@@ -1,19 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { AuthSheet } from '@/components/AuthSheet';
-import { courses, colorMap, kpiData } from '@/data/courseData';
+import { colorMap, kpiData } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Check, ArrowRight } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+
+interface CourseRow {
+  id: string;
+  slug: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  duration: string;
+  price: string;
+  features: string[];
+  color: string;
+}
 
 const CourseDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const course = courses.find(c => c.id === id);
+  const [course, setCourse] = useState<CourseRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('courses')
+      .select('*')
+      .eq('slug', id)
+      .single()
+      .then(({ data }) => {
+        setCourse(data as unknown as CourseRow | null);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <>
+        <CourseNavbar />
+        <div className="pt-28 px-4 text-center"><p>กำลังโหลด...</p></div>
+      </>
+    );
+  }
 
   if (!course) {
     return (
@@ -27,7 +60,7 @@ const CourseDetail: React.FC = () => {
     );
   }
 
-  const colors = colorMap[course.color];
+  const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
 
   const handleEnroll = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -35,7 +68,7 @@ const CourseDetail: React.FC = () => {
       setIsAuthOpen(true);
       return;
     }
-    navigate(`/enroll/${course.id}`);
+    navigate(`/enroll/${course.slug}`);
   };
 
   return (
@@ -43,7 +76,6 @@ const CourseDetail: React.FC = () => {
       <SEOHead title={`${course.title} - iDEAS365`} description={course.description} />
       <CourseNavbar />
 
-      {/* Hero */}
       <section className={`${colors.bg} text-white pt-28 pb-20 px-4`}>
         <div className="max-w-4xl mx-auto">
           <Link to="/courses" className="sweep-hover inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-8 transition-colors">
@@ -59,7 +91,6 @@ const CourseDetail: React.FC = () => {
         </div>
       </section>
 
-      {/* Content */}
       <section className="py-16 px-4 bg-background">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="md:col-span-2">
@@ -70,15 +101,14 @@ const CourseDetail: React.FC = () => {
             <ul className="space-y-3">
               {course.features.map((f, i) => (
                 <li key={i} className="flex items-start gap-3 group feature-item">
-                  <div className={`w-6 h-6 rounded-full ${colors.bgLight} flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-110 group-hover:${colors.bg}`}>
-                    <Check className={`w-3 h-3 ${colors.text} transition-colors duration-300 group-hover:text-white`} />
+                  <div className={`w-6 h-6 rounded-full ${colors.bgLight} flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-110`}>
+                    <Check className={`w-3 h-3 ${colors.text} transition-colors duration-300`} />
                   </div>
                   <span className={`text-foreground bracket-hover ${colors.border}`}>{f}</span>
                 </li>
               ))}
             </ul>
 
-            {/* KPI Section — single course color */}
             <div className="mt-12">
               <h3 className="text-lg font-bold mb-6">ตัวชี้วัดความสำเร็จ (KPI)</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -96,7 +126,6 @@ const CourseDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="md:col-span-1">
             <div className="sticky top-24 space-y-6">
               <div className={`rounded-2xl border ${colors.border}/30 p-6 bg-card hover:border-transparent hover:shadow-xl transition-all duration-500 group relative overflow-hidden`}>
@@ -113,7 +142,7 @@ const CourseDetail: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`rounded-2xl border border-border p-6 bg-card`}>
+              <div className="rounded-2xl border border-border p-6 bg-card">
                 <h4 className="font-bold mb-3 text-sm">ผลลัพธ์ที่คาดหวัง</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className={`bracket-hover ${colors.border}`}>• Conversion Rate +150-400%</li>
