@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/SEOHead';
 import { CourseNavbar } from '@/components/CourseNavbar';
 
+const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,14 +60,7 @@ const Auth = () => {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <Link to="/" className="inline-block mb-6">
-              <span className="text-3xl font-bold">
-                <span className="text-google-blue">i</span>
-                <span className="text-google-red">D</span>
-                <span className="text-google-yellow">E</span>
-                <span className="text-google-green">A</span>
-                <span className="text-foreground">S</span>
-                <span className="text-muted-foreground font-light">365</span>
-              </span>
+              <img src={LOGO_URL} alt="iDEAS365" className="h-10 w-auto mx-auto" />
             </Link>
             <h2 className="text-2xl font-bold text-foreground">
               {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
@@ -75,27 +70,9 @@ const Auth = () => {
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="อีเมล"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="h-12 rounded-xl"
-            />
-            <Input
-              type="password"
-              placeholder="รหัสผ่าน"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-12 rounded-xl"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-google-blue text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50"
-            >
+            <Input type="email" placeholder="อีเมล" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl" />
+            <Input type="password" placeholder="รหัสผ่าน" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl" />
+            <button type="submit" disabled={loading} className="w-full h-12 bg-google-blue text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
               {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </button>
           </form>
