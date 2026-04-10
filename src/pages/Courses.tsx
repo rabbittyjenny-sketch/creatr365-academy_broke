@@ -18,7 +18,13 @@ interface CourseRow {
   features: string[];
   color: string;
   is_active: boolean;
+  learning_type: string;
+  max_slots: number | null;
 }
+
+const LEARNING_LABELS: Record<string, string> = {
+  offline: 'Offline', online: 'Online', hybrid: 'Hybrid',
+};
 
 const Courses: React.FC = () => {
   const [courses, setCourses] = useState<CourseRow[]>([]);
@@ -50,7 +56,10 @@ const Courses: React.FC = () => {
                   <div className="reveal-slide rounded-2xl border border-border bg-card h-full transition-all duration-500 hover:shadow-2xl hover:border-transparent">
                     <div className={`h-2 rounded-t-2xl ${colors.bg}`} />
                     <div className="p-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
-                      <span className={`text-xs font-medium tracking-widest uppercase ${colors.text} mb-2 block`}>{course.tag}</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-xs font-medium tracking-widest uppercase ${colors.text}`}>{course.tag}</span>
+                        <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{LEARNING_LABELS[course.learning_type] || course.learning_type}</span>
+                      </div>
                       <h3 className="text-2xl font-bold mb-1">{course.title}</h3>
                       <p className="text-muted-foreground text-sm mb-4">{course.subtitle}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{course.description}</p>
