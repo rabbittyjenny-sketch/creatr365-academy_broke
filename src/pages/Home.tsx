@@ -8,6 +8,7 @@ import { courses, marketStats, targetAudience, colorMap } from '@/data/courseDat
 import { ArrowRight } from 'lucide-react';
 
 const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
+const HERO_LOGO_URL = 'https://ik.imagekit.io/ideas365logo/iDEAS365_20250508_193021_0001.png?updatedAt=1772818492859';
 
 const Home: React.FC = () => {
   return (
@@ -21,13 +22,8 @@ const Home: React.FC = () => {
       {/* Hero - Black */}
       <section className="min-h-screen flex items-center justify-center bg-foreground text-background px-4 pt-16">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex gap-2 mb-8 opacity-0 animate-fade-in">
-            <span className="px-3 py-1 rounded-full bg-google-blue/20 text-google-blue text-xs font-medium">Data-Driven</span>
-            <span className="px-3 py-1 rounded-full bg-google-red/20 text-google-red text-xs font-medium">Psychology-First</span>
-            <span className="px-3 py-1 rounded-full bg-google-green/20 text-google-green text-xs font-medium">AI-Ready</span>
-          </div>
           <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-6">
-            <img src={LOGO_URL} alt="iDEAS365" className="h-24 md:h-40 w-auto mx-auto invert" />
+            <img src={HERO_LOGO_URL} alt="iDEAS365" className="h-24 md:h-40 w-auto mx-auto" />
           </div>
           <p className="text-xl md:text-2xl font-light text-background/70 mb-4 opacity-0 animate-fade-in [animation-delay:400ms]">
             LIVE SHOPPING HOST ACADEMY
@@ -36,7 +32,7 @@ const Home: React.FC = () => {
             สร้างโฮสต์มืออาชีพที่แบรนด์ใหญ่ต้องการ<br />ไม่ใช่แค่คนพูดเก่ง
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:800ms]">
-            <Link to="/courses" className="group px-8 py-4 bg-google-blue text-white rounded-full text-base font-medium hover:opacity-90 transition-all inline-flex items-center gap-2">
+            <Link to="/courses" className="group px-8 py-4 bg-background text-foreground rounded-full text-base font-medium hover:opacity-90 transition-all inline-flex items-center gap-2">
               ดูหลักสูตรทั้งหมด
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
