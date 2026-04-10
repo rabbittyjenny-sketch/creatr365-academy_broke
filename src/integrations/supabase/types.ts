@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_enrollments: {
+        Row: {
+          amount_paid: number | null
+          course_id: string
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          promo_code_id: string | null
+          status: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          course_id: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          promo_code_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          course_id?: string
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          promo_code_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_enrollments_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           color: string
@@ -23,9 +77,12 @@ export type Database = {
           features: string[]
           id: string
           is_active: boolean
+          learning_type: string
+          max_slots: number | null
           price: string
           slug: string
           sort_order: number
+          stripe_price_id: string | null
           subtitle: string
           tag: string
           title: string
@@ -39,9 +96,12 @@ export type Database = {
           features?: string[]
           id?: string
           is_active?: boolean
+          learning_type?: string
+          max_slots?: number | null
           price?: string
           slug: string
           sort_order?: number
+          stripe_price_id?: string | null
           subtitle?: string
           tag?: string
           title: string
@@ -55,9 +115,12 @@ export type Database = {
           features?: string[]
           id?: string
           is_active?: boolean
+          learning_type?: string
+          max_slots?: number | null
           price?: string
           slug?: string
           sort_order?: number
+          stripe_price_id?: string | null
           subtitle?: string
           tag?: string
           title?: string
@@ -156,6 +219,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string
+          course_id: string | null
+          created_at: string
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number
+          used_count: number
+        }
+        Insert: {
+          code: string
+          course_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          course_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_codes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
