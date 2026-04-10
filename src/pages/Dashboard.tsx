@@ -2,37 +2,42 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { courses, colorMap } from '@/data/courseData';
+import { colorMap } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
 import { BookOpen, Trophy, Clock, TrendingUp } from 'lucide-react';
+
+interface CourseRow {
+  id: string;
+  slug: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  color: string;
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [courses, setCourses] = useState<CourseRow[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        navigate('/auth');
-        return;
-      }
+      if (!session?.user) { navigate('/auth'); return; }
       setUser(session.user);
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+      const { data } = await supabase.from('profiles').select('*').eq('user_id', session.user.id).maybeSingle();
       setProfile(data);
     };
     checkAuth();
+
+    supabase.from('courses').select('*').eq('is_active', true).order('sort_order')
+      .then(({ data }) => setCourses((data as unknown as CourseRow[]) || []));
   }, [navigate]);
 
   if (!user) return null;
 
-  // Mock enrolled courses for demo
   const enrolledCourses = courses.slice(0, 2);
   const recommendedCourses = courses.slice(2, 5);
 
@@ -55,7 +60,6 @@ const Dashboard: React.FC = () => {
           </h1>
           <p className="text-muted-foreground mb-10">ยินดีต้อนรับกลับมา! นี่คือความก้าวหน้าของคุณ</p>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {stats.map((stat, i) => {
               const colors = colorMap[stat.color];
@@ -74,13 +78,12 @@ const Dashboard: React.FC = () => {
             })}
           </div>
 
-          {/* Enrolled courses */}
           <h2 className="text-xl font-bold mb-4">หลักสูตรของคุณ</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {enrolledCourses.map((course) => {
-              const colors = colorMap[course.color];
+              const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
               return (
-                <Link key={course.id} to={`/course/${course.id}`} className="group">
+                <Link key={course.id} to={`/course/${course.slug}`} className="group">
                   <div className="reveal-slide rounded-2xl border border-border bg-card overflow-hidden transition-all duration-500 hover:shadow-xl hover:border-transparent">
                     <div className={`h-2 ${colors.bg}`} />
                     <div className="p-6 relative z-10">
@@ -94,7 +97,6 @@ const Dashboard: React.FC = () => {
                           <span className={`text-sm font-bold ${colors.text}`}>65%</span>
                         </div>
                       </div>
-                      {/* Progress bar */}
                       <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
                         <div className={`h-full ${colors.bg} rounded-full transition-all duration-1000`} style={{ width: '65%' }} />
                       </div>
@@ -108,19 +110,18 @@ const Dashboard: React.FC = () => {
             })}
           </div>
 
-          {/* Recommended */}
           <h2 className="text-xl font-bold mb-4">หลักสูตรแนะนำ</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {recommendedCourses.map((course) => {
-              const colors = colorMap[course.color];
+              const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
               return (
-                <Link key={course.id} to={`/course/${course.id}`} className="group">
+                <Link key={course.id} to={`/course/${course.slug}`} className="group">
                   <div className="reveal-slide rounded-2xl border border-border bg-card p-5 transition-all duration-500 hover:shadow-lg hover:border-transparent">
                     <span className={`text-xs font-medium tracking-widest uppercase ${colors.text}`}>{course.tag}</span>
                     <h3 className="text-base font-bold mt-1 mb-1">{course.title}</h3>
                     <p className="text-sm text-muted-foreground">{course.subtitle}</p>
                     <div className={`reveal-content ${colors.bg} rounded-b-2xl p-3 z-20`}>
-                      <p className="text-sm text-white font-bold">{course.price}</p>
+                      <p className="text-sm text-white font-bold">ดูรายละเอียด</p>
                     </div>
                   </div>
                 </Link>

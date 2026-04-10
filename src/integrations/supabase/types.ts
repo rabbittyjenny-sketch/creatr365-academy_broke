@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      courses: {
+        Row: {
+          color: string
+          created_at: string
+          description: string
+          duration: string
+          features: string[]
+          id: string
+          is_active: boolean
+          price: string
+          slug: string
+          sort_order: number
+          subtitle: string
+          tag: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string
+          duration?: string
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          price?: string
+          slug: string
+          sort_order?: number
+          subtitle?: string
+          tag?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string
+          duration?: string
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          price?: string
+          slug?: string
+          sort_order?: number
+          subtitle?: string
+          tag?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           event_id: string

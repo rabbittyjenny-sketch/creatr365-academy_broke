@@ -7,6 +7,8 @@ import { SEOHead } from '@/components/SEOHead';
 import { courses, marketStats, targetAudience, colorMap } from '@/data/courseData';
 import { ArrowRight } from 'lucide-react';
 
+const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
+
 const Home: React.FC = () => {
   return (
     <>
@@ -24,14 +26,9 @@ const Home: React.FC = () => {
             <span className="px-3 py-1 rounded-full bg-google-red/20 text-google-red text-xs font-medium">Psychology-First</span>
             <span className="px-3 py-1 rounded-full bg-google-green/20 text-google-green text-xs font-medium">AI-Ready</span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tight mb-6 opacity-0 animate-fade-in [animation-delay:200ms]">
-            <span className="text-google-blue">i</span>
-            <span className="text-google-red">D</span>
-            <span className="text-google-yellow">E</span>
-            <span className="text-google-green">A</span>
-            <span className="text-background">S</span>
-            <span className="text-background/50">365</span>
-          </h1>
+          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-6">
+            <img src={LOGO_URL} alt="iDEAS365" className="h-24 md:h-40 w-auto mx-auto invert" />
+          </div>
           <p className="text-xl md:text-2xl font-light text-background/70 mb-4 opacity-0 animate-fade-in [animation-delay:400ms]">
             LIVE SHOPPING HOST ACADEMY
           </p>
@@ -143,7 +140,7 @@ const Home: React.FC = () => {
           <Link to="/courses" className="inline-flex items-center gap-2 px-8 py-4 bg-google-blue text-white rounded-full text-base font-medium hover:opacity-90 transition-all">
             เริ่มเรียนเลย <ArrowRight className="w-4 h-4" />
           </Link>
-          <p className="mt-8 text-background/40 text-sm">contact@ideas365.academy · Bangkok, Thailand</p>
+          <p className="mt-8 text-background/40 text-sm">hello@ideas365.space · Bangkok, Thailand</p>
         </div>
       </section>
     </>

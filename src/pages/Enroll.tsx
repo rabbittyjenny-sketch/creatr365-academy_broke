@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { courses, colorMap } from '@/data/courseData';
+import { colorMap } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
+
+interface CourseRow {
+  id: string;
+  slug: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  duration: string;
+  price: string;
+  color: string;
+}
 
 const Enroll: React.FC = () => {
   const { id } = useParams();
@@ -14,7 +25,16 @@ const Enroll: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
-  const course = courses.find(c => c.id === id);
+  const [course, setCourse] = useState<CourseRow | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('courses')
+      .select('*')
+      .eq('slug', id)
+      .single()
+      .then(({ data }) => setCourse(data as unknown as CourseRow | null));
+  }, [id]);
 
   if (!course) {
     return (
@@ -28,20 +48,15 @@ const Enroll: React.FC = () => {
     );
   }
 
-  const colors = colorMap[course.color];
+  const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      navigate('/auth');
-      return;
-    }
+    if (!session?.user) { navigate('/auth'); return; }
 
-    // For now, register via event_registrations (reusing existing table)
-    // In production, you'd create a course_registrations table
     toast({
       title: 'สมัครสำเร็จ!',
       description: `คุณสมัครหลักสูตร ${course.title} เรียบร้อยแล้ว`,
@@ -58,7 +73,7 @@ const Enroll: React.FC = () => {
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
         <div className="max-w-lg mx-auto">
-          <Link to={`/course/${course.id}`} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
+          <Link to={`/course/${course.slug}`} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> กลับไปรายละเอียดหลักสูตร
           </Link>
 
@@ -72,31 +87,13 @@ const Enroll: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5">ชื่อ-นามสกุล</label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-                  placeholder="กรอกชื่อ-นามสกุล"
-                />
+                <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm" placeholder="กรอกชื่อ-นามสกุล" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">เบอร์โทรศัพท์</label>
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-                  placeholder="0XX-XXX-XXXX"
-                />
+                <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm" placeholder="0XX-XXX-XXXX" />
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full py-3 ${colors.bg} text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50`}
-              >
+              <button type="submit" disabled={loading} className={`w-full py-3 ${colors.bg} text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50`}>
                 {loading ? 'กำลังสมัคร...' : 'ยืนยันสมัครเรียน'}
               </button>
             </form>
