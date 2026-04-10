@@ -18,7 +18,13 @@ interface CourseRow {
   price: string;
   features: string[];
   color: string;
+  learning_type: string;
+  max_slots: number | null;
 }
+
+const LEARNING_LABELS: Record<string, string> = {
+  offline: 'Offline', online: 'Online', hybrid: 'Hybrid',
+};
 
 const CourseDetail: React.FC = () => {
   const { id } = useParams();
@@ -81,7 +87,10 @@ const CourseDetail: React.FC = () => {
           <Link to="/courses" className="sweep-hover inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> หลักสูตรทั้งหมด
           </Link>
-          <span className="block text-xs tracking-widest uppercase text-white/60 mb-2">{course.tag}</span>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-xs tracking-widest uppercase text-white/60">{course.tag}</span>
+            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">{LEARNING_LABELS[course.learning_type] || course.learning_type}</span>
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-3 opacity-0 animate-fade-in">{course.title}</h1>
           <p className="text-xl md:text-2xl text-white/80 mb-6 opacity-0 animate-fade-in [animation-delay:200ms]">{course.subtitle}</p>
           <div className="flex flex-wrap gap-4 items-center opacity-0 animate-fade-in [animation-delay:400ms]">
