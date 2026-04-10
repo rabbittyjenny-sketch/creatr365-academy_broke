@@ -71,7 +71,12 @@ const Auth = () => {
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input type="email" placeholder="อีเมล" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl" />
-            <Input type="password" placeholder="รหัสผ่าน" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl" />
+            <div>
+              <Input type="password" placeholder="รหัสผ่าน" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl" minLength={6} />
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground mt-1.5 ml-1">รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร ประกอบด้วยตัวอักษรและตัวเลข</p>
+              )}
+            </div>
             <button type="submit" disabled={loading} className="w-full h-12 bg-google-blue text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
               {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </button>
