@@ -6,7 +6,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2025-08-27.basil",
 });
 
-const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") || "";
+const endpointSecret = Deno.env.get("STRIPE_WEBHOOK") || "";
 
 serve(async (req) => {
   const signature = req.headers.get("stripe-signature");
