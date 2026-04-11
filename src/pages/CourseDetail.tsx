@@ -67,6 +67,7 @@ const CourseDetail: React.FC = () => {
   }
 
   const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
+  const accentStyle = { '--hover-accent': colors.hex } as React.CSSProperties;
 
   const handleEnroll = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -100,10 +101,10 @@ const CourseDetail: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-background">
+      <section className="py-16 px-4 bg-background" style={accentStyle}>
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="md:col-span-2">
-            <h2 className="text-2xl font-bold mb-4 passing-underline-wrapper"><span className={`passing-underline ${colors.border}`}>รายละเอียดหลักสูตร</span></h2>
+            <h2 className="text-2xl font-bold mb-4 passing-underline-wrapper"><span className="passing-underline">รายละเอียดหลักสูตร</span></h2>
             <p className="text-muted-foreground leading-relaxed mb-8">{course.description}</p>
             
             <h3 className="text-lg font-bold mb-4">สิ่งที่จะได้เรียนรู้</h3>
@@ -113,7 +114,7 @@ const CourseDetail: React.FC = () => {
                   <div className={`w-6 h-6 rounded-full ${colors.bgLight} flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-110`}>
                     <Check className={`w-3 h-3 ${colors.text} transition-colors duration-300`} />
                   </div>
-                  <span className={`text-foreground bracket-hover ${colors.border}`}>{f}</span>
+                  <span className="text-foreground bracket-hover accent-hover-text">{f}</span>
                 </li>
               ))}
             </ul>
@@ -154,10 +155,10 @@ const CourseDetail: React.FC = () => {
               <div className="rounded-2xl border border-border p-6 bg-card">
                 <h4 className="font-bold mb-3 text-sm">ผลลัพธ์ที่คาดหวัง</h4>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className={`bracket-hover ${colors.border}`}>• Conversion Rate +150-400%</li>
-                  <li className={`bracket-hover ${colors.border}`}>• อัตราคืนสินค้า ลด 40%</li>
-                  <li className={`bracket-hover ${colors.border}`}>• Portfolio ระดับโลก</li>
-                  <li className={`bracket-hover ${colors.border}`}>• ใบรับรอง iDEAS365</li>
+                  <li className="bracket-hover accent-hover-text">• Conversion Rate +150-400%</li>
+                  <li className="bracket-hover accent-hover-text">• อัตราคืนสินค้า ลด 40%</li>
+                  <li className="bracket-hover accent-hover-text">• Portfolio ระดับโลก</li>
+                  <li className="bracket-hover accent-hover-text">• ใบรับรอง iDEAS365</li>
                 </ul>
               </div>
             </div>
