@@ -134,7 +134,7 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background: currentColor;
+  background: var(--hover-accent, currentColor);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
@@ -154,6 +154,7 @@
 .bracket-hover::before,
 .bracket-hover::after {
   position: absolute;
+  color: var(--hover-accent, currentColor);
   opacity: 0;
   transition: all 0.3s ease;
   font-weight: 700;
@@ -186,7 +187,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: currentColor;
+  background: var(--hover-accent, currentColor);
   opacity: 0;
   transform: scaleX(0);
   transform-origin: left;
@@ -213,7 +214,7 @@
   bottom: 0;
   width: 3px;
   border-radius: 3px;
-  background: currentColor;
+  background: var(--hover-accent, currentColor);
   opacity: 0;
   transform: scaleY(0);
   transition: all 0.3s ease;
@@ -224,6 +225,15 @@
 .feature-item:hover::before {
   opacity: 0.5;
   transform: scaleY(1);
+}
+
+.accent-hover-text {
+  transition: color 0.3s ease;
+}
+
+.group:hover .accent-hover-text,
+.accent-hover-text:hover {
+  color: var(--hover-accent, currentColor);
 }
 
 /* Button slide arrow */

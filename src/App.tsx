@@ -8,6 +8,7 @@ import CourseDetail from "./pages/CourseDetail";
 import Enroll from "./pages/Enroll";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Contact from "./pages/Contact";
 import AdminCourses from "./pages/AdminCourses";
 import NotFound from "./pages/NotFound";
@@ -23,6 +24,7 @@ const App = () => (
       <Route path="/enroll/:id" element={<Enroll />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/admin/courses" element={<AdminCourses />} />
       <Route path="*" element={<NotFound />} />

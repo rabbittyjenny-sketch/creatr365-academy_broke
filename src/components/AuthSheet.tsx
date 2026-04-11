@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getAuthErrorMessage, isValidPassword, PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth';
 interface AuthSheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,17 +16,55 @@ export const AuthSheet: React.FC<AuthSheetProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: 'Enter your email first',
+        description: 'Please enter the email you used to sign up so we can send a reset link.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Reset link sent',
+        description: 'Please check your email to create a new password.'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: getAuthErrorMessage(error),
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isSignUp) {
+        if (!isValidPassword(password)) {
+          throw new Error(PASSWORD_REQUIREMENTS_TEXT);
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`
+            emailRedirectTo: window.location.origin
           }
         });
         
@@ -33,8 +72,9 @@ export const AuthSheet: React.FC<AuthSheetProps> = ({ isOpen, onClose }) => {
         
         toast({
           title: 'Account created!',
-          description: 'You can now sign in with your credentials.'
+          description: 'Please verify your email before signing in.'
         });
+        setPassword('');
         setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -53,7 +93,7 @@ export const AuthSheet: React.FC<AuthSheetProps> = ({ isOpen, onClose }) => {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: getAuthErrorMessage(error),
         variant: 'destructive'
       });
     } finally {
@@ -118,10 +158,23 @@ export const AuthSheet: React.FC<AuthSheetProps> = ({ isOpen, onClose }) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className="w-full bg-white/10 border border-white/20 text-white px-4 py-3 focus:outline-none focus:border-[#FA76FF] transition-colors"
                 placeholder="••••••••"
               />
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="text-[11px] text-gray-400">{PASSWORD_REQUIREMENTS_TEXT}</p>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                    className="shrink-0 text-[11px] text-white hover:text-[#FA76FF] transition-colors disabled:opacity-50"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
             </div>
 
             <button
