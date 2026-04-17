@@ -269,6 +269,13 @@ const AdminCourses = () => {
                     <Input type="number" value={editingCourse.sort_order} onChange={e => setEditingCourse({...editingCourse, sort_order: parseInt(e.target.value) || 0})} />
                   </div>
                   <div>
+                    <label className="text-sm font-medium block mb-1">สถานะป้าย (Status Badge)</label>
+                    <select value={editingCourse.status || 'now_open'} onChange={e => setEditingCourse({...editingCourse, status: e.target.value})}
+                      className="w-full border rounded-md px-3 py-2 text-sm bg-white">
+                      {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
                     <label className="text-sm font-medium block mb-1">Stripe Price ID (ถ้ามี)</label>
                     <Input value={editingCourse.stripe_price_id ?? ''} onChange={e => setEditingCourse({...editingCourse, stripe_price_id: e.target.value || null})} placeholder="price_xxx" />
                   </div>
@@ -290,9 +297,11 @@ const AdminCourses = () => {
             )}
 
             <div className="space-y-2">
-              {courses.map(course => (
+              {courses.map(course => {
+                const statusMeta = STATUS_OPTIONS.find(s => s.value === (course.status || 'now_open'));
+                return (
                 <div key={course.id} className="bg-white rounded-lg border p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <GripVertical className="w-4 h-4 text-gray-300" />
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === course.color)?.hex }} />
                     <div>
@@ -302,6 +311,11 @@ const AdminCourses = () => {
                         {course.max_slots && ` · เปิดรับ ${course.max_slots} คน`}
                       </p>
                     </div>
+                    {statusMeta && statusMeta.value !== 'none' && (
+                      <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full ${statusMeta.badge}`}>
+                        {statusMeta.label.toUpperCase()}
+                      </span>
+                    )}
                     {!course.is_active && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">ปิดใช้งาน</span>}
                   </div>
                   <div className="flex gap-1">
