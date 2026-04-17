@@ -24,6 +24,7 @@ interface CourseRow {
   learning_type: string;
   max_slots: number | null;
   stripe_price_id: string | null;
+  status: string;
 }
 
 interface PromoCode {
@@ -39,8 +40,8 @@ interface PromoCode {
 
 const COLOR_OPTIONS = [
   { value: 'blue', label: 'น้ำเงิน', hex: '#4285F4' },
-  { value: 'red', label: 'แดง', hex: '#EA4335' },
-  { value: 'yellow', label: 'เหลือง', hex: '#FBBC04' },
+  { value: 'red', label: 'แดง', hex: '#CC0033' },
+  { value: 'yellow', label: 'Gold', hex: '#FFD700' },
   { value: 'green', label: 'เขียว', hex: '#34A853' },
   { value: 'black', label: 'ดำ', hex: '#1A1A1A' },
 ];
@@ -49,6 +50,13 @@ const LEARNING_TYPES = [
   { value: 'offline', label: 'Offline (เรียนในห้อง)' },
   { value: 'online', label: 'Online (E-Learning)' },
   { value: 'hybrid', label: 'Hybrid (ผสมผสาน)' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'now_open',    label: 'Now Open',    badge: 'bg-google-green text-white' },
+  { value: 'coming_soon', label: 'Coming Soon', badge: 'bg-google-yellow text-foreground' },
+  { value: 'new_update',  label: 'New Update',  badge: 'bg-google-blue text-white' },
+  { value: 'none',        label: 'ไม่แสดง',       badge: 'bg-muted text-muted-foreground' },
 ];
 
 const AdminCourses = () => {
@@ -100,6 +108,7 @@ const AdminCourses = () => {
       duration: '', price: '', features: [], color: 'blue',
       sort_order: courses.length + 1, is_active: true,
       learning_type: 'offline', max_slots: null, stripe_price_id: null,
+      status: 'now_open',
     });
     setFeaturesText('');
     setIsNew(true);
@@ -115,6 +124,7 @@ const AdminCourses = () => {
       color: editingCourse.color, sort_order: editingCourse.sort_order,
       is_active: editingCourse.is_active, learning_type: editingCourse.learning_type,
       max_slots: editingCourse.max_slots, stripe_price_id: editingCourse.stripe_price_id,
+      status: editingCourse.status || 'now_open',
     };
     if (!payload.slug || !payload.title) {
       toast({ title: 'กรุณากรอก Slug และ Title', variant: 'destructive' }); return;
