@@ -92,14 +92,14 @@ export const colorMap = {
     text: 'text-google-red',
     border: 'border-google-red',
     bgLight: 'bg-google-red/10',
-    hex: '#EA4335',
+    hex: '#CC0033',
   },
   yellow: {
     bg: 'bg-google-yellow',
     text: 'text-google-yellow',
     border: 'border-google-yellow',
     bgLight: 'bg-google-yellow/10',
-    hex: '#FBBC04',
+    hex: '#FFD700',
   },
   green: {
     bg: 'bg-google-green',
@@ -118,10 +118,30 @@ export const colorMap = {
 };
 
 export const marketStats = [
-  { value: '$5.31T', label: 'E-Commerce โลก 2026', source: 'ECDB Global E-Commerce Compass 2026', color: 'blue' as const },
-  { value: '$287B', label: 'Live Commerce ปี 2034 (CAGR 33.9%)', source: 'Market.us Livestream E-Commerce Report 2025', color: 'red' as const },
-  { value: '$4.6B', label: 'TikTok Shop ไทย H1/2025 GMV', source: 'เติบโต +100% YoY (TTS Vibes 2025)', color: 'yellow' as const },
-  { value: '73%', label: 'คนไทยเคยใช้ Live Shopping', source: 'Wunderman Thompson via getstream.io', color: 'green' as const },
+  {
+    value: 'US$5.31T',
+    label: 'มูลค่าตลาด E-Commerce โลก ปี 2026 — ทะลุ 5 ล้านล้านครั้งแรกในประวัติศาสตร์',
+    source: 'ECDB Global E-Commerce Compass 2026',
+    color: 'blue' as const,
+  },
+  {
+    value: '90%',
+    label: 'ของ Live Streamer ในตลาดวันนี้ ไลฟ์โดยไม่มีมาตรฐาน — Live Commerce ไทยโตเร็วที่สุดในโลก แต่ยังขาดระบบ',
+    source: 'iDEAS365 Market Research 2025',
+    color: 'red' as const,
+  },
+  {
+    value: '+21.7%',
+    label: 'ไทยเติบโตเร็วที่สุดในภูมิภาค — ติด Top 3 ตลาด SEA',
+    source: 'Statista SEA Live Commerce 2025',
+    color: 'yellow' as const,
+  },
+  {
+    value: '+25%',
+    label: 'บริษัทที่ลงทุน Live Streaming อย่างจริงจัง รายงานรายได้เพิ่มสูงสุด 25%',
+    source: 'McKinsey Live Commerce Report',
+    color: 'green' as const,
+  },
 ];
 
 export const kpiData = [

@@ -82,6 +82,7 @@ export type Database = {
           price: string
           slug: string
           sort_order: number
+          status: string
           stripe_price_id: string | null
           subtitle: string
           tag: string
@@ -101,6 +102,7 @@ export type Database = {
           price?: string
           slug: string
           sort_order?: number
+          status?: string
           stripe_price_id?: string | null
           subtitle?: string
           tag?: string
@@ -120,6 +122,7 @@ export type Database = {
           price?: string
           slug?: string
           sort_order?: number
+          status?: string
           stripe_price_id?: string | null
           subtitle?: string
           tag?: string

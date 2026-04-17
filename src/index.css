@@ -27,7 +27,7 @@
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 10%;
 
-    --destructive: 7 83% 56%;
+    --destructive: 348 100% 40%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 142 53% 46%;
@@ -39,10 +39,10 @@
 
     --radius: 0.75rem;
 
-    /* Google-style color palette */
+    /* Brand color palette — refined */
     --google-blue: 217 89% 61%;
-    --google-red: 7 83% 56%;
-    --google-yellow: 45 98% 50%;
+    --google-red: 348 100% 40%;   /* #CC0033 */
+    --google-yellow: 51 100% 50%; /* #FFD700 Gold */
     --google-green: 142 53% 46%;
 
     --sidebar-background: 0 0% 98%;
@@ -70,7 +70,7 @@
     --muted-foreground: 0 0% 65%;
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 95%;
-    --destructive: 7 83% 56%;
+    --destructive: 348 100% 40%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 53% 46%;
     --success-foreground: 0 0% 100%;

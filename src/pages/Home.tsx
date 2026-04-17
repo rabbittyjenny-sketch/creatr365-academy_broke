@@ -42,23 +42,23 @@ const Home: React.FC = () => {
       />
       <CourseNavbar />
 
-      {/* Hero - Black (Opening Hook from Pitch Deck) */}
+      {/* Hero - Black */}
       <section className="min-h-screen flex items-center justify-center bg-foreground text-background px-4 pt-16">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-6">
-            <img src={HERO_LOGO_URL} alt="iDEAS365" className="h-24 md:h-40 w-auto mx-auto" />
+          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-8">
+            <img src={HERO_LOGO_URL} alt="iDEAS365" className="h-20 md:h-32 w-auto mx-auto" />
           </div>
-          <p className="text-xl md:text-2xl font-light text-background/70 mb-4 opacity-0 animate-fade-in [animation-delay:400ms]">
-            LIVE STREAMER ACADEMY
-          </p>
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 opacity-0 animate-fade-in [animation-delay:500ms]">
-            "เราไม่สร้างนักขายออนไลน์"
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 opacity-0 animate-fade-in [animation-delay:400ms] leading-[0.95]">
+            LIVE STREAMER<br />ACADEMY
           </h1>
-          <p className="text-lg md:text-xl text-background/60 mb-12 max-w-2xl mx-auto opacity-0 animate-fade-in [animation-delay:600ms]">
-            เราสร้าง Livestreamer ที่แบรนด์ระดับโลกเลือกหา<br />
-            ด้วย <span className="text-google-blue font-medium">Psychology</span> · <span className="text-google-yellow font-medium">Data</span> · <span className="text-google-green font-medium">AI</span>
+          <p className="text-lg md:text-2xl text-background/80 max-w-3xl mx-auto mb-4 opacity-0 animate-fade-in [animation-delay:600ms] leading-relaxed">
+            Anyone can go live. Not everyone earns a global brand's trust.<br className="hidden md:block" />
+            We build the ones who do.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:800ms]">
+          <p className="text-sm md:text-base font-light text-background/50 max-w-2xl mx-auto mb-12 opacity-0 animate-fade-in [animation-delay:800ms]">
+            จากศูนย์สู่แสน ใน 2 ชั่วโมงแรก · สอนจากประสบการณ์จริง · ไม่มีสคริปต์สำเร็จรูป
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:1000ms]">
             <Link to="/courses" className="group px-8 py-4 bg-background text-foreground rounded-full text-base font-medium hover:opacity-90 transition-all inline-flex items-center gap-2">
               ดูหลักสูตรทั้งหมด
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -71,7 +71,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Market Opportunity - Blue */}
-      <Section color="blue" title="THE OPPORTUNITY" subtitle="ตลาดกำลังระเบิด — แบรนด์ทุกแห่งต้องการ Live Streamer ที่ใช่">
+      <Section color="blue" title="THE OPPORTUNITY" subtitle="แพลตฟอร์มโตขึ้น ความต้องการ Professional Host ก็สูงขึ้น แต่ตลาดส่วนใหญ่ยังไลฟ์แบบไม่มีทิศทาง">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {marketStats.map((stat, i) => (
             <RevealCard 
@@ -79,8 +79,8 @@ const Home: React.FC = () => {
               color={stat.color}
               revealContent={<p className="text-sm opacity-90">{stat.source}</p>}
             >
-              <p className={`text-4xl md:text-5xl font-bold mb-2 ${colorMap[stat.color].text}`}>{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
+              <p className={`text-3xl md:text-4xl font-bold mb-3 ${colorMap[stat.color].text}`}>{stat.value}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{stat.label}</p>
             </RevealCard>
           ))}
         </div>
@@ -174,7 +174,7 @@ const Home: React.FC = () => {
           {[
             { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า' },
             { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE' },
-            { stat: 'Michelin', label: 'มาตรฐานการจัดการและ VIP Service ระดับโลก' },
+            { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)' },
             { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
           ].map((item, i) => (
             <div key={i} className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg transition-all">
@@ -189,7 +189,7 @@ const Home: React.FC = () => {
       <section className="py-20 md:py-28 bg-foreground text-background px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-            จะเป็นคนที่อยู่<span className="text-google-yellow">ต้นน้ำ</span><br />ของโอกาส?
+            จะเป็นคนที่อยู่<span className="text-google-blue">ต้นน้ำ</span><br />ของโอกาส?
           </h2>
           <p className="text-background/60 text-lg mb-8 italic">"จากศูนย์สู่แสน ใน 2 ชั่วโมงแรก"</p>
           <Link to="/courses" className="inline-flex items-center gap-2 px-8 py-4 bg-google-blue text-white rounded-full text-base font-medium hover:opacity-90 transition-all">
