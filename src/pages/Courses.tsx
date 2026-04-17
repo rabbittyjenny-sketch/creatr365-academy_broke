@@ -4,7 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { colorMap } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Monitor, Users, Layers } from 'lucide-react';
 
 interface CourseRow {
   id: string;
@@ -20,10 +20,20 @@ interface CourseRow {
   is_active: boolean;
   learning_type: string;
   max_slots: number | null;
+  status: string;
 }
 
-const LEARNING_LABELS: Record<string, string> = {
-  offline: 'Offline', online: 'Online', hybrid: 'Hybrid',
+const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor; className: string }> = {
+  offline: { label: 'Offline', Icon: Users, className: 'text-google-red bg-google-red/10' },
+  online:  { label: 'Online',  Icon: Monitor, className: 'text-google-blue bg-google-blue/10' },
+  hybrid:  { label: 'Hybrid',  Icon: Layers, className: 'text-google-green bg-google-green/10' },
+};
+
+const STATUS_META: Record<string, { label: string; className: string } | null> = {
+  now_open:    { label: 'NOW OPEN',    className: 'bg-google-green text-white' },
+  coming_soon: { label: 'COMING SOON', className: 'bg-google-yellow text-foreground' },
+  new_update:  { label: 'NEW UPDATE',  className: 'bg-google-blue text-white' },
+  none: null,
 };
 
 const Courses: React.FC = () => {
@@ -51,14 +61,24 @@ const Courses: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {courses.map((course) => {
               const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
+              const learning = LEARNING_META[course.learning_type] || LEARNING_META.offline;
+              const status = STATUS_META[course.status as keyof typeof STATUS_META];
+              const LearnIcon = learning.Icon;
               return (
                 <Link key={course.id} to={`/course/${course.slug}`} className="group" style={{ '--hover-accent': colors.hex } as React.CSSProperties}>
                   <div className="reveal-slide rounded-2xl border border-border bg-card h-full transition-all duration-500 hover:shadow-2xl hover:border-transparent">
                     <div className={`h-2 rounded-t-2xl ${colors.bg}`} />
                     <div className="p-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      {status && (
+                        <span className={`inline-block text-[10px] font-bold tracking-wider px-2 py-1 rounded-full mb-3 ${status.className}`}>
+                          {status.label}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className={`text-xs font-medium tracking-widest uppercase ${colors.text}`}>{course.tag}</span>
-                        <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{LEARNING_LABELS[course.learning_type] || course.learning_type}</span>
+                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${learning.className}`}>
+                          <LearnIcon className="w-3 h-3" /> {learning.label}
+                        </span>
                       </div>
                       <h3 className="text-2xl font-bold mb-1 accent-hover-text">{course.title}</h3>
                       <p className="text-muted-foreground text-sm mb-4">{course.subtitle}</p>
