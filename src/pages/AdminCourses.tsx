@@ -323,7 +323,8 @@ const AdminCourses = () => {
                     <Button variant="ghost" size="sm" onClick={() => handleDelete(course.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
               {courses.length === 0 && <p className="text-center text-gray-400 py-8">ยังไม่มีหลักสูตร</p>}
             </div>
           </>
