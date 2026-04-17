@@ -118,10 +118,10 @@ export const colorMap = {
 };
 
 export const marketStats = [
-  { value: '66.6%', label: 'คนไทยช้อปออนไลน์รายสัปดาห์', source: 'Research and Markets, 2026', color: 'blue' as const },
-  { value: '$15.2B', label: 'Social Commerce ไทย 2026', source: 'เติบโต 9.6% YoY', color: 'red' as const },
-  { value: '$4.6B', label: 'TikTok Shop Thailand GMV', source: 'เติบโต 92% YoY', color: 'yellow' as const },
-  { value: '15,000+', label: 'โฮสต์มือโปรที่ตลาดต้องการ', source: 'JobsDB Thailand, 2026', color: 'green' as const },
+  { value: '$5.31T', label: 'E-Commerce โลก 2026', source: 'ECDB Global E-Commerce Compass 2026', color: 'blue' as const },
+  { value: '$287B', label: 'Live Commerce ปี 2034 (CAGR 33.9%)', source: 'Market.us Livestream E-Commerce Report 2025', color: 'red' as const },
+  { value: '$4.6B', label: 'TikTok Shop ไทย H1/2025 GMV', source: 'เติบโต +100% YoY (TTS Vibes 2025)', color: 'yellow' as const },
+  { value: '73%', label: 'คนไทยเคยใช้ Live Shopping', source: 'Wunderman Thompson via getstream.io', color: 'green' as const },
 ];
 
 export const kpiData = [
@@ -135,27 +135,27 @@ export const kpiData = [
 
 export const targetAudience = [
   {
-    title: 'โฮสต์ที่ไลฟ์อยู่แล้ว',
-    desc: 'ไลฟ์มา 6-12 เดือน แต่ยอดขายไม่โต อยากพัฒนาทักษะให้เป็นระบบ',
-    recommend: 'Masterclass I',
-    color: 'blue' as const,
+    title: 'มือใหม่สนใจอาชีพ',
+    desc: 'อยากเริ่มต้นเป็น Live Streamer เรียนพื้นฐาน Hook + Live Commerce 101 ภายใน 3 ชั่วโมง',
+    recommend: 'Micro Express',
+    color: 'black' as const,
   },
   {
-    title: 'เจ้าของแบรนด์',
-    desc: 'ต้องการสร้างทีม In-house Live ลดต้นทุนจ้างเอเจนซี่ ควบคุม Brand Identity',
-    recommend: 'Masterclass II',
+    title: 'โฮสต์ที่ไลฟ์อยู่แล้ว',
+    desc: 'ไลฟ์มา 6-12 เดือน แต่ยอดขายไม่โต อยากแก้ Pain Point เสียง/กล้อง หรือ Data',
+    recommend: 'Short Course A หรือ B',
+    color: 'yellow' as const,
+  },
+  {
+    title: 'เจ้าของแบรนด์ / Agency',
+    desc: 'สร้างทีม In-house Live ระดับสากล ควบคุม Brand CI + Conversion +150-400%',
+    recommend: 'Combo Masterclass I+II',
     color: 'red' as const,
   },
   {
     title: 'ผู้ต้องการเปิดธุรกิจ',
-    desc: 'Live Commerce Business หรือ Agency เข้าใจโครงสร้างต้นทุน รุกตลาด Cross-border',
-    recommend: 'Combo Pass',
+    desc: 'Live Commerce Business หรือ Cross-border อ่าน P&L, KPI 8 ตัว และรุก USA/EU/ASEAN',
+    recommend: 'Masterclass II',
     color: 'green' as const,
-  },
-  {
-    title: 'มือใหม่สนใจอาชีพ',
-    desc: 'อยากเริ่มต้นเป็น Live Host เรียนรู้พื้นฐานที่ถูกต้อง สร้าง Portfolio ตั้งแต่เริ่ม',
-    recommend: 'Micro Express → Short Course',
-    color: 'yellow' as const,
   },
 ];

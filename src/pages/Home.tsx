@@ -1,35 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Section } from '@/components/Section';
 import { RevealCard } from '@/components/RevealCard';
 import { SEOHead } from '@/components/SEOHead';
-import { courses, marketStats, targetAudience, colorMap } from '@/data/courseData';
+import { marketStats, targetAudience, colorMap } from '@/data/courseData';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight } from 'lucide-react';
 
-const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
 const HERO_LOGO_URL = 'https://ik.imagekit.io/ideas365logo/iDEAS365_20250508_193021_0001.png?updatedAt=1772818492859';
 
+interface CourseRow {
+  id: string;
+  slug: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  duration: string;
+  price: string;
+  color: string;
+}
+
 const Home: React.FC = () => {
+  const [previewCourses, setPreviewCourses] = useState<CourseRow[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('courses')
+      .select('id, slug, tag, title, subtitle, duration, price, color')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(3)
+      .then(({ data }) => setPreviewCourses((data as unknown as CourseRow[]) || []));
+  }, []);
+
   return (
     <>
       <SEOHead 
-        title="iDEAS365 - Live Shopping Host Academy"
-        description="สร้างโฮสต์มืออาชีพระดับโลก Data-Driven, Psychology-First, AI-Ready"
+        title="iDEAS365 - Live Streamer Academy"
+        description="เราไม่สร้างนักขายออนไลน์ — เราสร้าง Livestreamer ที่แบรนด์ระดับโลกเลือกหา Psychology · Data · AI"
       />
       <CourseNavbar />
 
-      {/* Hero - Black */}
+      {/* Hero - Black (Opening Hook from Pitch Deck) */}
       <section className="min-h-screen flex items-center justify-center bg-foreground text-background px-4 pt-16">
         <div className="max-w-5xl mx-auto text-center">
           <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-6">
             <img src={HERO_LOGO_URL} alt="iDEAS365" className="h-24 md:h-40 w-auto mx-auto" />
           </div>
           <p className="text-xl md:text-2xl font-light text-background/70 mb-4 opacity-0 animate-fade-in [animation-delay:400ms]">
-            LIVE SHOPPING HOST ACADEMY
+            LIVE STREAMER ACADEMY
           </p>
-          <p className="text-lg md:text-xl text-background/50 mb-12 max-w-2xl mx-auto opacity-0 animate-fade-in [animation-delay:600ms]">
-            สร้างโฮสต์มืออาชีพที่แบรนด์ใหญ่ต้องการ<br />ไม่ใช่แค่คนพูดเก่ง
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 opacity-0 animate-fade-in [animation-delay:500ms]">
+            "เราไม่สร้างนักขายออนไลน์"
+          </h1>
+          <p className="text-lg md:text-xl text-background/60 mb-12 max-w-2xl mx-auto opacity-0 animate-fade-in [animation-delay:600ms]">
+            เราสร้าง Livestreamer ที่แบรนด์ระดับโลกเลือกหา<br />
+            ด้วย <span className="text-google-blue font-medium">Psychology</span> · <span className="text-google-yellow font-medium">Data</span> · <span className="text-google-green font-medium">AI</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:800ms]">
             <Link to="/courses" className="group px-8 py-4 bg-background text-foreground rounded-full text-base font-medium hover:opacity-90 transition-all inline-flex items-center gap-2">
@@ -43,8 +70,8 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Market Stats - Blue section */}
-      <Section color="blue" title="ทำไมต้อง iDEAS365?" subtitle="ตลาดกำลังโหยหามืออาชีพ">
+      {/* Market Opportunity - Blue */}
+      <Section color="blue" title="THE OPPORTUNITY" subtitle="ตลาดกำลังระเบิด — แบรนด์ทุกแห่งต้องการ Live Streamer ที่ใช่">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {marketStats.map((stat, i) => (
             <RevealCard 
@@ -59,11 +86,46 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* Courses Preview - Red section */}
-      <Section color="red" title="หลักสูตร iDEAS365" subtitle="5 หลักสูตร ครอบคลุมทุกระดับ" dark>
+      {/* The Problem - Red dark */}
+      <Section color="red" title="THE PROBLEM" subtitle="ปัญหาที่แบรนด์ชั้นนำหาคำตอบไม่ได้" dark>
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-white/90 text-lg md:text-xl leading-relaxed mb-8">
+            แบรนด์ต้องการ Live Streamer ที่เข้าใจทั้ง <span className="font-bold">Brand CI + Sales Psychology + Data</span> พร้อมกัน
+            <br />แต่สิ่งที่มีในตลาดคือ <span className="italic">"คนพูดหน้ากล้อง"</span> ที่ขาด 3 สิ่งนี้ทั้งหมด
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/80 text-sm">
+            <div className="bg-white/10 rounded-2xl p-5"><p className="font-bold text-white mb-1">Conversion ต่ำ</p>ไม่ถึงเกณฑ์มาตรฐาน</div>
+            <div className="bg-white/10 rounded-2xl p-5"><p className="font-bold text-white mb-1">Return Rate สูง</p>กระทบกำไรระยะยาว</div>
+            <div className="bg-white/10 rounded-2xl p-5"><p className="font-bold text-white mb-1">Brand Damage</p>วัดไม่ได้แต่รู้สึกได้</div>
+          </div>
+        </div>
+      </Section>
+
+      {/* 3 Pillars - Green */}
+      <Section color="green" title="THE SOLUTION" subtitle="3 Pillars ที่ทำให้ iDEAS365 แตกต่าง">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { title: 'Psychology-First', desc: 'S-O-R Framework + PAD Theory + 8 ศาสตร์หลัก ลงมือปฏิบัติจริงในไลฟ์', result: 'Conversion +150-400%', color: 'blue' as const },
+            { title: 'Data-Driven', desc: 'ทุกเทคนิคอ้างอิงสถิติจริง วัดผล GMV · CVR · AOV · KPI 8 ตัว', result: 'Return Rate <15%', color: 'red' as const },
+            { title: 'AI-Ready & Global', desc: 'ทำงานร่วม AI ตั้งแต่วันแรก + Cross-border Strategy สู่เวทีสากล', result: 'Smart Lazy Style', color: 'green' as const },
+          ].map((pillar, i) => (
+            <RevealCard 
+              key={i} 
+              color={pillar.color}
+              revealContent={<p className="text-sm font-medium">ผลลัพธ์: {pillar.result}</p>}
+            >
+              <h3 className={`text-2xl font-bold mb-3 ${colorMap[pillar.color].text}`}>{pillar.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{pillar.desc}</p>
+            </RevealCard>
+          ))}
+        </div>
+      </Section>
+
+      {/* Courses Preview - Black dark */}
+      <Section color="red" title="VALUE LADDER" subtitle="จากมือใหม่สู่ Global Professional" dark>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.slice(0, 3).map((course) => (
-            <Link key={course.id} to={`/course/${course.id}`} className="group">
+          {previewCourses.map((course) => (
+            <Link key={course.id} to={`/course/${course.slug}`} className="group">
               <div className="reveal-slide rounded-2xl bg-white/10 backdrop-blur border border-white/20 p-6 h-full transition-all duration-500 hover:bg-white/20 hover:shadow-2xl">
                 <span className="text-xs font-medium tracking-widest uppercase text-white/60 mb-2 block">{course.tag}</span>
                 <h3 className="text-xl font-bold text-white mb-1">{course.title}</h3>
@@ -88,27 +150,7 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* 3 Pillars - Green section */}
-      <Section color="green" title="จุดแข็งที่ไม่มีที่ไหน" subtitle="3 Pillars">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: 'Psychology-First', desc: 'S-O-R Framework, PAD Theory, FOMO Ladder 4 ขั้น', result: 'Conversion Rate +150-400%', color: 'blue' as const },
-            { title: 'Data-Driven', desc: 'ทุกเทคนิคอ้างอิงสถิติจริง KPI ที่ต้องอ่านเป็น', result: 'โฮสต์ที่แบรนด์ใหญ่ต้องการ', color: 'red' as const },
-            { title: 'AI-Ready', desc: 'AI Clipping Tools, Sentiment Analysis, Content Automation', result: 'Smart Lazy Strategy', color: 'green' as const },
-          ].map((pillar, i) => (
-            <RevealCard 
-              key={i} 
-              color={pillar.color}
-              revealContent={<p className="text-sm font-medium">ผลลัพธ์: {pillar.result}</p>}
-            >
-              <h3 className={`text-2xl font-bold mb-3 ${colorMap[pillar.color].text}`}>{pillar.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{pillar.desc}</p>
-            </RevealCard>
-          ))}
-        </div>
-      </Section>
-
-      {/* Target Audience - Yellow section */}
+      {/* Target Audience - Yellow */}
       <Section color="yellow" title="ใครควรเรียน?" subtitle="กลุ่มเป้าหมาย" dark>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {targetAudience.map((item, i) => (
@@ -126,13 +168,30 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
+      {/* Why Us - Blue */}
+      <Section color="blue" title="WHY US" subtitle='สอนโดย "ผู้ลงมือทำจริง" — ไม่ใช่แค่ทฤษฎี'>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {[
+            { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า' },
+            { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE' },
+            { stat: 'Michelin', label: 'มาตรฐานการจัดการและ VIP Service ระดับโลก' },
+            { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
+          ].map((item, i) => (
+            <div key={i} className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg transition-all">
+              <p className="text-3xl font-bold text-google-blue mb-2">{item.stat}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       {/* CTA - Black */}
       <section className="py-20 md:py-28 bg-foreground text-background px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            พร้อมเปลี่ยนอาชีพ<br />ของคุณ?
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+            จะเป็นคนที่อยู่<span className="text-google-yellow">ต้นน้ำ</span><br />ของโอกาส?
           </h2>
-          <p className="text-background/60 text-lg mb-8">เริ่มต้นวันนี้กับ iDEAS365</p>
+          <p className="text-background/60 text-lg mb-8 italic">"จากศูนย์สู่แสน ใน 2 ชั่วโมงแรก"</p>
           <Link to="/courses" className="inline-flex items-center gap-2 px-8 py-4 bg-google-blue text-white rounded-full text-base font-medium hover:opacity-90 transition-all">
             เริ่มเรียนเลย <ArrowRight className="w-4 h-4" />
           </Link>
