@@ -150,17 +150,17 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* Target Audience - Yellow */}
-      <Section color="yellow" title="ใครควรเรียน?" subtitle="กลุ่มเป้าหมาย" dark>
+      {/* Target Audience - Yellow with dark text */}
+      <Section color="yellow" title="ใครควรเรียน?" subtitle="กลุ่มเป้าหมาย">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {targetAudience.map((item, i) => (
-            <div key={i} className="group reveal-slide rounded-2xl bg-white/10 backdrop-blur border border-white/20 p-6 transition-all duration-500 hover:bg-white/20">
-              <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
-              <p className="text-white/70 text-sm mb-4 leading-relaxed">{item.desc}</p>
+            <div key={i} className="group reveal-slide rounded-2xl bg-foreground/5 border border-foreground/10 p-6 transition-all duration-500 hover:bg-foreground/10">
+              <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
+              <p className="text-foreground/70 text-sm mb-4 leading-relaxed">{item.desc}</p>
               <div className="relative overflow-hidden h-8">
-                <p className="text-white/50 text-xs transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-4">เลื่อนเพื่อดูคำแนะนำ</p>
+                <p className="text-foreground/50 text-xs transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-4">เลื่อนเพื่อดูคำแนะนำ</p>
                 <div className="absolute inset-0 translate-y-full transition-transform duration-500 group-hover:translate-y-0">
-                  <p className="text-sm font-semibold text-white">แนะนำ: {item.recommend}</p>
+                  <p className="text-sm font-semibold text-foreground">แนะนำ: {item.recommend}</p>
                 </div>
               </div>
             </div>
@@ -185,15 +185,23 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* CTA - Black */}
-      <section className="py-20 md:py-28 bg-foreground text-background px-4">
+      {/* CTA - Black/White only, hover reveals page accent (blue) */}
+      <section className="group/cta py-20 md:py-28 bg-foreground text-background px-4 transition-colors duration-500">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-            จะเป็นคนที่อยู่<span className="text-google-blue">ต้นน้ำ</span><br />ของโอกาส?
+            "เราไม่สร้างนักขายออนไลน์"
           </h2>
-          <p className="text-background/60 text-lg mb-8 italic">"จากศูนย์สู่แสน ใน 2 ชั่วโมงแรก"</p>
-          <Link to="/courses" className="inline-flex items-center gap-2 px-8 py-4 bg-google-blue text-white rounded-full text-base font-medium hover:opacity-90 transition-all">
-            เริ่มเรียนเลย <ArrowRight className="w-4 h-4" />
+          <p className="text-background/80 text-lg md:text-xl mb-4 leading-relaxed">
+            เราสร้าง Live Streamer ที่แบรนด์ระดับโลกเลือกหา
+          </p>
+          <p className="text-background/60 text-base md:text-lg mb-10 italic">
+            — ด้วยมาตรฐานวิชาชีพที่ยั่งยืนไปกับทุกเวที
+          </p>
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-background text-foreground rounded-full text-base font-medium transition-all hover:bg-google-blue hover:text-white"
+          >
+            เริ่มเรียนเลย <ArrowRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-1" />
           </Link>
           <p className="mt-8 text-background/40 text-sm">hello@ideas365.space · Bangkok, Thailand</p>
         </div>

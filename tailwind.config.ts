@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Kanit', 'sans-serif'],
+        sans: ['Google Sans', 'Noto Sans Thai Looped', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
