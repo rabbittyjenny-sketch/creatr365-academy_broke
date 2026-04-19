@@ -44,8 +44,8 @@ const Home: React.FC = () => {
       {/* Hero - Black */}
       <section className="min-h-screen flex items-center justify-center bg-foreground text-background px-4 pt-16">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-8">
-            <img src={logoWhite} alt="iDEAS365" className="h-20 md:h-32 w-auto mx-auto" />
+          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-10">
+            <img src={logoWhite} alt="iDEAS365" className="h-24 md:h-40 lg:h-48 w-auto mx-auto" />
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 opacity-0 animate-fade-in [animation-delay:400ms] leading-[0.95]">
             LIVE STREAMER<br />ACADEMY
