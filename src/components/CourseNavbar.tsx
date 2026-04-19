@@ -2,8 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
-
-const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
+import logoDark from '@/assets/logo-dark.png';
 
 export const CourseNavbar: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ export const CourseNavbar: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <img src={LOGO_URL} alt="iDEAS365" className="h-8 w-auto" />
+          <img src={logoDark} alt="iDEAS365" className="h-8 w-auto" />
         </Link>
         
         <div className="flex items-center gap-6 text-sm font-medium">
