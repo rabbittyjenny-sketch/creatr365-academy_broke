@@ -121,7 +121,7 @@ const Home: React.FC = () => {
       </Section>
 
       {/* Courses Preview - Black dark */}
-      <Section color="red" title="VALUE LADDER" subtitle="จากมือใหม่สู่ Global Professional" dark>
+      <Section color="black" title="VALUE LADDER" subtitle="จากมือใหม่สู่ Global Professional" dark>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {previewCourses.map((course) => (
             <Link key={course.id} to={`/course/${course.slug}`} className="group">
@@ -176,9 +176,9 @@ const Home: React.FC = () => {
             { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)' },
             { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
           ].map((item, i) => (
-            <div key={i} className="group rounded-2xl border border-border bg-card p-6 hover:shadow-lg hover:border-google-blue transition-all">
+            <div key={i} className="group rounded-2xl border border-border bg-card p-6 hover:-translate-y-1 hover:shadow-xl hover:border-google-blue hover:bg-google-blue/10 transition-all duration-300">
               <p className="text-3xl font-bold text-google-blue mb-2 group-hover:scale-105 transition-transform origin-left">{item.stat}</p>
-              <p className="text-sm text-foreground/80 leading-relaxed">{item.label}</p>
+              <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground">{item.label}</p>
             </div>
           ))}
         </div>
