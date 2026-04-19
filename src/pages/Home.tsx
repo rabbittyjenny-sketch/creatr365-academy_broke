@@ -7,8 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { marketStats, targetAudience, colorMap } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight } from 'lucide-react';
-
-const HERO_LOGO_URL = 'https://ik.imagekit.io/ideas365logo/iDEAS365_20250508_193021_0001.png?updatedAt=1772818492859';
+import logoWhite from '@/assets/logo-white.png';
 
 interface CourseRow {
   id: string;
@@ -46,7 +45,7 @@ const Home: React.FC = () => {
       <section className="min-h-screen flex items-center justify-center bg-foreground text-background px-4 pt-16">
         <div className="max-w-5xl mx-auto text-center">
           <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-8">
-            <img src={HERO_LOGO_URL} alt="iDEAS365" className="h-20 md:h-32 w-auto mx-auto" />
+            <img src={logoWhite} alt="iDEAS365" className="h-20 md:h-32 w-auto mx-auto" />
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 opacity-0 animate-fade-in [animation-delay:400ms] leading-[0.95]">
             LIVE STREAMER<br />ACADEMY
@@ -177,9 +176,9 @@ const Home: React.FC = () => {
             { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)' },
             { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
           ].map((item, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg transition-all">
-              <p className="text-3xl font-bold text-google-blue mb-2">{item.stat}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.label}</p>
+            <div key={i} className="group rounded-2xl border border-border bg-card p-6 hover:shadow-lg hover:border-google-blue transition-all">
+              <p className="text-3xl font-bold text-google-blue mb-2 group-hover:scale-105 transition-transform origin-left">{item.stat}</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{item.label}</p>
             </div>
           ))}
         </div>
