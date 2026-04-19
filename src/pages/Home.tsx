@@ -171,16 +171,27 @@ const Home: React.FC = () => {
       <Section color="blue" title="WHY US" subtitle='สอนโดย "ผู้ลงมือทำจริง" — ไม่ใช่แค่ทฤษฎี'>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {[
-            { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า' },
-            { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE' },
-            { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)' },
-            { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
-          ].map((item, i) => (
-            <div key={i} className="group rounded-2xl border border-border bg-card p-6 hover:-translate-y-1 hover:shadow-xl hover:border-google-blue hover:bg-google-blue/10 transition-all duration-300">
-              <p className="text-3xl font-bold text-google-blue mb-2 group-hover:scale-105 transition-transform origin-left">{item.stat}</p>
-              <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground">{item.label}</p>
-            </div>
-          ))}
+            { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า', accent: 'blue' as const },
+            { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE', accent: 'red' as const },
+            { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)', accent: 'yellow' as const },
+            { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง', accent: 'green' as const },
+          ].map((item, i) => {
+            const c = colorMap[item.accent];
+            return (
+              <div
+                key={i}
+                style={{ ['--accent' as any]: c.hex }}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:border-transparent hover:[background:var(--accent)]"
+              >
+                <p className={`text-3xl font-bold mb-2 ${c.text} transition-colors duration-500 group-hover:text-white`}>
+                  {item.stat}
+                </p>
+                <p className="text-sm text-foreground/80 leading-relaxed transition-colors duration-500 group-hover:text-white/95">
+                  {item.label}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </Section>
 
