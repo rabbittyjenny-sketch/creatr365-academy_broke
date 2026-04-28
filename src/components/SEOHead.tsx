@@ -15,7 +15,7 @@ export const SEOHead = ({
   image = '/placeholder.svg',
   url = window.location.href
 }: SEOHeadProps) => {
-  const fullTitle = `${title} | EventHub`;
+  const fullTitle = title.includes('Creatr365') ? title : `${title} | Creatr365`;
   
   return (
     <Helmet>

@@ -127,7 +127,7 @@ export const marketStats = [
   {
     value: '90%',
     label: 'ของ Live Streamer ในตลาดวันนี้ ไลฟ์โดยไม่มีมาตรฐาน — Live Commerce ไทยโตเร็วที่สุดในโลก แต่ยังขาดระบบ',
-    source: 'iDEAS365 Market Research 2025',
+    source: 'Creatr365 Market Research 2025',
     color: 'red' as const,
   },
   {

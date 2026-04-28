@@ -50,7 +50,7 @@ const Courses: React.FC = () => {
 
   return (
     <>
-      <SEOHead title="หลักสูตรทั้งหมด - iDEAS365" description="หลักสูตรครอบคลุมทุกระดับ สร้างโฮสต์มืออาชีพระดับโลก" />
+      <SEOHead title="หลักสูตรทั้งหมด - Creatr365" description="หลักสูตรครอบคลุมทุกระดับ สร้างโฮสต์มืออาชีพระดับโลก" />
       <CourseNavbar />
 
       <section className="pt-28 pb-16 px-4 bg-background">
@@ -80,7 +80,7 @@ const Courses: React.FC = () => {
                           <LearnIcon className="w-3 h-3" /> {learning.label}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-bold mb-1 accent-hover-text">{course.title}</h3>
+                      <h3 className="text-2xl font-bold mb-1 hover-shift" data-accent={course.color === 'black' ? 'blue' : course.color}>{course.title}</h3>
                       <p className="text-muted-foreground text-sm mb-4">{course.subtitle}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{course.description}</p>
                       <div className="flex items-center justify-between text-sm">

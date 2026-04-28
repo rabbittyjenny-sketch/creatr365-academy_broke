@@ -15,16 +15,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    --primary: 217 89% 61%;
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 98% 50%;
+    --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 10%;
 
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 96%;
+    --accent: 0 0% 94%;
     --accent-foreground: 0 0% 10%;
 
     --destructive: 348 100% 40%;
@@ -35,7 +35,7 @@
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 217 89% 61%;
+    --ring: 0 0% 20%;
 
     --radius: 0.75rem;
 
@@ -228,12 +228,14 @@
 }
 
 .accent-hover-text {
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
 }
 
 .group:hover .accent-hover-text,
 .accent-hover-text:hover {
   color: var(--hover-accent, currentColor);
+  transform: translateX(4px);
 }
 
 /* Button slide arrow */
@@ -243,3 +245,25 @@
 .btn-slide:hover .lucide-arrow-right {
   transform: translateX(4px);
 }
+
+/* === Unified hover effect: text color + slight shift === */
+/* Apply to any element. Cycles through 4 brand accents based on data attribute. */
+.hover-shift {
+  display: inline-block;
+  transition: color 0.35s ease, transform 0.35s ease, letter-spacing 0.35s ease;
+  cursor: pointer;
+}
+.hover-shift:hover,
+.group\/shift:hover .hover-shift,
+.group:hover .hover-shift {
+  transform: translateY(-2px);
+  letter-spacing: 0.01em;
+}
+.hover-shift[data-accent="blue"]:hover,
+.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
+.hover-shift[data-accent="red"]:hover,
+.group:hover .hover-shift[data-accent="red"]    { color: hsl(var(--google-red)); }
+.hover-shift[data-accent="yellow"]:hover,
+.group:hover .hover-shift[data-accent="yellow"] { color: hsl(var(--google-yellow)); }
+.hover-shift[data-accent="green"]:hover,
+.group:hover .hover-shift[data-accent="green"]  { color: hsl(var(--google-green)); }

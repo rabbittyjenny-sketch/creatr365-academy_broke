@@ -55,7 +55,7 @@ const ResetPassword = () => {
 
   return (
     <>
-      <SEOHead title="ตั้งรหัสผ่านใหม่ - iDEAS365" description="ตั้งรหัสผ่านใหม่สำหรับบัญชี iDEAS365" />
+      <SEOHead title="ตั้งรหัสผ่านใหม่ - Creatr365" description="ตั้งรหัสผ่านใหม่สำหรับบัญชี Creatr365" />
       <CourseNavbar />
 
       <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20">

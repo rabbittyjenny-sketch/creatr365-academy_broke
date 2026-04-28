@@ -7,7 +7,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { getAuthErrorMessage, isValidPassword, PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth';
 
-const LOGO_URL = 'https://ik.imagekit.io/ideas365logo/LOGO_iDEAS365Black.png?updatedAt=1772818424343';
+import logoCreatr from '@/assets/logo-creatr365.png';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -82,19 +82,19 @@ const Auth = () => {
       <CourseNavbar />
       <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-16">
         <SEOHead 
-          title={isLogin ? 'เข้าสู่ระบบ - iDEAS365' : 'สมัครสมาชิก - iDEAS365'}
-          description="เข้าสู่ระบบเพื่อเริ่มเรียนกับ iDEAS365"
+          title={isLogin ? 'เข้าสู่ระบบ - Creatr365' : 'สมัครสมาชิก - Creatr365'}
+          description="เข้าสู่ระบบเพื่อเริ่มเรียนกับ Creatr365"
         />
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <Link to="/" className="inline-block mb-6">
-              <img src={LOGO_URL} alt="iDEAS365" className="h-10 w-auto mx-auto" />
+              <img src={logoCreatr} alt="Creatr365" className="h-12 w-auto mx-auto" />
             </Link>
             <h2 className="text-2xl font-bold text-foreground">
               {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ iDEAS365'}
+              {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">

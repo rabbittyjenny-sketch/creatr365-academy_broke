@@ -8,7 +8,7 @@ const LINE_QR_URL = 'https://ik.imagekit.io/ideas365logo/L_926gxgxq_BW-1.png?upd
 const Contact: React.FC = () => {
   return (
     <>
-      <SEOHead title="ติดต่อสอบถาม - iDEAS365" description="ติดต่อ iDEAS365 Live Shopping Host Academy" />
+      <SEOHead title="ติดต่อสอบถาม - Creatr365" description="ติดต่อ Creatr365 Live Streamer Academy" />
       <CourseNavbar />
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
@@ -40,8 +40,8 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold mb-1">Email</h3>
-                    <a href="mailto:hello@ideas365.space" className="text-google-blue hover:underline text-sm">
-                      hello@ideas365.space
+                    <a href="mailto:hello@creatr365.com" className="text-google-blue hover:underline text-sm">
+                      hello@creatr365.com
                     </a>
                   </div>
                 </div>
@@ -54,8 +54,8 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold mb-1">Website</h3>
-                    <a href="https://www.ideas365.space" target="_blank" rel="noopener noreferrer" className="text-google-red hover:underline text-sm">
-                      www.ideas365.space
+                    <a href="https://www.creatr365.com" target="_blank" rel="noopener noreferrer" className="text-google-red hover:underline text-sm">
+                      www.creatr365.com
                     </a>
                   </div>
                 </div>
@@ -63,7 +63,7 @@ const Contact: React.FC = () => {
 
               <div className="rounded-2xl border border-border bg-card p-6">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  <strong>iDEAS365 Live Shopping Host Academy</strong><br />
+                  <strong>Creatr365 Live Streamer Academy</strong><br />
                   Bangkok, Thailand<br /><br />
                   เปิดรับสมัครตลอดทั้งปี<br />
                   ตอบกลับภายใน 24 ชั่วโมง

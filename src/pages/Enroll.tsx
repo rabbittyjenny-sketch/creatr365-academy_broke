@@ -126,7 +126,7 @@ const Enroll: React.FC = () => {
 
   return (
     <>
-      <SEOHead title={`สมัครเรียน ${course.title} - iDEAS365`} description={`สมัครเรียนหลักสูตร ${course.title}`} />
+      <SEOHead title={`สมัครเรียน ${course.title} - Creatr365`} description={`สมัครเรียนหลักสูตร ${course.title}`} />
       <CourseNavbar />
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
@@ -172,7 +172,7 @@ const Enroll: React.FC = () => {
 
                 <div className="text-xs text-muted-foreground text-center space-y-1 mt-4">
                   <p>การชำระเงินผ่านระบบ Stripe ที่ปลอดภัยตามมาตรฐาน PCI DSS</p>
-                  <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ hello@ideas365.space</p>
+                  <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ hello@creatr365.com</p>
                   <p>สามารถขอคืนเงินได้ภายใน 7 วัน ตาม พ.ร.บ.คุ้มครองผู้บริโภค</p>
                 </div>
               </form>
