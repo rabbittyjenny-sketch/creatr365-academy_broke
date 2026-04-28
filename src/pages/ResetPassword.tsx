@@ -92,7 +92,7 @@ const ResetPassword = () => {
                 className="h-12 rounded-xl"
               />
 
-              <button type="submit" disabled={loading} className="w-full h-12 bg-google-blue text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
+              <button type="submit" disabled={loading} className="w-full h-12 bg-foreground text-background rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
                 {loading ? 'กำลังบันทึก...' : 'บันทึกรหัสผ่านใหม่'}
               </button>
             </form>
