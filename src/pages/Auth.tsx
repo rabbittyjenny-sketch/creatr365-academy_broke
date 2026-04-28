@@ -104,13 +104,13 @@ const Auth = () => {
               <div className="mt-1.5 flex items-center justify-between gap-3 text-xs">
                 <p className="ml-1 text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
                 {isLogin && (
-                  <button type="button" onClick={handleForgotPassword} disabled={loading} className="shrink-0 text-google-blue hover:opacity-80 transition-opacity disabled:opacity-50">
+                  <button type="button" onClick={handleForgotPassword} disabled={loading} className="shrink-0 text-foreground/70 hover:text-foreground transition-opacity disabled:opacity-50">
                     ลืมรหัสผ่าน?
                   </button>
                 )}
               </div>
             </div>
-            <button type="submit" disabled={loading} className="w-full h-12 bg-google-blue text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
+            <button type="submit" disabled={loading} className="w-full h-12 bg-foreground text-background rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
               {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </button>
           </form>
