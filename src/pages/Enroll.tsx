@@ -126,7 +126,7 @@ const Enroll: React.FC = () => {
 
   return (
     <>
-      <SEOHead title={`สมัครเรียน ${course.title} - iDEAS365`} description={`สมัครเรียนหลักสูตร ${course.title}`} />
+      <SEOHead title={`สมัครเรียน ${course.title} - Creatr365`} description={`สมัครเรียนหลักสูตร ${course.title}`} />
       <CourseNavbar />
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">

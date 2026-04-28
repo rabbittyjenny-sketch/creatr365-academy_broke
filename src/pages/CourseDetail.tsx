@@ -80,7 +80,7 @@ const CourseDetail: React.FC = () => {
 
   return (
     <>
-      <SEOHead title={`${course.title} - iDEAS365`} description={course.description} />
+      <SEOHead title={`${course.title} - Creatr365`} description={course.description} />
       <CourseNavbar />
 
       <section className={`${colors.bg} text-white pt-28 pb-20 px-4`}>
@@ -158,7 +158,7 @@ const CourseDetail: React.FC = () => {
                   <li className="bracket-hover accent-hover-text">• Conversion Rate +150-400%</li>
                   <li className="bracket-hover accent-hover-text">• อัตราคืนสินค้า ลด 40%</li>
                   <li className="bracket-hover accent-hover-text">• Portfolio ระดับโลก</li>
-                  <li className="bracket-hover accent-hover-text">• ใบรับรอง iDEAS365</li>
+                  <li className="bracket-hover accent-hover-text">• ใบรับรอง Creatr365</li>
                 </ul>
               </div>
             </div>

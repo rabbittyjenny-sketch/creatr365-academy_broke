@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <SEOHead title="Dashboard - iDEAS365" description="ติดตามความก้าวหน้าของคุณ" />
+      <SEOHead title="Dashboard - Creatr365" description="ติดตามความก้าวหน้าของคุณ" />
       <CourseNavbar />
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
