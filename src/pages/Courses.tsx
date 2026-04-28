@@ -23,18 +23,20 @@ interface CourseRow {
   status: string;
 }
 
-const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor; className: string }> = {
-  offline: { label: 'Offline', Icon: Users, className: 'text-google-red bg-google-red/10' },
-  online:  { label: 'Online',  Icon: Monitor, className: 'text-google-blue bg-google-blue/10' },
-  hybrid:  { label: 'Hybrid',  Icon: Layers, className: 'text-google-green bg-google-green/10' },
+const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor }> = {
+  offline: { label: 'Offline', Icon: Users },
+  online:  { label: 'Online',  Icon: Monitor },
+  hybrid:  { label: 'Hybrid',  Icon: Layers },
 };
 
-const STATUS_META: Record<string, { label: string; className: string } | null> = {
-  now_open:    { label: 'NOW OPEN',    className: 'bg-google-green text-white' },
-  coming_soon: { label: 'COMING SOON', className: 'bg-google-yellow text-foreground' },
-  new_update:  { label: 'NEW UPDATE',  className: 'bg-google-blue text-white' },
+const STATUS_META: Record<string, { label: string } | null> = {
+  now_open:    { label: 'NOW OPEN' },
+  coming_soon: { label: 'COMING SOON' },
+  new_update:  { label: 'NEW UPDATE' },
   none: null,
 };
+
+const ACCENT_CYCLE = ['blue', 'red', 'yellow', 'green'] as const;
 
 const Courses: React.FC = () => {
   const [courses, setCourses] = useState<CourseRow[]>([]);
