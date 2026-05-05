@@ -96,7 +96,7 @@ const CourseDetail: React.FC = () => {
           <p className="text-xl md:text-2xl text-white/80 mb-6 opacity-0 animate-fade-in [animation-delay:200ms]">{course.subtitle}</p>
           <div className="flex flex-wrap gap-4 items-center opacity-0 animate-fade-in [animation-delay:400ms]">
             <span className="text-white/60 text-sm">{course.duration}</span>
-            <span className="text-2xl font-bold">{course.price}</span>
+            {course.price?.trim() && <span className="text-2xl font-bold">{course.price}</span>}
           </div>
         </div>
       </section>
@@ -141,7 +141,7 @@ const CourseDetail: React.FC = () => {
               <div className={`rounded-2xl border ${colors.border}/30 p-6 bg-card hover:border-transparent hover:shadow-xl transition-all duration-500 group relative overflow-hidden`}>
                 <div className={`absolute inset-0 ${colors.bgLight} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                 <div className="relative z-10">
-                  <p className={`text-3xl font-bold ${colors.text} mb-2`}>{course.price}</p>
+                  {course.price?.trim() && <p className={`text-3xl font-bold ${colors.text} mb-2`}>{course.price}</p>}
                   <p className="text-sm text-muted-foreground mb-6">{course.duration}</p>
                   <button 
                     onClick={handleEnroll}
