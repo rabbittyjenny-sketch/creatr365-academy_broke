@@ -86,7 +86,7 @@ const Courses: React.FC = () => {
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{course.description}</p>
                       <div className="pt-4 mt-auto border-t border-border flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">{course.duration}</span>
-                        <span className="font-bold text-foreground">{course.price}</span>
+                        {course.price?.trim() && <span className="font-bold text-foreground">{course.price}</span>}
                       </div>
                       <div className="mt-3 flex items-center gap-1 text-sm font-medium text-foreground/80">
                         <span className="hover-shift" data-accent={accent}>สมัครเรียน</span>

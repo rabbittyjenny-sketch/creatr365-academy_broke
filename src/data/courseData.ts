@@ -156,26 +156,26 @@ export const kpiData = [
 export const targetAudience = [
   {
     title: 'มือใหม่สนใจอาชีพ',
-    desc: 'อยากเริ่มต้นเป็น Live Streamer เรียนพื้นฐาน Hook + Live Commerce 101 ภายใน 3 ชั่วโมง',
-    recommend: 'Micro Express',
+    desc: 'อยากเริ่มต้นเป็น Live Streamer เรียน Hook Formula + Live Commerce 101 ภายใน 3 ชั่วโมง',
+    recommend: 'MICRO EXPRESS',
     color: 'black' as const,
   },
   {
     title: 'โฮสต์ที่ไลฟ์อยู่แล้ว',
-    desc: 'ไลฟ์มา 6-12 เดือน แต่ยอดขายไม่โต อยากแก้ Pain Point เสียง/กล้อง หรือ Data',
-    recommend: 'Short Course A หรือ B',
+    desc: 'ไลฟ์มาแล้วแต่ยอดไม่โต อยากแก้ Pain Point เสียง/กล้อง หรืออ่าน Analytics ไม่ออก',
+    recommend: 'SIGNAL หรือ MATRIX',
     color: 'yellow' as const,
   },
   {
-    title: 'เจ้าของแบรนด์ / Agency',
-    desc: 'สร้างทีม In-house Live ระดับสากล ควบคุม Brand CI + Conversion +150-400%',
-    recommend: 'Combo Masterclass I+II',
+    title: 'In-house Host / Brand',
+    desc: 'ต้องการสร้างเอกลักษณ์ Brand CI + ระบบการผลิต Multi-Camera Scale ได้',
+    recommend: 'STAGE → BLUEPRINT',
     color: 'red' as const,
   },
   {
-    title: 'ผู้ต้องการเปิดธุรกิจ',
-    desc: 'Live Commerce Business หรือ Cross-border อ่าน P&L, KPI 8 ตัว และรุก USA/EU/ASEAN',
-    recommend: 'Masterclass II',
+    title: 'เจ้าของแบรนด์ / Agency',
+    desc: 'อ่าน P&L, KPI 8 ตัว และรุกตลาดสากล USA / EU / China / ASEAN',
+    recommend: 'FRONTIER',
     color: 'green' as const,
   },
 ];

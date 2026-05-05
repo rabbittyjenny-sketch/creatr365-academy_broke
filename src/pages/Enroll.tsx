@@ -141,7 +141,7 @@ const Enroll: React.FC = () => {
             <h1 className="text-2xl font-bold mt-1 mb-1">{course.title}</h1>
             <p className="text-muted-foreground text-sm mb-2">{course.subtitle} · {course.duration}</p>
             <p className="text-xs text-muted-foreground mb-4">{LEARNING_LABELS[course.learning_type] || course.learning_type}</p>
-            <p className={`text-2xl font-bold ${colors.text} mb-6`}>{course.price}</p>
+            {course.price?.trim() && <p className={`text-2xl font-bold ${colors.text} mb-6`}>{course.price}</p>}
 
             {isFull ? (
               <div className="text-center py-8">

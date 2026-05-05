@@ -140,7 +140,7 @@ const Home: React.FC = () => {
                 <div className="pt-4 border-t border-background/10 flex items-center justify-between">
                   <p className="text-background/80 text-sm">{course.duration}</p>
                   <span className="inline-flex items-center gap-1 text-sm text-background font-medium">
-                    {course.price} <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                    {course.price?.trim() ? course.price : 'ดูรายละเอียด'} <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
               </div>
