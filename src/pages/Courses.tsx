@@ -21,6 +21,9 @@ interface CourseRow {
   learning_type: string;
   max_slots: number | null;
   status: string;
+  level: string | null;
+  format_label: string | null;
+  cover_image_url: string | null;
 }
 
 const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor }> = {
@@ -69,12 +72,22 @@ const Courses: React.FC = () => {
               return (
                 <Link key={course.id} to={`/course/${course.slug}`} className="group">
                   <div className="rounded-2xl border border-border bg-card h-full transition-all duration-500 hover:shadow-xl hover:-translate-y-1 overflow-hidden flex flex-col">
+                    {course.cover_image_url && (
+                      <img src={course.cover_image_url} alt={course.title} className="w-full aspect-video object-cover border-b border-border" />
+                    )}
                     <div className="p-6 flex-1 flex flex-col">
-                      {status && (
-                        <span className="inline-block self-start text-[10px] font-bold tracking-wider px-2 py-1 rounded-full mb-3 bg-foreground/5 text-foreground/70">
-                          {status.label}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 mb-3 flex-wrap">
+                        {status && (
+                          <span className="text-[10px] font-bold tracking-wider px-2 py-1 rounded-full bg-foreground/5 text-foreground/70">
+                            {status.label}
+                          </span>
+                        )}
+                        {course.level && (
+                          <span className="text-[10px] font-bold tracking-wider px-2 py-1 rounded-full border border-border text-foreground/70">
+                            {course.level}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground">{course.tag}</span>
                         <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-foreground/5 text-foreground/70">
@@ -85,7 +98,7 @@ const Courses: React.FC = () => {
                       <p className="text-muted-foreground text-sm mb-4">{course.subtitle}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{course.description}</p>
                       <div className="pt-4 mt-auto border-t border-border flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{course.duration}</span>
+                        <span className="text-muted-foreground">{course.format_label || course.duration}</span>
                         {course.price?.trim() && <span className="font-bold text-foreground">{course.price}</span>}
                       </div>
                       <div className="mt-3 flex items-center gap-1 text-sm font-medium text-foreground/80">
