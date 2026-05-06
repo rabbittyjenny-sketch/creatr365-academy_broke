@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          module_id: string | null
+          note: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          score: number | null
+          status: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          module_id?: string | null
+          note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          score?: number | null
+          status?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          module_id?: string | null
+          note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          score?: number | null
+          status?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_enrollments: {
         Row: {
           amount_paid: number | null
@@ -68,17 +125,130 @@ export type Database = {
           },
         ]
       }
+      course_modules: {
+        Row: {
+          code: string
+          course_id: string
+          created_at: string
+          duration_label: string | null
+          has_assignment: boolean
+          has_quiz: boolean
+          id: string
+          name: string
+          sort_order: number
+          summary: string | null
+          updated_at: string
+          vod_url: string | null
+        }
+        Insert: {
+          code: string
+          course_id: string
+          created_at?: string
+          duration_label?: string | null
+          has_assignment?: boolean
+          has_quiz?: boolean
+          id?: string
+          name: string
+          sort_order?: number
+          summary?: string | null
+          updated_at?: string
+          vod_url?: string | null
+        }
+        Update: {
+          code?: string
+          course_id?: string
+          created_at?: string
+          duration_label?: string | null
+          has_assignment?: boolean
+          has_quiz?: boolean
+          id?: string
+          name?: string
+          sort_order?: number
+          summary?: string | null
+          updated_at?: string
+          vod_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_quizzes: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: string
+          module_id: string | null
+          pass_threshold: number
+          phase: string
+          qg_code: string | null
+          source_ref: string | null
+          title: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string | null
+          pass_threshold?: number
+          phase?: string
+          qg_code?: string | null
+          source_ref?: string | null
+          title: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string | null
+          pass_threshold?: number
+          phase?: string
+          qg_code?: string | null
+          source_ref?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_quizzes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_quizzes_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
+          bloom_level: string | null
           color: string
+          cover_image_url: string | null
           created_at: string
+          deliverables: string[]
           description: string
           duration: string
           features: string[]
+          format_label: string | null
+          gallery_image_urls: string[]
           id: string
+          intro_video_url: string | null
           is_active: boolean
+          kpi_notes: Json
           learning_type: string
+          level: string | null
           max_slots: number | null
+          outcome_goal: string | null
           price: string
           slug: string
           sort_order: number
@@ -86,19 +256,29 @@ export type Database = {
           stripe_price_id: string | null
           subtitle: string
           tag: string
+          target_audience: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          bloom_level?: string | null
           color?: string
+          cover_image_url?: string | null
           created_at?: string
+          deliverables?: string[]
           description?: string
           duration?: string
           features?: string[]
+          format_label?: string | null
+          gallery_image_urls?: string[]
           id?: string
+          intro_video_url?: string | null
           is_active?: boolean
+          kpi_notes?: Json
           learning_type?: string
+          level?: string | null
           max_slots?: number | null
+          outcome_goal?: string | null
           price?: string
           slug: string
           sort_order?: number
@@ -106,19 +286,29 @@ export type Database = {
           stripe_price_id?: string | null
           subtitle?: string
           tag?: string
+          target_audience?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          bloom_level?: string | null
           color?: string
+          cover_image_url?: string | null
           created_at?: string
+          deliverables?: string[]
           description?: string
           duration?: string
           features?: string[]
+          format_label?: string | null
+          gallery_image_urls?: string[]
           id?: string
+          intro_video_url?: string | null
           is_active?: boolean
+          kpi_notes?: Json
           learning_type?: string
+          level?: string | null
           max_slots?: number | null
+          outcome_goal?: string | null
           price?: string
           slug?: string
           sort_order?: number
@@ -126,10 +316,43 @@ export type Database = {
           stripe_price_id?: string | null
           subtitle?: string
           tag?: string
+          target_audience?: string | null
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      enrollment_notes: {
+        Row: {
+          author_id: string
+          created_at: string
+          enrollment_id: string
+          id: string
+          note: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          enrollment_id: string
+          id?: string
+          note: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          enrollment_id?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollment_notes_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "course_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_registrations: {
         Row: {
@@ -199,6 +422,41 @@ export type Database = {
         }
         Relationships: []
       }
+      module_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          module_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -267,6 +525,50 @@ export type Database = {
           },
         ]
       }
+      quiz_questions: {
+        Row: {
+          answer: string | null
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          prompt: string
+          q_no: number
+          quiz_id: string
+          type: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          prompt: string
+          q_no: number
+          quiz_id: string
+          type?: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          prompt?: string
+          q_no?: number
+          quiz_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "course_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -301,6 +603,10 @@ export type Database = {
         Returns: boolean
       }
       increment_promo_used: { Args: { promo_id: string }; Returns: undefined }
+      unlock_next_module: {
+        Args: { _module_id: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

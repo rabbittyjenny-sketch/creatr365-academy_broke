@@ -42,6 +42,10 @@ const Enroll: React.FC = () => {
   useEffect(() => {
     if (searchParams.get('success') === 'true') {
       setPaymentSuccess(true);
+      const enrollmentId = searchParams.get('enrollment_id');
+      if (enrollmentId) {
+        supabase.functions.invoke('verify-payment', { body: { enrollmentId } }).catch(() => {});
+      }
     }
   }, [searchParams]);
 

@@ -81,8 +81,9 @@ serve(async (req) => {
     }
 
     // Parse price (e.g. "25,000 - 45,000 ฿" → take first number)
-    const priceMatch = course.price.replace(/,/g, "").match(/(\d+)/);
+    const priceMatch = (course.price || "").replace(/,/g, "").match(/(\d+)/);
     let priceAmount = priceMatch ? parseInt(priceMatch[1]) : 0;
+    if (!priceAmount) throw new Error("Course price not configured");
 
     if (isFree) {
       // Free enrollment
