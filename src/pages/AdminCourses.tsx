@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/SEOHead';
-import { Plus, Pencil, Trash2, ArrowLeft, Save, X, GripVertical, Ticket } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Save, X, GripVertical, Ticket, Upload, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface CourseRow {
   id: string;
@@ -25,6 +25,29 @@ interface CourseRow {
   max_slots: number | null;
   stripe_price_id: string | null;
   status: string;
+  level: string | null;
+  target_audience: string | null;
+  format_label: string | null;
+  intro_video_url: string | null;
+  cover_image_url: string | null;
+  gallery_image_urls: string[];
+  kpi_notes: Array<{ label: string; value: string; note?: string }>;
+  deliverables: string[];
+  outcome_goal: string | null;
+  bloom_level: string | null;
+}
+
+interface ModuleRow {
+  id: string;
+  course_id: string;
+  code: string;
+  name: string;
+  summary: string;
+  duration_label: string;
+  vod_url: string | null;
+  has_quiz: boolean;
+  has_assignment: boolean;
+  sort_order: number;
 }
 
 interface PromoCode {
@@ -59,16 +82,34 @@ const STATUS_OPTIONS = [
   { value: 'none',        label: 'ไม่แสดง',       badge: 'bg-muted text-muted-foreground' },
 ];
 
+const LEVEL_OPTIONS = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
+
+const emptyCourse = (sort: number): CourseRow => ({
+  id: '', slug: '', tag: '', title: '', subtitle: '', description: '',
+  duration: '', price: '', features: [], color: 'blue',
+  sort_order: sort, is_active: true,
+  learning_type: 'offline', max_slots: null, stripe_price_id: null,
+  status: 'now_open',
+  level: null, target_audience: null, format_label: null,
+  intro_video_url: null, cover_image_url: null, gallery_image_urls: [],
+  kpi_notes: [], deliverables: [], outcome_goal: null, bloom_level: null,
+});
+
 const AdminCourses = () => {
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [editingCourse, setEditingCourse] = useState<CourseRow | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [featuresText, setFeaturesText] = useState('');
+  const [deliverablesText, setDeliverablesText] = useState('');
+  const [kpiText, setKpiText] = useState('');
+  const [subTab, setSubTab] = useState<'info' | 'media' | 'modules' | 'pricing'>('info');
+  const [modules, setModules] = useState<ModuleRow[]>([]);
   const [tab, setTab] = useState<'courses' | 'promos'>('courses');
   const [promos, setPromos] = useState<PromoCode[]>([]);
   const [editingPromo, setEditingPromo] = useState<Partial<PromoCode> | null>(null);
   const [isNewPromo, setIsNewPromo] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -96,27 +137,49 @@ const AdminCourses = () => {
     setPromos((data as unknown as PromoCode[]) || []);
   };
 
+  const fetchModules = async (courseId: string) => {
+    if (!courseId) { setModules([]); return; }
+    const { data } = await supabase.from('course_modules').select('*').eq('course_id', courseId).order('sort_order');
+    setModules((data as unknown as ModuleRow[]) || []);
+  };
+
   const startEdit = (course: CourseRow) => {
-    setEditingCourse({ ...course });
-    setFeaturesText(course.features.join('\n'));
+    const c: CourseRow = {
+      ...course,
+      gallery_image_urls: course.gallery_image_urls || [],
+      kpi_notes: course.kpi_notes || [],
+      deliverables: course.deliverables || [],
+      features: course.features || [],
+    };
+    setEditingCourse(c);
+    setFeaturesText(c.features.join('\n'));
+    setDeliverablesText(c.deliverables.join('\n'));
+    setKpiText(c.kpi_notes.map(k => `${k.label}|${k.value}${k.note ? '|' + k.note : ''}`).join('\n'));
     setIsNew(false);
+    setSubTab('info');
+    fetchModules(course.id);
   };
 
   const startNew = () => {
-    setEditingCourse({
-      id: '', slug: '', tag: '', title: '', subtitle: '', description: '',
-      duration: '', price: '', features: [], color: 'blue',
-      sort_order: courses.length + 1, is_active: true,
-      learning_type: 'offline', max_slots: null, stripe_price_id: null,
-      status: 'now_open',
-    });
+    setEditingCourse(emptyCourse(courses.length + 1));
     setFeaturesText('');
+    setDeliverablesText('');
+    setKpiText('');
+    setModules([]);
     setIsNew(true);
+    setSubTab('info');
   };
+
+  const parseKpi = (text: string) => text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+    const [label, value, note] = line.split('|').map(s => s?.trim() || '');
+    return { label, value, note };
+  });
 
   const handleSave = async () => {
     if (!editingCourse) return;
     const features = featuresText.split('\n').map(f => f.trim()).filter(Boolean);
+    const deliverables = deliverablesText.split('\n').map(f => f.trim()).filter(Boolean);
+    const kpi_notes = parseKpi(kpiText);
     const payload = {
       slug: editingCourse.slug, tag: editingCourse.tag, title: editingCourse.title,
       subtitle: editingCourse.subtitle, description: editingCourse.description,
@@ -125,6 +188,12 @@ const AdminCourses = () => {
       is_active: editingCourse.is_active, learning_type: editingCourse.learning_type,
       max_slots: editingCourse.max_slots, stripe_price_id: editingCourse.stripe_price_id,
       status: editingCourse.status || 'now_open',
+      level: editingCourse.level, target_audience: editingCourse.target_audience,
+      format_label: editingCourse.format_label, intro_video_url: editingCourse.intro_video_url,
+      cover_image_url: editingCourse.cover_image_url,
+      gallery_image_urls: editingCourse.gallery_image_urls || [],
+      kpi_notes, deliverables,
+      outcome_goal: editingCourse.outcome_goal, bloom_level: editingCourse.bloom_level,
     };
     if (!payload.slug || !payload.title) {
       toast({ title: 'กรุณากรอก Slug และ Title', variant: 'destructive' }); return;
@@ -144,6 +213,87 @@ const AdminCourses = () => {
     const { error } = await supabase.from('courses').delete().eq('id', id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else { toast({ title: 'ลบสำเร็จ' }); fetchCourses(); }
+  };
+
+  // Media upload
+  const uploadFile = async (file: File, prefix: string): Promise<string | null> => {
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from('course-media').upload(path, file, { upsert: false });
+      if (error) { toast({ title: 'Upload error', description: error.message, variant: 'destructive' }); return null; }
+      const { data } = supabase.storage.from('course-media').getPublicUrl(path);
+      return data.publicUrl;
+    } finally { setUploading(false); }
+  };
+
+  const onUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f || !editingCourse) return;
+    const url = await uploadFile(f, 'covers');
+    if (url) setEditingCourse({ ...editingCourse, cover_image_url: url });
+  };
+
+  const onUploadIntro = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (!f || !editingCourse) return;
+    const url = await uploadFile(f, 'intros');
+    if (url) setEditingCourse({ ...editingCourse, intro_video_url: url });
+  };
+
+  const onUploadGallery = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files; if (!files || !editingCourse) return;
+    const urls: string[] = [];
+    for (const f of Array.from(files)) {
+      const u = await uploadFile(f, 'gallery'); if (u) urls.push(u);
+    }
+    setEditingCourse({ ...editingCourse, gallery_image_urls: [...(editingCourse.gallery_image_urls || []), ...urls] });
+  };
+
+  const removeGallery = (url: string) => {
+    if (!editingCourse) return;
+    setEditingCourse({ ...editingCourse, gallery_image_urls: editingCourse.gallery_image_urls.filter(u => u !== url) });
+  };
+
+  // Modules
+  const addModule = async () => {
+    if (!editingCourse?.id) { toast({ title: 'กรุณาบันทึกหลักสูตรก่อนเพิ่มโมดูล', variant: 'destructive' }); return; }
+    const next = modules.length + 1;
+    const { error } = await supabase.from('course_modules').insert({
+      course_id: editingCourse.id, code: `M${String(next).padStart(2, '0')}`,
+      name: 'โมดูลใหม่', sort_order: next,
+    } as any);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else fetchModules(editingCourse.id);
+  };
+
+  const updateModule = async (m: ModuleRow, patch: Partial<ModuleRow>) => {
+    setModules(modules.map(x => x.id === m.id ? { ...x, ...patch } : x));
+  };
+
+  const saveModule = async (m: ModuleRow) => {
+    const { error } = await supabase.from('course_modules').update({
+      code: m.code, name: m.name, summary: m.summary, duration_label: m.duration_label,
+      vod_url: m.vod_url, has_quiz: m.has_quiz, has_assignment: m.has_assignment, sort_order: m.sort_order,
+    } as any).eq('id', m.id);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else toast({ title: 'บันทึกโมดูลแล้ว' });
+  };
+
+  const deleteModule = async (id: string) => {
+    if (!confirm('ลบโมดูลนี้?')) return;
+    const { error } = await supabase.from('course_modules').delete().eq('id', id);
+    if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    else if (editingCourse) fetchModules(editingCourse.id);
+  };
+
+  const moveModule = async (m: ModuleRow, dir: -1 | 1) => {
+    const sorted = [...modules].sort((a, b) => a.sort_order - b.sort_order);
+    const idx = sorted.findIndex(x => x.id === m.id);
+    const swapWith = sorted[idx + dir];
+    if (!swapWith) return;
+    await supabase.from('course_modules').update({ sort_order: swapWith.sort_order } as any).eq('id', m.id);
+    await supabase.from('course_modules').update({ sort_order: m.sort_order } as any).eq('id', swapWith.id);
+    if (editingCourse) fetchModules(editingCourse.id);
   };
 
   // Promo handlers
@@ -184,6 +334,8 @@ const AdminCourses = () => {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
+  const ec = editingCourse;
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <SEOHead title="จัดการหลักสูตร - Admin" description="Admin course management" />
@@ -198,7 +350,6 @@ const AdminCourses = () => {
           <Button onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))} variant="outline" size="sm">ออกจากระบบ</Button>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <Button variant={tab === 'courses' ? 'default' : 'outline'} size="sm" onClick={() => setTab('courses')}>หลักสูตร</Button>
           <Button variant={tab === 'promos' ? 'default' : 'outline'} size="sm" onClick={() => setTab('promos')}>
@@ -212,87 +363,235 @@ const AdminCourses = () => {
               <Button onClick={startNew} size="sm"><Plus className="w-4 h-4 mr-1" /> เพิ่มหลักสูตร</Button>
             </div>
 
-            {editingCourse && (
+            {ec && (
               <div className="bg-white rounded-xl border p-6 mb-6 space-y-4">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-bold">{isNew ? 'เพิ่มหลักสูตรใหม่' : 'แก้ไขหลักสูตร'}</h2>
+                  <h2 className="text-lg font-bold">{isNew ? 'เพิ่มหลักสูตรใหม่' : `แก้ไข: ${ec.title}`}</h2>
                   <Button variant="ghost" size="sm" onClick={() => setEditingCourse(null)}><X className="w-4 h-4" /></Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Slug (URL)</label>
-                    <Input value={editingCourse.slug} onChange={e => setEditingCourse({...editingCourse, slug: e.target.value})} placeholder="masterclass-1" />
+
+                {/* Sub tabs */}
+                <div className="flex gap-1 border-b">
+                  {([
+                    ['info', 'ข้อมูลหลัก'],
+                    ['media', 'สื่อ (Cover/Intro/Gallery)'],
+                    ['modules', 'โมดูล'],
+                    ['pricing', 'ราคา & Stripe'],
+                  ] as const).map(([k, l]) => (
+                    <button key={k} onClick={() => setSubTab(k)}
+                      className={`px-4 py-2 text-sm border-b-2 -mb-px ${subTab === k ? 'border-foreground font-semibold' : 'border-transparent text-muted-foreground'}`}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+
+                {subTab === 'info' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Slug (URL)</label>
+                        <Input value={ec.slug} onChange={e => setEditingCourse({ ...ec, slug: e.target.value })} placeholder="signal" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Tag (Code)</label>
+                        <Input value={ec.tag} onChange={e => setEditingCourse({ ...ec, tag: e.target.value })} placeholder="SIGNAL" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">ชื่อหลักสูตร</label>
+                        <Input value={ec.title} onChange={e => setEditingCourse({ ...ec, title: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">ชื่อรอง</label>
+                        <Input value={ec.subtitle} onChange={e => setEditingCourse({ ...ec, subtitle: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Level</label>
+                        <select value={ec.level || ''} onChange={e => setEditingCourse({ ...ec, level: e.target.value || null })}
+                          className="w-full border rounded-md px-3 py-2 text-sm bg-white">
+                          <option value="">— ไม่ระบุ —</option>
+                          {LEVEL_OPTIONS.map(l => <option key={l} value={l}>{l}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">รูปแบบ (Format)</label>
+                        <Input value={ec.format_label || ''} onChange={e => setEditingCourse({ ...ec, format_label: e.target.value || null })} placeholder="VOD Self-paced / Onsite 1 วัน" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">ระยะเวลา</label>
+                        <Input value={ec.duration} onChange={e => setEditingCourse({ ...ec, duration: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">ประเภทการเรียน</label>
+                        <select value={ec.learning_type} onChange={e => setEditingCourse({ ...ec, learning_type: e.target.value })}
+                          className="w-full border rounded-md px-3 py-2 text-sm bg-white">
+                          {LEARNING_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">Bloom Level (Pre → Post)</label>
+                        <Input value={ec.bloom_level || ''} onChange={e => setEditingCourse({ ...ec, bloom_level: e.target.value || null })} placeholder="Remember → Apply/Analyze" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">สี (accent on hover)</label>
+                        <div className="flex gap-2">
+                          {COLOR_OPTIONS.map(c => (
+                            <button key={c.value} onClick={() => setEditingCourse({ ...ec, color: c.value })}
+                              className={`w-8 h-8 rounded-full border-2 ${ec.color === c.value ? 'border-gray-900 scale-110' : 'border-gray-200'} transition-all`}
+                              style={{ backgroundColor: c.hex }} title={c.label} />
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">ลำดับ</label>
+                        <Input type="number" value={ec.sort_order} onChange={e => setEditingCourse({ ...ec, sort_order: parseInt(e.target.value) || 0 })} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium block mb-1">สถานะป้าย</label>
+                        <select value={ec.status || 'now_open'} onChange={e => setEditingCourse({ ...ec, status: e.target.value })}
+                          className="w-full border rounded-md px-3 py-2 text-sm bg-white">
+                          {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium block mb-1">เป้าหมาย (Outcome Goal)</label>
+                      <Textarea value={ec.outcome_goal || ''} onChange={e => setEditingCourse({ ...ec, outcome_goal: e.target.value || null })} rows={2} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">กลุ่มผู้เรียน (Target audience)</label>
+                      <Textarea value={ec.target_audience || ''} onChange={e => setEditingCourse({ ...ec, target_audience: e.target.value || null })} rows={2} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">รายละเอียด</label>
+                      <Textarea value={ec.description} onChange={e => setEditingCourse({ ...ec, description: e.target.value })} rows={3} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">จุดเด่น (บรรทัดละ 1)</label>
+                      <Textarea value={featuresText} onChange={e => setFeaturesText(e.target.value)} rows={4} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">สิ่งที่ผู้เรียนจะได้รับ — Deliverables (บรรทัดละ 1)</label>
+                      <Textarea value={deliverablesText} onChange={e => setDeliverablesText(e.target.value)} rows={4} placeholder="Certificate of Completion&#10;Templates pack&#10;Replay 30 วัน" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">KPI (บรรทัดละ 1, รูปแบบ: <code>label|value|note</code>)</label>
+                      <Textarea value={kpiText} onChange={e => setKpiText(e.target.value)} rows={4}
+                        placeholder="Watch Time|≥ 70%|ค่ามาตรฐาน&#10;NPS|≥ 8/10|จากผู้เรียน&#10;Pass criteria|80%" />
+                    </div>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={ec.is_active} onChange={e => setEditingCourse({ ...ec, is_active: e.target.checked })} />
+                      เปิดใช้งาน
+                    </label>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Tag</label>
-                    <Input value={editingCourse.tag} onChange={e => setEditingCourse({...editingCourse, tag: e.target.value})} placeholder="SIGNATURE" />
+                )}
+
+                {subTab === 'media' && (
+                  <div className="space-y-6">
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Cover Image</label>
+                      {ec.cover_image_url && (
+                        <img src={ec.cover_image_url} alt="cover" className="w-full max-w-md rounded-md border mb-2" />
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Input type="file" accept="image/*" onChange={onUploadCover} disabled={uploading} className="max-w-sm" />
+                        {ec.cover_image_url && <Button variant="ghost" size="sm" onClick={() => setEditingCourse({ ...ec, cover_image_url: null })}>ลบรูป</Button>}
+                      </div>
+                      <Input className="mt-2 max-w-md" placeholder="หรือวาง URL ตรงนี้" value={ec.cover_image_url || ''} onChange={e => setEditingCourse({ ...ec, cover_image_url: e.target.value || null })} />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Intro Video (URL หรืออัปโหลด)</label>
+                      {ec.intro_video_url && (
+                        <video src={ec.intro_video_url} controls className="w-full max-w-md rounded-md border mb-2" />
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Input type="file" accept="video/*" onChange={onUploadIntro} disabled={uploading} className="max-w-sm" />
+                        {ec.intro_video_url && <Button variant="ghost" size="sm" onClick={() => setEditingCourse({ ...ec, intro_video_url: null })}>ลบ</Button>}
+                      </div>
+                      <Input className="mt-2 max-w-md" placeholder="https://...mp4 หรือ YouTube URL" value={ec.intro_video_url || ''} onChange={e => setEditingCourse({ ...ec, intro_video_url: e.target.value || null })} />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium block mb-2">Gallery</label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                        {(ec.gallery_image_urls || []).map(url => (
+                          <div key={url} className="relative group">
+                            <img src={url} alt="gallery" className="w-full h-24 object-cover rounded-md border" />
+                            <button onClick={() => removeGallery(url)}
+                              className="absolute top-1 right-1 bg-black/70 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <Input type="file" accept="image/*" multiple onChange={onUploadGallery} disabled={uploading} className="max-w-sm" />
+                    </div>
+
+                    {uploading && <p className="text-sm text-muted-foreground"><Upload className="w-4 h-4 inline mr-1" /> กำลังอัปโหลด...</p>}
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ชื่อหลักสูตร</label>
-                    <Input value={editingCourse.title} onChange={e => setEditingCourse({...editingCourse, title: e.target.value})} />
+                )}
+
+                {subTab === 'modules' && (
+                  <div className="space-y-3">
+                    {!ec.id && (
+                      <p className="text-sm text-amber-600">บันทึกหลักสูตรก่อน แล้วค่อยมาเพิ่มโมดูลค่ะ</p>
+                    )}
+                    {ec.id && (
+                      <>
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={addModule}><Plus className="w-4 h-4 mr-1" /> เพิ่มโมดูล</Button>
+                        </div>
+                        {modules.length === 0 && <p className="text-center text-muted-foreground py-6 text-sm">ยังไม่มีโมดูล</p>}
+                        {modules.map(m => (
+                          <div key={m.id} className="border rounded-md p-3 space-y-2 bg-gray-50">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">#{m.sort_order}</span>
+                              <Input className="w-24" value={m.code} onChange={e => updateModule(m, { code: e.target.value })} placeholder="M01" />
+                              <Input value={m.name} onChange={e => updateModule(m, { name: e.target.value })} placeholder="ชื่อโมดูล" />
+                              <Input className="w-32" value={m.duration_label || ''} onChange={e => updateModule(m, { duration_label: e.target.value })} placeholder="20 นาที" />
+                              <Button variant="ghost" size="sm" onClick={() => moveModule(m, -1)}><ArrowUp className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => moveModule(m, 1)}><ArrowDown className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => deleteModule(m.id)}><Trash2 className="w-4 h-4" /></Button>
+                            </div>
+                            <Textarea rows={2} value={m.summary || ''} onChange={e => updateModule(m, { summary: e.target.value })} placeholder="สรุปสั้นๆ" />
+                            <Input value={m.vod_url || ''} onChange={e => updateModule(m, { vod_url: e.target.value || null })} placeholder="VOD URL (YouTube / mp4)" />
+                            <div className="flex items-center gap-4 text-sm">
+                              <label className="flex items-center gap-1">
+                                <input type="checkbox" checked={m.has_quiz} onChange={e => updateModule(m, { has_quiz: e.target.checked })} /> มี Quiz
+                              </label>
+                              <label className="flex items-center gap-1">
+                                <input type="checkbox" checked={m.has_assignment} onChange={e => updateModule(m, { has_assignment: e.target.checked })} /> มีงานส่ง
+                              </label>
+                              <Button size="sm" variant="outline" className="ml-auto" onClick={() => saveModule(m)}>
+                                <Save className="w-3 h-3 mr-1" /> บันทึกโมดูล
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ชื่อรอง</label>
-                    <Input value={editingCourse.subtitle} onChange={e => setEditingCourse({...editingCourse, subtitle: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ระยะเวลา</label>
-                    <Input value={editingCourse.duration} onChange={e => setEditingCourse({...editingCourse, duration: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ราคา</label>
-                    <Input value={editingCourse.price} onChange={e => setEditingCourse({...editingCourse, price: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ประเภทการเรียน</label>
-                    <select value={editingCourse.learning_type} onChange={e => setEditingCourse({...editingCourse, learning_type: e.target.value})}
-                      className="w-full border rounded-md px-3 py-2 text-sm bg-white">
-                      {LEARNING_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">จำนวนที่เปิดรับ (ว่างไว้ = ไม่จำกัด)</label>
-                    <Input type="number" value={editingCourse.max_slots ?? ''} onChange={e => setEditingCourse({...editingCourse, max_slots: e.target.value ? parseInt(e.target.value) : null})} placeholder="ไม่จำกัด" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">สี</label>
-                    <div className="flex gap-2">
-                      {COLOR_OPTIONS.map(c => (
-                        <button key={c.value} onClick={() => setEditingCourse({...editingCourse, color: c.value})}
-                          className={`w-8 h-8 rounded-full border-2 ${editingCourse.color === c.value ? 'border-gray-900 scale-110' : 'border-gray-200'} transition-all`}
-                          style={{ backgroundColor: c.hex }} title={c.label} />
-                      ))}
+                )}
+
+                {subTab === 'pricing' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium block mb-1">ราคา (เว้นว่าง = ไม่แสดง)</label>
+                      <Input value={ec.price} onChange={e => setEditingCourse({ ...ec, price: e.target.value })} placeholder="฿9,900" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">Stripe Price ID</label>
+                      <Input value={ec.stripe_price_id ?? ''} onChange={e => setEditingCourse({ ...ec, stripe_price_id: e.target.value || null })} placeholder="price_xxx" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium block mb-1">จำนวนที่เปิดรับ (ว่าง = ไม่จำกัด)</label>
+                      <Input type="number" value={ec.max_slots ?? ''} onChange={e => setEditingCourse({ ...ec, max_slots: e.target.value ? parseInt(e.target.value) : null })} placeholder="ไม่จำกัด" />
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">ลำดับ</label>
-                    <Input type="number" value={editingCourse.sort_order} onChange={e => setEditingCourse({...editingCourse, sort_order: parseInt(e.target.value) || 0})} />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">สถานะป้าย (Status Badge)</label>
-                    <select value={editingCourse.status || 'now_open'} onChange={e => setEditingCourse({...editingCourse, status: e.target.value})}
-                      className="w-full border rounded-md px-3 py-2 text-sm bg-white">
-                      {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Stripe Price ID (ถ้ามี)</label>
-                    <Input value={editingCourse.stripe_price_id ?? ''} onChange={e => setEditingCourse({...editingCourse, stripe_price_id: e.target.value || null})} placeholder="price_xxx" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">รายละเอียด</label>
-                  <Textarea value={editingCourse.description} onChange={e => setEditingCourse({...editingCourse, description: e.target.value})} rows={3} />
-                </div>
-                <div>
-                  <label className="text-sm font-medium block mb-1">จุดเด่น (บรรทัดละ 1 รายการ)</label>
-                  <Textarea value={featuresText} onChange={e => setFeaturesText(e.target.value)} rows={4} />
-                </div>
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editingCourse.is_active} onChange={e => setEditingCourse({...editingCourse, is_active: e.target.checked})} />
-                  เปิดใช้งาน
-                </label>
-                <Button onClick={handleSave} className="w-full"><Save className="w-4 h-4 mr-1" /> บันทึก</Button>
+                )}
+
+                <Button onClick={handleSave} className="w-full"><Save className="w-4 h-4 mr-1" /> บันทึกหลักสูตร</Button>
               </div>
             )}
 
@@ -300,29 +599,32 @@ const AdminCourses = () => {
               {courses.map(course => {
                 const statusMeta = STATUS_OPTIONS.find(s => s.value === (course.status || 'now_open'));
                 return (
-                <div key={course.id} className="bg-white rounded-lg border p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <GripVertical className="w-4 h-4 text-gray-300" />
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === course.color)?.hex }} />
-                    <div>
-                      <p className="font-medium text-sm">{course.title}</p>
-                      <p className="text-xs text-gray-500">
-                        {course.tag} · {course.price} · {LEARNING_TYPES.find(t => t.value === course.learning_type)?.label || course.learning_type}
-                        {course.max_slots && ` · เปิดรับ ${course.max_slots} คน`}
-                      </p>
+                  <div key={course.id} className="bg-white rounded-lg border p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <GripVertical className="w-4 h-4 text-gray-300" />
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLOR_OPTIONS.find(c => c.value === course.color)?.hex }} />
+                      <div>
+                        <p className="font-medium text-sm">
+                          {course.title}
+                          {course.level && <span className="ml-2 text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-gray-900 text-white">{course.level}</span>}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {course.tag} · {course.price || '—'} · {LEARNING_TYPES.find(t => t.value === course.learning_type)?.label || course.learning_type}
+                          {course.max_slots && ` · ${course.max_slots} คน`}
+                        </p>
+                      </div>
+                      {statusMeta && statusMeta.value !== 'none' && (
+                        <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full ${statusMeta.badge}`}>
+                          {statusMeta.label.toUpperCase()}
+                        </span>
+                      )}
+                      {!course.is_active && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">ปิดใช้งาน</span>}
                     </div>
-                    {statusMeta && statusMeta.value !== 'none' && (
-                      <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full ${statusMeta.badge}`}>
-                        {statusMeta.label.toUpperCase()}
-                      </span>
-                    )}
-                    {!course.is_active && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-500">ปิดใช้งาน</span>}
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => startEdit(course)}><Pencil className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(course.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                    </div>
                   </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => startEdit(course)}><Pencil className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(course.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
-                  </div>
-                </div>
                 );
               })}
               {courses.length === 0 && <p className="text-center text-gray-400 py-8">ยังไม่มีหลักสูตร</p>}
@@ -345,11 +647,11 @@ const AdminCourses = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium block mb-1">รหัสโปรโมชั่น</label>
-                    <Input value={editingPromo.code || ''} onChange={e => setEditingPromo({...editingPromo, code: e.target.value.toUpperCase()})} placeholder="EARLYBIRD" />
+                    <Input value={editingPromo.code || ''} onChange={e => setEditingPromo({ ...editingPromo, code: e.target.value.toUpperCase() })} placeholder="EARLYBIRD" />
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1">หลักสูตร</label>
-                    <select value={editingPromo.course_id || ''} onChange={e => setEditingPromo({...editingPromo, course_id: e.target.value})}
+                    <select value={editingPromo.course_id || ''} onChange={e => setEditingPromo({ ...editingPromo, course_id: e.target.value })}
                       className="w-full border rounded-md px-3 py-2 text-sm bg-white">
                       <option value="">เลือกหลักสูตร</option>
                       {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
@@ -357,7 +659,7 @@ const AdminCourses = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1">ประเภทส่วนลด</label>
-                    <select value={editingPromo.discount_type || 'percent'} onChange={e => setEditingPromo({...editingPromo, discount_type: e.target.value})}
+                    <select value={editingPromo.discount_type || 'percent'} onChange={e => setEditingPromo({ ...editingPromo, discount_type: e.target.value })}
                       className="w-full border rounded-md px-3 py-2 text-sm bg-white">
                       <option value="percent">ลด % (เปอร์เซ็นต์)</option>
                       <option value="amount">ลดเป็นบาท</option>
@@ -370,15 +672,15 @@ const AdminCourses = () => {
                     </label>
                     <Input type="number" disabled={editingPromo.discount_type === 'free'}
                       value={editingPromo.discount_value || 0}
-                      onChange={e => setEditingPromo({...editingPromo, discount_value: parseFloat(e.target.value) || 0})} />
+                      onChange={e => setEditingPromo({ ...editingPromo, discount_value: parseFloat(e.target.value) || 0 })} />
                   </div>
                   <div>
                     <label className="text-sm font-medium block mb-1">ใช้ได้สูงสุด (คน)</label>
-                    <Input type="number" value={editingPromo.max_uses || 1} onChange={e => setEditingPromo({...editingPromo, max_uses: parseInt(e.target.value) || 1})} />
+                    <Input type="number" value={editingPromo.max_uses || 1} onChange={e => setEditingPromo({ ...editingPromo, max_uses: parseInt(e.target.value) || 1 })} />
                   </div>
                 </div>
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editingPromo.is_active ?? true} onChange={e => setEditingPromo({...editingPromo, is_active: e.target.checked})} />
+                  <input type="checkbox" checked={editingPromo.is_active ?? true} onChange={e => setEditingPromo({ ...editingPromo, is_active: e.target.checked })} />
                   เปิดใช้งาน
                 </label>
                 <Button onClick={handleSavePromo} className="w-full"><Save className="w-4 h-4 mr-1" /> บันทึก</Button>
