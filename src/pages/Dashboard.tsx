@@ -289,26 +289,6 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {lockedCourses.length>0 && (
-          <div>
-            <h2 className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-3">คอร์สที่ยังไม่ได้ลงทะเบียน</h2>
-            <div className="space-y-2">
-              {lockedCourses.map(x=>(
-                <Link key={x.course.id} to={`/course/${x.course.slug}`}
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-muted">
-                  <div className="w-8 h-8 rounded-xl bg-muted border border-border flex items-center justify-center font-bold text-sm">
-                    {x.course.title.slice(0,1)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground">{x.course.tag}{x.course.level?` · ${x.course.level}`:''}</p>
-                    <p className="text-sm font-semibold truncate hover-shift" data-accent={x.accent}>{x.course.title}</p>
-                  </div>
-                  <Lock className="w-4 h-4 text-muted-foreground"/>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       {selected && (
