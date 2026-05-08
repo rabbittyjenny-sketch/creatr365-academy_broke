@@ -29,6 +29,7 @@ export const CourseNavbar: React.FC = () => {
         <div className="flex items-center gap-6 text-sm font-medium">
           <Link to="/" className="hidden md:inline-block text-muted-foreground"><span className="hover-shift" data-accent="blue">หน้าแรก</span></Link>
           <Link to="/courses" className="hidden md:inline-block text-muted-foreground"><span className="hover-shift" data-accent="red">หลักสูตร</span></Link>
+          <Link to="/articles" className="hidden md:inline-block text-muted-foreground"><span className="hover-shift" data-accent="yellow">บทความ</span></Link>
           <Link to="/contact" className="hidden md:inline-block text-muted-foreground"><span className="hover-shift" data-accent="green">ติดต่อ</span></Link>
           {user ? (
             <>

@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          slug: string
+          sort_order: number
+          summary: string
+          target_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          slug: string
+          sort_order?: number
+          summary?: string
+          target_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          slug?: string
+          sort_order?: number
+          summary?: string
+          target_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assignments: {
         Row: {
           course_id: string
@@ -134,7 +176,9 @@ export type Database = {
           has_assignment: boolean
           has_quiz: boolean
           id: string
+          is_test: boolean
           name: string
+          phase: string
           sort_order: number
           summary: string | null
           updated_at: string
@@ -148,7 +192,9 @@ export type Database = {
           has_assignment?: boolean
           has_quiz?: boolean
           id?: string
+          is_test?: boolean
           name: string
+          phase?: string
           sort_order?: number
           summary?: string | null
           updated_at?: string
@@ -162,7 +208,9 @@ export type Database = {
           has_assignment?: boolean
           has_quiz?: boolean
           id?: string
+          is_test?: boolean
           name?: string
+          phase?: string
           sort_order?: number
           summary?: string | null
           updated_at?: string
@@ -319,6 +367,60 @@ export type Database = {
           target_audience?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      diagnostic_quiz_results: {
+        Row: {
+          age_band: string | null
+          created_at: string
+          gaps: string[]
+          gender: string | null
+          id: string
+          interest: string | null
+          occupation: string | null
+          per_qg_scores: Json
+          province: string | null
+          recommended_courses: string[]
+          referrer: string | null
+          strengths: string[]
+          total_score: number
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          age_band?: string | null
+          created_at?: string
+          gaps?: string[]
+          gender?: string | null
+          id?: string
+          interest?: string | null
+          occupation?: string | null
+          per_qg_scores?: Json
+          province?: string | null
+          recommended_courses?: string[]
+          referrer?: string | null
+          strengths?: string[]
+          total_score?: number
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          age_band?: string | null
+          created_at?: string
+          gaps?: string[]
+          gender?: string | null
+          id?: string
+          interest?: string | null
+          occupation?: string | null
+          per_qg_scores?: Json
+          province?: string | null
+          recommended_courses?: string[]
+          referrer?: string | null
+          strengths?: string[]
+          total_score?: number
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

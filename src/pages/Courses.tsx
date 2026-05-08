@@ -71,7 +71,7 @@ const Courses: React.FC = () => {
               const accent = ACCENT_CYCLE[idx % 4];
               return (
                 <Link key={course.id} to={`/course/${course.slug}`} className="group">
-                  <div className="rounded-2xl border border-border bg-card h-full transition-all duration-500 hover:shadow-xl hover:-translate-y-1 overflow-hidden flex flex-col">
+                  <div className="card-water rounded-2xl border border-border bg-card h-full flex flex-col" data-accent={accent}>
                     {course.cover_image_url && (
                       <img src={course.cover_image_url} alt={course.title} className="w-full aspect-video object-cover border-b border-border" />
                     )}
@@ -94,7 +94,7 @@ const Courses: React.FC = () => {
                           <LearnIcon className="w-3 h-3" /> {learning.label}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-bold mb-1 hover-shift" data-accent={accent}>{course.title}</h3>
+                      <h3 className="card-water-title text-2xl font-bold mb-1 transition-colors">{course.title}</h3>
                       <p className="text-muted-foreground text-sm mb-4">{course.subtitle}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{course.description}</p>
                       <div className="pt-4 mt-auto border-t border-border flex items-center justify-between text-sm">

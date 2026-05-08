@@ -1,97 +1,109 @@
 
-# Phase 2 — Backend, Course Enrichment & Student Portal
+# Phase 3 — Plan (ยังไม่เริ่มทำ รอยืนยัน)
 
-## 1. Course Schema Enrichment (DB migration)
+ยึดตามไฟล์ `double_super_final_course.md`, `Quiz_System_Architecture.md`, `Quize_Bank.xlsx`, `Learning Flow v3` และ `quiz.html` ที่อยู่ใน storage แล้ว ส่วน "ฐานข้อมูลข้อสอบ" ไม่แตะต้องในเฟสนี้ตามที่สั่ง
 
-Add columns to `courses` so admin can edit everything from backend, and pages render only what is filled:
+---
 
-- `level` text — STARTER / DEVELOPING / COMPETENT / PROFICIENT / MASTER (from PDF "Value Ladder")
-- `target_audience` text — กลุ่มผู้เรียน (e.g. "มือใหม่อยากลองก่อน")
-- `format_label` text — รูปแบบ (e.g. "VOD Self-paced", "Onsite 1 วัน")
-- `intro_video_url` text nullable — YouTube/MP4 URL for course intro
-- `cover_image_url` text nullable — banner image
-- `gallery_image_urls` text[] — extra images
-- `kpi_notes` jsonb — `[{label, value, note}]` rendered small at bottom of course page
-- `deliverables` text[] — "สิ่งที่ผู้เรียนจะได้รับ" (badge, certificate, templates)
-- `outcome_goal` text — short "เป้าหมาย" line from PDF
-- `bloom_level` text — Pre→Post (e.g. "Remember → Apply/Analyze")
+## 1) แผนคอร์ส + จุดเรียก Pre/Post Test (วาง map ไว้ก่อน ยังไม่ผูก quiz engine)
 
-Re-seed all 6 courses (MICRO EXPRESS, SIGNAL, MATRIX, STAGE, BLUEPRINT, FRONTIER) with full data from `double_super_final_course.pdf`:
-- level + target_audience + format_label + outcome_goal + deliverables + kpi_notes (e.g. Watch Time, NPS, Pass criteria) per course.
-- Modules from PDF Page 2-9 will be inserted into the new `course_modules` table (below).
+ทุกคอร์สจะมี module sort_order เริ่มที่ `00 PRE-TEST` (ถ้ามี) และจบด้วย `99 POST-TEST` (ถ้ามี) — โครง modules อัปเดตตามนี้:
 
-## 2. Modules / Quizzes / Assignments backend
+| Course | Format | บท (modules) | Pre-Test | Post-Test |
+| :-- | :-- | :-- | :-- | :-- |
+| MICRO EXPRESS · STARTER | VOD 100% (3 ชม.) | M01–M05 (5 คลิป) | QG-01 Pre Set-A (5 ข้อ) | QG-01 Post Set-A (6 ข้อ ≥70%) + QG-05 Pre |
+| SIGNAL · DEVELOPING | VOD 4.5h + Live Q&A 1.5h (7+1) | S01 Hook · S02 S-O-R+PAD · S03 Vocal · S04 Camera · S05 Trust · S06 Narrative · S07 LiveQ&A | QG-01 Pre Set-B + QG-04 Pre | QG-01 Post + QG-03 Post + QG-04 Post (Post≥Pre+20pts) |
+| MATRIX · DEVELOPING | VOD 4.5h + Workshop 1.5h | M01 Algorithm · M02 FOMO · M03 Dashboard · M04 Reporting · M05 AI · M06 Compliance · M07 Workshop | QG-05 Pre + QG-02 Pre | QG-05 Post + QG-02 Post (≥80%) + GMV Scenario (≥71%) |
+| STAGE · COMPETENT | Onsite 1 วัน (8h) | ST01 Vocal Lab · ST02 Camera · ST03 Hook Factory · ST04 Narrative · ST05 Crisis Improv · ST06 KPI Test | QG-03 Pre + QG-01 During | QG-03 Post + Live KPI Rubric |
+| BLUEPRINT · PROFICIENT | Onsite 2 วัน (16h) | BP01 5 Hidden Souls · BP02 Brand CI · BP03 Personal Branding/EPK · BP04 Multi-cam · BP05 Team System · BP06 Live Sim+EPK | QG-06 Pre | QG-06 Post + EPK Rubric |
+| FRONTIER · MASTER | Onsite 2 วัน (16h) | FR01 P&L · FR02 Adv Analytics · FR03 Smart Lazy · FR04 P&L Workshop · FR05 Global Mkt · FR06 IMC · FR07 Global Pitch+EPK Final | QG-07 Pre + QG-05 Pre adv | QG-07 Post + Panel Review |
 
-New tables (RLS: public read for active rows, admin write; user-scoped progress tables):
+ระบบที่จะทำในเฟสนี้:
+- เพิ่มคอลัมน์ `phase` ('pre'|'during'|'post') ลง `course_modules` และ flag `is_test`
+- migration อัปเดต/insert modules ตามตารางข้างบน (idempotent)
+- ในหน้า student VOD list จะเห็น "Pre-Test" เป็นบทแรก (locked ไว้ — ปุ่มจะ "เปิดใช้งานเร็วๆ นี้" ตามที่สั่งว่ายังไม่เชื่อม quiz engine จริง)
 
-- `course_modules` — `id, course_id, code (M01,S03…), name, summary, duration_label, vod_url, sort_order, has_quiz, has_assignment`
-- `course_quizzes` — `id, course_id, module_id nullable, qg_code (QG-01…), phase (pre|during|post), title, pass_threshold int, source_ref text` (no questions table yet — exams exist externally; this just registers them)
-- `quiz_questions` — `id, quiz_id, q_no, type (mcq|tf|calc|scenario|write), prompt, options jsonb, answer text, explanation text` — seeded from QG-01…QG-07 in `Creatr365_Quiz_System_Architecture.docx` so data is preserved even though the front-end won't render them yet
-- `module_progress` — `user_id, module_id, status (locked|unlocked|completed), completed_at`
-- `assignments` — `id, user_id, course_id, module_id, video_url, note, status (pending|approved|rejected), score, reviewer_id, reviewed_at, created_at`
+---
 
-RLS: students read/write own rows; admins read/update all. `has_role(auth.uid(),'admin')` for review.
+## 2) Dashboard นักเรียน — แสดงเฉพาะคอร์สที่เป็นเจ้าของ
 
-## 3. Storage bucket for course media
+เปลี่ยน rule:
+- **แสดงเฉพาะ** course ที่ user มี `course_enrollments` row ที่ `status IN ('paid','free')`
+- คอร์ส "ยังไม่ได้ลงทะเบียน" จะถูกเอาออกจาก Dashboard (ย้ายไปหน้า /courses อย่างเดียว)
+- คอร์สฟรีจะเข้าได้เฉพาะเมื่อกด "เริ่มเรียนฟรี" จาก /course/:slug → ระบบ insert `course_enrollments(status='free')` อัตโนมัติ (ปัจจุบัน Enroll.tsx ทำอยู่แล้ว — จะตรวจ flow ให้ครบ)
+- ถ้ายังไม่มี enrollment เลย แสดง empty state พร้อมปุ่มไป /courses
 
-- New public bucket `course-media` (covers, intro videos, gallery)
-- RLS: public read; admin write. Admin uploads via `/admin/courses` — URLs saved to course columns above.
+---
 
-## 4. `/admin/courses` upgrade
+## 3) /courses — Hover effect "smooth + สีเดิม"
 
-Existing AdminCourses page extended:
-- Per-course form: edit level, target_audience, format_label, outcome_goal, kpi_notes, deliverables, bloom_level
-- Upload widgets: cover image, intro video (file or URL paste), multiple gallery images → uploads to `course-media` bucket
-- Modules sub-editor: add/edit/reorder `course_modules` rows + paste VOD URL per module
-- Toggle has_quiz / has_assignment per module
-- Save price, stripe_price_id (already exists)
+ปัญหาปัจจุบัน: card ใช้ class `hover-shift` กับชื่อคอร์สเฉยๆ การ์ดทั้งใบยกเล็กน้อย ไม่มี water/sweep
 
-Simple Tabs UI: "ข้อมูลหลัก / สื่อ / โมดูล / ราคา".
+จะกลับไปใช้รูปแบบเดิม:
+- เพิ่ม `.card-water` utility ใน `index.css` — overlay สี accent (blue/red/yellow/green) วิ่งจากซ้าย→ขวาแบบ scaleX แล้ว fade เข้า (cubic-bezier ease-out 600ms) คล้าย sweep-hover แต่ทั้งใบ
+- ใช้ CSS variable `--hover-accent` set ที่ root ของการ์ด → text/border/CTA arrow ใช้สีเดียวกันเมื่อ hover
+- ลบ transform ของ `hover-shift` ในบริบทใน card เพื่อกัน jank
+- บังคับ `transition` ทั้ง color, background, transform, box-shadow ใน 350–600ms ease-out
+- การ์ดใน Home preview, Courses list, CourseDetail sticky CTA ใช้ utility ตัวเดียวกันทั้งเว็บ
 
-## 5. Course detail / Courses list rendering rules
+---
 
-- Render `cover_image_url` only if present; else no empty hero block
-- Render `intro_video_url` only if present (YouTube embed or `<video>`)
-- Render gallery only if `gallery_image_urls.length > 0`
-- Show `level` badge (STARTER…MASTER) on course card
-- Replace existing "ใครควรเรียนคอร์สนี้" block with the small KPI list (`kpi_notes`) at the bottom of `CourseDetail.tsx` using `text-xs text-muted-foreground`
-- Show `deliverables` as a clean bullet list ("สิ่งที่ผู้เรียนจะได้รับ")
-- Hide price section entirely if `price` empty (already done)
+## 4) เมนูใหม่ "บทความ / Articles"
 
-## 6. Student Portal updates (`/dashboard`)
+Routing + Nav:
+- เพิ่ม `/articles` ใน CourseNavbar (และ Mobile bottom nav ถ้ามี) ระหว่าง "หลักสูตร" กับ "ติดต่อ"
+- หน้า `/articles` = grid การ์ด (รูปแบบเดียวกับ /courses) ดึงจาก table ใหม่ `articles` (slug, title, summary, cover_image_url, kind enum: news|tool|community|quiz, target_url, is_active, sort_order)
+- Migration จะ seed 1 การ์ดแรก: `kind='quiz'`, target = `/articles/diagnostic-quiz`
 
-- Pull real `course_modules` instead of deriving from `features`
-- Pull real `module_progress` per user; first module auto-unlocked on enrollment via DB trigger
-- Quiz tab: show "Quiz พร้อมให้ทำเร็วๆ นี้" placeholder (do NOT wire to Tally yet, per request)
-- Submit tab: real upload → inserts into `assignments`, file goes to `course-media/assignments/{user}/…`
-- Level badge under name uses course-level naming: STARTER → MASTER (mapped from completed courses + their `level`)
+หน้า Diagnostic Quiz `/articles/diagnostic-quiz`:
+- React component ที่ port จาก `quiz.html` (intro → survey → 14 ข้อ → result with skill profile + course recommendations)
+- ใช้ design system โมโนโทน (ลบ `#10b981/#ef4444/#FF…` ของ html เดิม → ใช้ token `--success/--destructive/--muted`)
+- ไม่มีบังคับ login (ใช้ฟรีสาธารณะตาม spec)
 
-## 7. Admin review pages
+Data ที่จะเก็บ (เตรียม table `diagnostic_quiz_results` ไว้สำหรับเฟสถัดไป — เฟสนี้ insert เลยให้พร้อมใช้):
+- `id, created_at`
+- demographics: `gender, age_band, province, occupation, interest`
+- `total_score (0–14), per_qg_scores jsonb` (คะแนนรายกลุ่ม QG-01…QG-07)
+- `strengths text[], gaps text[], recommended_courses text[]`
+- `user_id` (nullable — ถ้า login อยู่)
+- `user_agent, referrer`
+- RLS: insert public, select admin only (เพื่อสรุปข้อมูลภายหลัง)
 
-- `/admin/assignments` — list pending `assignments`, video preview, Approve/Reject + score; on approve, mark `module_progress` completed and unlock next module via SQL function `unlock_next_module(user_id, module_id)`
-- `/admin/payments` — list `course_enrollments` joined with course + profile; status filter; mark refund/note (insert-only audit log table `enrollment_notes` if needed)
+หมายเหตุ: ใช้ฐานข้อมูลคำถาม "ของคนทั่วไป" ตาม `quiz.html` (14 ข้อ) ไปก่อน — ยังไม่ต่อกับ QG bank ของในคอร์ส (อันนั้นรอเฟสถัดไป)
 
-Both gated by `has_role('admin')`; redirect non-admins.
+---
 
-## 8. Payment flow check
+## 5) Hover unified ทั้งเว็บ
 
-- Verify `create-checkout` still finds price (now from `stripe_price_id` if set, else parses `price` text fallback)
-- Add `verify-payment` edge function called from `/payment-success` to set enrollment `status='paid'` (currently relies on webhook only — adding fallback makes test trustworthy)
-- Re-run live curl tests after deploy
+ตรวจและ normalize:
+- ทุก card (Course/Article/Module/Stat) ใช้ `.card-water` + `.hover-shift`
+- ทุกปุ่ม CTA ใช้ `.btn-slide` + arrow translate-x
+- ทุก nav link ใช้ `.hover-shift` (มีอยู่แล้ว) แต่ปรับ duration เป็น 350ms ทั่วทั้งระบบ
 
-## 9. What is NOT in this phase (per user)
+---
 
-- No quiz front-end / Tally integration. Quiz data is seeded in DB so it's ready when the tool is decided.
-- No Certificate PDF generator (placeholder badge only).
+## ไฟล์ที่จะแก้/สร้าง
 
-## Technical notes
+DB migration:
+- ALTER `course_modules` add `phase text default 'main'`, `is_test boolean default false`
+- CREATE `articles` (id, slug, title, summary, cover_image_url, kind, target_url, is_active, sort_order, created_at)
+- CREATE `diagnostic_quiz_results` (+ RLS)
+- Seed: modules ทุกคอร์สตามตาราง §1, article 1 รายการ (Diagnostic Quiz)
 
-```text
-courses ──< course_modules ──< module_progress (user_id)
-courses ──< course_quizzes ──< quiz_questions      (data only, no UI)
-courses ──< course_enrollments (existing)
-modules ──< assignments (user_id, reviewer_id)
-storage: course-media (public)  admin-write
-```
+Code:
+- `src/index.css` — เพิ่ม `.card-water`, ปรับ duration
+- `src/pages/Dashboard.tsx` — ลบ section "คอร์สที่ยังไม่ได้ลงทะเบียน"
+- `src/pages/Courses.tsx`, `src/pages/Home.tsx`, `src/pages/CourseDetail.tsx` — apply `.card-water`
+- `src/components/CourseNavbar.tsx` — เพิ่มลิงก์ "บทความ"
+- `src/pages/Articles.tsx` (ใหม่) — grid card
+- `src/pages/DiagnosticQuiz.tsx` (ใหม่) — port จาก quiz.html
+- `src/App.tsx` — route `/articles`, `/articles/diagnostic-quiz`, `/admin/assignments`, `/admin/payments` (ลงทะเบียนให้ครบ)
 
-All new SELECT policies are `is_active = true` or `auth.uid() = user_id`; INSERT/UPDATE/DELETE require `has_role(auth.uid(),'admin')` except student-owned rows.
+---
+
+## ที่ "ยังไม่ทำ" ในเฟสนี้ (ตามคำสั่ง)
+
+- ไม่ผูก Quiz Engine ของในคอร์ส (QG-01…QG-07) เข้ากับ Dashboard
+- ไม่สร้าง quiz_questions seed (ข้อมูลใน xlsx เก็บไว้ใช้ภายหลัง)
+- ไม่ออกใบ Certificate PDF
+- ไม่แตะ schema `quiz_questions / course_quizzes` ที่มีอยู่แล้ว

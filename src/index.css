@@ -267,3 +267,44 @@
 .group:hover .hover-shift[data-accent="yellow"] { color: hsl(var(--google-yellow)); }
 .hover-shift[data-accent="green"]:hover,
 .group:hover .hover-shift[data-accent="green"]  { color: hsl(var(--google-green)); }
+
+/* === Card Water Hover (smooth accent wash + lift) === */
+.card-water {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.5s ease;
+  will-change: transform;
+}
+.card-water::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hover-accent, hsl(var(--foreground)));
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.5s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+.card-water:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -20px hsl(var(--foreground) / 0.18);
+  border-color: var(--hover-accent, hsl(var(--border)));
+}
+.card-water:hover::before {
+  transform: scaleX(1);
+  opacity: 0.06;
+}
+.card-water[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.card-water[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.card-water[data-accent="yellow"] { --hover-accent: hsl(var(--google-yellow)); }
+.card-water[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+.card-water:hover .card-water-title {
+  color: var(--hover-accent, hsl(var(--foreground)));
+  transition: color 0.45s ease;
+}
