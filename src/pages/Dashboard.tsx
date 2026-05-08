@@ -167,7 +167,6 @@ const Dashboard: React.FC = () => {
   });
 
   const enrolledCourses = courseList.filter(x=>x.enrolled);
-  const lockedCourses = courseList.filter(x=>!x.enrolled);
   const completedModules = enrolledCourses.reduce((s,x)=>s+x.modules.filter(m=>m._status==='completed').length,0);
   const totalModules = enrolledCourses.reduce((s,x)=>s+x.modules.length,0);
   const completedCourses = enrolledCourses.filter(x=>x.modules.length>0 && x.modules.every(m=>m._status==='completed'));
