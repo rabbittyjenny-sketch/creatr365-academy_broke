@@ -308,3 +308,57 @@
   color: var(--hover-accent, hsl(var(--foreground)));
   transition: color 0.45s ease;
 }
+
+/* === Per-letter Hover Effect ===
+   Wraps each character in a span; when cursor passes a letter,
+   that single letter changes color/underline/highlight independently.
+*/
+.hover-letters {
+  display: inline-block;
+  --hover-accent: hsl(var(--foreground));
+}
+.hover-letters[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.hover-letters[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.hover-letters[data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); } /* darker for contrast on white */
+.hover-letters[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.hover-letters .hl-char {
+  display: inline-block;
+  position: relative;
+  transition: color 220ms ease, transform 220ms ease;
+  will-change: color, transform;
+}
+.hover-letters .hl-char:hover {
+  color: var(--hover-accent);
+  transform: translateY(-2px);
+}
+
+/* Underline variant: each letter gets its own underline that fills on hover */
+.hover-letters--underline .hl-char::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: var(--hover-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+.hover-letters--underline .hl-char:hover::after { transform: scaleX(1); }
+
+/* Highlight variant: background bar appears behind each letter on hover */
+.hover-letters--highlight .hl-char {
+  padding: 0 1px;
+  border-radius: 2px;
+}
+.hover-letters--highlight .hl-char:hover {
+  background: var(--hover-accent);
+  color: hsl(var(--background));
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
