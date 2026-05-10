@@ -42,14 +42,16 @@ const Home: React.FC = () => {
       />
       <CourseNavbar />
 
-      {/* Hero — single image + 2 CTAs */}
-      <section className="min-h-screen flex items-center justify-center bg-background text-foreground px-4 pt-20 pb-12">
-        <div className="max-w-5xl mx-auto w-full text-center">
+      {/* Hero — full-bleed image + 2 CTAs */}
+      <section className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground pt-20 pb-12">
+        <div className="w-full">
           <img
             src={heroImage}
             alt="Live Streamer Academy — Creatr365"
-            className="w-full max-w-3xl mx-auto h-auto opacity-0 animate-fade-in [animation-delay:200ms]"
+            className="block w-full h-auto opacity-0 animate-fade-in [animation-delay:200ms]"
           />
+        </div>
+        <div className="w-full px-4">
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:600ms]">
             <Link
               to="/courses"
