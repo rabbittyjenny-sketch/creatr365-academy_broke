@@ -6,7 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { marketStats, targetAudience } from '@/data/courseData';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight } from 'lucide-react';
-import logoCreatr from '@/assets/logo-creatr365.png';
+import heroImage from '@/assets/hero-live-streamer.png';
 
 interface CourseRow {
   id: string;
@@ -42,29 +42,27 @@ const Home: React.FC = () => {
       />
       <CourseNavbar />
 
-      {/* Hero - White background (logo is dark) */}
-      <section className="min-h-screen flex items-center justify-center bg-background text-foreground px-4 pt-16">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="opacity-0 animate-fade-in [animation-delay:200ms] mb-10 inline-block">
-            <img src={logoCreatr} alt="Creatr365" className="h-24 md:h-36 lg:h-44 w-auto mx-auto" />
-          </div>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-6 opacity-0 animate-fade-in [animation-delay:400ms] leading-[0.95]">
-            LIVE STREAMER<br />ACADEMY
-          </h1>
-          <p className="text-lg md:text-2xl text-foreground/70 max-w-3xl mx-auto mb-4 opacity-0 animate-fade-in [animation-delay:600ms] leading-relaxed">
-            Anyone can go live. Not everyone earns a global brand's trust.<br className="hidden md:block" />
-            We build the ones who do.
-          </p>
-          <p className="text-sm md:text-base font-light text-foreground/50 max-w-2xl mx-auto mb-12 opacity-0 animate-fade-in [animation-delay:800ms]">
-            จากศูนย์สู่แสน ใน 2 ชั่วโมงแรก · สอนจากประสบการณ์จริง · ไม่มีสคริปต์สำเร็จรูป
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:1000ms]">
-            <Link to="/courses" className="group px-8 py-4 bg-foreground text-background rounded-full text-base font-medium hover:opacity-90 transition-all inline-flex items-center justify-center gap-2">
-              <span className="hover-shift" data-accent="blue">ดูหลักสูตรทั้งหมด</span>
+      {/* Hero — single image + 2 CTAs */}
+      <section className="min-h-screen flex items-center justify-center bg-background text-foreground px-4 pt-20 pb-12">
+        <div className="max-w-5xl mx-auto w-full text-center">
+          <img
+            src={heroImage}
+            alt="Live Streamer Academy — Creatr365"
+            className="w-full max-w-3xl mx-auto h-auto opacity-0 animate-fade-in [animation-delay:200ms]"
+          />
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:600ms]">
+            <Link
+              to="/courses"
+              className="group px-8 py-4 bg-foreground text-background rounded-lg text-base font-medium hover:opacity-90 transition-all inline-flex items-center justify-center gap-2"
+            >
+              ดูหลักสูตรทั้งหมด
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/auth" className="px-8 py-4 border border-foreground/30 text-foreground rounded-full text-base font-medium hover:bg-foreground/5 transition-all text-center">
-              <span className="hover-shift" data-accent="yellow">สมัครเรียน</span>
+            <Link
+              to="/auth"
+              className="px-8 py-4 border border-foreground text-foreground rounded-lg text-base font-medium hover:bg-foreground/5 transition-all text-center"
+            >
+              สมัครเรียน
             </Link>
           </div>
         </div>
