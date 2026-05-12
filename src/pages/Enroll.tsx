@@ -76,7 +76,7 @@ const Enroll: React.FC = () => {
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-2">สมัครสำเร็จ!</h1>
             <p className="text-muted-foreground mb-6">ขอบคุณที่สมัครเรียนกับเรา ระบบจะส่งรายละเอียดไปยังอีเมลของคุณ</p>
-            <Link to="/dashboard" className="text-primary hover:underline">ไปหน้า Dashboard</Link>
+            <Link to="/dashboard" data-accent="green" className="nav-link text-primary">ไปหน้า Dashboard</Link>
           </div>
         </div>
       </>
@@ -135,15 +135,15 @@ const Enroll: React.FC = () => {
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
         <div className="max-w-lg mx-auto">
-          <Link to={`/course/${course.slug}`} className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
+          <Link to={`/course/${course.slug}`} data-accent="green" className="inline-flex items-center gap-1 text-muted-foreground text-sm mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> กลับไปรายละเอียดหลักสูตร
           </Link>
 
           <div className={`h-2 rounded-t-2xl ${colors.bg}`} />
           <div className="rounded-b-2xl border border-t-0 border-border bg-card p-8">
             <span className={`text-xs tracking-widest uppercase ${colors.text} font-medium`}>{course.tag}</span>
-            <h1 className="text-2xl font-bold mt-1 mb-1">{course.title}</h1>
-            <p className="text-muted-foreground text-sm mb-2">{course.subtitle} · {course.duration}</p>
+            <h1 className="text-2xl font-bold mt-1 mb-1" data-accent="green">{course.title}</h1>
+            <p className="text-muted-foreground text-sm mb-2" data-accent="green">{course.subtitle} · {course.duration}</p>
             <p className="text-xs text-muted-foreground mb-4">{LEARNING_LABELS[course.learning_type] || course.learning_type}</p>
             {course.price?.trim() && <p className={`text-2xl font-bold ${colors.text} mb-6`}>{course.price}</p>}
 
@@ -170,7 +170,8 @@ const Enroll: React.FC = () => {
                     className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm font-mono" placeholder="EARLYBIRD" />
                 </div>
                 <button type="submit" disabled={loading}
-                  className={`w-full py-3 ${colors.bg} text-white rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2`}>
+                  data-accent="green"
+                  className="btn-brand w-full py-3 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> กำลังดำเนินการ...</> : 'ยืนยันสมัครเรียน'}
                 </button>
 
