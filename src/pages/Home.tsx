@@ -70,15 +70,20 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Market Opportunity - light grey */}
-      <Section title="THE OPPORTUNITY" subtitle="แพลตฟอร์มโตขึ้น ความต้องการ Professional Host ก็สูงขึ้น แต่ตลาดส่วนใหญ่ยังไลฟ์แบบไม่มีทิศทาง" className="bg-muted/40">
+      {/* Market Opportunity */}
+      <Section
+        title="THE OPPORTUNITY"
+        subtitle="แพลตฟอร์มโตขึ้น ความต้องการ Professional Host ก็สูงขึ้น แต่ตลาดส่วนใหญ่ยังไลฟ์แบบไม่มีทิศทาง"
+        accent="blue"
+        className="bg-muted/40"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {marketStats.map((stat, i) => (
             <div
               key={i}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
+              className="card-water rounded-2xl border border-border bg-card p-6"
             >
-              <p className="text-3xl md:text-4xl font-bold mb-3 text-foreground hover-shift" data-accent={ACCENT_CYCLE[i % 4]}>{stat.value}</p>
+              <p className="text-3xl md:text-4xl font-bold mb-3 text-foreground hover-shift">{stat.value}</p>
               <p className="text-sm text-muted-foreground leading-relaxed mb-3">{stat.label}</p>
               <p className="text-xs text-muted-foreground/60 italic">{stat.source}</p>
             </div>
@@ -86,80 +91,107 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* The Problem - dark */}
-      <Section title="THE PROBLEM" subtitle="ปัญหาที่แบรนด์ชั้นนำหาคำตอบไม่ได้" dark>
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-background/90 text-lg md:text-xl leading-relaxed mb-10">
-            แบรนด์ต้องการ Live Streamer ที่เข้าใจทั้ง <span className="font-bold">Brand CI + Sales Psychology + Data</span> พร้อมกัน
-            <br />แต่สิ่งที่มีในตลาดคือ <span className="italic">"คนพูดหน้ากล้อง"</span> ที่ขาด 3 สิ่งนี้ทั้งหมด
+      {/* The Problem */}
+      <Section
+        title="THE PROBLEM"
+        subtitle="ปัญหาที่แบรนด์ชั้นนำหาคำตอบไม่ได้"
+        accent="red"
+        dark
+      >
+        <div className="max-w-3xl mx-auto space-y-5 text-background/90 text-lg md:text-xl leading-relaxed">
+          <p>วันนี้ Live Commerce ไม่ใช่แค่การไลฟ์ขายของอีกต่อไป</p>
+          <p>
+            แต่กำลังเปลี่ยนจาก{' '}
+            <span className="italic">‘การขายของ Online ไปสู่ อุตสาหกรรมระดับโลก’</span>
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <p>
+            และอาชีพ <span className="font-semibold">Live Streamer</span> หรือ{' '}
+            <span className="font-semibold">Host</span> ก็เป็นหนึ่งในอาชีพที่เติบโตเร็วที่สุดในยุค Creator Economy
+          </p>
+          <p>แต่ในปัจจุบันอาชีพนี้ก็ยังไม่เพียงพอต่อความต้องการของตลาด เพราะแบรนด์ใหญ่...</p>
+          <p className="text-background font-semibold text-xl md:text-2xl pt-2">
+            “ต้องการ Host ที่มีคุณภาพและมาตรฐาน ไม่ใช่แค่สร้างยอดขายเป็นอย่างเดียว”
+          </p>
+          <p className="text-background/70 italic pt-2">
+            — เพราะคนที่มีทักษะ … คือคนที่มีโอกาสเติบโตมากที่สุด
+          </p>
+        </div>
+      </Section>
+
+      {/* The Solution */}
+      <Section
+        title="THE SOLUTION"
+        subtitle="แนวคิดของเรา"
+        accent="green"
+      >
+        <div className="max-w-3xl mx-auto space-y-5 text-foreground/90 text-lg md:text-xl leading-relaxed">
+          <p>
+            เพราะเราเชื่อว่า Live Commerce อาจไม่ได้ต้องการคนที่เสียงดัง
+            หรือแค่สร้างยอดขายได้เพียงอย่างเดียว
+          </p>
+          <p>
+            แต่ควรเติบโตด้วยความเข้าใจผู้บริโภค เข้าใจกฎหมายและความถูกต้อง
+            ด้วยมาตรฐานการสื่อสารที่ดี
+          </p>
+          <p>
+            และทั้งหมดนี้คือทักษะ ที่คุณจะนำไปใช้ได้
+            ทั้งในธุรกิจ การขาย และโลกของ Creator Economy
+          </p>
+          <p className="pt-4 text-foreground italic border-l-2 border-foreground/20 pl-5">
+            “ด้วยการเรียนรู้ที่เป็นแบบ Learning Flow ที่ภายในระบบการเรียน
+            จะมีทั้ง Free Courses และ Foundation Courses สำหรับคนที่เริ่มต้น
+            ไปจนถึงหลักสูตรด้าน Psychology Communication”
+          </p>
+        </div>
+      </Section>
+
+      {/* Value Ladder */}
+      <Section
+        title="VALUE LADDER"
+        subtitle="ออกแบบสำหรับทุกเส้นทางของคุณ"
+        accent="yellow"
+        dark
+      >
+        <div className="max-w-2xl mx-auto text-background/90 text-lg md:text-xl leading-relaxed">
+          <p className="mb-6">ไม่ว่าคุณจะเป็น</p>
+          <ul className="space-y-3 mb-8">
             {[
-              { t: 'Conversion ต่ำ', d: 'ไม่ถึงเกณฑ์มาตรฐาน', a: 'yellow' },
-              { t: 'Return Rate สูง', d: 'กระทบกำไรระยะยาว', a: 'blue' },
-              { t: 'Brand Damage', d: 'วัดไม่ได้แต่รู้สึกได้', a: 'green' },
-            ].map((it, i) => (
-              <div key={i} className="group bg-background/5 border border-background/10 rounded-2xl p-6 transition-all duration-500 hover:bg-background/10">
-                <p className="font-bold text-background mb-1 hover-shift" data-accent={it.a}>{it.t}</p>
-                <p className="text-background/70 text-sm">{it.d}</p>
-              </div>
+              'คนที่อยากเริ่มสายไลฟ์',
+              'Creator ที่อยากเพิ่มรายได้',
+              'Host ที่อยากยกระดับตัวเอง',
+              'หรือคนที่อยากเข้าสู่ตลาด Global Commerce',
+            ].map((item) => (
+              <li key={item} className="flex gap-3">
+                <span className="text-background/50">—</span>
+                <span>{item}</span>
+              </li>
             ))}
-          </div>
+          </ul>
+          <p className="text-background font-semibold">
+            ที่นี่ถูกออกแบบมาเพื่อคุณ
+          </p>
         </div>
-      </Section>
-
-      {/* 3 Pillars - white */}
-      <Section title="THE SOLUTION" subtitle="3 Pillars ที่ทำให้ Creatr365 แตกต่าง">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: 'Psychology-First', desc: 'S-O-R Framework + PAD Theory + 8 ศาสตร์หลัก ลงมือปฏิบัติจริงในไลฟ์', result: 'Conversion +150-400%', accent: 'blue' as const },
-            { title: 'Data-Driven', desc: 'ทุกเทคนิคอ้างอิงสถิติจริง วัดผล GMV · CVR · AOV · KPI 8 ตัว', result: 'Return Rate <15%', accent: 'red' as const },
-            { title: 'AI-Ready & Global', desc: 'ทำงานร่วม AI ตั้งแต่วันแรก + Cross-border Strategy สู่เวทีสากล', result: 'Smart Lazy Style', accent: 'green' as const },
-          ].map((pillar, i) => (
-            <div
-              key={i}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <h3 className="text-2xl font-bold mb-3 text-foreground hover-shift" data-accent={pillar.accent}>{pillar.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4">{pillar.desc}</p>
-              <p className="text-xs font-medium text-foreground/60 pt-3 border-t border-border">ผลลัพธ์: {pillar.result}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      {/* Courses Preview - dark */}
-      <Section title="VALUE LADDER" subtitle="จากมือใหม่สู่ Global Professional" dark>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {previewCourses.map((course, i) => (
-            <Link key={course.id} to={`/course/${course.slug}`} className="group">
-              <div className="rounded-2xl bg-background/5 border border-background/15 p-6 h-full transition-all duration-500 hover:bg-background/10 hover:-translate-y-1">
-                <span className="text-xs font-medium tracking-widest uppercase text-background/60 mb-2 block">{course.tag}</span>
-                <h3 className="text-xl font-bold text-background mb-1 hover-shift" data-accent={ACCENT_CYCLE[i % 4]}>{course.title}</h3>
-                <p className="text-background/70 text-sm mb-4">{course.subtitle}</p>
-                <div className="pt-4 border-t border-background/10 flex items-center justify-between">
-                  <p className="text-background/80 text-sm">{course.duration}</p>
-                  <span className="inline-flex items-center gap-1 text-sm text-background font-medium">
-                    {course.price?.trim() ? course.price : 'ดูรายละเอียด'} <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <Link to="/courses" className="group inline-flex items-center gap-2 px-6 py-3 border border-background/30 text-background rounded-full hover:bg-background/10 transition-all text-sm font-medium">
-            <span className="hover-shift" data-accent="yellow">ดูหลักสูตรทั้งหมด</span> <ArrowRight className="w-4 h-4" />
+        <div className="mt-12 text-center">
+          <Link
+            to="/courses"
+            className="group inline-flex items-center gap-2 px-6 py-3 border border-background/30 text-background rounded-full hover:bg-background/10 transition-all text-sm font-medium"
+          >
+            ดูหลักสูตรทั้งหมด <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
       </Section>
 
-      {/* Target Audience - light grey */}
-      <Section title="ใครควรเรียน?" subtitle="กลุ่มเป้าหมาย" className="bg-muted/40">
+      {/* Target Audience */}
+      <Section
+        title="ใครควรเรียน?"
+        subtitle="กลุ่มเป้าหมายของหลักสูตร"
+        accent="blue"
+        className="bg-muted/40"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {targetAudience.map((item, i) => (
-            <div key={i} className="group rounded-2xl bg-card border border-border p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl">
-              <h3 className="text-lg font-bold text-foreground mb-2 hover-shift" data-accent={ACCENT_CYCLE[i % 4]}>{item.title}</h3>
+            <div key={i} className="card-water rounded-2xl bg-card border border-border p-6">
+              <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
               <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{item.desc}</p>
               <p className="text-xs font-semibold text-foreground/70 pt-3 border-t border-border">แนะนำ: {item.recommend}</p>
             </div>
@@ -167,25 +199,25 @@ const Home: React.FC = () => {
         </div>
       </Section>
 
-      {/* Why Us - white */}
-      <Section title="WHY US" subtitle='สอนโดย "ผู้ลงมือทำจริง" — ไม่ใช่แค่ทฤษฎี'>
+      {/* Why Us */}
+      <Section
+        title="WHY US"
+        subtitle='สอนโดย "ผู้ลงมือทำจริง" — ไม่ใช่แค่ทฤษฎี'
+        accent="green"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {[
-            { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า', accent: 'blue' as const },
-            { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE', accent: 'red' as const },
-            { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)', accent: 'yellow' as const },
-            { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง', accent: 'green' as const },
+            { stat: '6 หลัก', label: 'ยอดขายใน 2 ชั่วโมง — Conversion 12.3% สูงกว่าตลาด 4-6 เท่า' },
+            { stat: '20+', label: 'แบรนด์ชั้นนำ — Big C · BBL · Shopee · TikTok LIVE' },
+            { stat: 'World-Class', label: 'มาตรฐานชัดเจนและแข็งแรง — ต่อยอดจากประสบการณ์ระดับสากล (Michelin VIP Service & Operations)' },
+            { stat: 'DPC', label: 'Demonstrate → Practice → Critique เรียนผ่านสถานการณ์จริง' },
           ].map((item, i) => (
             <div
               key={i}
-              className="group rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
+              className="card-water rounded-2xl border border-border bg-card p-6"
             >
-              <p className="text-3xl font-bold mb-2 text-foreground hover-shift" data-accent={item.accent}>
-                {item.stat}
-              </p>
-              <p className="text-sm text-foreground/80 leading-relaxed">
-                {item.label}
-              </p>
+              <p className="text-3xl font-bold mb-2 text-foreground hover-shift">{item.stat}</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">{item.label}</p>
             </div>
           ))}
         </div>
