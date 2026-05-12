@@ -141,13 +141,13 @@ const CourseDetail: React.FC = () => {
         <section className="py-10 px-4 bg-muted/40">
           <div className="max-w-4xl mx-auto">
             {ytEmbed ? (
-              <div className="aspect-video rounded-2xl overflow-hidden border border-border">
+              <div className="aspect-video overflow-hidden border border-border">
                 <iframe src={ytEmbed} title={course.title} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               </div>
             ) : course.intro_video_url ? (
-              <video src={course.intro_video_url} controls className="w-full rounded-2xl border border-border bg-foreground" />
+              <video src={course.intro_video_url} controls className="w-full border border-border bg-foreground" />
             ) : course.cover_image_url ? (
-              <img src={course.cover_image_url} alt={course.title} className="w-full rounded-2xl border border-border" />
+              <img src={course.cover_image_url} alt={course.title} className="w-full border border-border" />
             ) : null}
           </div>
         </section>
@@ -222,27 +222,28 @@ const CourseDetail: React.FC = () => {
 
           <aside className="md:col-span-1">
             <div className="sticky top-24 space-y-6">
-              <div className="rounded-2xl border border-border p-6 bg-card">
+              <div className="card-water border border-border p-6 bg-card" data-accent={accent}>
                 {course.price?.trim() && <p className="text-3xl font-bold mb-2">{course.price}</p>}
                 <p className="text-sm text-muted-foreground mb-6">{course.format_label || course.duration}</p>
                 <button
                   onClick={handleEnroll}
-                  className="w-full py-3 bg-foreground text-background rounded-full font-medium hover:opacity-90 transition-all inline-flex items-center justify-center gap-2"
+                  data-accent={accent}
+                  className="btn-brand w-full py-3 rounded-lg font-medium"
                 >
-                  <span className="hover-shift" data-accent={accent}>สมัครเรียน</span>
+                  <span>สมัครเรียน</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
 
               {course.target_audience && (
-                <div className="rounded-2xl border border-border p-5 bg-card">
+                <div className="card-water border border-border p-5 bg-card" data-accent={accent}>
                   <h4 className="font-bold mb-2 text-sm">เหมาะสำหรับใคร</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">{course.target_audience}</p>
                 </div>
               )}
 
               {course.bloom_level && (
-                <div className="rounded-2xl border border-border p-5 bg-card">
+                <div className="card-water border border-border p-5 bg-card" data-accent={accent}>
                   <h4 className="font-bold mb-1 text-sm">ระดับการเรียนรู้</h4>
                   <p className="text-xs text-muted-foreground">{course.bloom_level}</p>
                 </div>
