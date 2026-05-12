@@ -21,22 +21,24 @@ const App = () => (
   <TooltipProvider>
     <Toaster />
     <Sonner />
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/course/:id" element={<CourseDetail />} />
-      <Route path="/enroll/:id" element={<Enroll />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/admin/courses" element={<AdminCourses />} />
-      <Route path="/admin/assignments" element={<AdminAssignments />} />
-      <Route path="/admin/payments" element={<AdminPayments />} />
-      <Route path="/articles" element={<Articles />} />
-      <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <div className="site-hover-scope">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/course/:id" element={<CourseDetail />} />
+        <Route path="/enroll/:id" element={<Enroll />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/admin/courses" element={<AdminCourses />} />
+        <Route path="/admin/assignments" element={<AdminAssignments />} />
+        <Route path="/admin/payments" element={<AdminPayments />} />
+        <Route path="/articles" element={<Articles />} />
+        <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
   </TooltipProvider>
 );
 
