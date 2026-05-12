@@ -362,40 +362,54 @@
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
-/* === Global Heading Hover Effect ===
-   All h1-h4 get a sweep underline + color shift on hover.
-   Uses ONLY the brand palette (blue/red/yellow/green).
+/* === Global Heading + Text Hover Effect ===
+   ONE consistent style across the whole site.
+   Color is driven by --section-accent set on the parent <section data-accent="...">.
+   Each section uses ONE color — never mixed inside the same section.
 */
-h1, h2, h3, h4, .heading-hover {
+.section-accent[data-accent="blue"]   { --section-accent: hsl(var(--google-blue)); }
+.section-accent[data-accent="red"]    { --section-accent: hsl(var(--google-red)); }
+.section-accent[data-accent="yellow"] { --section-accent: hsl(45 95% 42%); }
+.section-accent[data-accent="green"]  { --section-accent: hsl(var(--google-green)); }
+
+/* Inherit section accent for hover-shift / card-water when no override */
+.section-accent .hover-shift:not([data-accent]),
+.section-accent .card-water:not([data-accent]) {
+  --hover-accent: var(--section-accent, hsl(var(--foreground)));
+}
+
+h1, h2, h3, h4, h5, h6, .heading-hover {
   position: relative;
   display: inline-block;
-  cursor: pointer;
-  transition: color 600ms ease;
+  cursor: default;
+  transition: color 500ms ease;
   --heading-accent: hsl(var(--google-blue));
 }
-h2 { --heading-accent: hsl(var(--google-red)); }
-h3 { --heading-accent: hsl(45 95% 42%); }
-h4 { --heading-accent: hsl(var(--google-green)); }
-
-h1::after, h2::after, h3::after, h4::after, .heading-hover::after {
+.section-accent h1,
+.section-accent h2,
+.section-accent h3,
+.section-accent h4,
+.section-accent h5,
+.section-accent h6,
+.section-accent .heading-hover {
+  --heading-accent: var(--section-accent);
+}
+h1::after, h2::after, h3::after, h4::after, h5::after, h6::after, .heading-hover::after {
   content: "";
   position: absolute;
   left: 0;
-  right: 0;
-  bottom: -4px;
-  margin: 0 auto;
-  height: 3px;
-  width: 1px;
-  background-color: transparent;
-  transition: width 700ms ease, background-color 700ms ease;
+  bottom: -6px;
+  height: 2px;
+  width: 0;
+  background-color: var(--heading-accent);
+  transition: width 500ms ease;
 }
-h1:hover, h2:hover, h3:hover, h4:hover, .heading-hover:hover {
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
   color: var(--heading-accent);
 }
 h1:hover::after, h2:hover::after, h3:hover::after,
-h4:hover::after, .heading-hover:hover::after {
+h4:hover::after, h5:hover::after, h6:hover::after,
+.heading-hover:hover::after {
   width: 100%;
-  background-color: var(--heading-accent);
 }
-
 
