@@ -162,10 +162,10 @@ const DiagnosticQuiz: React.FC = () => {
 
         {!loading && !error && stage === 'intro' && (
           <section className="space-y-8">
-            <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Diagnostic</p>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">รู้ก่อนว่าคุณ<br/>ควรเริ่มจากตรงไหน</h1>
-            <p className="text-lg text-muted-foreground max-w-xl">14 คำถามสั้นๆ วิเคราะห์ว่าทักษะไหนของคุณแข็งแล้ว และโฟกัสพัฒนาอะไรก่อนจะได้ผลเร็วที่สุด</p>
-            <button onClick={() => setStage('survey')} className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-background rounded-full font-semibold hover:opacity-90 transition">
+            <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase" data-accent="green">Diagnostic</p>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight" data-accent="green">รู้ก่อนว่าคุณ<br/>ควรเริ่มจากตรงไหน</h1>
+            <p className="text-lg text-muted-foreground max-w-xl" data-accent="green">14 คำถามสั้นๆ วิเคราะห์ว่าทักษะไหนของคุณแข็งแล้ว และโฟกัสพัฒนาอะไรก่อนจะได้ผลเร็วที่สุด</p>
+            <button onClick={() => setStage('survey')} data-accent="green" className="btn-brand px-8 py-4 rounded-lg font-semibold">
               <span>เริ่มต้นทำแบบทดสอบ</span><ArrowRight className="w-4 h-4"/>
             </button>
             {bank.length === 0 && <p className="text-xs text-muted-foreground">⚠️ ยังไม่สามารถโหลดข้อสอบจากแหล่งภายนอกได้ — กรุณาลองใหม่อีกครั้ง</p>}
@@ -174,7 +174,7 @@ const DiagnosticQuiz: React.FC = () => {
 
         {!loading && stage === 'survey' && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-bold">ระบุข้อมูลส่วนตัว</h2>
+            <h2 className="text-2xl md:text-3xl font-bold" data-accent="green">ระบุข้อมูลส่วนตัว</h2>
             <form onSubmit={(e)=>{e.preventDefault(); startQuiz();}} className="space-y-4 max-w-md">
               {[
                 { name:'gender', label:'เพศ', opts:['ชาย','หญิง','ไม่ระบุ'] },
@@ -208,7 +208,7 @@ const DiagnosticQuiz: React.FC = () => {
                 <input required value={profile.occupation} onChange={(e)=>setProfile(p=>({...p,occupation:e.target.value}))}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm"/>
               </div>
-              <button type="submit" className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full font-semibold hover:opacity-90">
+              <button type="submit" data-accent="green" className="btn-brand px-6 py-3 rounded-lg font-semibold">
                 ไปที่ข้อสอบ <ArrowRight className="w-4 h-4"/>
               </button>
             </form>
@@ -231,12 +231,12 @@ const DiagnosticQuiz: React.FC = () => {
                 const wrong = picked === c.k && !correct;
                 const show = !!picked;
                 return (
-                  <button key={c.k} onClick={()=>choose(c.k)}
+                  <button key={c.k} onClick={()=>choose(c.k)} data-accent="green"
                     className={`w-full text-left flex items-start gap-4 p-5 rounded-2xl border-2 transition-all
                       ${show && correct ? 'border-success bg-success/5' :
                         show && wrong ? 'border-destructive bg-destructive/5' :
                         show ? 'border-border opacity-50' :
-                        'border-border hover:border-foreground'}`}>
+                        'border-border hover:border-[var(--hover-accent)]'}`}>
                     <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold flex-shrink-0
                       ${show && correct ? 'bg-success border-success text-success-foreground' :
                         show && wrong ? 'bg-destructive border-destructive text-destructive-foreground' :
@@ -254,7 +254,7 @@ const DiagnosticQuiz: React.FC = () => {
                   <p className="font-bold mb-1">{picked === quiz[current].answer ? 'ถูกต้อง!' : 'ยังไม่ถูก'}</p>
                   <p className="text-sm text-muted-foreground">{quiz[current].rationale || 'ไม่มีคำอธิบายเพิ่มเติม'}</p>
                 </div>
-                <button onClick={next} className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-background rounded-full font-semibold">
+                <button onClick={next} data-accent="green" className="btn-brand px-6 py-3 rounded-lg font-semibold">
                   {current === quiz.length-1 ? 'ดูผลลัพธ์' : 'ถัดไป'} <ArrowRight className="w-4 h-4"/>
                 </button>
               </div>
