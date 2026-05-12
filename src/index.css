@@ -250,14 +250,14 @@
 /* Apply to any element. Cycles through 4 brand accents based on data attribute. */
 .hover-shift {
   display: inline-block;
-  transition: color 0.35s ease, transform 0.35s ease, letter-spacing 0.35s ease;
+  transition: color 0.28s ease, transform 0.28s ease;
   cursor: pointer;
 }
 .hover-shift:hover,
 .group\/shift:hover .hover-shift,
 .group:hover .hover-shift {
-  transform: translateY(-2px);
-  letter-spacing: 0.01em;
+  transform: translateY(-1px);
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
 }
 .hover-shift[data-accent="blue"]:hover,
 .group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
@@ -273,9 +273,10 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.5s ease;
+  transition: transform 0.32s ease,
+              box-shadow 0.32s ease,
+              border-color 0.32s ease,
+              background-color 0.32s ease;
   will-change: transform;
 }
 .card-water::before {
@@ -284,21 +285,19 @@
   inset: 0;
   background: var(--hover-accent, hsl(var(--foreground)));
   opacity: 0;
-  transform: scaleX(0);
+  transform: none;
   transform-origin: left center;
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              opacity 0.5s ease;
+  transition: opacity 0.32s ease;
   z-index: -1;
   border-radius: inherit;
 }
 .card-water:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -20px hsl(var(--foreground) / 0.18);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -24px hsl(var(--foreground) / 0.2);
   border-color: var(--hover-accent, hsl(var(--border)));
 }
 .card-water:hover::before {
-  transform: scaleX(1);
-  opacity: 0.06;
+  opacity: 0.055;
 }
 .card-water[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
 .card-water[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
