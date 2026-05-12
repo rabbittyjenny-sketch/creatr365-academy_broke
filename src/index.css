@@ -499,9 +499,14 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 .btn-brand:hover::before {
   opacity: 1;
 }
+.btn-brand span,
+.btn-brand svg {
+  color: inherit;
+}
 .btn-brand--outline {
   background: transparent;
-  color: hsl(var(--foreground));
+  color: currentColor;
+  border-color: currentColor;
 }
 .btn-brand--outline:hover {
   color: hsl(var(--background));
