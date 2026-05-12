@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { HoverLetters } from '@/components/HoverLetters';
+
+const MAIN_NAV = [
+  { to: '/', label: 'หน้าแรก', accent: 'blue' },
+  { to: '/courses', label: 'หลักสูตร', accent: 'red' },
+  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'green' },
+  { to: '/articles', label: 'บทความ', accent: 'yellow' },
+  { to: '/contact', label: 'ติดต่อ', accent: 'blue' },
+] as const;
 
 export const CourseNavbar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [open, setOpen] = useState(false);
 
@@ -23,26 +31,36 @@ export const CourseNavbar: React.FC = () => {
 
   const close = () => setOpen(false);
 
+  const isActive = (to: string) =>
+    to === '/' ? location.pathname === '/' : location.pathname === to || location.pathname.startsWith(`${to}/`);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Creatr365" className="h-9 w-auto" />
+          <img src="/favicon.png" alt="Creatr365" className="h-7 w-auto" />
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium">
-          <Link to="/" className="text-foreground"><HoverLetters text="หน้าแรก" accent="blue" /></Link>
-          <Link to="/courses" className="text-foreground"><HoverLetters text="หลักสูตร" accent="red" /></Link>
-          <Link to="/articles" className="text-foreground"><HoverLetters text="บทความ" accent="yellow" /></Link>
-          <Link to="/contact" className="text-foreground"><HoverLetters text="ติดต่อ" accent="green" /></Link>
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {MAIN_NAV.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              data-accent={item.accent}
+              aria-current={isActive(item.to) ? 'page' : undefined}
+              className="nav-link text-foreground"
+            >
+              {item.label}
+            </Link>
+          ))}
           {user ? (
             <>
-              <Link to="/dashboard" className="text-foreground"><HoverLetters text="Dashboard" accent="yellow" /></Link>
-              <button onClick={handleLogout} className="text-foreground"><HoverLetters text="ออกจากระบบ" accent="red" /></button>
+              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
+              <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">ออกจากระบบ</button>
             </>
           ) : (
-            <Link to="/auth" className="px-4 py-2 bg-foreground text-background rounded-md text-sm font-medium hover:opacity-90 transition-opacity">
+            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
               เข้าสู่ระบบ
             </Link>
           )}
@@ -61,18 +79,26 @@ export const CourseNavbar: React.FC = () => {
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-3 text-base font-medium">
-            <Link to="/" onClick={close} className="py-2 text-foreground"><HoverLetters text="หน้าแรก" accent="blue" /></Link>
-            <Link to="/courses" onClick={close} className="py-2 text-foreground"><HoverLetters text="หลักสูตร" accent="red" /></Link>
-            <Link to="/articles" onClick={close} className="py-2 text-foreground"><HoverLetters text="บทความ" accent="yellow" /></Link>
-            <Link to="/contact" onClick={close} className="py-2 text-foreground"><HoverLetters text="ติดต่อ" accent="green" /></Link>
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-base font-medium">
+            {MAIN_NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={close}
+                data-accent={item.accent}
+                aria-current={isActive(item.to) ? 'page' : undefined}
+                className="nav-link py-3 text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} className="py-2 text-foreground"><HoverLetters text="Dashboard" accent="yellow" /></Link>
-                <button onClick={handleLogout} className="py-2 text-left text-foreground"><HoverLetters text="ออกจากระบบ" accent="red" /></button>
+                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
+                <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">ออกจากระบบ</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} className="mt-1 px-4 py-2.5 bg-foreground text-background rounded-md text-sm font-medium text-center">
+              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
                 เข้าสู่ระบบ
               </Link>
             )}
