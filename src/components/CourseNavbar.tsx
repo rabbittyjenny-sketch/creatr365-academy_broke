@@ -31,8 +31,11 @@ export const CourseNavbar: React.FC = () => {
 
   const close = () => setOpen(false);
 
-  const isActive = (to: string) =>
-    to === '/' ? location.pathname === '/' : location.pathname === to || location.pathname.startsWith(`${to}/`);
+  const isActive = (to: string) => {
+    if (to === '/') return location.pathname === '/';
+    if (to === '/articles') return location.pathname === '/articles';
+    return location.pathname === to || location.pathname.startsWith(`${to}/`);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
