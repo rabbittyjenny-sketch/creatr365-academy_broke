@@ -412,3 +412,111 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   width: 100%;
 }
 
+/* === App-wide professional hover language ===
+   Simple, consistent state changes: color for text, subtle lift for cards,
+   and soft accent wash for buttons. Driven only by the brand accents.
+*/
+.site-hover-scope,
+.site-hover-scope [data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.site-hover-scope [data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.site-hover-scope [data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); }
+.site-hover-scope [data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.site-hover-scope p,
+.site-hover-scope li,
+.site-hover-scope label,
+.site-hover-scope small,
+.site-hover-scope span:not(.sr-only):not(.hl-char),
+.site-hover-scope a:not(.btn-brand),
+.site-hover-scope button:not(.btn-brand) {
+  transition: color 0.28s ease, border-color 0.28s ease, background-color 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
+}
+
+.site-hover-scope p:hover,
+.site-hover-scope li:hover,
+.site-hover-scope label:hover,
+.site-hover-scope small:hover,
+.site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+.site-hover-scope a:not(.btn-brand):hover,
+.site-hover-scope button:not(.btn-brand):hover {
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: hsl(var(--foreground));
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--hover-accent, hsl(var(--google-blue)));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s ease;
+}
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--hover-accent, hsl(var(--google-blue)));
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.btn-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border: 1px solid hsl(var(--foreground));
+  transition: color 0.28s ease, border-color 0.28s ease, transform 0.28s ease, background-color 0.28s ease;
+}
+.btn-brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--hover-accent, hsl(var(--google-blue)));
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.btn-brand:hover {
+  transform: translateY(-1px);
+  border-color: var(--hover-accent, hsl(var(--foreground)));
+}
+.btn-brand:hover::before {
+  opacity: 1;
+}
+.btn-brand--outline {
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+.btn-brand--outline:hover {
+  color: hsl(var(--background));
+}
+
+@media (hover: none) {
+  .site-hover-scope p:hover,
+  .site-hover-scope li:hover,
+  .site-hover-scope label:hover,
+  .site-hover-scope small:hover,
+  .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+  .site-hover-scope a:not(.btn-brand):hover,
+  .site-hover-scope button:not(.btn-brand):hover,
+  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
+    color: inherit;
+  }
+}
+
