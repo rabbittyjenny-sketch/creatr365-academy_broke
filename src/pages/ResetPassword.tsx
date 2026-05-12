@@ -59,10 +59,10 @@ const ResetPassword = () => {
       <CourseNavbar />
 
       <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-20">
-        <div className="w-full max-w-md space-y-6 rounded-3xl border border-border bg-card p-8 shadow-sm">
+        <div className="card-water w-full max-w-md space-y-6 border border-border bg-card p-8 shadow-sm" data-accent="green">
           <div className="space-y-2 text-center">
-            <h1 className="text-2xl font-bold text-foreground">ตั้งรหัสผ่านใหม่</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground" data-accent="green">ตั้งรหัสผ่านใหม่</h1>
+            <p className="text-sm text-muted-foreground" data-accent="green">
               {canReset ? 'กรอกรหัสผ่านใหม่เพื่อกลับเข้าสู่ระบบ' : 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่จากหน้าเข้าสู่ระบบ'}
             </p>
           </div>
@@ -92,7 +92,7 @@ const ResetPassword = () => {
                 className="h-12 rounded-xl"
               />
 
-              <button type="submit" disabled={loading} className="w-full h-12 bg-foreground text-background rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
+              <button type="submit" disabled={loading} data-accent="green" className="btn-brand w-full h-12 rounded-lg font-medium disabled:opacity-50">
                 {loading ? 'กำลังบันทึก...' : 'บันทึกรหัสผ่านใหม่'}
               </button>
             </form>
@@ -101,7 +101,8 @@ const ResetPassword = () => {
           <button
             type="button"
             onClick={() => navigate('/auth')}
-            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+            data-accent="green"
+            className="w-full text-sm text-muted-foreground"
           >
             กลับไปหน้าเข้าสู่ระบบ
           </button>
