@@ -1,38 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Section } from '@/components/Section';
 import { SEOHead } from '@/components/SEOHead';
 import { marketStats, targetAudience } from '@/data/courseData';
-import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight } from 'lucide-react';
 import heroImage from '@/assets/hero-live-streamer.png';
 
-interface CourseRow {
-  id: string;
-  slug: string;
-  tag: string;
-  title: string;
-  subtitle: string;
-  duration: string;
-  price: string;
-  color: string;
-}
-
-const ACCENT_CYCLE = ['blue', 'red', 'yellow', 'green'] as const;
-
 const Home: React.FC = () => {
-  const [previewCourses, setPreviewCourses] = useState<CourseRow[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from('courses')
-      .select('id, slug, tag, title, subtitle, duration, price, color')
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(3)
-      .then(({ data }) => setPreviewCourses((data as unknown as CourseRow[]) || []));
-  }, []);
 
   return (
     <>
