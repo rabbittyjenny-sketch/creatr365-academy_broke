@@ -191,25 +191,28 @@ const Home: React.FC = () => {
             </div>
           ))}
         </div>
+        <div className="max-w-3xl mx-auto mt-12 space-y-5 text-center text-foreground/85 text-lg md:text-xl leading-relaxed">
+          <p>
+            “เพราะในโลกของ Live Commerce คนที่พูดเก่ง… อาจไม่ใช่คนที่เติบโตที่สุด
+          </p>
+          <p>
+            แต่คนที่เข้าใจผู้ชม เข้าใจแบรนด์ และสร้าง Trust ได้ต่างหาก ที่จะอยู่ในอุตสาหกรรมนี้ได้ระยะยาว”
+          </p>
+        </div>
       </Section>
 
       {/* CTA - dark */}
       <section className="py-20 md:py-28 bg-foreground text-background px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-            "เราไม่สร้างนักขายออนไลน์"
+            “CREATR365 ไม่ได้สร้างแค่ Host แต่กำลังสร้างมาตรฐานใหม่ของอาชีพนี้”
           </h2>
-          <p className="text-background/80 text-lg md:text-xl mb-4 leading-relaxed">
-            เราสร้าง Live Streamer ที่แบรนด์ระดับโลกเลือกหา
-          </p>
-          <p className="text-background/60 text-base md:text-lg mb-10 italic">
-            — ด้วยมาตรฐานวิชาชีพที่ยั่งยืนไปกับทุกเวที
-          </p>
           <Link
             to="/courses"
-            className="group inline-flex items-center gap-2 px-8 py-4 bg-background text-foreground rounded-full text-base font-medium transition-all hover:bg-background/90"
+            data-accent="green"
+            className="btn-brand btn-brand--outline group px-8 py-4 rounded-lg text-base font-medium border-background text-background"
           >
-            <span className="hover-shift" data-accent="green">เริ่มเรียนเลย</span>
+            <span>เริ่มเรียนเลย</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <p className="mt-8 text-background/40 text-sm">hello@creatr365.com · Bangkok, Thailand</p>
