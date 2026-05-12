@@ -264,10 +264,10 @@ const DiagnosticQuiz: React.FC = () => {
 
         {stage === 'result' && (
           <section className="space-y-10">
-            <h1 className="text-3xl md:text-5xl font-bold">You did it! Quiz complete.</h1>
+            <h1 className="text-3xl md:text-5xl font-bold" data-accent="green">You did it! Quiz complete.</h1>
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="rounded-3xl border border-border bg-card p-6">
-                <h3 className="font-bold mb-4">📊 Skill Profile</h3>
+              <div className="card-water border border-border bg-card p-6" data-accent="green">
+                <h3 className="font-bold mb-4" data-accent="green">📊 Skill Profile</h3>
                 <div className="space-y-3">
                   {TAGS.map(tag => {
                     const s = stats[tag] || { total: 2, right: 0 };
@@ -288,8 +288,8 @@ const DiagnosticQuiz: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-6">
-                <div className="rounded-3xl border border-border bg-card p-6">
-                  <h3 className="font-bold mb-4">🚀 Growth Areas</h3>
+                <div className="card-water border border-border bg-card p-6" data-accent="green">
+                  <h3 className="font-bold mb-4" data-accent="green">🚀 Growth Areas</h3>
                   <div className="space-y-4">
                     {TAGS.map(tag => {
                       const s = stats[tag] || { total: 2, right: 0 };
@@ -301,7 +301,7 @@ const DiagnosticQuiz: React.FC = () => {
                           <p className="font-bold mt-1">{gap[tag].weak}</p>
                           {gap[tag].impact && <p className="text-xs text-muted-foreground italic mt-1 pl-3 border-l-2 border-foreground">"{gap[tag].impact}"</p>}
                           {gap[tag].course && (
-                            <Link to="/courses" className="mt-3 inline-flex items-center gap-2 text-xs px-4 py-2 rounded-full border border-foreground hover:bg-foreground hover:text-background transition">
+                            <Link to="/courses" data-accent="green" className="btn-brand btn-brand--outline mt-3 text-xs px-4 py-2 rounded-lg">
                               {gap[tag].course} <ArrowRight className="w-3 h-3"/>
                             </Link>
                           )}
@@ -315,10 +315,10 @@ const DiagnosticQuiz: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={reset} className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-foreground font-semibold">
+                  <button onClick={reset} data-accent="green" className="btn-brand btn-brand--outline flex-1 px-6 py-3 rounded-lg font-semibold">
                     <RotateCcw className="w-4 h-4"/> เริ่มใหม่
                   </button>
-                  <Link to="/courses" className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-foreground text-background rounded-full font-semibold">
+                  <Link to="/courses" data-accent="green" className="btn-brand flex-1 px-6 py-3 rounded-lg font-semibold">
                     ดูคอร์ส <ArrowRight className="w-4 h-4"/>
                   </Link>
                 </div>
