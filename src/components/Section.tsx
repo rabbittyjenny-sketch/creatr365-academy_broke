@@ -1,32 +1,47 @@
 import React from 'react';
 
+type SectionAccent = 'blue' | 'red' | 'yellow' | 'green';
+
 interface SectionProps {
-  color?: 'blue' | 'yellow' | 'red' | 'green' | 'black';
   title: string;
   subtitle?: string;
   children: React.ReactNode;
   className?: string;
   dark?: boolean;
+  accent?: SectionAccent;
 }
 
 /**
  * Monochrome Section.
- * - dark=false: white background, black text, light grey badge
- * - dark=true: black background, white text, white/10 badge
- * Brand colors are reserved for hover states only (handled by .hover-shift utility).
+ * - dark=false: white background, black text
+ * - dark=true: black background, white text
+ * `accent` sets the hover color for ALL h1-h6 + .hover-shift / .card-water inside.
+ * Layout is fixed: H2 first, small subtitle BELOW it (consistent across the site).
  */
-export const Section: React.FC<SectionProps> = ({ title, subtitle, children, className = '', dark = false }) => {
+export const Section: React.FC<SectionProps> = ({
+  title,
+  subtitle,
+  children,
+  className = '',
+  dark = false,
+  accent = 'blue',
+}) => {
   return (
-    <section className={`py-20 md:py-28 px-4 ${dark ? 'bg-foreground text-background' : 'bg-background text-foreground'} ${className}`}>
+    <section
+      data-accent={accent}
+      className={`section-accent py-20 md:py-28 px-4 ${dark ? 'bg-foreground text-background' : 'bg-background text-foreground'} ${className}`}
+    >
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12 md:mb-16">
-          <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium tracking-widest uppercase mb-4 ${dark ? 'bg-background/10 text-background' : 'bg-foreground/5 text-foreground/70'}`}>
-            {subtitle || title}
-          </div>
+        <header className="mb-12 md:mb-16">
           <h2 className={`text-3xl md:text-5xl font-bold tracking-tight ${dark ? 'text-background' : 'text-foreground'}`}>
             {title}
           </h2>
-        </div>
+          {subtitle && (
+            <p className={`mt-3 text-base md:text-lg ${dark ? 'text-background/70' : 'text-muted-foreground'}`}>
+              {subtitle}
+            </p>
+          )}
+        </header>
         {children}
       </div>
     </section>
