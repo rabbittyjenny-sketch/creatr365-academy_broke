@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { HoverLetters } from '@/components/HoverLetters';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Monitor, Users, Layers } from 'lucide-react';
 
@@ -60,11 +59,11 @@ const Courses: React.FC = () => {
 
       <section className="pt-28 pb-16 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            <HoverLetters text="หลักสูตรทั้งหมด" accent="red" variant="underline" />
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4" data-accent="red">
+            หลักสูตรทั้งหมด
           </h1>
-          <p className="text-muted-foreground text-lg mb-12">
-            <HoverLetters text="ครอบคลุมทุกระดับ" accent="blue" variant="underline" />
+          <p className="text-muted-foreground text-lg mb-12" data-accent="blue">
+            ครอบคลุมทุกระดับ
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -98,19 +97,15 @@ const Courses: React.FC = () => {
                           <LearnIcon className="w-3 h-3" /> {learning.label}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-bold mb-1">
-                        <HoverLetters text={course.title} accent={accent} />
-                      </h3>
-                      <p className="text-muted-foreground text-sm mb-4">
-                        <HoverLetters text={course.subtitle} accent={accent} />
-                      </p>
+                      <h3 className="card-water-title text-2xl font-bold mb-1" data-accent={accent}>{course.title}</h3>
+                      <p className="text-muted-foreground text-sm mb-4" data-accent={accent}>{course.subtitle}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{course.description}</p>
                       <div className="pt-4 mt-auto border-t border-border flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">{course.format_label || course.duration}</span>
                         {course.price?.trim() && <span className="font-bold text-foreground">{course.price}</span>}
                       </div>
                       <div className="mt-3 flex items-center gap-1 text-sm font-medium text-foreground/80">
-                        <HoverLetters text="สมัครเรียน" accent={accent} />
+                        <span data-accent={accent}>สมัครเรียน</span>
                         <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
