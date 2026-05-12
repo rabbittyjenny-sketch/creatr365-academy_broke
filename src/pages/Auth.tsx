@@ -90,10 +90,10 @@ const Auth = () => {
             <Link to="/" className="inline-block mb-6">
               <img src={logoCreatr} alt="Creatr365" className="h-12 w-auto mx-auto" />
             </Link>
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-2xl font-bold text-foreground" data-accent="green">
               {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground" data-accent="green">
               {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
             </p>
           </div>
@@ -104,18 +104,18 @@ const Auth = () => {
               <div className="mt-1.5 flex items-center justify-between gap-3 text-xs">
                 <p className="ml-1 text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
                 {isLogin && (
-                  <button type="button" onClick={handleForgotPassword} disabled={loading} className="shrink-0 text-foreground/70 hover:text-foreground transition-opacity disabled:opacity-50">
+                  <button type="button" onClick={handleForgotPassword} disabled={loading} data-accent="green" className="shrink-0 text-foreground/70 disabled:opacity-50">
                     ลืมรหัสผ่าน?
                   </button>
                 )}
               </div>
             </div>
-            <button type="submit" disabled={loading} className="w-full h-12 bg-foreground text-background rounded-full font-medium hover:opacity-90 transition-all disabled:opacity-50">
+            <button type="submit" disabled={loading} data-accent="green" className="btn-brand w-full h-12 rounded-lg font-medium disabled:opacity-50">
               {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </button>
           </form>
           <p className="text-center text-sm text-muted-foreground">
-            <button onClick={() => setIsLogin(!isLogin)} className="hover:text-foreground transition-colors">
+            <button onClick={() => setIsLogin(!isLogin)} data-accent="green">
               {isLogin ? 'ยังไม่มีบัญชี? สมัครสมาชิก' : 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ'}
             </button>
           </p>
