@@ -18,7 +18,7 @@ const Home: React.FC = () => {
       <CourseNavbar />
 
       {/* Hero — full-bleed image + 2 CTAs */}
-      <section className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground pt-20 pb-12">
+      <section className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground pt-16 pb-12">
         <div className="w-full">
           <img
             src={heroImage}
@@ -30,14 +30,16 @@ const Home: React.FC = () => {
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in [animation-delay:600ms]">
             <Link
               to="/courses"
-              className="group px-8 py-4 bg-foreground text-background rounded-lg text-base font-medium hover:opacity-90 transition-all inline-flex items-center justify-center gap-2"
+              data-accent="blue"
+              className="btn-brand group px-8 py-4 rounded-lg text-base font-medium"
             >
               ดูหลักสูตรทั้งหมด
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/auth"
-              className="px-8 py-4 border border-foreground text-foreground rounded-lg text-base font-medium hover:bg-foreground/5 transition-all text-center"
+              data-accent="green"
+              className="btn-brand btn-brand--outline px-8 py-4 rounded-lg text-base font-medium text-center"
             >
               สมัครเรียน
             </Link>
@@ -73,7 +75,7 @@ const Home: React.FC = () => {
         accent="red"
         dark
       >
-        <div className="max-w-3xl mx-auto space-y-5 text-background/90 text-lg md:text-xl leading-relaxed">
+        <div className="max-w-4xl mx-auto space-y-5 text-background/90 text-lg md:text-xl leading-relaxed">
           <p>วันนี้ Live Commerce ไม่ใช่แค่การไลฟ์ขายของอีกต่อไป</p>
           <p>
             แต่กำลังเปลี่ยนจาก{' '}
@@ -81,7 +83,8 @@ const Home: React.FC = () => {
           </p>
           <p>
             และอาชีพ <span className="font-semibold">Live Streamer</span> หรือ{' '}
-            <span className="font-semibold">Host</span> ก็เป็นหนึ่งในอาชีพที่เติบโตเร็วที่สุดในยุค Creator Economy
+            <span className="font-semibold">Host</span> ก็เป็นหนึ่งในอาชีพที่เติบโตเร็วที่สุดในยุค{' '}
+            <span className="whitespace-nowrap">Creator Economy</span>
           </p>
           <p>แต่ในปัจจุบันอาชีพนี้ก็ยังไม่เพียงพอต่อความต้องการของตลาด เพราะแบรนด์ใหญ่...</p>
           <p className="text-background font-semibold text-xl md:text-2xl pt-2">
@@ -99,10 +102,10 @@ const Home: React.FC = () => {
         subtitle="แนวคิดของเรา"
         accent="green"
       >
-        <div className="max-w-3xl mx-auto space-y-5 text-foreground/90 text-lg md:text-xl leading-relaxed">
+        <div className="max-w-4xl mx-auto space-y-5 text-foreground/90 text-lg md:text-xl leading-relaxed">
           <p>
             เพราะเราเชื่อว่า Live Commerce อาจไม่ได้ต้องการคนที่เสียงดัง
-            หรือแค่สร้างยอดขายได้เพียงอย่างเดียว
+            หรือแค่สร้างยอดขายได้เพียง<span className="whitespace-nowrap">อย่างเดียว</span>
           </p>
           <p>
             แต่ควรเติบโตด้วยความเข้าใจผู้บริโภค เข้าใจกฎหมายและความถูกต้อง
@@ -115,19 +118,28 @@ const Home: React.FC = () => {
           <p className="pt-4 text-foreground italic border-l-2 border-foreground/20 pl-5">
             “ด้วยการเรียนรู้ที่เป็นแบบ Learning Flow ที่ภายในระบบการเรียน
             จะมีทั้ง Free Courses และ Foundation Courses สำหรับคนที่เริ่มต้น
-            ไปจนถึงหลักสูตรด้าน Psychology Communication”
+            ไปจนถึงหลักสูตรด้าน <span className="whitespace-nowrap">Psychology Communication”</span>
           </p>
         </div>
       </Section>
 
-      {/* Value Ladder */}
+      {/* Target Audience */}
       <Section
-        title="VALUE LADDER"
-        subtitle="ออกแบบสำหรับทุกเส้นทางของคุณ"
-        accent="yellow"
+        title="ใครควรเรียน?"
+        subtitle="กลุ่มเป้าหมายของหลักสูตร"
+        accent="blue"
         dark
       >
-        <div className="max-w-2xl mx-auto text-background/90 text-lg md:text-xl leading-relaxed">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {targetAudience.map((item, i) => (
+            <div key={i} className="card-water bg-background/5 border border-background/20 p-6">
+              <h3 className="text-lg font-bold text-background mb-2">{item.title}</h3>
+              <p className="text-background/70 text-sm mb-4 leading-relaxed">{item.desc}</p>
+              <p className="text-xs font-semibold text-background/70 pt-3 border-t border-background/20">แนะนำ: {item.recommend}</p>
+            </div>
+          ))}
+        </div>
+        <div className="max-w-2xl mx-auto mt-12 text-background/90 text-lg md:text-xl leading-relaxed">
           <p className="mb-6">ไม่ว่าคุณจะเป็น</p>
           <ul className="space-y-3 mb-8">
             {[
@@ -137,7 +149,7 @@ const Home: React.FC = () => {
               'หรือคนที่อยากเข้าสู่ตลาด Global Commerce',
             ].map((item) => (
               <li key={item} className="flex gap-3">
-                <span className="text-background/50">—</span>
+                <span className="text-background/50">✦</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -149,28 +161,11 @@ const Home: React.FC = () => {
         <div className="mt-12 text-center">
           <Link
             to="/courses"
-            className="group inline-flex items-center gap-2 px-6 py-3 border border-background/30 text-background rounded-full hover:bg-background/10 transition-all text-sm font-medium"
+            data-accent="blue"
+            className="btn-brand btn-brand--outline group px-6 py-3 rounded-lg text-sm font-medium border-background/30 text-background"
           >
             ดูหลักสูตรทั้งหมด <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </div>
-      </Section>
-
-      {/* Target Audience */}
-      <Section
-        title="ใครควรเรียน?"
-        subtitle="กลุ่มเป้าหมายของหลักสูตร"
-        accent="blue"
-        className="bg-muted/40"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {targetAudience.map((item, i) => (
-            <div key={i} className="card-water rounded-2xl bg-card border border-border p-6">
-              <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{item.desc}</p>
-              <p className="text-xs font-semibold text-foreground/70 pt-3 border-t border-border">แนะนำ: {item.recommend}</p>
-            </div>
-          ))}
         </div>
       </Section>
 
