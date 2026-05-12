@@ -505,7 +505,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 }
 .btn-brand--outline {
   background: transparent;
-  color: currentColor;
+  color: inherit;
   border-color: currentColor;
 }
 .btn-brand--outline:hover {
