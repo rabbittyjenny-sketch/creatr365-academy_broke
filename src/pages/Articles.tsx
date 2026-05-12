@@ -34,8 +34,8 @@ const Articles: React.FC = () => {
 
       <section className="pt-28 pb-16 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">บทความ</h1>
-          <p className="text-muted-foreground text-lg mb-12">ข่าวสาร · เครื่องมือ · ชุมชน</p>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4" data-accent="yellow">บทความ</h1>
+          <p className="text-muted-foreground text-lg mb-12" data-accent="yellow">ข่าวสาร · เครื่องมือ · ชุมชน</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {items.map((a, idx) => {
@@ -49,7 +49,7 @@ const Articles: React.FC = () => {
                 : { href: a.target_url, target: '_blank', rel: 'noopener noreferrer' };
               return (
                 <Wrapper key={a.id} {...wrapperProps} className="group">
-                  <div className="card-water rounded-2xl border border-border bg-card h-full flex flex-col" data-accent={accent}>
+                  <div className="card-water border border-border bg-card h-full flex flex-col" data-accent={accent}>
                     {a.cover_image_url && (
                       <img src={a.cover_image_url} alt={a.title} className="w-full aspect-video object-cover border-b border-border" />
                     )}
@@ -60,9 +60,9 @@ const Articles: React.FC = () => {
                         </span>
                       </div>
                       <h3 className="card-water-title text-xl font-bold mb-2 transition-colors">{a.title}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{a.summary}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1" data-accent={accent}>{a.summary}</p>
                       <div className="mt-auto pt-4 border-t border-border flex items-center gap-1 text-sm font-medium text-foreground/80">
-                        <span>เข้าใช้งาน</span>
+                        <span data-accent={accent}>เข้าใช้งาน</span>
                         <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>

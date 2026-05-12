@@ -184,7 +184,7 @@ const Dashboard: React.FC = () => {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 pt-24 pb-24">
         <div>
           <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
-          <h1 className="text-2xl font-bold">{displayName}</h1>
+          <h1 className="text-2xl font-bold" data-accent="green">{displayName}</h1>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-xs font-mono bg-muted border border-border px-2 py-0.5 rounded-md">{keyId}</span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
             { label:'บทที่ผ่าน', value:`${completedModules}/${totalModules}`, accent:'green' },
             { label:'ใบประกาศ', value:certCount, accent:'yellow' },
           ].map(s=>(
-            <div key={s.label} className="bg-card border border-border rounded-2xl p-3 text-center">
+            <div key={s.label} className="card-water bg-card border border-border p-3 text-center" data-accent={s.accent}>
               <p className="text-xl font-black hover-shift" data-accent={s.accent}>{s.value as any}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
             </div>
@@ -221,7 +221,7 @@ const Dashboard: React.FC = () => {
                 const pct = total ? Math.round(done/total*100) : 0;
                 const isOpen = openCourse === x.course.id;
                 return (
-                  <div key={x.course.id} className="rounded-2xl border border-border bg-card overflow-hidden">
+                  <div key={x.course.id} className="card-water border border-border bg-card overflow-hidden" data-accent={x.accent}>
                     <div className="p-5 flex items-start gap-4">
                       <div className="w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0">
                         {x.course.title.slice(0,1)}
@@ -245,7 +245,8 @@ const Dashboard: React.FC = () => {
                         )}
                       </div>
                       <button onClick={()=>setOpenCourse(isOpen?null:x.course.id)}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-border hover:bg-muted">
+                        data-accent={x.accent}
+                        className="btn-brand btn-brand--outline text-xs px-3 py-1.5 rounded-lg border-border">
                         {isOpen?'ซ่อน':'เปิด'}
                       </button>
                     </div>
@@ -255,8 +256,8 @@ const Dashboard: React.FC = () => {
                           const locked = m._status==='locked';
                           const dn = m._status==='completed';
                           return (
-                            <button key={m.id} disabled={locked} onClick={()=>setSelected({course:x.course, mod:m})}
-                              className={`w-full text-left flex items-center gap-3 p-3 rounded-xl ${locked?'opacity-40 cursor-not-allowed':'hover:bg-muted'}`}>
+                            <button key={m.id} disabled={locked} onClick={()=>setSelected({course:x.course, mod:m})} data-accent={x.accent}
+                              className={`w-full text-left flex items-center gap-3 p-3 rounded-lg ${locked?'opacity-40 cursor-not-allowed':'hover:bg-muted'}`}>
                               <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs ${dn?'bg-foreground text-background border-foreground':'border-border'}`}>
                                 {dn ? <Check className="w-4 h-4"/> : locked ? <Lock className="w-4 h-4"/> : <Play className="w-4 h-4"/>}
                               </div>
