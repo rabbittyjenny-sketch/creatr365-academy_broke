@@ -89,7 +89,7 @@ const Enroll: React.FC = () => {
         <CourseNavbar />
         <div className="pt-28 px-4 text-center">
           <h1 className="text-3xl font-bold mb-4">ไม่พบหลักสูตร</h1>
-          <Link to="/courses" className="text-primary hover:underline">กลับไปดูหลักสูตรทั้งหมด</Link>
+          <Link to="/courses" data-accent="green" className="nav-link text-primary">กลับไปดูหลักสูตรทั้งหมด</Link>
         </div>
       </>
     );
