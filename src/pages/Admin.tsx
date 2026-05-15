@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { SEOHead } from '@/components/SEOHead';
+import { ArrowLeft } from 'lucide-react';
 
 // Input validation schema
 const eventSchema = z.object({
@@ -258,13 +259,22 @@ const Admin = () => {
         description="Manage events and content for your event platform"
       />
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-normal text-[#1A1A1A] tracking-[-0.02em]">
-            Event CMS
-          </h1>
-          <Button onClick={handleSignOut} variant="outline">
-            Sign Out
-          </Button>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <ArrowLeft className="w-4 h-4 mr-1"/>หน้าหลัก
+            </Button>
+            <h1 className="text-2xl font-bold">Event CMS</h1>
+          </div>
+          <Button onClick={handleSignOut} variant="outline" size="sm">ออกจากระบบ</Button>
+        </div>
+
+        {/* Admin navigation */}
+        <div className="flex gap-1 flex-wrap mb-8 border-b pb-4">
+          <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
+          <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
+          <Link to="/admin/payments"><Button variant="outline" size="sm">การชำระเงิน</Button></Link>
+          <Button variant="default" size="sm">Event CMS (นี่คือ)</Button>
         </div>
 
         {selectedEvent && (

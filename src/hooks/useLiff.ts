@@ -13,6 +13,7 @@ export type LiffProfile = {
 type LiffState = {
   ready: boolean;
   loggedIn: boolean;
+  isInClient: boolean;
   profile: LiffProfile | null;
   accessToken: string | null;
   error: string | null;
@@ -22,6 +23,7 @@ export function useLiff() {
   const [state, setState] = useState<LiffState>({
     ready: false,
     loggedIn: false,
+    isInClient: false,
     profile: null,
     accessToken: null,
     error: null,
@@ -36,15 +38,17 @@ export function useLiff() {
     liff
       .init({ liffId: LIFF_ID })
       .then(async () => {
+        // isInClient is only valid after init()
+        const isInClient = liff.isInClient();
         const loggedIn = liff.isLoggedIn();
         if (loggedIn) {
           const [profile, accessToken] = await Promise.all([
             liff.getProfile(),
             Promise.resolve(liff.getAccessToken()),
           ]);
-          setState({ ready: true, loggedIn: true, profile, accessToken, error: null });
+          setState({ ready: true, loggedIn: true, isInClient, profile, accessToken, error: null });
         } else {
-          setState({ ready: true, loggedIn: false, profile: null, accessToken: null, error: null });
+          setState({ ready: true, loggedIn: false, isInClient, profile: null, accessToken: null, error: null });
         }
       })
       .catch((err: Error) => {
@@ -61,7 +65,5 @@ export function useLiff() {
     setState(s => ({ ...s, loggedIn: false, profile: null, accessToken: null }));
   }, []);
 
-  const isInClient = liff.isInClient?.() ?? false;
-
-  return { ...state, login, logout, isInClient };
+  return { ...state, login, logout };
 }

@@ -20,40 +20,35 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${access_token}` },
     });
     if (!profileRes.ok) {
-      throw new Error(`LINE API error: ${profileRes.status}`);
+      const errText = await profileRes.text();
+      throw new Error(`LINE API error ${profileRes.status}: ${errText}`);
     }
     const lineProfile = await profileRes.json() as {
       userId: string;
       displayName: string;
       pictureUrl?: string;
     };
+    if (!lineProfile.userId) throw new Error("Invalid LINE profile response");
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Check if this LINE user already has a linked Supabase account
+    // Synthetic email — one unique email per LINE user, never changes
+    const syntheticEmail = `line_${lineProfile.userId}@line.creatr365.com`;
+
+    // Step 1: Check if this LINE user already has a linked profile
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
       .select("user_id")
       .eq("line_user_id", lineProfile.userId)
       .maybeSingle();
 
-    let supabaseUserId: string;
-    let userEmail: string;
-
-    if (existingProfile?.user_id) {
-      // Existing user – get their email to generate a magic link
-      supabaseUserId = existingProfile.user_id;
-      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(supabaseUserId);
-      if (!userData?.user?.email) throw new Error("Linked user not found");
-      userEmail = userData.user.email;
-    } else {
-      // New user – create a Supabase account tied to their LINE user ID
-      userEmail = `line_${lineProfile.userId}@line.creatr365.com`;
-      const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-        email: userEmail,
+    if (!existingProfile?.user_id) {
+      // Step 2: New user — create Supabase account (idempotent: ignore duplicate-email error)
+      const { data: newUser } = await supabaseAdmin.auth.admin.createUser({
+        email: syntheticEmail,
         email_confirm: true,
         user_metadata: {
           line_user_id: lineProfile.userId,
@@ -62,29 +57,24 @@ serve(async (req) => {
           provider: "line",
         },
       });
-      if (createErr) {
-        // User may already exist with this email but without profile row
-        const { data: existing } = await supabaseAdmin.auth.admin.listUsers();
-        const found = existing?.users?.find(u => u.email === userEmail);
-        if (!found) throw new Error(createErr.message);
-        supabaseUserId = found.id;
-      } else {
-        supabaseUserId = newUser.user.id;
-      }
 
-      // Create or update profile with line_user_id
-      await supabaseAdmin.from("profiles").upsert({
-        user_id: supabaseUserId,
-        line_user_id: lineProfile.userId,
-        display_name: lineProfile.displayName,
-        avatar_url: lineProfile.pictureUrl ?? null,
-      }, { onConflict: "user_id" });
+      if (newUser?.user?.id) {
+        // Upsert profile with LINE data
+        await supabaseAdmin.from("profiles").upsert({
+          user_id: newUser.user.id,
+          line_user_id: lineProfile.userId,
+          display_name: lineProfile.displayName,
+          avatar_url: lineProfile.pictureUrl ?? null,
+        }, { onConflict: "user_id" });
+      }
+      // If createUser failed (email already exists from a partial prior run),
+      // generateLink below will still work because syntheticEmail exists in auth.users
     }
 
-    // Generate a magic link token for this user
+    // Step 3: Generate a one-time magic-link token (works for both new & existing users)
     const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
-      email: userEmail,
+      email: syntheticEmail,
     });
     if (linkErr || !linkData?.properties?.hashed_token) {
       throw new Error(linkErr?.message ?? "Failed to generate login token");

@@ -102,7 +102,7 @@ export const EventDetailPage: React.FC = () => {
             The event you're looking for doesn't exist or has been removed.
           </p>
           <button
-            onClick={() => navigate('/discover')}
+            onClick={() => navigate('/events')}
             className="px-6 py-3 bg-[#1A1A1A] text-white border border-[#1A1A1A] hover:bg-white hover:text-[#1A1A1A] transition-colors uppercase text-sm font-medium"
           >
             Browse Events
