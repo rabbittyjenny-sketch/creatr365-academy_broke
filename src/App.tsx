@@ -15,6 +15,10 @@ import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
 import Articles from "./pages/Articles";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
+import Discover from "./pages/Discover";
+import MyEvents from "./pages/MyEvents";
+import CreateEvent from "./pages/CreateEvent";
+import EditEvent from "./pages/EditEvent";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -36,6 +40,10 @@ const App = () => (
         <Route path="/admin/payments" element={<AdminPayments />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
+        <Route path="/events" element={<Discover />} />
+        <Route path="/my-events" element={<MyEvents />} />
+        <Route path="/create-event" element={<CreateEvent />} />
+        <Route path="/edit-event/:id" element={<EditEvent />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

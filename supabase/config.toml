@@ -2,3 +2,9 @@ project_id = "iellfdkapaopvjkcjjsj"
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.liff-auth]
+verify_jwt = false
+
+[functions.make-webhook]
+verify_jwt = false
