@@ -19,6 +19,7 @@ import Discover from "./pages/Discover";
 import MyEvents from "./pages/MyEvents";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
+import { EventDetailPage } from "./components/EventDetailPage";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -41,6 +42,7 @@ const App = () => (
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
         <Route path="/events" element={<Discover />} />
+        <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/my-events" element={<MyEvents />} />
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/edit-event/:id" element={<EditEvent />} />
