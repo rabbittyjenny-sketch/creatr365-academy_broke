@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
+import Admin from "./pages/Admin";
 import Articles from "./pages/Articles";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
 import Discover from "./pages/Discover";
@@ -36,6 +37,7 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/admin/courses" element={<AdminCourses />} />
         <Route path="/admin/assignments" element={<AdminAssignments />} />
         <Route path="/admin/payments" element={<AdminPayments />} />

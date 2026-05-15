@@ -48,7 +48,15 @@ interface ModuleRow {
   has_quiz: boolean;
   has_assignment: boolean;
   sort_order: number;
+  phase: 'pre' | 'main' | 'post';
+  is_test: boolean;
 }
+
+const PHASE_OPTIONS = [
+  { value: 'pre',  label: 'Pre-Test (ก่อนเรียน)' },
+  { value: 'main', label: 'เนื้อหาหลัก' },
+  { value: 'post', label: 'Post-Test (หลังเรียน)' },
+];
 
 interface PromoCode {
   id: string;
@@ -273,7 +281,8 @@ const AdminCourses = () => {
   const saveModule = async (m: ModuleRow) => {
     const { error } = await supabase.from('course_modules').update({
       code: m.code, name: m.name, summary: m.summary, duration_label: m.duration_label,
-      vod_url: m.vod_url, has_quiz: m.has_quiz, has_assignment: m.has_assignment, sort_order: m.sort_order,
+      vod_url: m.vod_url, has_quiz: m.has_quiz, has_assignment: m.has_assignment,
+      sort_order: m.sort_order, phase: m.phase, is_test: m.is_test,
     } as any).eq('id', m.id);
     if (error) toast({ title: 'Error', description: error.message, variant: 'destructive' });
     else toast({ title: 'บันทึกโมดูลแล้ว' });
@@ -340,14 +349,22 @@ const AdminCourses = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <SEOHead title="จัดการหลักสูตร - Admin" description="Admin course management" />
       <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-              <ArrowLeft className="w-4 h-4 mr-1" /> กลับหน้าหลัก
+              <ArrowLeft className="w-4 h-4 mr-1" /> หน้าหลัก
             </Button>
             <h1 className="text-2xl font-bold">จัดการหลักสูตร</h1>
           </div>
           <Button onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))} variant="outline" size="sm">ออกจากระบบ</Button>
+        </div>
+
+        {/* Admin navigation */}
+        <div className="flex gap-1 flex-wrap mb-6 border-b pb-4">
+          <Button variant="default" size="sm">หลักสูตร (นี่คือ)</Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin/assignments')}>รายการงานส่ง</Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin/payments')}>การชำระเงิน</Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>Event CMS</Button>
         </div>
 
         <div className="flex gap-2 mb-6">
@@ -556,7 +573,21 @@ const AdminCourses = () => {
                             </div>
                             <Textarea rows={2} value={m.summary || ''} onChange={e => updateModule(m, { summary: e.target.value })} placeholder="สรุปสั้นๆ" />
                             <Input value={m.vod_url || ''} onChange={e => updateModule(m, { vod_url: e.target.value || null })} placeholder="VOD URL (YouTube / mp4)" />
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex flex-wrap items-center gap-3 text-sm">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground">Phase:</span>
+                                <select
+                                  value={m.phase || 'main'}
+                                  onChange={e => updateModule(m, { phase: e.target.value as ModuleRow['phase'] })}
+                                  className="border rounded px-2 py-1 text-xs bg-white"
+                                >
+                                  {PHASE_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                                </select>
+                              </div>
+                              <label className="flex items-center gap-1">
+                                <input type="checkbox" checked={m.is_test || false} onChange={e => updateModule(m, { is_test: e.target.checked })} />
+                                <span className="text-xs">เป็นแบบทดสอบ</span>
+                              </label>
                               <label className="flex items-center gap-1">
                                 <input type="checkbox" checked={m.has_quiz} onChange={e => updateModule(m, { has_quiz: e.target.checked })} /> มี Quiz
                               </label>
