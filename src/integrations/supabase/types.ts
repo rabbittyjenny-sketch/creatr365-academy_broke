@@ -677,6 +677,42 @@ export type Database = {
           },
         ]
       }
+      user_accounts: {
+        Row: {
+          id: string
+          line_user_id: string
+          email: string | null
+          student_id: string | null
+          password_hash: string | null
+          hash_algorithm: string
+          is_active: boolean
+          registered_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          line_user_id: string
+          email?: string | null
+          student_id?: string | null
+          password_hash?: string | null
+          hash_algorithm?: string
+          is_active?: boolean
+          registered_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          line_user_id?: string
+          email?: string | null
+          student_id?: string | null
+          password_hash?: string | null
+          hash_algorithm?: string
+          is_active?: boolean
+          registered_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
