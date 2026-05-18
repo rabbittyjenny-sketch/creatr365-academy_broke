@@ -117,7 +117,8 @@ function ModuleModal({ course, mod, onClose, onUploaded }:{
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<{id:string;email?:string}|null>(null);
-  const [profile, setProfile] = useState<{display_name?:string}|null>(null);
+  const [profile, setProfile] = useState<{display_name?:string;line_user_id?:string}|null>(null);
+  const [studentId, setStudentId] = useState<string|null>(null);
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [progress, setProgress] = useState<ProgressRow[]>([]);
@@ -130,13 +131,22 @@ const Dashboard: React.FC = () => {
     if (!session?.user) { navigate('/auth'); return; }
     setUser({ id: session.user.id, email: session.user.email });
     const [{ data: prof }, { data: cs }, { data: ms }, { data: pr }, { data: en }] = await Promise.all([
-      supabase.from('profiles').select('display_name').eq('user_id', session.user.id).maybeSingle(),
+      supabase.from('profiles').select('display_name,line_user_id').eq('user_id', session.user.id).maybeSingle(),
       supabase.from('courses').select('id,slug,tag,title,subtitle,color,learning_type,level').eq('is_active', true).order('sort_order'),
       supabase.from('course_modules').select('*').order('sort_order'),
       supabase.from('module_progress').select('module_id,status').eq('user_id', session.user.id),
       supabase.from('course_enrollments').select('id,course_id,status').eq('user_id', session.user.id),
     ]);
     setProfile(prof||null);
+    // Fetch student_id (STU-XXXX) from user_accounts if line_user_id is available
+    if ((prof as any)?.line_user_id) {
+      const { data: acct } = await supabase
+        .from('user_accounts')
+        .select('student_id')
+        .eq('line_user_id', (prof as any).line_user_id)
+        .maybeSingle();
+      if ((acct as any)?.student_id) setStudentId((acct as any).student_id);
+    }
     setCourses((cs as any)||[]);
     setModules((ms as any)||[]);
     setProgress((pr as any)||[]);
@@ -173,7 +183,7 @@ const Dashboard: React.FC = () => {
   const certCount = completedCourses.length;
   const highestLevelIdx = Math.max(0, ...completedCourses.map(x => Math.max(0, LEVEL_NAMES.indexOf((x.course.level||'STARTER').toUpperCase()))));
   const currentLevel = enrolledCourses.length === 0 ? 'GUEST' : (certCount > 0 ? LEVEL_NAMES[highestLevelIdx] : 'STARTER');
-  const keyId = `ID365-${user.id.slice(0,6).toUpperCase()}`;
+  const keyId = studentId || `ID365-${user.id.slice(0,6).toUpperCase()}`;
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'นักเรียน';
 
   return (
