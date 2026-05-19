@@ -103,7 +103,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => {
+    load();
+    // reload progress เมื่อกลับจาก LMS (tab กลับมา focus)
+    const onFocus = () => load();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+    // eslint-disable-next-line
+  }, []);
 
   const enrolledIds = useMemo(() =>
     new Set(enrollments.filter(e => ['paid', 'free', 'active'].includes(e.status)).map(e => e.course_id)),
@@ -124,7 +131,7 @@ const Dashboard: React.FC = () => {
     return map;
   }, [modules]);
 
-  if (!user) return null;
+  if (!user || studentId === null) return null;
 
   const enrolledCourses = courses
     .filter(c => enrolledIds.has(c.id))
