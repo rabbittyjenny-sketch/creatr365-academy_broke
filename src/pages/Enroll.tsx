@@ -44,7 +44,12 @@ const Enroll: React.FC = () => {
       setPaymentSuccess(true);
       const enrollmentId = searchParams.get('enrollment_id');
       if (enrollmentId) {
-        supabase.functions.invoke('verify-payment', { body: { enrollmentId } }).catch(() => {});
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          supabase.functions.invoke('verify-payment', {
+            body: { enrollmentId },
+            headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+          }).catch(() => {});
+        });
       }
     }
   }, [searchParams]);
@@ -101,12 +106,15 @@ const Enroll: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Refresh session first to ensure token is valid (critical for LIFF magic-link sessions)
+    await supabase.auth.getSession();
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) { navigate('/auth'); return; }
+    if (!session?.access_token) { navigate('/auth'); return; }
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { courseId: course.id, fullName, phone, promoCode: promoCode || null },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (error) throw new Error(error.message);
