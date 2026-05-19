@@ -32,27 +32,34 @@ const Enroll: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [course, setCourse] = useState<CourseRow | null>(null);
   const [isFull, setIsFull] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      setPaymentSuccess(true);
-      const enrollmentId = searchParams.get('enrollment_id');
-      if (enrollmentId) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          supabase.functions.invoke('verify-payment', {
-            body: { enrollmentId },
-            headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
-          }).catch(() => {});
+    if (searchParams.get('success') !== 'true') return;
+    setPaymentSuccess(true);
+    const enrollmentId = searchParams.get('enrollment_id');
+    if (!enrollmentId) { setTimeout(() => navigate('/dashboard'), 2000); return; }
+
+    setVerifying(true);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      try {
+        await supabase.functions.invoke('verify-payment', {
+          body: { enrollmentId },
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
         });
-      }
-    }
-  }, [searchParams]);
+      } catch {}
+      setVerifying(false);
+      setTimeout(() => navigate('/dashboard'), 1500);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -78,10 +85,15 @@ const Enroll: React.FC = () => {
         <CourseNavbar />
         <div className="pt-28 pb-16 px-4 bg-background min-h-screen flex items-center justify-center">
           <div className="max-w-md text-center">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">สมัครสำเร็จ!</h1>
-            <p className="text-muted-foreground mb-6">ขอบคุณที่สมัครเรียนกับเรา ระบบจะส่งรายละเอียดไปยังอีเมลของคุณ</p>
-            <Link to="/dashboard" data-accent="green" className="nav-link text-primary">ไปหน้า Dashboard</Link>
+            {verifying ? (
+              <Loader2 className="w-16 h-16 text-muted-foreground mx-auto mb-4 animate-spin" />
+            ) : (
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            )}
+            <h1 className="text-2xl font-bold mb-2">{verifying ? 'กำลังยืนยันการชำระเงิน...' : 'ชำระเงินสำเร็จ!'}</h1>
+            <p className="text-muted-foreground mb-6">
+              {verifying ? 'รอสักครู่ กำลังเปิดคอร์สของคุณ' : 'กำลังพาไปหน้า Dashboard...'}
+            </p>
           </div>
         </div>
       </>
@@ -113,7 +125,7 @@ const Enroll: React.FC = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { courseId: course.id, fullName, phone, promoCode: promoCode || null },
+        body: { courseId: course.id, fullName, phone, email: email.trim() || null, promoCode: promoCode || null },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
@@ -170,6 +182,13 @@ const Enroll: React.FC = () => {
                   <label className="block text-sm font-medium mb-1.5">ชื่อ-นามสกุล</label>
                   <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm" placeholder="กรอกชื่อ-นามสกุล" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">
+                    อีเมล <span className="text-muted-foreground font-normal text-xs">(สำหรับรับใบเสร็จ)</span>
+                  </label>
+                  <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm" placeholder="your@email.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">เบอร์โทรศัพท์</label>

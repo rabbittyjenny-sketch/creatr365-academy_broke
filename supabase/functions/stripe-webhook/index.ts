@@ -37,13 +37,31 @@ serve(async (req) => {
 
     if (enrollmentId) {
       // Update enrollment to paid
-      await supabaseAdmin
+      const { data: enr } = await supabaseAdmin
         .from("course_enrollments")
-        .update({
-          status: "paid",
-          stripe_session_id: session.id,
-        })
-        .eq("id", enrollmentId);
+        .update({ status: "paid", stripe_session_id: session.id })
+        .eq("id", enrollmentId)
+        .select("user_id, course_id")
+        .single();
+
+      // Unlock first module for the student
+      if (enr?.course_id && enr?.user_id) {
+        const { data: firstModule } = await supabaseAdmin
+          .from("course_modules")
+          .select("id")
+          .eq("course_id", enr.course_id)
+          .order("sort_order", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (firstModule) {
+          await supabaseAdmin
+            .from("module_progress")
+            .upsert(
+              { user_id: enr.user_id, module_id: firstModule.id, status: "unlocked" },
+              { onConflict: "user_id,module_id" }
+            );
+        }
+      }
 
       // Increment promo usage
       if (promoCodeId) {

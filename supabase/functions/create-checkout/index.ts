@@ -25,8 +25,10 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { courseId, fullName, phone, promoCode } = await req.json();
+    const { courseId, fullName, phone, promoCode, email: submittedEmail } = await req.json();
     if (!courseId) throw new Error("courseId is required");
+    // Use submitted real email for Stripe receipts; fall back to Supabase auth email (may be synthetic LINE email)
+    const receiptEmail = (submittedEmail as string | null) || user.email || "";
 
     // Use service role to bypass RLS for admin operations
     const supabaseAdmin = createClient(
@@ -175,13 +177,13 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email: receiptEmail, limit: 1 });
     let customerId: string | undefined;
     if (customers.data.length > 0) customerId = customers.data[0].id;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : receiptEmail,
       line_items: [
         {
           price_data: {
