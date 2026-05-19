@@ -1,0 +1,2 @@
+[functions.save-score]
+verify_jwt = false

@@ -1,0 +1,2 @@
+[functions.get-enrollment]
+verify_jwt = false
