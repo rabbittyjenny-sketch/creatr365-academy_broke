@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
     return map;
   }, [modules]);
 
-  if (!user) return null;
+  if (!user || studentId === null) return null;
 
   const enrolledCourses = courses
     .filter(c => enrolledIds.has(c.id))
