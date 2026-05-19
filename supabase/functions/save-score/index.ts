@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { student_id, module_code, score, passed } = await req.json();
+    const { student_id, course_slug, module_code, score, passed } = await req.json();
     if (!student_id || !module_code) throw new Error("student_id and module_code required");
 
     const supabase = createClient(
@@ -42,14 +42,45 @@ serve(async (req) => {
       authUserId = profile.user_id;
     }
 
-    // หา module_id จาก code
-    const { data: mod, error: modErr } = await supabase
-      .from("course_modules")
-      .select("id")
-      .eq("code", module_code)
-      .maybeSingle();
-    if (modErr) throw new Error("course_modules lookup failed: " + modErr.message);
-    if (!mod) throw new Error("module_code not found: " + module_code);
+    // หา module: ลอง course_slug + module_code ก่อน, fallback ด้วย module_code เดียว
+    let mod: { id: string } | null = null;
+
+    if (course_slug) {
+      const { data: course } = await supabase
+        .from("courses")
+        .select("id")
+        .eq("slug", course_slug)
+        .maybeSingle();
+
+      if (course?.id) {
+        const { data: m } = await supabase
+          .from("course_modules")
+          .select("id")
+          .eq("course_id", course.id)
+          .eq("code", module_code)
+          .maybeSingle();
+        mod = m ?? null;
+      }
+    }
+
+    // fallback: หา module_code โดยไม่สนใจ course
+    if (!mod) {
+      const { data: m, error: modErr } = await supabase
+        .from("course_modules")
+        .select("id")
+        .eq("code", module_code)
+        .maybeSingle();
+      if (modErr) throw new Error("course_modules lookup failed: " + modErr.message);
+      mod = m ?? null;
+    }
+
+    if (!mod) {
+      // module ไม่เจอ — log แต่ไม่ fail (อาจเป็น qg ที่ยังไม่ได้ตั้งค่าใน DB)
+      console.warn(`module_code "${module_code}" not found in course_modules, skipping progress update`);
+      return new Response(JSON.stringify({ ok: true, warning: "module not found, score not saved to progress" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // บันทึก progress พร้อม score
     const { error: upsertErr } = await supabase.from("module_progress").upsert(
@@ -66,10 +97,11 @@ serve(async (req) => {
 
     // ถ้าผ่าน → ปลดล็อคบทถัดไป
     if (passed) {
-      await supabase.rpc("unlock_next_module", {
+      const { error: unlockErr } = await supabase.rpc("unlock_next_module", {
         _module_id: mod.id,
         _user_id: authUserId,
       });
+      if (unlockErr) console.error("unlock_next_module failed:", unlockErr.message);
     }
 
     return new Response(JSON.stringify({ ok: true }), {
