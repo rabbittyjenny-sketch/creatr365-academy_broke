@@ -18,13 +18,27 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // หา user_id จาก student_id
+    // หา line_user_id จาก student_id
     const { data: acct } = await supabase
       .from("user_accounts")
-      .select("id")
+      .select("line_user_id")
       .eq("student_id", student_id)
       .single();
     if (!acct) throw new Error("student_id not found");
+
+    // แปลง line_user_id → auth.users.id
+    let authUserId: string;
+    if (acct.line_user_id.startsWith("web:")) {
+      authUserId = acct.line_user_id.replace("web:", "");
+    } else {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("line_user_id", acct.line_user_id)
+        .single();
+      if (!profile) throw new Error("profile not found for LINE user");
+      authUserId = profile.user_id;
+    }
 
     // หา module_id จาก code
     const { data: mod } = await supabase
@@ -37,7 +51,7 @@ serve(async (req) => {
     // บันทึก progress
     await supabase.from("module_progress").upsert(
       {
-        user_id: acct.id,
+        user_id: authUserId,
         module_id: mod.id,
         status: passed ? "completed" : "in_progress",
         completed_at: passed ? new Date().toISOString() : null,
@@ -49,7 +63,7 @@ serve(async (req) => {
     if (passed) {
       await supabase.rpc("unlock_next_module", {
         _module_id: mod.id,
-        _user_id: acct.id,
+        _user_id: authUserId,
       });
     }
 
