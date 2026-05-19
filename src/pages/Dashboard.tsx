@@ -82,8 +82,8 @@ const Dashboard: React.FC = () => {
         .maybeSingle();
       sid = (acct as any)?.student_id ?? null;
     }
-    if (!sid && u.email) {
-      sid = await ensureStudentId(u.id, u.email);
+    if (!sid) {
+      sid = await ensureStudentId(u.id, u.email ?? `web_${u.id}@creatr365.com`);
     }
     setStudentId(sid);
 

@@ -59,13 +59,23 @@ serve(async (req) => {
       });
 
       if (newUser?.user?.id) {
-        // Upsert profile with LINE data
+        const uid = newUser.user.id;
+
         await supabaseAdmin.from("profiles").upsert({
-          user_id: newUser.user.id,
+          user_id: uid,
           line_user_id: lineProfile.userId,
           display_name: lineProfile.displayName,
           avatar_url: lineProfile.pictureUrl ?? null,
         }, { onConflict: "user_id" });
+
+        // สร้าง user_accounts พร้อม student_id สำหรับเข้า LMS
+        const student_id = "STU-" + uid.slice(0, 6).toUpperCase();
+        await supabaseAdmin.from("user_accounts").upsert({
+          line_user_id: lineProfile.userId,
+          email: syntheticEmail,
+          student_id,
+          is_active: true,
+        }, { onConflict: "line_user_id" });
       }
       // If createUser failed (email already exists from a partial prior run),
       // generateLink below will still work because syntheticEmail exists in auth.users
