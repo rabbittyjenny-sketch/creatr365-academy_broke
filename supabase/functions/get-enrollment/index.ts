@@ -54,19 +54,38 @@ serve(async (req) => {
       );
     }
 
-    // 2. Find Supabase user_id via profiles
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("user_id, display_name")
-      .eq("line_user_id", account.line_user_id)
-      .maybeSingle();
+    // 2. Find Supabase user_id — web users use "web:<uuid>" as line_user_id
+    let userId: string | null = null;
+    let displayName: string | null = null;
 
-    if (!profile?.user_id) {
+    if (account.line_user_id.startsWith("web:")) {
+      // Email-signup user: user_id is embedded in line_user_id
+      userId = account.line_user_id.replace("web:", "");
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+      displayName = profile?.display_name ?? null;
+    } else {
+      // LINE user: find via profiles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .eq("line_user_id", account.line_user_id)
+        .maybeSingle();
+      userId = profile?.user_id ?? null;
+      displayName = profile?.display_name ?? null;
+    }
+
+    if (!userId) {
       return new Response(
         JSON.stringify({ display_name: null, courses: [SLUG_TO_LMS[FREE_COURSE_SLUG]] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    const profile = { user_id: userId, display_name: displayName };
 
     // 3. Get paid/free enrollments
     const { data: enrollments } = await supabase
