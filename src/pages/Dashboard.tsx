@@ -3,188 +3,138 @@ import { useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
-import { Lock, Check, Play, Award, Star } from 'lucide-react';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle } from 'lucide-react';
+
+const LMS_URL = 'https://6course-quiz.vercel.app';
 
 interface CourseRow {
   id: string; slug: string; tag: string; title: string; subtitle: string;
   color: string; learning_type: string; level: string | null;
 }
+interface EnrollmentRow { id: string; course_id: string; status: string }
 interface ModuleRow {
   id: string; course_id: string; code: string; name: string;
-  summary: string; vod_url: string | null; sort_order: number;
-  has_quiz: boolean; has_assignment: boolean;
+  duration_label: string | null; has_quiz: boolean; sort_order: number;
 }
-interface ProgressRow { module_id: string; status: 'unlocked' | 'completed' }
-interface EnrollmentRow { id: string; course_id: string; status: string }
+interface ProgressRow { module_id: string; status: string }
 
 const COLOR_CYCLE = ['blue', 'green', 'yellow', 'red'] as const;
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
 
-function ModuleModal({ course, mod, onClose, onUploaded }:{
-  course: CourseRow; mod: ModuleRow; onClose: () => void; onUploaded: () => void;
-}) {
-  const [tab, setTab] = useState<'learn'|'quiz'|'submit'>('learn');
-  const [file, setFile] = useState<File | null>(null);
-  const [note, setNote] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+async function ensureStudentId(userId: string, email: string): Promise<string> {
+  const fallback = 'STU-' + userId.slice(0, 6).toUpperCase();
+  try {
+    // Lookup by email (email-only Supabase auth users don't have line_user_id)
+    const { data: byEmail } = await supabase
+      .from('user_accounts')
+      .select('student_id')
+      .eq('email', email)
+      .maybeSingle();
+    if ((byEmail as any)?.student_id) return (byEmail as any).student_id;
 
-  const tabs = [
-    { id:'learn', label:'เนื้อหา' },
-    ...(mod.has_quiz ? [{ id:'quiz', label:'Quiz' } as const] : []),
-    ...(mod.has_assignment ? [{ id:'submit', label:'ส่งงาน' } as const] : []),
-  ];
-
-  const submit = async () => {
-    if (!file) return;
-    setBusy(true); setMsg(null);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setBusy(false); return; }
-    const path = `assignments/${user.id}/${mod.id}-${Date.now()}-${file.name}`;
-    const { error: upErr } = await supabase.storage.from('course-media').upload(path, file);
-    if (upErr) { setMsg(upErr.message); setBusy(false); return; }
-    const { data: pub } = supabase.storage.from('course-media').getPublicUrl(path);
-    const { error: insErr } = await supabase.from('assignments').insert({
-      user_id: user.id, course_id: mod.course_id, module_id: mod.id,
-      video_url: pub.publicUrl, note, status: 'pending',
-    });
-    setBusy(false);
-    if (insErr) setMsg(insErr.message);
-    else { setMsg('ส่งงานสำเร็จ — ทีมงานจะตรวจภายใน 24 ชม.'); onUploaded(); }
-  };
-
-  const ytEmbed = mod.vod_url?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" />
-      <div className="relative w-full max-w-lg bg-card border border-border rounded-3xl overflow-hidden" onClick={(e)=>e.stopPropagation()}>
-        <div className="p-5 pb-0">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-xs font-bold tracking-widest text-muted-foreground">{course.title} · {mod.code}</p>
-              <h3 className="text-base font-bold">{mod.name}</h3>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-lg">×</button>
-          </div>
-          <div className="flex gap-1 bg-muted p-1 rounded-xl">
-            {tabs.map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id as typeof tab)}
-                className={`flex-1 text-xs py-1.5 rounded-lg font-medium ${tab===t.id?'bg-background shadow-sm':'text-muted-foreground'}`}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-5">
-          {tab==='learn' && (
-            mod.vod_url ? (
-              ytEmbed ? (
-                <div className="aspect-video rounded-xl overflow-hidden">
-                  <iframe src={`https://www.youtube.com/embed/${ytEmbed[1]}`} className="w-full h-full" allowFullScreen />
-                </div>
-              ) : (
-                <video src={mod.vod_url} controls className="w-full rounded-xl bg-foreground" />
-              )
-            ) : (
-              <div className="aspect-video rounded-xl flex items-center justify-center bg-muted text-xs text-muted-foreground">VOD จะปรากฏเมื่อทีมงานอัปโหลด</div>
-            )
-          )}
-          {tab==='quiz' && (
-            <div className="p-4 rounded-xl bg-muted text-center text-xs text-muted-foreground">
-              📝 Quiz กำลังเตรียมระบบ — เร็ว ๆ นี้
-            </div>
-          )}
-          {tab==='submit' && (
-            <div className="space-y-3">
-              <input type="file" accept="video/*" onChange={e=>setFile(e.target.files?.[0]||null)} className="text-xs w-full" />
-              <textarea placeholder="หมายเหตุ (ถ้ามี)" value={note} onChange={e=>setNote(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg border border-border bg-background" rows={2}/>
-              <button disabled={!file||busy} onClick={submit}
-                className="w-full py-2.5 rounded-xl text-sm font-semibold bg-foreground text-background disabled:opacity-40">
-                {busy?'กำลังส่ง...':'อัปโหลดและส่งงาน'}
-              </button>
-              {msg && <p className="text-xs text-muted-foreground text-center">{msg}</p>}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+    // Create record with synthetic line_user_id namespace
+    const { error } = await supabase.from('user_accounts').upsert(
+      { line_user_id: 'web:' + userId, email, student_id: fallback, is_active: true },
+      { onConflict: 'line_user_id' },
+    );
+    if (error) console.warn('user_accounts upsert:', error.message);
+  } catch (e) {
+    console.warn('ensureStudentId failed, using fallback', e);
+  }
+  return fallback;
 }
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<{id:string;email?:string}|null>(null);
-  const [profile, setProfile] = useState<{display_name?:string;line_user_id?:string}|null>(null);
-  const [studentId, setStudentId] = useState<string|null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [profile, setProfile] = useState<{ display_name?: string; line_user_id?: string } | null>(null);
+  const [studentId, setStudentId] = useState<string | null>(null);
   const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [progress, setProgress] = useState<ProgressRow[]>([]);
-  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
-  const [openCourse, setOpenCourse] = useState<string|null>(null);
-  const [selected, setSelected] = useState<{course:CourseRow;mod:ModuleRow}|null>(null);
+  const [openCourse, setOpenCourse] = useState<string | null>(null);
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { navigate('/auth'); return; }
-    setUser({ id: session.user.id, email: session.user.email });
-    const [{ data: prof }, { data: cs }, { data: ms }, { data: pr }, { data: en }] = await Promise.all([
+    const u = { id: session.user.id, email: session.user.email };
+    setUser(u);
+
+    const [{ data: prof }, { data: cs }, { data: en }] = await Promise.all([
       supabase.from('profiles').select('display_name,line_user_id').eq('user_id', session.user.id).maybeSingle(),
       supabase.from('courses').select('id,slug,tag,title,subtitle,color,learning_type,level').eq('is_active', true).order('sort_order'),
-      supabase.from('course_modules').select('*').order('sort_order'),
-      supabase.from('module_progress').select('module_id,status').eq('user_id', session.user.id),
       supabase.from('course_enrollments').select('id,course_id,status').eq('user_id', session.user.id),
     ]);
-    setProfile(prof||null);
-    // Fetch student_id (STU-XXXX) from user_accounts if line_user_id is available
+
+    setProfile(prof || null);
+    setCourses((cs as any) || []);
+    const enRows: EnrollmentRow[] = (en as any) || [];
+    setEnrollments(enRows);
+
+    // Resolve student_id
+    let sid: string | null = null;
     if ((prof as any)?.line_user_id) {
       const { data: acct } = await supabase
         .from('user_accounts')
         .select('student_id')
         .eq('line_user_id', (prof as any).line_user_id)
         .maybeSingle();
-      if ((acct as any)?.student_id) setStudentId((acct as any).student_id);
+      sid = (acct as any)?.student_id ?? null;
     }
-    setCourses((cs as any)||[]);
-    setModules((ms as any)||[]);
-    setProgress((pr as any)||[]);
-    setEnrollments((en as any)||[]);
+    if (!sid && u.email) {
+      sid = await ensureStudentId(u.id, u.email);
+    }
+    setStudentId(sid);
+
+    // Fetch modules and progress for enrolled courses
+    const activeIds = enRows
+      .filter(e => ['paid', 'free', 'active'].includes(e.status))
+      .map(e => e.course_id);
+
+    if (activeIds.length > 0) {
+      const [{ data: mods }, { data: prog }] = await Promise.all([
+        supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
+          .in('course_id', activeIds).order('sort_order'),
+        supabase.from('module_progress').select('module_id,status').eq('user_id', session.user.id),
+      ]);
+      setModules((mods as any) || []);
+      setProgress((prog as any) || []);
+    }
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
 
-  const enrolledIds = useMemo(()=>new Set(enrollments.filter(e=>['paid','free','active'].includes(e.status)).map(e=>e.course_id)),[enrollments]);
-  const progMap = useMemo(()=>{ const m: Record<string,'unlocked'|'completed'> = {}; progress.forEach(p=>m[p.module_id]=p.status); return m; },[progress]);
+  const enrolledIds = useMemo(() =>
+    new Set(enrollments.filter(e => ['paid', 'free', 'active'].includes(e.status)).map(e => e.course_id)),
+    [enrollments],
+  );
+
+  const completedModuleIds = useMemo(() =>
+    new Set(progress.filter(p => p.status === 'completed').map(p => p.module_id)),
+    [progress],
+  );
+
+  const modulesByCourse = useMemo(() => {
+    const map = new Map<string, ModuleRow[]>();
+    for (const m of modules) {
+      if (!map.has(m.course_id)) map.set(m.course_id, []);
+      map.get(m.course_id)!.push(m);
+    }
+    return map;
+  }, [modules]);
 
   if (!user) return null;
 
-  const courseList = courses.map((c, idx) => {
-    const accent = COLOR_CYCLE[idx % 4];
-    const enrolled = enrolledIds.has(c.id);
-    const mods = modules.filter(m => m.course_id === c.id);
-    const enriched = mods.map((m, i) => {
-      let status: 'completed'|'unlocked'|'locked' = 'locked';
-      if (enrolled) {
-        const p = progMap[m.id];
-        if (p === 'completed') status = 'completed';
-        else if (p === 'unlocked' || i === 0) status = 'unlocked';
-      }
-      return { ...m, _status: status };
-    });
-    return { course: c, accent, enrolled, modules: enriched };
-  });
+  const enrolledCourses = courses
+    .filter(c => enrolledIds.has(c.id))
+    .map((c, idx) => ({ course: c, accent: COLOR_CYCLE[idx % 4] }));
 
-  const enrolledCourses = courseList.filter(x=>x.enrolled);
-  const completedModules = enrolledCourses.reduce((s,x)=>s+x.modules.filter(m=>m._status==='completed').length,0);
-  const totalModules = enrolledCourses.reduce((s,x)=>s+x.modules.length,0);
-  const completedCourses = enrolledCourses.filter(x=>x.modules.length>0 && x.modules.every(m=>m._status==='completed'));
-  const certCount = completedCourses.length;
-  const highestLevelIdx = Math.max(0, ...completedCourses.map(x => Math.max(0, LEVEL_NAMES.indexOf((x.course.level||'STARTER').toUpperCase()))));
-  const currentLevel = enrolledCourses.length === 0 ? 'GUEST' : (certCount > 0 ? LEVEL_NAMES[highestLevelIdx] : 'STARTER');
-  const keyId = studentId || `ID365-${user.id.slice(0,6).toUpperCase()}`;
+  const keyId = studentId || `STU-${user.id.slice(0, 6).toUpperCase()}`;
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'นักเรียน';
+
+  const totalCompleted = completedModuleIds.size;
+  const currentLevel = enrolledCourses.length === 0 ? 'GUEST' : LEVEL_NAMES[0];
 
   return (
     <>
@@ -192,6 +142,7 @@ const Dashboard: React.FC = () => {
       <CourseNavbar />
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 pt-24 pb-24">
+        {/* Header */}
         <div>
           <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
           <h1 className="text-2xl font-bold" data-accent="green">{displayName}</h1>
@@ -204,92 +155,119 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label:'คอร์สที่เรียน', value:enrolledCourses.length, accent:'blue' },
-            { label:'บทที่ผ่าน', value:`${completedModules}/${totalModules}`, accent:'green' },
-            { label:'ใบประกาศ', value:certCount, accent:'yellow' },
-          ].map(s=>(
+            { label: 'คอร์สที่เรียน', value: enrolledCourses.length, accent: 'blue' },
+            { label: 'บทที่ผ่าน', value: totalCompleted, accent: 'green' },
+            { label: 'ใบประกาศ', value: 0, accent: 'yellow' },
+          ].map(s => (
             <div key={s.label} className="card-water bg-card border border-border p-3 text-center" data-accent={s.accent}>
-              <p className="text-xl font-black hover-shift" data-accent={s.accent}>{s.value as any}</p>
+              <p className="text-xl font-black hover-shift" data-accent={s.accent}>{s.value}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
 
+        {/* Courses */}
         <div>
           <h2 className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-3">คอร์สของฉัน</h2>
+
           {enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              ยังไม่มีคอร์สที่ลงทะเบียน — <Link to="/courses" className="underline hover-shift" data-accent="blue">เลือกคอร์ส</Link>
+              ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
+              <Link to="/courses" className="underline hover-shift" data-accent="blue">เลือกคอร์ส</Link>
             </div>
           ) : (
             <div className="space-y-3">
-              {enrolledCourses.map(x => {
-                const total = x.modules.length;
-                const done = x.modules.filter(m=>m._status==='completed').length;
-                const pct = total ? Math.round(done/total*100) : 0;
-                const isOpen = openCourse === x.course.id;
+              {enrolledCourses.map(({ course: c, accent }) => {
+                const courseMods = modulesByCourse.get(c.id) || [];
+                const total = courseMods.length;
+                const done = courseMods.filter(m => completedModuleIds.has(m.id)).length;
+                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                const isOpen = openCourse === c.id;
+                const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}`;
+
                 return (
-                  <div key={x.course.id} className="card-water border border-border bg-card overflow-hidden" data-accent={x.accent}>
-                    <div className="p-5 flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0">
-                        {x.course.title.slice(0,1)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                          <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{x.course.tag}</span>
-                          {x.course.level && <span className="text-[10px] text-muted-foreground">· {x.course.level}</span>}
+                  <div key={c.id} className="card-water border border-border bg-card overflow-hidden" data-accent={accent}>
+                    {/* Course header */}
+                    <div className="p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0 text-sm">
+                          {c.title.slice(0, 2)}
                         </div>
-                        <p className="text-sm font-semibold hover-shift" data-accent={x.accent}>{x.course.title}</p>
-                        <p className="text-xs text-muted-foreground">{x.course.subtitle}</p>
-                        {total>0 && (
-                          <div className="mt-3">
-                            <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                              <span>{done}/{total} บท</span><span>{pct}%</span>
-                            </div>
-                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                              <div className="h-full bg-foreground transition-all duration-500" style={{width:`${pct}%`}} />
-                            </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                            <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{c.tag}</span>
+                            {c.level && <span className="text-[10px] text-muted-foreground">· {c.level}</span>}
                           </div>
+                          <p className="text-sm font-semibold hover-shift" data-accent={accent}>{c.title}</p>
+                          <p className="text-xs text-muted-foreground">{c.subtitle}</p>
+                          {total > 0 && (
+                            <p className="text-[10px] text-muted-foreground mt-1">{done}/{total} บทเรียน</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      {total > 0 && (
+                        <div className="mt-3">
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{ width: `${pct}%`, background: 'var(--color-foreground)' }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1">{pct}% สำเร็จ</p>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="mt-4 flex items-center gap-2">
+                        <a
+                          href={lmsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-accent={accent}
+                          className="btn-brand text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 flex-shrink-0"
+                        >
+                          เข้าเรียน <ExternalLink className="w-3 h-3" />
+                        </a>
+                        {total > 0 && (
+                          <button
+                            onClick={() => setOpenCourse(isOpen ? null : c.id)}
+                            className="btn-brand btn-brand--outline text-xs px-3 py-2 rounded-lg border-border"
+                          >
+                            {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
+                          </button>
                         )}
                       </div>
-                      <button onClick={()=>setOpenCourse(isOpen?null:x.course.id)}
-                        data-accent={x.accent}
-                        className="btn-brand btn-brand--outline text-xs px-3 py-1.5 rounded-lg border-border">
-                        {isOpen?'ซ่อน':'เปิด'}
-                      </button>
                     </div>
-                    {isOpen && (
+
+                    {/* Lesson list (collapsible) */}
+                    {isOpen && total > 0 && (
                       <div className="border-t border-border px-3 py-2 space-y-0.5">
-                        {x.modules.map(m=>{
-                          const locked = m._status==='locked';
-                          const dn = m._status==='completed';
+                        {courseMods.map((mod, i) => {
+                          const isDone = completedModuleIds.has(mod.id);
                           return (
-                            <button key={m.id} disabled={locked} onClick={()=>setSelected({course:x.course, mod:m})} data-accent={x.accent}
-                              className={`w-full text-left flex items-center gap-3 p-3 rounded-lg ${locked?'opacity-40 cursor-not-allowed':'hover:bg-muted'}`}>
-                              <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs ${dn?'bg-foreground text-background border-foreground':'border-border'}`}>
-                                {dn ? <Check className="w-4 h-4"/> : locked ? <Lock className="w-4 h-4"/> : <Play className="w-4 h-4"/>}
+                            <div key={mod.id} className="flex items-center gap-3 p-3 rounded-lg">
+                              <div className="flex-shrink-0">
+                                {isDone
+                                  ? <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                  : <Circle className="w-5 h-5 text-muted-foreground/40" />
+                                }
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{m.code} — {m.name}</p>
+                                <p className="text-sm font-medium truncate">{i + 1}. {mod.name}</p>
                                 <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
-                                  {m.has_quiz && <span>📝 Quiz</span>}
-                                  {m.has_assignment && <span>🎥 ส่งงาน</span>}
+                                  {mod.duration_label && <span>{mod.duration_label}</span>}
+                                  {mod.has_quiz && <span>· Quiz</span>}
                                 </div>
                               </div>
-                              <span className="text-[10px] text-muted-foreground hover-shift" data-accent={x.accent}>
-                                {dn?'ผ่าน':locked?'ล็อค':'เปิด'}
-                              </span>
-                            </button>
+                              <BookOpen className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
+                            </div>
                           );
                         })}
-                        {pct===100 && (
-                          <div className="flex items-center gap-2 p-3 rounded-xl bg-muted border border-border">
-                            <Award className="w-4 h-4"/>
-                            <span className="text-xs font-medium">Certificate ของคุณพร้อมแล้ว</span>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -299,12 +277,13 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
+        {/* LMS info */}
+        <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
+          <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Key ID ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
+          <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Key ID ด้านบน</p>
+        </div>
       </main>
-
-      {selected && (
-        <ModuleModal course={selected.course} mod={selected.mod}
-          onClose={()=>setSelected(null)} onUploaded={load}/>
-      )}
     </>
   );
 };
