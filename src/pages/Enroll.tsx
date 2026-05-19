@@ -117,7 +117,11 @@ const Enroll: React.FC = () => {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        let msg = error.message;
+        try { const b = await (error as any).context?.json?.(); if (b?.error) msg = b.error; } catch {}
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
 
       if (data?.free) {
