@@ -155,7 +155,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
 
-  const enrolledIds = useMemo(()=>new Set(enrollments.filter(e=>['paid','free'].includes(e.status)).map(e=>e.course_id)),[enrollments]);
+  const enrolledIds = useMemo(()=>new Set(enrollments.filter(e=>['paid','free','active'].includes(e.status)).map(e=>e.course_id)),[enrollments]);
   const progMap = useMemo(()=>{ const m: Record<string,'unlocked'|'completed'> = {}; progress.forEach(p=>m[p.module_id]=p.status); return m; },[progress]);
 
   if (!user) return null;

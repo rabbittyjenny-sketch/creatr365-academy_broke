@@ -27,6 +27,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
     const { data: enr } = await supaAdmin
       .from("course_enrollments")
       .select("*")
@@ -35,27 +36,37 @@ serve(async (req) => {
       .single();
     if (!enr) throw new Error("Enrollment not found");
 
+    // Already confirmed — nothing to do
     if (enr.status === "paid" || enr.status === "free") {
       return new Response(JSON.stringify({ status: enr.status }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Look up Stripe session by metadata search (fallback to listing recent)
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
       apiVersion: "2025-08-27.basil",
     });
-    const sessions = await stripe.checkout.sessions.search({
-      query: `metadata['enrollment_id']:'${enrollmentId}'`,
-      limit: 1,
-    });
-    const session = sessions.data[0];
-    if (!session) throw new Error("Stripe session not found");
 
-    if (session.payment_status === "paid") {
+    // Prefer direct retrieval using stored stripe_session_id (set at checkout creation)
+    // Fall back to metadata search if the column is missing for older enrollments
+    let stripeSession: Stripe.Checkout.Session | null = null;
+
+    if (enr.stripe_session_id) {
+      stripeSession = await stripe.checkout.sessions.retrieve(enr.stripe_session_id);
+    } else {
+      // Fallback: list recent sessions and find by metadata
+      const sessions = await stripe.checkout.sessions.list({ limit: 25 });
+      stripeSession = sessions.data.find(
+        (s) => s.metadata?.enrollment_id === enrollmentId
+      ) ?? null;
+    }
+
+    if (!stripeSession) throw new Error("Stripe session not found");
+
+    if (stripeSession.payment_status === "paid") {
       await supaAdmin
         .from("course_enrollments")
-        .update({ status: "paid", stripe_session_id: session.id })
+        .update({ status: "paid", stripe_session_id: stripeSession.id })
         .eq("id", enrollmentId);
 
       // Unlock first module
@@ -66,6 +77,7 @@ serve(async (req) => {
         .order("sort_order", { ascending: true })
         .limit(1)
         .maybeSingle();
+
       if (firstModule) {
         await supaAdmin
           .from("module_progress")
@@ -74,6 +86,7 @@ serve(async (req) => {
             { onConflict: "user_id,module_id" }
           );
       }
+
       return new Response(JSON.stringify({ status: "paid" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
