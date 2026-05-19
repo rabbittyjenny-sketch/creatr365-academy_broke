@@ -44,6 +44,24 @@ serve(async (req) => {
       .single();
     if (courseErr || !course) throw new Error("Course not found");
 
+    // Prevent duplicate paid/free enrollment
+    const { data: existingPaid } = await supabaseAdmin
+      .from("course_enrollments")
+      .select("id, status")
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .in("status", ["paid", "free"])
+      .maybeSingle();
+    if (existingPaid) throw new Error("คุณลงทะเบียนคอร์สนี้แล้ว กรุณาไปที่ Dashboard");
+
+    // Remove any stale pending enrollments for this user/course before creating a new one
+    await supabaseAdmin
+      .from("course_enrollments")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("course_id", courseId)
+      .eq("status", "pending");
+
     // Check enrollment capacity
     if (course.max_slots) {
       const { count } = await supabaseAdmin
@@ -60,6 +78,7 @@ serve(async (req) => {
     let discount = 0;
     let promoId: string | null = null;
     let isFree = false;
+    let promoDiscountType: string | null = null;
 
     if (promoCode) {
       const { data: promo } = await supabaseAdmin
@@ -72,12 +91,13 @@ serve(async (req) => {
 
       if (promo && promo.used_count < promo.max_uses) {
         promoId = promo.id;
+        promoDiscountType = promo.discount_type;
         if (promo.discount_type === "free") {
           isFree = true;
         } else if (promo.discount_type === "percent") {
-          discount = promo.discount_value; // percentage
+          discount = promo.discount_value;
         } else if (promo.discount_type === "amount") {
-          discount = promo.discount_value; // fixed THB
+          discount = promo.discount_value;
         }
       }
     }
@@ -116,18 +136,10 @@ serve(async (req) => {
     // Calculate final price in satang (THB cents)
     let finalAmount = priceAmount;
     if (discount > 0) {
-      if (promoCode) {
-        // Re-check discount type
-        const { data: promo } = await supabaseAdmin
-          .from("promo_codes")
-          .select("discount_type")
-          .eq("id", promoId)
-          .single();
-        if (promo?.discount_type === "percent") {
-          finalAmount = Math.round(priceAmount * (1 - discount / 100));
-        } else {
-          finalAmount = Math.max(0, priceAmount - discount);
-        }
+      if (promoDiscountType === "percent") {
+        finalAmount = Math.round(priceAmount * (1 - discount / 100));
+      } else {
+        finalAmount = Math.max(0, priceAmount - discount);
       }
     }
 
@@ -206,6 +218,12 @@ serve(async (req) => {
         promo_code_id: promoId || "",
       },
     });
+
+    // Save stripe_session_id to enrollment immediately so verify-payment can retrieve directly
+    await supabaseAdmin
+      .from("course_enrollments")
+      .update({ stripe_session_id: session.id })
+      .eq("id", enrollment.id);
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
