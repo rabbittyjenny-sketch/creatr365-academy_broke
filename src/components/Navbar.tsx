@@ -79,6 +79,8 @@ export const Navbar: React.FC = () => {
             <button 
               onClick={async () => {
                 await supabase.auth.signOut();
+                localStorage.clear();
+                navigate('/auth');
               }}
               className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-black leading-none group"
             >
@@ -148,8 +150,8 @@ export const Navbar: React.FC = () => {
                 <button 
                   onClick={async () => {
                     await supabase.auth.signOut();
-                    localStorage.clear()          // ← เพิ่มบรรทัดนี้
-                    navigate('/auth')
+                    localStorage.clear();
+                    navigate('/auth');
                     setIsMobileMenuOpen(false);
                   }}
                   className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase tracking-[-0.34px] animate-fade-in"
