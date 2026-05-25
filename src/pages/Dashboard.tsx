@@ -248,3 +248,88 @@ const Dashboard: React.FC = () => {
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{ width: `${pct}%`, background: 'var(--color-foreground)' }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1">{pct}% สำเร็จ</p>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="mt-4 flex items-center gap-2">
+                        <a
+                          href={lmsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-accent={accent}
+                          className="btn-brand text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 flex-shrink-0"
+                        >
+                          เข้าเรียน <ExternalLink className="w-3 h-3" />
+                        </a>
+                        {total > 0 && (
+                          <button
+                            onClick={() => setOpenCourse(isOpen ? null : c.id)}
+                            className="btn-brand btn-brand--outline text-xs px-3 py-2 rounded-lg border-border"
+                          >
+                            {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Lesson list (collapsible) */}
+                    {isOpen && total > 0 && (
+                      <div className="border-t border-border px-3 py-2 space-y-0.5">
+                        {courseMods.map((mod, i) => {
+                          const isDone = completedModuleIds.has(mod.id);
+                          const moduleProgress = progress.find(p => p.module_id === mod.id);
+                          return (
+                            <div key={mod.id} className="flex items-center gap-3 p-3 rounded-lg">
+                              <div className="flex-shrink-0">
+                                {isDone
+                                  ? <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                  : <Circle className="w-5 h-5 text-muted-foreground/40" />
+                                }
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{i + 1}. {mod.name}</p>
+                                <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
+                                  {mod.duration_label && <span>{mod.duration_label}</span>}
+                                  {mod.has_quiz && <span>· Quiz</span>}
+                                  {mod.has_quiz && moduleProgress?.score != null && (
+                                    <span className={`font-bold ${moduleProgress.score >= 70 ? 'text-green-600' : 'text-red-500'}`}>
+                                      {moduleProgress.score}% {moduleProgress.score >= 70 ? 'ผ่าน' : 'ยังไม่ผ่าน'}
+                                    </span>
+                                  )}
+                                  {mod.has_quiz && moduleProgress?.score == null && moduleProgress?.status === 'unlocked' && (
+                                    <span>ยังไม่ได้ทำ</span>
+                                  )}
+                                  {(!moduleProgress || moduleProgress.status === 'not_started') && (
+                                    <span>ล็อก</span>
+                                  )}
+                                </div>
+                              </div>
+                              <BookOpen className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* LMS info */}
+        <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
+          <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Key ID ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
+          <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Key ID ด้านบน</p>
+        </div>
+      </main>
+    </>
+  );
+};
+
+export default Dashboard;
