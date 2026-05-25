@@ -16,7 +16,7 @@ interface ModuleRow {
   id: string; course_id: string; code: string; name: string;
   duration_label: string | null; has_quiz: boolean; sort_order: number;
 }
-interface ProgressRow { module_id: string; status: string }
+interface ProgressRow { module_id: string; status: string; score: number | null }
 
 const COLOR_CYCLE = ['blue', 'green', 'yellow', 'red'] as const;
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
@@ -107,21 +107,6 @@ const Dashboard: React.FC = () => {
         supabase.from('module_progress')
               .select('module_id, status, score, completed_at')
               .eq('user_id', session.user.id)
-        // Interface เพิ่ม score
-interface ProgressRow { module_id: string; status: string; score: number | null }
-
-// แสดงใน module list (ใน JSX)
-{mod.has_quiz && prog?.score != null && (
-  <span className={`text-[10px] font-bold ${prog.score >= 70 ? 'text-green-600' : 'text-red-500'}`}>
-    {prog.score}% {prog.score >= 70 ? '✓ ผ่าน' : '✗ ยังไม่ผ่าน'}
-  </span>
-)}
-{mod.has_quiz && prog?.score == null && prog?.status === 'unlocked' && (
-  <span className="text-[10px] text-muted-foreground">ยังไม่ได้ทำ</span>
-)}
-{(!prog || prog.status === 'not_started') && (
-  <span className="text-[10px] text-muted-foreground">🔒</span>
-)}
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
@@ -156,16 +141,35 @@ interface ProgressRow { module_id: string; status: string; score: number | null 
     return map;
   }, [modules]);
 
-  if (!user || studentId === null) return null;
-
-  const enrolledCourses = courses
+  const enrolledCourses = useMemo(() => courses
     .filter(c => enrolledIds.has(c.id))
-    .map((c, idx) => ({ course: c, accent: COLOR_CYCLE[idx % 4] }));
+    .map((c, idx) => ({ course: c, accent: COLOR_CYCLE[idx % 4] })),
+    [courses, enrolledIds],
+  );
+
+  const statsData = useMemo(() => {
+    const completedCourses = enrollments.filter(e => {
+      const mods = modulesByCourse.get(e.course_id) || [];
+      return mods.length > 0 && mods.every(m => completedModuleIds.has(m.id));
+    }).length;
+
+    const quizScores = progress.filter(p => p.score != null).map(p => p.score!);
+    const avgScore = quizScores.length
+      ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length)
+      : 0;
+
+    return [
+      { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'blue' },
+      { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'green' },
+      { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
+      { label: 'ใบประกาศ', value: completedCourses, accent: 'yellow' },
+    ];
+  }, [enrollments, enrolledCourses.length, modulesByCourse, completedModuleIds, progress]);
+
+  if (!user || studentId === null) return null;
 
   const keyId = studentId || `STU-${user.id.slice(0, 6).toUpperCase()}`;
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'นักเรียน';
-
-  const totalCompleted = completedModuleIds.size;
   const currentLevel = enrolledCourses.length === 0 ? 'GUEST' : LEVEL_NAMES[0];
 
   return (
@@ -188,25 +192,13 @@ interface ProgressRow { module_id: string; status: string; score: number | null 
         </div>
 
         {/* Stats */}
-        <div // คำนวณ stats จาก state ที่มีอยู่แล้ว
-const statsData = useMemo(() => {
-  const completedCourses = enrollments.filter(e => {
-    const mods = modulesByCourse.get(e.course_id) || [];
-    return mods.length > 0 && mods.every(m => completedModuleIds.has(m.id));
-  }).length;
-
-  const quizScores = progress.filter(p => p.score != null).map(p => p.score!);
-  const avgScore = quizScores.length 
-    ? Math.round(quizScores.reduce((a,b) => a+b, 0) / quizScores.length) 
-    : 0;
-
-  return [
-    { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'blue' },
-    { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'green' },
-    { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
-    { label: 'ใบประกาศ', value: completedCourses, accent: 'yellow' },
-  ];
-}, [enrollments, enrolledCourses, modulesByCourse, completedModuleIds, progress]);
+        <div className="grid grid-cols-2 gap-3">
+          {statsData.map(stat => (
+            <div key={stat.label} className="card-water border border-border bg-card p-4" data-accent={stat.accent}>
+              <p className="text-xl font-bold">{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+            </div>
+          ))}
         </div>
 
         {/* Courses */}
@@ -256,76 +248,3 @@ const statsData = useMemo(() => {
                             <div
                               className="h-full rounded-full transition-all duration-500"
                               style={{ width: `${pct}%`, background: 'var(--color-foreground)' }}
-                            />
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-1">{pct}% สำเร็จ</p>
-                        </div>
-                      )}
-
-                      {/* Action buttons */}
-                      <div className="mt-4 flex items-center gap-2">
-                        <a
-                          href={lmsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-accent={accent}
-                          className="btn-brand text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 flex-shrink-0"
-                        >
-                          เข้าเรียน <ExternalLink className="w-3 h-3" />
-                        </a>
-                        {total > 0 && (
-                          <button
-                            onClick={() => setOpenCourse(isOpen ? null : c.id)}
-                            className="btn-brand btn-brand--outline text-xs px-3 py-2 rounded-lg border-border"
-                          >
-                            {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Lesson list (collapsible) */}
-                    {isOpen && total > 0 && (
-                      <div className="border-t border-border px-3 py-2 space-y-0.5">
-                        {courseMods.map((mod, i) => {
-                          const isDone = completedModuleIds.has(mod.id);
-                          return (
-                            <div key={mod.id} className="flex items-center gap-3 p-3 rounded-lg">
-                              <div className="flex-shrink-0">
-                                {isDone
-                                  ? <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                  : <Circle className="w-5 h-5 text-muted-foreground/40" />
-                                }
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{i + 1}. {mod.name}</p>
-                                <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
-                                  {mod.duration_label && <span>{mod.duration_label}</span>}
-                                  {mod.has_quiz && <span>· Quiz</span>}
-                                </div>
-                              </div>
-                              <BookOpen className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* LMS info */}
-        <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
-          <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Key ID ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
-          <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Key ID ด้านบน</p>
-        </div>
-      </main>
-    </>
-  );
-};
-
-export default Dashboard;
