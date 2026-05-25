@@ -24,7 +24,7 @@ const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER
 async function ensureStudentId(userId: string, email: string): Promise<string> {
   const fallback = 'STU-' + userId.slice(0, 6).toUpperCase();
   try {
-    // Lookup by email (email-only Supabase auth users don't have line_user_id)
+    // 1. ลอง email ก่อน (master key)
     const { data: byEmail } = await supabase
       .from('user_accounts')
       .select('student_id')
@@ -32,14 +32,22 @@ async function ensureStudentId(userId: string, email: string): Promise<string> {
       .maybeSingle();
     if ((byEmail as any)?.student_id) return (byEmail as any).student_id;
 
-    // Create record with synthetic line_user_id namespace
+    // 2. ลอง line_user_id (web: prefix)
+    const { data: byLine } = await supabase
+      .from('user_accounts')
+      .select('student_id')
+      .eq('line_user_id', 'web:' + userId)
+      .maybeSingle();
+    if ((byLine as any)?.student_id) return (byLine as any).student_id;
+
+    // 3. สร้างใหม่
     const { error } = await supabase.from('user_accounts').upsert(
       { line_user_id: 'web:' + userId, email, student_id: fallback, is_active: true },
       { onConflict: 'line_user_id' },
     );
     if (error) console.warn('user_accounts upsert:', error.message);
   } catch (e) {
-    console.warn('ensureStudentId failed, using fallback', e);
+    console.warn('ensureStudentId failed', e);
   }
   return fallback;
 }
