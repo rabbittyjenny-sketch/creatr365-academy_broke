@@ -188,17 +188,25 @@ interface ProgressRow { module_id: string; status: string; score: number | null 
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'คอร์สที่เรียน', value: enrolledCourses.length, accent: 'blue' },
-            { label: 'บทที่ผ่าน', value: totalCompleted, accent: 'green' },
-            { label: 'ใบประกาศ', value: 0, accent: 'yellow' },
-          ].map(s => (
-            <div key={s.label} className="card-water bg-card border border-border p-3 text-center" data-accent={s.accent}>
-              <p className="text-xl font-black hover-shift" data-accent={s.accent}>{s.value}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-            </div>
-          ))}
+        <div // คำนวณ stats จาก state ที่มีอยู่แล้ว
+const statsData = useMemo(() => {
+  const completedCourses = enrollments.filter(e => {
+    const mods = modulesByCourse.get(e.course_id) || [];
+    return mods.length > 0 && mods.every(m => completedModuleIds.has(m.id));
+  }).length;
+
+  const quizScores = progress.filter(p => p.score != null).map(p => p.score!);
+  const avgScore = quizScores.length 
+    ? Math.round(quizScores.reduce((a,b) => a+b, 0) / quizScores.length) 
+    : 0;
+
+  return [
+    { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'blue' },
+    { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'green' },
+    { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
+    { label: 'ใบประกาศ', value: completedCourses, accent: 'yellow' },
+  ];
+}, [enrollments, enrolledCourses, modulesByCourse, completedModuleIds, progress]);
         </div>
 
         {/* Courses */}
