@@ -104,7 +104,24 @@ const Dashboard: React.FC = () => {
       const [{ data: mods }, { data: prog }] = await Promise.all([
         supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
           .in('course_id', activeIds).order('sort_order'),
-        supabase.from('module_progress').select('module_id,status').eq('user_id', session.user.id),
+        supabase.from('module_progress')
+              .select('module_id, status, score, completed_at')
+              .eq('user_id', session.user.id)
+        // Interface เพิ่ม score
+interface ProgressRow { module_id: string; status: string; score: number | null }
+
+// แสดงใน module list (ใน JSX)
+{mod.has_quiz && prog?.score != null && (
+  <span className={`text-[10px] font-bold ${prog.score >= 70 ? 'text-green-600' : 'text-red-500'}`}>
+    {prog.score}% {prog.score >= 70 ? '✓ ผ่าน' : '✗ ยังไม่ผ่าน'}
+  </span>
+)}
+{mod.has_quiz && prog?.score == null && prog?.status === 'unlocked' && (
+  <span className="text-[10px] text-muted-foreground">ยังไม่ได้ทำ</span>
+)}
+{(!prog || prog.status === 'not_started') && (
+  <span className="text-[10px] text-muted-foreground">🔒</span>
+)}
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
