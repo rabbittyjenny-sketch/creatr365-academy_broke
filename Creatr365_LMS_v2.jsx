@@ -59,9 +59,9 @@ const CFG = {
 // ============================================================
 const COURSES = {
   MICRO_EXPRESS: {
-    id: "MICRO_EXPRESS", name: "MICRO EXPRESS", badge: "STARTER", type: "online",
-    duration: "3 ชั่วโมง",
-    desc: "30-Sec Hook Formula — หยุดนิ้วผู้ชมได้ใน 3 วินาที",
+   id: "MICRO_EXPRESS", name: "HOOK & HOLD", badge: "LOW TICKET 1", type: "online",
+    duration: "3–4 ชั่วโมง (VOD)",
+    desc: "หยุดคนดูให้อยู่ใน 3 วินาที",
     pretestQGs: ["QG-01"], pretestCount: 5,
     lessons: [
       { id:"M01", name:"Why Hook คือทุกอย่าง",          dur:"8 นาที",  url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
@@ -75,9 +75,9 @@ const COURSES = {
   },
 
   SIGNAL: {
-    id: "SIGNAL", name: "SIGNAL", badge: "ENTRY A", type: "online",
-    duration: "6 ชั่วโมง",
-    desc: "Hook · Voice · Camera Presence — เพิ่ม Watch Time ≥30%",
+   id: "SIGNAL", name: "LIVE SALES SYSTEM", badge: "LOW TICKET 2", type: "online",
+    duration: "4 ชั่วโมง (VOD)",
+    desc: "อ่าน KPI เป็น ขายได้ระบบ",
     pretestQGs: ["QG-01","QG-03","QG-04"], pretestCount: 15,
     lessons: [
       { id:"S01", name:"Hook Architecture",   dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
@@ -91,9 +91,9 @@ const COURSES = {
   },
 
   MATRIX: {
-    id: "MATRIX", name: "MATRIX", badge: "ENTRY B", type: "online",
-    duration: "6 ชั่วโมง",
-    desc: "Platform Analytics · AI Tools — Live Score >75",
+   id: "MATRIX", name: "AI FOR LIVE COMMERCE", badge: "LOW TICKET 4", type: "online",
+    duration: "2–2.5 ชั่วโมง (VOD)",
+    desc: "ใช้ AI ก่อน-ระหว่าง-หลังไลฟ์",
     pretestQGs: ["QG-05"], pretestCount: 10,
     lessons: [
       { id:"MT01", name:"Algorithm Intel",       dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
@@ -107,9 +107,9 @@ const COURSES = {
   },
 
   STAGE: {
-    id: "STAGE", name: "STAGE", badge: "INTERMEDIATE", type: "onsite",
-    duration: "8 ชั่วโมง (1 วัน)",
-    desc: "Communication Mastery Lab — ฝึก Vocal/Camera/Crisis Onsite",
+    id: "STAGE", name: "LIVE PSYCHOLOGY & CONVERSION", badge: "MID TIER 1", type: "onsite",
+    duration: "7 ชั่วโมง (Onsite 1 วัน)",
+    desc: "อ่านใจคนดู เพิ่ม Conversion ไม่ลดราคา",
     pretestQGs: [], pretestCount: 0, // Trainer ประเมิน
     lessons: [
       { id:"S1", name:"Vocal Engine Lab",       dur:"09:00-10:30", url:null, qg:"QG-03", sessionCode:true },
@@ -139,9 +139,9 @@ const COURSES = {
   },
 
   FRONTIER: {
-    id: "FRONTIER", name: "FRONTIER", badge: "MASTER", type: "onsite",
-    duration: "16 ชั่วโมง (2 วัน)",
-    desc: "Business & Global Strategy — P&L Mastery + Global Pitch",
+    id: "FRONTIER", name: "LIVE COMMERCE BUSINESS & GLOBAL", badge: "HIGH TIER", type: "onsite",
+    duration: "16 ชั่วโมง (Onsite 2 วัน)",
+    desc: "ขยายธุรกิจ รุกตลาดโลก",
     pretestQGs: ["QG-05","QG-07"], pretestCount: 10,
     lessons: [
       { id:"F1", name:"P&L Mastery",               dur:"วัน 1 · 09:00-11:30", url:null, qg:"QG-07", sessionCode:true, day:1 },
