@@ -1083,6 +1083,377 @@ function CourseResults({ courseId, student, lessonScores, enrolledCourses, onBac
 }
 
 // ============================================================
+// 📋  SUPPORT SCREEN — FAQ + PDPA + Refund + Terms (TH/EN)
+// ============================================================
+const SUPPORT_TABS = [
+  { id: "faq",    th: "คำถามที่พบบ่อย",     en: "FAQ" },
+  { id: "pdpa",   th: "นโยบายความเป็นส่วนตัว", en: "Privacy / PDPA" },
+  { id: "refund", th: "คืนเงิน / เปลี่ยนคอร์ส", en: "Refund & Swap" },
+  { id: "terms",  th: "ข้อกำหนด / ลิขสิทธิ์",  en: "Terms & IP" },
+];
+
+const SUPPORT_CONTENT = {
+  faq: {
+    th: [
+      {
+        section: "การสมัครและการเข้าเรียน",
+        items: [
+          { q: "สมัครเรียนแล้วเข้าเรียนได้ทันทีหรือไม่?", a: "หลังชำระเงินสำเร็จ ระบบจะเปิดสิทธิ์ทันทีในหน้า \"คอร์สของฉัน\" หากไม่เห็นภายใน 5 นาที กรุณาติดต่อทีมสนับสนุนผ่าน LINE OA หรืออีเมล hello@creatr365.com" },
+          { q: "เรียนได้กี่อุปกรณ์?", a: "1 บัญชีต่อ 1 อุปกรณ์ในเวลาเดียวกัน เพื่อป้องกันการแชร์บัญชี สามารถสลับอุปกรณ์ได้ตามต้องการ" },
+          { q: "อายุการเข้าถึงคอร์สมีจำกัดไหม?", a: "ทุกคอร์สให้สิทธิ์เข้าถึงตลอดชีพ (Lifetime Access) ตราบใดที่บัญชียังใช้งานได้และ Creatr365 ยังให้บริการแพลตฟอร์ม" },
+          { q: "เรียนแบบไหน มีกำหนดเวลาหรือไม่?", a: "แบ่งเป็น 2 รูปแบบ: (1) Online VOD เรียนได้ทุกเวลา ทบทวนกี่ครั้งก็ได้ตลอดชีพ (2) Onsite ตามตารางที่กำหนด มีเวลาเริ่ม-จบ อาจมีการส่งการบ้าน" },
+          { q: "เรียนผ่านอุปกรณ์อะไรได้บ้าง?", a: "รองรับทุกอุปกรณ์ที่มีอินเทอร์เน็ต ทั้งคอมพิวเตอร์ แท็บเล็ต และสมาร์ทโฟน" },
+          { q: "มีใบรับรอง (Certificate) ไหม?", a: "ทุกคอร์สมีใบรับรองดิจิทัลหลังเรียนจบและผ่านเกณฑ์การประเมิน สามารถดาวน์โหลดได้จากหน้า \"ผลการเรียน\"" },
+          { q: "มีข้อสงสัยระหว่างเรียน ถามได้ที่ไหน?", a: "ติดต่อได้ที่ LINE OA: @creatr365 หรืออีเมล hello@creatr365.com เราตอบกลับภายใน 1 วันทำการ" },
+        ],
+      },
+      {
+        section: "การชำระเงินและใบเสร็จ",
+        items: [
+          { q: "รองรับช่องทางชำระเงินอะไรบ้าง?", a: "รองรับบัตรเครดิต/เดบิต (Visa, Mastercard), PromptPay, QR PromptPay และ Truemoney Wallet" },
+          { q: "ขอใบเสร็จหรือใบกำกับภาษีได้ไหม?", a: "ได้ ขอได้ภายใน 15 วันจากวันที่ซื้อ ผ่านหน้า \"คำขอของฉัน\" ทีมงานจะออก e-Receipt ให้ภายใน 7 วันทำการ" },
+          { q: "นโยบายคืนเงินสรุปสั้น ๆ คืออะไร?", a: "ขอคืนเงินได้ภายใน 7 วันหลังซื้อ โดยต้องเรียนไปแล้วไม่เกิน 20% ของคอร์ส ดูรายละเอียดเพิ่มเติมในแท็บ \"คืนเงิน / เปลี่ยนคอร์ส\"" },
+        ],
+      },
+    ],
+    en: [
+      {
+        section: "Registration & Access",
+        items: [
+          { q: "Can I start learning immediately after enrollment?", a: "Yes. Once payment is confirmed, access is granted instantly under \"My Courses\". If you don't see the course within 5 minutes, contact us via LINE OA or email hello@creatr365.com." },
+          { q: "How many devices can I use?", a: "One account can stream on one device at a time to prevent account sharing. You can switch devices freely." },
+          { q: "Is there a time limit to access the course?", a: "All courses come with lifetime access as long as your account remains active and Creatr365 continues to operate the platform." },
+          { q: "What are the learning formats?", a: "Two formats: (1) Online VOD — self-paced, rewatch anytime, lifetime access. (2) Onsite — scheduled sessions with set start/end times; assignments may apply." },
+          { q: "What devices are supported?", a: "Any internet-connected device: computer, tablet, or smartphone." },
+          { q: "Is a Certificate included?", a: "Yes. Every course includes a digital certificate after you complete the content and pass the assessments. Download it from the \"My Results\" page." },
+          { q: "Where can I ask questions while studying?", a: "Contact us via LINE OA: @creatr365 or email hello@creatr365.com. We respond within 1 business day." },
+        ],
+      },
+      {
+        section: "Payment & Receipts",
+        items: [
+          { q: "What payment methods are accepted?", a: "We accept credit/debit cards (Visa, Mastercard), PromptPay, QR PromptPay, and Truemoney Wallet." },
+          { q: "Can I request a receipt or tax invoice?", a: "Yes, request within 15 days of payment via the \"My Requests\" page. We will issue an e-Receipt within 7 business days." },
+          { q: "What is the refund policy in short?", a: "You may request a refund within 7 days of purchase, provided you have completed less than 20% of the course. See the \"Refund & Swap\" tab for full details." },
+        ],
+      },
+    ],
+  },
+
+  pdpa: {
+    th: `**นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)**
+อัปเดตล่าสุด: มิถุนายน 2569
+
+**1. ข้อมูลที่เราเก็บรวบรวม**
+- ข้อมูลส่วนบุคคล: ชื่อ-นามสกุล, อีเมล, เบอร์โทรศัพท์, ที่อยู่สำหรับออกใบกำกับภาษี
+- ข้อมูลการใช้งาน: ประวัติการเข้าดูคอร์ส, คะแนนแบบทดสอบ, ไฟล์งานที่อัปโหลด
+- ข้อมูลทางเทคนิค: IP address, ประเภทอุปกรณ์, Browser
+
+**2. วัตถุประสงค์ในการเก็บข้อมูล**
+- สร้างและจัดการบัญชีผู้เรียน
+- ประมวลผลการชำระเงินและออกใบเสร็จ
+- ให้บริการคอร์สเรียนและฟีเจอร์ต่าง ๆ
+- ปรับปรุงเนื้อหาและประสบการณ์ผู้ใช้
+- ส่งข่าวสารทางการตลาด (เมื่อได้รับความยินยอม)
+
+**3. ฐานกฎหมายในการประมวลผล**
+- การปฏิบัติตามสัญญา (การให้บริการคอร์สเรียน)
+- ความยินยอม (ข่าวสารการตลาด, คุกกี้ที่ไม่จำเป็น)
+- ประโยชน์อันชอบธรรม (การป้องกันทุจริต, การปรับปรุงแพลตฟอร์ม)
+
+**4. การเปิดเผยข้อมูลต่อบุคคลภายนอก**
+- เราจะไม่ขายข้อมูลส่วนบุคคลให้แก่ผู้ใด
+- อาจแบ่งปันข้อมูลเท่าที่จำเป็นแก่ผู้ประมวลผลข้อมูล เช่น ระบบชำระเงิน, ผู้ให้บริการอีเมล ภายใต้สัญญาประมวลผลข้อมูล (DPA) ที่เข้มงวด
+
+**5. สิทธิของเจ้าของข้อมูล**
+- สิทธิในการเข้าถึง แก้ไข ลบ หรือโอนย้ายข้อมูล
+- สิทธิในการเพิกถอนความยินยอม
+- สิทธิในการคัดค้านการประมวลผล
+- ใช้สิทธิได้ที่: hello@creatr365.com (ตอบกลับภายใน 30 วัน)
+
+**6. ระยะเวลาเก็บข้อมูล**
+- ข้อมูลบัญชี: ตลอดอายุสมาชิก และ 5 ปีหลังจากปิดบัญชี
+- ข้อมูลการสมัครข่าวสาร: จนกว่าท่านจะยกเลิก
+
+**7. การรักษาความปลอดภัย**
+- ใช้การเข้ารหัส SSL/TLS, การควบคุมการเข้าถึงตามบทบาท และการตรวจสอบความปลอดภัยประจำปี
+
+**8. การเปลี่ยนแปลงนโยบาย**
+- หากมีการเปลี่ยนแปลงสำคัญ จะแจ้งผ่านอีเมลและเว็บไซต์ล่วงหน้า 30 วัน
+
+**9. เจ้าหน้าที่คุ้มครองข้อมูล (DPO)**
+อีเมล: hello@creatr365.com`,
+
+    en: `**Privacy Policy & PDPA Notice**
+Last updated: June 2026
+
+**1. Data We Collect**
+- Personal information: full name, email, phone number, billing address.
+- Usage data: course progress, quiz scores, uploaded assignments.
+- Technical data: IP address, device type, browser.
+
+**2. Purposes of Processing**
+- Create and manage your learner account.
+- Process payments and issue receipts.
+- Deliver course content and platform features.
+- Improve course quality and user experience.
+- Send marketing communications (with consent).
+
+**3. Legal Basis**
+- Contractual necessity (service delivery).
+- Consent (marketing, non-essential cookies).
+- Legitimate interests (fraud prevention, platform improvement).
+
+**4. Third-Party Disclosure**
+- We never sell personal data.
+- Data may be shared with processors (payment gateways, email providers) under strict Data Processing Agreements (DPA).
+
+**5. Your Rights**
+- Right to access, rectify, delete, or port your data.
+- Right to withdraw consent.
+- Right to object to processing.
+- Exercise your rights at hello@creatr365.com; we respond within 30 days.
+
+**6. Data Retention**
+- Account data: while active and for 5 years after closure.
+- Marketing consent: until you unsubscribe.
+
+**7. Security**
+- SSL/TLS encryption, role-based access controls, and annual security audits.
+
+**8. Policy Changes**
+- Material changes communicated via email and website notice 30 days in advance.
+
+**9. Data Protection Officer (DPO)**
+Email: hello@creatr365.com`,
+  },
+
+  refund: {
+    th: `**นโยบายการคืนเงิน เปลี่ยน และโอนคอร์ส**
+อัปเดตล่าสุด: มิถุนายน 2569
+
+**1. การขอคืนเงิน (Refund)**
+- ขอคืนเงินได้ภายใน 7 วันนับจากวันซื้อ
+- ต้องเรียนไปแล้วไม่เกิน 20% ของเนื้อหาทั้งหมด (นับจากจำนวนบทเรียนที่เปิดดู)
+- ไม่ครอบคลุม: คอร์ส Flash Sale ที่ระบุว่า "ไม่รับคืนเงิน", Bundle ที่เปิดเรียนเกิน 10%, คอร์สของขวัญหลังผู้รับเปิดใช้แล้ว, คอร์ส Onsite ที่เข้าร่วมแล้ว
+- เงินคืนเข้าช่องทางเดิมภายใน 14 วันทำการ
+
+**2. การเปลี่ยนคอร์ส (Course Swap)**
+- เปลี่ยนเป็นคอร์สอื่นมูลค่าเท่ากันหรือน้อยกว่าได้ 1 ครั้งต่อการซื้อ
+- ต้องดำเนินการภายใน 3 วันหลังซื้อ และเรียนไปแล้วไม่เกิน 15%
+- หากคอร์สใหม่ราคาถูกกว่า ส่วนต่างเก็บเป็นเครดิตในบัญชี (ไม่คืนเป็นเงินสด)
+- หากคอร์สใหม่ราคาสูงกว่า ผู้เรียนต้องชำระส่วนต่าง
+
+**3. การเลื่อนรอบ Onsite (Reschedule)**
+- แจ้งล่วงหน้าอย่างน้อย 7 วันก่อนวันเริ่มเรียน
+- ใช้สิทธิ์เลื่อนได้สูงสุด 1 ครั้งต่อการซื้อ
+
+**4. การโอนสิทธิ์ (Transfer)**
+- ไม่อนุญาตให้โอนสิทธิ์เข้าถึงคอร์สให้บุคคลอื่น
+- การแชร์บัญชีหรือขายต่อสิทธิ์จะนำไปสู่การระงับบัญชีโดยไม่คืนเงิน
+
+**5. การร้องขอที่ผิดปกติ**
+- Creatr365 ขอสงวนสิทธิ์ปฏิเสธการคืนเงินหากตรวจพบพฤติกรรมใช้ในทางที่ผิด เช่น ดาวน์โหลดเนื้อหาจำนวนมากแล้วขอคืนเงิน หรือขอคืนเงินซ้ำซากโดยมีเจตนาทุจริต
+
+ติดต่อขอคืนเงิน/เปลี่ยนคอร์ส: hello@creatr365.com`,
+
+    en: `**Refund, Swap & Transfer Policy**
+Last updated: June 2026
+
+**1. Refund**
+- Request within 7 days of purchase.
+- Must have completed less than 20% of total course content (by lessons accessed).
+- Not available for: "Flash Sale" / non-refundable promotional courses; Bundles where >10% accessed; Gift purchases once activated; Onsite courses already attended.
+- Refunds issued to original payment method within 14 business days.
+
+**2. Course Swap**
+- Swap to a course of equal or lesser value once per purchase.
+- Request within 3 days of purchase and before completing 15%.
+- If new course costs less, difference held as account credit (not refunded in cash).
+- If new course costs more, you pay the difference.
+
+**3. Onsite Reschedule**
+- Notify at least 7 days before the session start date.
+- Maximum 1 reschedule per purchase.
+
+**4. Transfer**
+- Course access is non-transferable.
+- Account sharing or reselling access results in account suspension without refund.
+
+**5. Abuse Prevention**
+- Creatr365 reserves the right to deny refund or swap requests if abusive behavior is detected (e.g., bulk-downloading content before requesting a refund, or repeated suspicious refund patterns).
+
+Contact for refund/swap: hello@creatr365.com`,
+  },
+
+  terms: {
+    th: `**ข้อกำหนดการใช้บริการและสิทธิ์ทรัพย์สินทางปัญญา**
+อัปเดตล่าสุด: มิถุนายน 2569
+
+**1. การยอมรับเงื่อนไข**
+การลงทะเบียนหรือใช้บริการ Creatr365 ถือว่าท่านยอมรับข้อกำหนดนี้ทั้งหมด
+
+**2. การให้สิทธิ์การใช้งาน**
+Creatr365 ให้สิทธิ์แบบไม่ผูกขาด (non-exclusive), ไม่สามารถโอนได้, จำกัดเฉพาะการใช้ส่วนบุคคล ห้ามทำซ้ำ ดัดแปลง หรือเผยแพร่เนื้อหาโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร
+
+**3. ทรัพย์สินทางปัญญาและลิขสิทธิ์**
+เนื้อหาทั้งหมด ได้แก่ วิดีโอคลิป, เสียง, สไลด์, ไฟล์ PDF, แบบฝึกหัด และซอร์สโค้ด เป็นทรัพย์สินทางปัญญาของ Creatr365 แต่เพียงผู้เดียว
+
+ผู้เรียนตกลงปฏิบัติตามเงื่อนไขดังนี้:
+- ห้ามบันทึกหน้าจอ, ดาวน์โหลดวิดีโอ (ยกเว้นระบบอนุญาต), ทำซ้ำ หรือดัดแปลงเนื้อหา
+- ห้ามนำวิดีโอ, เสียง หรือไฟล์ประกอบไปใช้ในเชิงพาณิชย์ หรือเปิดสอนต่อ
+- 1 บัญชีต่อ 1 ผู้เรียน ห้ามแชร์บัญชีหรือให้บุคคลอื่นร่วมรับชม
+
+**4. บทลงโทษหากละเมิด**
+หากพบการละเมิดลิขสิทธิ์ บริษัทฯ จะดำเนินการทันที:
+1. ระงับสิทธิ์การใช้งานบัญชีและตัดสิทธิ์เข้าเรียนถาวร (ไม่คืนเงิน)
+2. ดำเนินคดีทั้งทางแพ่งและทางอาญาตาม พ.ร.บ.ลิขสิทธิ์ มีโทษจำคุกสูงสุด 4 ปี และ/หรือปรับสูงสุด 800,000 บาท และเรียกค่าเสียหายทางแพ่ง
+
+**5. ข้อจำกัดความรับผิด**
+Creatr365 ไม่รับผิดชอบต่อความเสียหายทางอ้อม ความรับผิดทั้งหมดไม่เกินจำนวนเงินที่ท่านชำระสำหรับคอร์สที่เป็นประเด็น
+
+**6. การระงับบัญชี**
+ขอสงวนสิทธิ์ระงับหรือยกเลิกบัญชีโดยไม่คืนเงิน หากพบการแชร์บัญชี, ละเมิดลิขสิทธิ์ หรือกระทำที่เป็นภัยต่อธุรกิจ
+
+**7. กฎหมายที่ใช้บังคับ**
+ข้อกำหนดนี้อยู่ภายใต้กฎหมายไทย ศาลในกรุงเทพมหานครมีเขตอำนาจพิจารณาคดี
+
+**8. การเปลี่ยนแปลง**
+เราอาจแก้ไขข้อกำหนดได้ตลอดเวลา โดยแจ้งล่วงหน้าผ่านอีเมลและเว็บไซต์ การใช้บริการต่อถือว่ายอมรับ`,
+
+    en: `**Terms of Service & Intellectual Property**
+Last updated: June 2026
+
+**1. Acceptance**
+By registering or using Creatr365, you agree to be bound by these Terms.
+
+**2. License Grant**
+We grant you a limited, non-exclusive, non-transferable license to access course content for personal, non-commercial use only. Reproduction, modification, or redistribution without written permission is prohibited.
+
+**3. Intellectual Property & Copyright**
+All course materials (videos, audio, slides, PDFs, exercises, source code) are exclusively owned by Creatr365. Users agree to:
+- Not screen-record, download (unless permitted), copy, or modify content.
+- Not use materials commercially or to teach others.
+- 1 account = 1 learner; account sharing is prohibited.
+
+**4. Infringement & Penalties**
+If infringement is detected, we will immediately:
+1. Permanently suspend account access without refund.
+2. Pursue civil and criminal proceedings under Thai Copyright Law (max. 4 years imprisonment and/or 800,000 THB fine, plus civil damages).
+
+**5. Limitation of Liability**
+Creatr365 is not liable for indirect or consequential damages. Total liability is limited to the amount paid for the course in dispute.
+
+**6. Account Suspension**
+We reserve the right to suspend or terminate accounts without refund for account sharing, copyright infringement, or fraudulent activity.
+
+**7. Governing Law**
+Governed by Thai law; exclusive jurisdiction of courts in Bangkok.
+
+**8. Modifications**
+Terms may be updated at any time with advance notice via email and website. Continued use constitutes acceptance.`,
+  },
+};
+
+function SupportScreen({ onBack }) {
+  const [lang, setLang] = useState("th");
+  const [tab, setTab]   = useState("faq");
+  const [openIdx, setOpenIdx] = useState({});
+
+  const toggleQ = (sIdx, qIdx) => {
+    const key = `${sIdx}-${qIdx}`;
+    setOpenIdx(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const renderMarkdown = (text) =>
+    text.split("\n").map((line, i) => {
+      if (line.startsWith("**") && line.endsWith("**"))
+        return <p key={i} style={{ fontWeight:700, fontSize:14, marginTop:14, marginBottom:4, color:"#111" }}>{line.replace(/\*\*/g,"")}</p>;
+      if (line.startsWith("- "))
+        return <p key={i} style={{ fontSize:13, color:"#444", paddingLeft:14, marginBottom:2, lineHeight:1.6 }}>{"• " + line.slice(2)}</p>;
+      if (line.trim()==="") return <div key={i} style={{ height:6 }} />;
+      return <p key={i} style={{ fontSize:13, color:"#444", marginBottom:3, lineHeight:1.6 }}>{line}</p>;
+    });
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#F8F8F8", fontFamily:"'Sarabun', Arial, sans-serif" }}>
+      {/* Header */}
+      <div style={{ background:"#111", padding:"14px 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <button onClick={onBack} style={{ background:"transparent", border:"1px solid #444", color:"#CCC", padding:"5px 12px", borderRadius:3, cursor:"pointer", fontSize:12 }}>← กลับ</button>
+        <span style={{ color:"#FFF", fontWeight:700, fontSize:14, letterSpacing:1 }}>ช่วยเหลือ / Help Center</span>
+        <div style={{ display:"flex", gap:6 }}>
+          <button onClick={()=>setLang("th")} style={{ padding:"4px 10px", borderRadius:3, cursor:"pointer", fontSize:12, fontWeight:700, border:"none", background:lang==="th"?"#FFF":"#333", color:lang==="th"?"#111":"#AAA" }}>ไทย</button>
+          <button onClick={()=>setLang("en")} style={{ padding:"4px 10px", borderRadius:3, cursor:"pointer", fontSize:12, fontWeight:700, border:"none", background:lang==="en"?"#FFF":"#333", color:lang==="en"?"#111":"#AAA" }}>EN</button>
+        </div>
+      </div>
+
+      <div style={{ maxWidth:820, margin:"0 auto", padding:"20px 16px 60px" }}>
+        {/* Tabs */}
+        <div style={{ display:"flex", gap:6, marginBottom:20, overflowX:"auto", paddingBottom:4 }}>
+          {SUPPORT_TABS.map(t => (
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{
+              padding:"8px 14px", borderRadius:3, cursor:"pointer", fontSize:13, fontWeight:600, whiteSpace:"nowrap",
+              border: tab===t.id ? "none" : "1.5px solid #CCC",
+              background: tab===t.id ? "#111" : "#FFF",
+              color: tab===t.id ? "#FFF" : "#555",
+            }}>
+              {lang==="th" ? t.th : t.en}
+            </button>
+          ))}
+        </div>
+
+        {/* FAQ Tab */}
+        {tab==="faq" && (
+          <div>
+            {SUPPORT_CONTENT.faq[lang].map((section, sIdx) => (
+              <div key={sIdx} style={{ marginBottom:20 }}>
+                <p style={{ fontSize:12, fontWeight:700, color:"#888", letterSpacing:1, textTransform:"uppercase", marginBottom:10 }}>{section.section}</p>
+                {section.items.map((item, qIdx) => {
+                  const key = `${sIdx}-${qIdx}`;
+                  const open = !!openIdx[key];
+                  return (
+                    <div key={qIdx} style={{ background:"#FFF", border:"1px solid #E0E0E0", borderRadius:3, marginBottom:6 }}>
+                      <button onClick={()=>toggleQ(sIdx,qIdx)} style={{ width:"100%", textAlign:"left", padding:"12px 16px", background:"transparent", border:"none", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", gap:10 }}>
+                        <span style={{ fontSize:14, fontWeight:600, color:"#111", flex:1 }}>{item.q}</span>
+                        <span style={{ fontSize:16, color:"#888", flexShrink:0 }}>{open?"−":"+"}</span>
+                      </button>
+                      {open && (
+                        <div style={{ padding:"0 16px 14px", borderTop:"1px solid #F0F0F0" }}>
+                          <p style={{ fontSize:13, color:"#444", lineHeight:1.7, marginTop:10 }}>{item.a}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            <div style={{ background:"#F0F0F0", borderRadius:3, padding:"14px 18px", marginTop:16 }}>
+              <p style={{ fontSize:13, color:"#555", margin:0 }}>
+                {lang==="th" ? "ยังมีข้อสงสัย? ติดต่อเราที่ LINE OA: @creatr365 หรืออีเมล hello@creatr365.com" : "Still have questions? Contact us via LINE OA: @creatr365 or email hello@creatr365.com"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* PDPA / Refund / Terms Tabs */}
+        {(tab==="pdpa"||tab==="refund"||tab==="terms") && (
+          <div style={{ background:"#FFF", border:"1px solid #E0E0E0", borderRadius:3, padding:"24px", lineHeight:1.7 }}>
+            {renderMarkdown(SUPPORT_CONTENT[tab][lang])}
+          </div>
+        )}
+
+        {/* Footer note */}
+        <p style={{ fontSize:11, color:"#AAA", textAlign:"center", marginTop:24, lineHeight:1.6 }}>
+          {lang==="th"
+            ? "Creatr365 — สงวนลิขสิทธิ์ตาม พ.ร.บ.ลิขสิทธิ์ พ.ศ.2537 | PDPA: pdpc.or.th | ข้อมูลกฎหมาย: ipthailand.go.th"
+            : "Creatr365 — All rights reserved under Thai Copyright Act B.E.2537 | PDPA: pdpc.or.th | IP info: ipthailand.go.th"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // 🚀  MAIN APP
 // ============================================================
 
@@ -1369,10 +1740,34 @@ export default function Creatr365LMS() {
         />
       )}
 
+      {/* Support / Legal Screen */}
+      {screen==="support" && <SupportScreen onBack={()=>setScreen(student ? "dashboard" : "login")} />}
       {/* Footer */}
-      <div style={{ textAlign:"center", padding:"40px 0 60px", opacity:0.6 }}>
-        <img src={IMG.concept} alt="Concept" style={{ width:180 }} />
-      </div>
+      {/* Footer */}
+      {screen !== "support" && (
+        <div style={{ textAlign:"center", padding:"32px 0 56px", borderTop:"1px solid #E5E5E5", marginTop:20 }}>
+          <img src={IMG.concept} alt="Concept" style={{ width:160, opacity:0.5, marginBottom:16 }} />
+          <div style={{ display:"flex", justifyContent:"center", gap:20, flexWrap:"wrap" }}>
+            {[
+              { label:"คำถามที่พบบ่อย / FAQ",      screen:"faq"    },
+              { label:"นโยบายความเป็นส่วนตัว / Privacy",   screen:"pdpa"   },
+              { label:"คืนเงิน / Refund",            screen:"refund" },
+              { label:"ข้อกำหนด / Terms & IP",      screen:"terms"  },
+            ].map(link => (
+              <button
+                key={link.screen}
+                onClick={() => { setScreen("support"); }}
+                style={{ background:"transparent", border:"none", color:"#888", fontSize:11, cursor:"pointer", textDecoration:"underline", padding:0 }}
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+          <p style={{ fontSize:10, color:"#BBB", marginTop:12 }}>
+            © 2026 Creatr365 · hello@creatr365.com · All rights reserved
+          </p>
+        </div>
+      )}
     </div>
   );
 }
