@@ -1,12 +1,3 @@
-// ============================================================
-// IMPORTS ที่ต้องเพิ่มบนหัวไฟล์ Creatr365_LMS_v2.jsx
-// (ถ้าต้องการแยกไฟล์ — หรือ copy content มา inline ก็ได้)
-// ============================================================
-// import { FREE_MODULES_DEFAULT } from "./data/freeModules";
-// import FreeModuleScreen from "./screens/FreeModuleScreen";
-// import AdminScreen from "./screens/AdminScreen";
-// ============================================================
-
 /**
  * ============================================================
  * CREATR365 LMS — v3.0 | May 2026
@@ -57,106 +48,177 @@ const CFG = {
 // ============================================================
 // 📚  COURSE CONFIG — 6 คอร์ส
 // ============================================================
+// ============================================================
+// COURSES — อัปเดตตาม courseData.ts (8 คอร์ส) | Jun 2026
+// แก้ไขเฉพาะ: id, name, badge, type, duration, price, desc, lessons
+// ไม่แตะ: quiz logic, rubric, QG mapping, submission structure
+// ============================================================
 const COURSES = {
-  MICRO_EXPRESS: {
-   id: "MICRO_EXPRESS", name: "HOOK & HOLD", badge: "LOW TICKET 1", type: "online",
-    duration: "3–4 ชั่วโมง (VOD)",
-    desc: "หยุดคนดูให้อยู่ใน 3 วินาที",
+
+  LIVE_COMMERCE_STARTER_KIT: {
+    id: "LIVE_COMMERCE_STARTER_KIT",
+    name: "LIVE COMMERCE STARTER KIT",
+    badge: "FREE",
+    type: "online",
+    duration: "75–90 นาที (VOD)",
+    price: "ฟรี",
+    desc: "รู้จักอาชีพ รู้กฎหมาย รู้มาตรฐานก่อนเริ่ม — เรียนฟรีไม่ต้องสมัคร",
     pretestQGs: ["QG-01"], pretestCount: 5,
     lessons: [
-      { id:"M01", name:"Why Hook คือทุกอย่าง",          dur:"8 นาที",  url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
-      { id:"M02", name:"30-Sec Hook Formula ชั้นที่ 1", dur:"10 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
-      { id:"M03", name:"Formula ชั้นที่ 2-3",            dur:"12 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
-      { id:"M04", name:"Host คือใคร? 5 ประเภท",         dur:"8 นาที",  url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
-      { id:"M05", name:"Live Commerce 101",               dur:"10 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"SK01", name:"Live Commerce คืออะไร – ตลาดไทยและโอกาส",            dur:"15 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"SK02", name:"โฮสต์ 5 ประเภท + แบบประเมินตัวเอง",                  dur:"15 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"SK03", name:"กฎหมาย 5 ฉบับที่โฮสต์ต้องรู้ (อย. / PDPA / สคบ.)", dur:"20 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-07" },
+      { id:"SK04", name:"จรรยาบรรณโฮสต์มืออาชีพ 6 ข้อ",                       dur:"15 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-06" },
+      { id:"SK05", name:"KPI พื้นฐาน 8 ตัว + Pre-Live Master Checklist",       dur:"15 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
     ],
-    // Submission optional (Hook เขียน)
-    submission: { enabled: true, rubric:"RUB-07", label:"ส่ง Hook เขียน 1 ชิ้น" },
+    submission: { enabled: false, rubric: null, label: "" },
   },
 
-  SIGNAL: {
-   id: "SIGNAL", name: "LIVE SALES SYSTEM", badge: "LOW TICKET 2", type: "online",
+  HOOK_AND_HOLD: {
+    id: "HOOK_AND_HOLD",
+    name: "HOOK & HOLD",
+    badge: "LOW TICKET 1",
+    type: "online",
+    duration: "3–4 ชั่วโมง (VOD)",
+    price: "฿990",
+    desc: "หยุดคนดูให้อยู่ใน 3 วินาที — Watch Time เพิ่ม >20%",
+    pretestQGs: ["QG-01","QG-03"], pretestCount: 5,
+    lessons: [
+      { id:"HH01", name:"30-Second Hook Formula ฉบับสมบูรณ์",          dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"HH02", name:"Hook 5 ประเภท + Hook Loop",                    dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"HH03", name:"Voice Dynamics – Tone, Pacing, Pause, Whisper", dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-03" },
+      { id:"HH04", name:"Camera Presence – Eye-line, Champion Stance",   dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-03" },
+      { id:"HH05", name:"CTA & Retention – ดึงคนอยู่ทั้งไลฟ์",         dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+    ],
+    submission: { enabled: true, rubric: "RUB-01", label: "ส่ง Hook Video 30–45 วินาที" },
+  },
+
+  LIVE_SALES_SYSTEM: {
+    id: "LIVE_SALES_SYSTEM",
+    name: "LIVE SALES SYSTEM",
+    badge: "LOW TICKET 2",
+    type: "online",
     duration: "4 ชั่วโมง (VOD)",
-    desc: "อ่าน KPI เป็น ขายได้ระบบ",
-    pretestQGs: ["QG-01","QG-03","QG-04"], pretestCount: 15,
+    price: "฿3,900",
+    desc: "อ่าน KPI เป็น ขายได้ระบบ — Live Score >75",
+    pretestQGs: ["QG-05","QG-02"], pretestCount: 10,
     lessons: [
-      { id:"S01", name:"Hook Architecture",   dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
-      { id:"S02", name:"S-O-R + PAD Theory",  dur:"90 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-04" },
-      { id:"S03", name:"Vocal Dynamics",       dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-03" },
-      { id:"S04", name:"Camera Mastery",       dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-03" },
-      { id:"S05", name:"Trust Architecture",   dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-03" },
-      { id:"S06", name:"Narrative Selling",    dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"LS01", name:"TikTok Live Algorithm 2026 – Live Score + Peak Time",  dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LS02", name:"KPI 8 ตัวที่ต้องรู้ – CCV / CVR / AOV / GMV",        dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LS03", name:"Product Selection – สินค้าแบบไหนขายดีใน Live",       dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LS04", name:"Live Sales Flow – FOMO Ladder + Flash Sale",            dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-02" },
+      { id:"LS05", name:"Post-Live Report + AI Workflow",                        dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
     ],
-    submission: { enabled: true, rubric:"RUB-01", label:"ส่ง Hook Video 30-45 วินาที" },
+    submission: { enabled: true, rubric: null, label: "ส่ง Post-Live Report จาก Mock Data" },
   },
 
-  MATRIX: {
-   id: "MATRIX", name: "AI FOR LIVE COMMERCE", badge: "LOW TICKET 4", type: "online",
+  LIVE_TECH_SETUP: {
+    id: "LIVE_TECH_SETUP",
+    name: "LIVE TECH SETUP",
+    badge: "LOW TICKET 3",
+    type: "online",
+    duration: "2–3 ชั่วโมง (VOD)",
+    price: "฿990",
+    desc: "ตั้งค่าให้ถูก ไลฟ์ไม่มีสะดุด — ลดปัญหาหน้างาน 80%",
+    pretestQGs: ["QG-05"], pretestCount: 5,
+    lessons: [
+      { id:"LT01", name:"แสง Softbox + CRI สำหรับ Live Commerce",  dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LT02", name:"ไมโครโฟน + Audio Setup มาตรฐาน",          dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LT03", name:"OBS Studio – Scene, Overlay, Graphic",     dur:"45 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LT04", name:"เน็ตสำรอง + Backup Plan ฉุกเฉิน",          dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"LT05", name:"Pre-Live Tech Checklist ใช้ได้ทันที",      dur:"15 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+    ],
+    submission: { enabled: false, rubric: null, label: "" },
+  },
+
+  AI_FOR_LIVE_COMMERCE: {
+    id: "AI_FOR_LIVE_COMMERCE",
+    name: "AI FOR LIVE COMMERCE",
+    badge: "LOW TICKET 4",
+    type: "online",
     duration: "2–2.5 ชั่วโมง (VOD)",
-    desc: "ใช้ AI ก่อน-ระหว่าง-หลังไลฟ์",
-    pretestQGs: ["QG-05"], pretestCount: 10,
+    price: "฿1,490",
+    desc: "ใช้ AI ก่อน-ระหว่าง-หลังไลฟ์ — ลดเวลาเตรียมงาน 80%",
+    pretestQGs: ["QG-05"], pretestCount: 5,
     lessons: [
-      { id:"MT01", name:"Algorithm Intel",       dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
-      { id:"MT02", name:"FOMO System",            dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-02" },
-      { id:"MT03", name:"Dashboard Analytics",    dur:"90 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
-      { id:"MT04", name:"Reporting & GMV",        dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
-      { id:"MT05", name:"AI Tools",               dur:"60 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
-      { id:"MT06", name:"Compliance (PDPA/ETDA)", dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-07" },
+      { id:"AI01", name:"AI เขียนสคริปต์ + Hook ด้วย ChatGPT / Claude",         dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"AI02", name:"Canva AI + CapCut – ภาพ ป้าย กราฟิก",                   dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"AI03", name:"Flowjin / Framedrop – ตัดคลิปอัตโนมัติ",                dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
+      { id:"AI04", name:"Script Generator (Creatr365) – สร้างสคริปต์ใน 5 นาที", dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-01" },
+      { id:"AI05", name:"KPI Translator (Creatr365) – อ่าน Analytics ด้วย AI",  dur:"30 นาที", url:"https://www.youtube.com/embed/QbuyU8EGMjU?si=npNmAGbOt4I0Almb", qg:"QG-05" },
     ],
-    submission: { enabled: true, rubric:null, label:"ส่ง Data Analysis Report (3 จุด + Solution)" },
+    submission: { enabled: false, rubric: null, label: "" },
   },
 
-  STAGE: {
-    id: "STAGE", name: "LIVE PSYCHOLOGY & CONVERSION", badge: "MID TIER 1", type: "onsite",
+  LIVE_PSYCHOLOGY_CONVERSION: {
+    id: "LIVE_PSYCHOLOGY_CONVERSION",
+    name: "LIVE PSYCHOLOGY & CONVERSION",
+    badge: "MID TIER 1",
+    type: "onsite",
     duration: "7 ชั่วโมง (Onsite 1 วัน)",
-    desc: "อ่านใจคนดู เพิ่ม Conversion ไม่ลดราคา",
-    pretestQGs: [], pretestCount: 0, // Trainer ประเมิน
+    price: "฿5,500",
+    desc: "อ่านใจคนดู เพิ่ม Conversion ไม่ลดราคา — CVR >3%",
+    pretestQGs: ["QG-04","QG-02"], pretestCount: 10,
     lessons: [
-      { id:"S1", name:"Vocal Engine Lab",       dur:"09:00-10:30", url:null, qg:"QG-03", sessionCode:true },
-      { id:"S2", name:"Camera Presence",        dur:"10:30-11:30", url:null, qg:"QG-03", sessionCode:true },
-      { id:"S3", name:"Hook Factory",           dur:"11:30-12:00", url:null, qg:"QG-01", sessionCode:true },
-      { id:"S4", name:"Narrative Performance",  dur:"13:00-14:30", url:null, qg:"QG-04", sessionCode:true },
-      { id:"S5", name:"Crisis Improv Lab",      dur:"14:30-16:30", url:null, qg:"QG-03", sessionCode:true },
-      { id:"S6", name:"Test Live + Debrief",    dur:"16:30-17:00", url:null, qg:"QG-01", sessionCode:true },
+      { id:"PC01", name:"S-O-R + PAD Theory – รหัสซ่อนในสมองผู้ซื้อ",                       dur:"09:00–10:30", url:null, qg:"QG-04", sessionCode:true },
+      { id:"PC02", name:"Audience State Mapping – 4 สถานะผู้ชม",                             dur:"10:30–11:30", url:null, qg:"QG-04", sessionCode:true },
+      { id:"PC03", name:"Emotional Conversion – FOMO / Trust / Urgency / Belonging",          dur:"12:30–14:00", url:null, qg:"QG-02", sessionCode:true },
+      { id:"PC04", name:"Live Energy Control – Dead Chat Recovery",                            dur:"14:00–15:30", url:null, qg:"QG-04", sessionCode:true },
+      { id:"PC05", name:"Roleplay + Simulation – สถานการณ์จริง",                             dur:"15:30–17:00", url:null, qg:"QG-04", sessionCode:true },
     ],
-    submission: { enabled: false, rubric:null, label:"" },
+    submission: { enabled: false, rubric: null, label: "" },
   },
 
-  BLUEPRINT: {
-    id: "BLUEPRINT", name: "BLUEPRINT", badge: "ADVANCED", type: "onsite",
-    duration: "16 ชั่วโมง (2 วัน)",
-    desc: "Identity & Production Architecture — สร้าง Brand CI + EPK",
-    pretestQGs: [], pretestCount: 0,
+  HOST_IDENTITY_PERSONAL_BRAND: {
+    id: "HOST_IDENTITY_PERSONAL_BRAND",
+    name: "HOST IDENTITY & PERSONAL BRAND",
+    badge: "MID TIER 2",
+    type: "onsite",
+    duration: "7 ชั่วโมง (Onsite 1 วัน)",
+    price: "฿5,500",
+    desc: "มีตัวตนชัด แบรนด์อยากจ้าง — EPK + Rate Card พร้อมใช้",
+    pretestQGs: ["QG-06"], pretestCount: 5,
     lessons: [
-      { id:"B1", name:"5 Hidden Souls",             dur:"วัน 1 · 09:00-11:30", url:null, qg:"QG-06", sessionCode:true, day:1 },
-      { id:"B2", name:"Brand CI Architecture",       dur:"วัน 1 · 12:30-14:30", url:null, qg:"QG-06", sessionCode:true, day:1 },
-      { id:"B3", name:"Personal Branding + EPK",     dur:"วัน 1 · 14:30-16:30", url:null, qg:"QG-06", sessionCode:true, day:1 },
-      { id:"B5", name:"Multi-Camera Production",     dur:"วัน 2 · 09:00-11:00", url:null, qg:"QG-06", sessionCode:true, day:2 },
-      { id:"B6", name:"Team Production System",      dur:"วัน 2 · 11:00-12:30", url:null, qg:"QG-06", sessionCode:true, day:2 },
-      { id:"B7", name:"Live Simulation + EPK Build", dur:"วัน 2 · 13:30-16:00", url:null, qg:"QG-06", sessionCode:true, day:2 },
+      { id:"HI01", name:"Host Archetype 5 ประเภท – Expert / Entertainer / Closer / Educator / Luxury", dur:"09:00–10:30", url:null, qg:"QG-06", sessionCode:true },
+      { id:"HI02", name:"Signature Presence – Opening Identity + วลีเด็ดติดปาก",                       dur:"10:30–11:30", url:null, qg:"QG-06", sessionCode:true },
+      { id:"HI03", name:"Brand Communication – แบรนด์มองอะไรเมื่อจ้างโฮสต์",                         dur:"12:30–14:00", url:null, qg:"QG-06", sessionCode:true },
+      { id:"HI04", name:"Creator Reputation System – Professionalism + Crisis Image",                   dur:"14:00–15:30", url:null, qg:"QG-06", sessionCode:true },
+      { id:"HI05", name:"EPK Workshop – Media Kit + Rate Card + Host Contract",                         dur:"15:30–17:00", url:null, qg:"QG-06", sessionCode:true },
     ],
-    submission: { enabled: true, rubric:"RUB-11", label:"ส่ง EPK Draft (Checklist 10 ข้อ)" },
+    submission: { enabled: true, rubric: "RUB-11", label: "ส่ง EPK Draft (Checklist 10 ข้อ)" },
   },
 
-  FRONTIER: {
-    id: "FRONTIER", name: "LIVE COMMERCE BUSINESS & GLOBAL", badge: "HIGH TIER", type: "onsite",
+  LIVE_COMMERCE_BUSINESS_GLOBAL: {
+    id: "LIVE_COMMERCE_BUSINESS_GLOBAL",
+    name: "LIVE COMMERCE BUSINESS & GLOBAL",
+    badge: "HIGH TIER",
+    type: "onsite",
     duration: "16 ชั่วโมง (Onsite 2 วัน)",
-    desc: "ขยายธุรกิจ รุกตลาดโลก",
+    price: "฿12,000",
+    desc: "ขยายธุรกิจ รุกตลาดโลก — P&L + Global Pitch + Agency Starter Kit",
     pretestQGs: ["QG-05","QG-07"], pretestCount: 10,
     lessons: [
-      { id:"F1", name:"P&L Mastery",               dur:"วัน 1 · 09:00-11:30", url:null, qg:"QG-07", sessionCode:true, day:1 },
-      { id:"F2", name:"Advanced Analytics",         dur:"วัน 1 · 12:30-14:00", url:null, qg:"QG-05", sessionCode:true, day:1 },
-      { id:"F3", name:"Smart Lazy Strategy",        dur:"วัน 1 · 14:00-15:30", url:null, qg:"QG-07", sessionCode:true, day:1 },
-      { id:"F5", name:"Global Market Intelligence", dur:"วัน 2 · 09:00-11:00", url:null, qg:"QG-07", sessionCode:true, day:2 },
-      { id:"F6", name:"IMC & Digital Marketing",    dur:"วัน 2 · 11:00-12:30", url:null, qg:"QG-06", sessionCode:true, day:2 },
-      { id:"F7", name:"Global Pitch Simulation",    dur:"วัน 2 · 13:30-16:00", url:null, qg:"QG-07", sessionCode:true, day:2 },
+      { id:"BG01", name:"P&L Mastery – คำนวณกำไรจริง + Break-even + ROAS",     dur:"วัน 1 · 09:00–11:30", url:null, qg:"QG-07", sessionCode:true, day:1 },
+      { id:"BG02", name:"Advanced Analytics – Retention Curve + Golden Minute", dur:"วัน 1 · 12:30–14:00", url:null, qg:"QG-05", sessionCode:true, day:1 },
+      { id:"BG03", name:"Smart Lazy Strategy – ไลฟ์ 3 วัน/สัปดาห์ ยอดไม่ลด",  dur:"วัน 1 · 14:00–15:30", url:null, qg:"QG-07", sessionCode:true, day:1 },
+      { id:"BG04", name:"Global Market Intelligence – US / EU / China / ASEAN", dur:"วัน 2 · 09:00–11:00", url:null, qg:"QG-07", sessionCode:true, day:2 },
+      { id:"BG05", name:"Global Pitch + EPK Final – นำเสนอต่อ Expert Panel",   dur:"วัน 2 · 13:30–16:00", url:null, qg:"QG-07", sessionCode:true, day:2 },
     ],
-    submission: { enabled: true, rubric:"RUB-04", label:"ส่ง Global Pitch (ภาษาอังกฤษ)" },
+    submission: { enabled: true, rubric: "RUB-04", label: "ส่ง Global Pitch (ภาษาอังกฤษ)" },
   },
 };
 
 // ลำดับระดับคอร์ส (ใช้สำหรับ unlock + แนะนำคอร์สถัดไปที่ซื้อแล้ว)
-const COURSE_ORDER = ["MICRO_EXPRESS", "SIGNAL", "MATRIX", "STAGE", "BLUEPRINT", "FRONTIER"];
+const COURSE_ORDER = [
+  "LIVE_COMMERCE_STARTER_KIT",
+  "HOOK_AND_HOLD",
+  "LIVE_SALES_SYSTEM",
+  "LIVE_TECH_SETUP",
+  "AI_FOR_LIVE_COMMERCE",
+  "LIVE_PSYCHOLOGY_CONVERSION",
+  "HOST_IDENTITY_PERSONAL_BRAND",
+  "LIVE_COMMERCE_BUSINESS_GLOBAL",
+];
 
 // Radar 5 มิติ
 const RADAR_DIMS = [
@@ -439,78 +501,18 @@ function LoginScreen({ onLogin }) {
 }
 
 // ── Dashboard ────────────────────────────────────────────────
-
-// ── Dashboard (MODIFIED — เพิ่ม Free Module banner + lesson topics) ──
-function Dashboard({ student, enrolledCourses, courseProgress, onSelect, onGoFreeModule, freeModules }) {
+function Dashboard({ student, enrolledCourses, courseProgress, onSelect }) {
+  // Show only purchased courses, sorted by level (COURSE_ORDER)
   const allCourses = COURSE_ORDER
     .filter(id => enrolledCourses.includes(id))
     .map(id => COURSES[id])
     .filter(Boolean);
-
-  // คำนวณสถานะ Free Module รวม
-  const freeTotalLessons = freeModules.reduce((a, m) => a + m.lessons.length, 0);
-  const freeDoneLessons  = freeModules.reduce((a, m) => a + m.lessons.filter(l => l.done).length, 0);
-  const freeAllDone      = freeTotalLessons > 0 && freeDoneLessons >= freeTotalLessons;
 
   return (
     <div style={S.wrap}>
       <div style={{ padding:"22px 0 14px" }}>
         <div style={S.h1}>สวัสดี, {student.name}</div>
         <div style={S.muted}>คอร์สของฉัน · {allCourses.length} คอร์ส</div>
-      </div>
-
-      {/* ── FREE MODULE STATUS CARD ── */}
-      <div style={{
-        background: freeAllDone ? "#F0FAF4" : "#E6F4FB",
-        border: `1.5px solid ${freeAllDone ? "#1A6B3A" : "#B5D4F0"}`,
-        borderRadius: 4, padding:"14px 18px", marginBottom:18,
-      }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:12, flexWrap:"wrap" }}>
-          <div style={{ flex:1 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:6 }}>
-              <span style={{ display:"inline-block", background:"#0A5C8A", color:"#fff", fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:2, letterSpacing:1 }}>
-                FREE
-              </span>
-              <span style={{ display:"inline-block", background:"#2d6a1a", color:"#fff", fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:2, letterSpacing:1 }}>
-                MANDATORY
-              </span>
-              <span style={{ fontSize:13, fontWeight:700, color: freeAllDone ? "#1A6B3A" : "#0A3D5C" }}>
-                รู้ก่อนไลฟ์ — โมดูลบังคับ
-              </span>
-            </div>
-
-            {/* lesson topics */}
-            {freeModules.map(m => (
-              <div key={m.id} style={{ marginBottom:6 }}>
-                <div style={{ fontSize:11, fontWeight:700, color:"#555", marginBottom:3 }}>{m.name}</div>
-                {m.lessons.map(l => (
-                  <div key={l.id} style={{ fontSize:12, color:"#444", display:"flex", alignItems:"center", gap:6, padding:"1px 0" }}>
-                    <span style={{ color: l.done ? "#1A6B3A" : "#ccc", fontSize:12 }}>
-                      {l.done ? "✓" : "○"}
-                    </span>
-                    {l.name}
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            <div style={{ fontSize:12, color: freeAllDone?"#1A6B3A":"#0A5C8A", marginTop:6 }}>
-              {freeDoneLessons}/{freeTotalLessons} บทเรียน
-            </div>
-          </div>
-
-          <div style={{ flexShrink:0 }}>
-            {freeAllDone ? (
-              <span style={{ color:"#1A6B3A", fontWeight:700, fontSize:13 }}>✓ ผ่านแล้ว</span>
-            ) : (
-              <button
-                style={{ background:"#0A5C8A", color:"#fff", border:"none", padding:"8px 14px", borderRadius:3, cursor:"pointer", fontSize:13, fontWeight:600 }}
-                onClick={onGoFreeModule}>
-                {freeDoneLessons > 0 ? `ต่อเรียน ${Math.round(freeDoneLessons/freeTotalLessons*100)}%` : "เรียนได้เลย →"}
-              </button>
-            )}
-          </div>
-        </div>
       </div>
 
       {allCourses.length === 0 && (
@@ -521,41 +523,27 @@ function Dashboard({ student, enrolledCourses, courseProgress, onSelect, onGoFre
       )}
 
       {allCourses.map(course => {
-        const prog  = courseProgress[course.id] || {};
-        const done  = prog.lessonsCompleted || 0;
+        const prog = courseProgress[course.id] || {};
+        const done = prog.lessonsCompleted || 0;
         const total = course.lessons.length;
-        const pct   = total ? Math.round(done/total*100) : 0;
+        const pct = total ? Math.round(done/total*100) : 0;
 
         return (
           <div key={course.id} style={S.card}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
               <div style={{ flex:1 }}>
-                <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4, flexWrap:"wrap" }}>
+                <div style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
                   <span style={{ fontWeight:700, fontSize:15 }}>{course.name}</span>
                   <span style={S.badge}>{course.badge}</span>
                   <span style={S.badgeO}>{course.type==="onsite"?"ONSITE":"ONLINE"}</span>
                 </div>
                 <div style={{ ...S.muted, marginBottom:8 }}>{course.duration} · {course.desc}</div>
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <div style={S.barBg}><div style={S.barFill(pct)} /></div>
                   <span style={{ ...S.muted, whiteSpace:"nowrap" }}>{done}/{total} บท</span>
                 </div>
-
-                {/* หัวข้อบทเรียนใน Dashboard */}
-                <div style={{ borderTop:"1px solid #f0f0ee", paddingTop:8 }}>
-                  <div style={{ fontSize:11, fontWeight:700, color:"#aaa", marginBottom:5, letterSpacing:.5, textTransform:"uppercase" }}>
-                    หัวข้อในคอร์ส
-                  </div>
-                  {course.lessons.map(l => (
-                    <div key={l.id} style={{ fontSize:12, color:"#555", display:"flex", alignItems:"center", gap:6, padding:"1px 0" }}>
-                      <span style={{ color: prog[l.id]==="done" ? "#1A6B3A" : "#ddd", fontSize:10 }}>●</span>
-                      {l.name}
-                      <span style={{ ...S.muted, fontSize:10 }}>{l.dur}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
-              <div style={{ marginLeft:14, flexShrink:0 }}>
+              <div style={{ marginLeft:14 }}>
                 <button onClick={()=>onSelect(course.id)} style={S.btnSm}>เข้าเรียน</button>
               </div>
             </div>
@@ -566,6 +554,8 @@ function Dashboard({ student, enrolledCourses, courseProgress, onSelect, onGoFre
   );
 }
 
+// ── Course View ───────────────────────────────────────────────
+function CourseView({ courseId, student, allLessonStatus, allLessonScores, onBack, onPretest, onLesson, onSessionUnlock, onViewResults, onWatch }) {
   const course = COURSES[courseId];
   const lessonStatus = allLessonStatus[courseId] || {};
   const lessonScores = allLessonScores[courseId] || {};
@@ -1083,604 +1073,192 @@ function CourseResults({ courseId, student, lessonScores, enrolledCourses, onBac
 }
 
 // ============================================================
-// 📋  SUPPORT SCREEN — FAQ + PDPA + Refund + Terms (TH/EN)
-// ============================================================
-const SUPPORT_TABS = [
-  { id: "faq",    th: "คำถามที่พบบ่อย",     en: "FAQ" },
-  { id: "pdpa",   th: "นโยบายความเป็นส่วนตัว", en: "Privacy / PDPA" },
-  { id: "refund", th: "คืนเงิน / เปลี่ยนคอร์ส", en: "Refund & Swap" },
-  { id: "terms",  th: "ข้อกำหนด / ลิขสิทธิ์",  en: "Terms & IP" },
-];
-
-const SUPPORT_CONTENT = {
-  faq: {
-    th: [
-      {
-        section: "การสมัครและการเข้าเรียน",
-        items: [
-          { q: "สมัครเรียนแล้วเข้าเรียนได้ทันทีหรือไม่?", a: "หลังชำระเงินสำเร็จ ระบบจะเปิดสิทธิ์ทันทีในหน้า \"คอร์สของฉัน\" หากไม่เห็นภายใน 5 นาที กรุณาติดต่อทีมสนับสนุนผ่าน LINE OA หรืออีเมล hello@creatr365.com" },
-          { q: "เรียนได้กี่อุปกรณ์?", a: "1 บัญชีต่อ 1 อุปกรณ์ในเวลาเดียวกัน เพื่อป้องกันการแชร์บัญชี สามารถสลับอุปกรณ์ได้ตามต้องการ" },
-          { q: "อายุการเข้าถึงคอร์สมีจำกัดไหม?", a: "ทุกคอร์สให้สิทธิ์เข้าถึงตลอดชีพ (Lifetime Access) ตราบใดที่บัญชียังใช้งานได้และ Creatr365 ยังให้บริการแพลตฟอร์ม" },
-          { q: "เรียนแบบไหน มีกำหนดเวลาหรือไม่?", a: "แบ่งเป็น 2 รูปแบบ: (1) Online VOD เรียนได้ทุกเวลา ทบทวนกี่ครั้งก็ได้ตลอดชีพ (2) Onsite ตามตารางที่กำหนด มีเวลาเริ่ม-จบ อาจมีการส่งการบ้าน" },
-          { q: "เรียนผ่านอุปกรณ์อะไรได้บ้าง?", a: "รองรับทุกอุปกรณ์ที่มีอินเทอร์เน็ต ทั้งคอมพิวเตอร์ แท็บเล็ต และสมาร์ทโฟน" },
-          { q: "มีใบรับรอง (Certificate) ไหม?", a: "ทุกคอร์สมีใบรับรองดิจิทัลหลังเรียนจบและผ่านเกณฑ์การประเมิน สามารถดาวน์โหลดได้จากหน้า \"ผลการเรียน\"" },
-          { q: "มีข้อสงสัยระหว่างเรียน ถามได้ที่ไหน?", a: "ติดต่อได้ที่ LINE OA: @creatr365 หรืออีเมล hello@creatr365.com เราตอบกลับภายใน 1 วันทำการ" },
-        ],
-      },
-      {
-        section: "การชำระเงินและใบเสร็จ",
-        items: [
-          { q: "รองรับช่องทางชำระเงินอะไรบ้าง?", a: "รองรับบัตรเครดิต/เดบิต (Visa, Mastercard), PromptPay, QR PromptPay และ Truemoney Wallet" },
-          { q: "ขอใบเสร็จหรือใบกำกับภาษีได้ไหม?", a: "ได้ ขอได้ภายใน 15 วันจากวันที่ซื้อ ผ่านหน้า \"คำขอของฉัน\" ทีมงานจะออก e-Receipt ให้ภายใน 7 วันทำการ" },
-          { q: "นโยบายคืนเงินสรุปสั้น ๆ คืออะไร?", a: "ขอคืนเงินได้ภายใน 7 วันหลังซื้อ โดยต้องเรียนไปแล้วไม่เกิน 20% ของคอร์ส ดูรายละเอียดเพิ่มเติมในแท็บ \"คืนเงิน / เปลี่ยนคอร์ส\"" },
-        ],
-      },
-    ],
-    en: [
-      {
-        section: "Registration & Access",
-        items: [
-          { q: "Can I start learning immediately after enrollment?", a: "Yes. Once payment is confirmed, access is granted instantly under \"My Courses\". If you don't see the course within 5 minutes, contact us via LINE OA or email hello@creatr365.com." },
-          { q: "How many devices can I use?", a: "One account can stream on one device at a time to prevent account sharing. You can switch devices freely." },
-          { q: "Is there a time limit to access the course?", a: "All courses come with lifetime access as long as your account remains active and Creatr365 continues to operate the platform." },
-          { q: "What are the learning formats?", a: "Two formats: (1) Online VOD — self-paced, rewatch anytime, lifetime access. (2) Onsite — scheduled sessions with set start/end times; assignments may apply." },
-          { q: "What devices are supported?", a: "Any internet-connected device: computer, tablet, or smartphone." },
-          { q: "Is a Certificate included?", a: "Yes. Every course includes a digital certificate after you complete the content and pass the assessments. Download it from the \"My Results\" page." },
-          { q: "Where can I ask questions while studying?", a: "Contact us via LINE OA: @creatr365 or email hello@creatr365.com. We respond within 1 business day." },
-        ],
-      },
-      {
-        section: "Payment & Receipts",
-        items: [
-          { q: "What payment methods are accepted?", a: "We accept credit/debit cards (Visa, Mastercard), PromptPay, QR PromptPay, and Truemoney Wallet." },
-          { q: "Can I request a receipt or tax invoice?", a: "Yes, request within 15 days of payment via the \"My Requests\" page. We will issue an e-Receipt within 7 business days." },
-          { q: "What is the refund policy in short?", a: "You may request a refund within 7 days of purchase, provided you have completed less than 20% of the course. See the \"Refund & Swap\" tab for full details." },
-        ],
-      },
-    ],
-  },
-
-  pdpa: {
-    th: `**นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)**
-อัปเดตล่าสุด: มิถุนายน 2569
-
-**1. ข้อมูลที่เราเก็บรวบรวม**
-- ข้อมูลส่วนบุคคล: ชื่อ-นามสกุล, อีเมล, เบอร์โทรศัพท์, ที่อยู่สำหรับออกใบกำกับภาษี
-- ข้อมูลการใช้งาน: ประวัติการเข้าดูคอร์ส, คะแนนแบบทดสอบ, ไฟล์งานที่อัปโหลด
-- ข้อมูลทางเทคนิค: IP address, ประเภทอุปกรณ์, Browser
-
-**2. วัตถุประสงค์ในการเก็บข้อมูล**
-- สร้างและจัดการบัญชีผู้เรียน
-- ประมวลผลการชำระเงินและออกใบเสร็จ
-- ให้บริการคอร์สเรียนและฟีเจอร์ต่าง ๆ
-- ปรับปรุงเนื้อหาและประสบการณ์ผู้ใช้
-- ส่งข่าวสารทางการตลาด (เมื่อได้รับความยินยอม)
-
-**3. ฐานกฎหมายในการประมวลผล**
-- การปฏิบัติตามสัญญา (การให้บริการคอร์สเรียน)
-- ความยินยอม (ข่าวสารการตลาด, คุกกี้ที่ไม่จำเป็น)
-- ประโยชน์อันชอบธรรม (การป้องกันทุจริต, การปรับปรุงแพลตฟอร์ม)
-
-**4. การเปิดเผยข้อมูลต่อบุคคลภายนอก**
-- เราจะไม่ขายข้อมูลส่วนบุคคลให้แก่ผู้ใด
-- อาจแบ่งปันข้อมูลเท่าที่จำเป็นแก่ผู้ประมวลผลข้อมูล เช่น ระบบชำระเงิน, ผู้ให้บริการอีเมล ภายใต้สัญญาประมวลผลข้อมูล (DPA) ที่เข้มงวด
-
-**5. สิทธิของเจ้าของข้อมูล**
-- สิทธิในการเข้าถึง แก้ไข ลบ หรือโอนย้ายข้อมูล
-- สิทธิในการเพิกถอนความยินยอม
-- สิทธิในการคัดค้านการประมวลผล
-- ใช้สิทธิได้ที่: hello@creatr365.com (ตอบกลับภายใน 30 วัน)
-
-**6. ระยะเวลาเก็บข้อมูล**
-- ข้อมูลบัญชี: ตลอดอายุสมาชิก และ 5 ปีหลังจากปิดบัญชี
-- ข้อมูลการสมัครข่าวสาร: จนกว่าท่านจะยกเลิก
-
-**7. การรักษาความปลอดภัย**
-- ใช้การเข้ารหัส SSL/TLS, การควบคุมการเข้าถึงตามบทบาท และการตรวจสอบความปลอดภัยประจำปี
-
-**8. การเปลี่ยนแปลงนโยบาย**
-- หากมีการเปลี่ยนแปลงสำคัญ จะแจ้งผ่านอีเมลและเว็บไซต์ล่วงหน้า 30 วัน
-
-**9. เจ้าหน้าที่คุ้มครองข้อมูล (DPO)**
-อีเมล: hello@creatr365.com`,
-
-    en: `**Privacy Policy & PDPA Notice**
-Last updated: June 2026
-
-**1. Data We Collect**
-- Personal information: full name, email, phone number, billing address.
-- Usage data: course progress, quiz scores, uploaded assignments.
-- Technical data: IP address, device type, browser.
-
-**2. Purposes of Processing**
-- Create and manage your learner account.
-- Process payments and issue receipts.
-- Deliver course content and platform features.
-- Improve course quality and user experience.
-- Send marketing communications (with consent).
-
-**3. Legal Basis**
-- Contractual necessity (service delivery).
-- Consent (marketing, non-essential cookies).
-- Legitimate interests (fraud prevention, platform improvement).
-
-**4. Third-Party Disclosure**
-- We never sell personal data.
-- Data may be shared with processors (payment gateways, email providers) under strict Data Processing Agreements (DPA).
-
-**5. Your Rights**
-- Right to access, rectify, delete, or port your data.
-- Right to withdraw consent.
-- Right to object to processing.
-- Exercise your rights at hello@creatr365.com; we respond within 30 days.
-
-**6. Data Retention**
-- Account data: while active and for 5 years after closure.
-- Marketing consent: until you unsubscribe.
-
-**7. Security**
-- SSL/TLS encryption, role-based access controls, and annual security audits.
-
-**8. Policy Changes**
-- Material changes communicated via email and website notice 30 days in advance.
-
-**9. Data Protection Officer (DPO)**
-Email: hello@creatr365.com`,
-  },
-
-  refund: {
-    th: `**นโยบายการคืนเงิน เปลี่ยน และโอนคอร์ส**
-อัปเดตล่าสุด: มิถุนายน 2569
-
-**1. การขอคืนเงิน (Refund)**
-- ขอคืนเงินได้ภายใน 7 วันนับจากวันซื้อ
-- ต้องเรียนไปแล้วไม่เกิน 20% ของเนื้อหาทั้งหมด (นับจากจำนวนบทเรียนที่เปิดดู)
-- ไม่ครอบคลุม: คอร์ส Flash Sale ที่ระบุว่า "ไม่รับคืนเงิน", Bundle ที่เปิดเรียนเกิน 10%, คอร์สของขวัญหลังผู้รับเปิดใช้แล้ว, คอร์ส Onsite ที่เข้าร่วมแล้ว
-- เงินคืนเข้าช่องทางเดิมภายใน 14 วันทำการ
-
-**2. การเปลี่ยนคอร์ส (Course Swap)**
-- เปลี่ยนเป็นคอร์สอื่นมูลค่าเท่ากันหรือน้อยกว่าได้ 1 ครั้งต่อการซื้อ
-- ต้องดำเนินการภายใน 3 วันหลังซื้อ และเรียนไปแล้วไม่เกิน 15%
-- หากคอร์สใหม่ราคาถูกกว่า ส่วนต่างเก็บเป็นเครดิตในบัญชี (ไม่คืนเป็นเงินสด)
-- หากคอร์สใหม่ราคาสูงกว่า ผู้เรียนต้องชำระส่วนต่าง
-
-**3. การเลื่อนรอบ Onsite (Reschedule)**
-- แจ้งล่วงหน้าอย่างน้อย 7 วันก่อนวันเริ่มเรียน
-- ใช้สิทธิ์เลื่อนได้สูงสุด 1 ครั้งต่อการซื้อ
-
-**4. การโอนสิทธิ์ (Transfer)**
-- ไม่อนุญาตให้โอนสิทธิ์เข้าถึงคอร์สให้บุคคลอื่น
-- การแชร์บัญชีหรือขายต่อสิทธิ์จะนำไปสู่การระงับบัญชีโดยไม่คืนเงิน
-
-**5. การร้องขอที่ผิดปกติ**
-- Creatr365 ขอสงวนสิทธิ์ปฏิเสธการคืนเงินหากตรวจพบพฤติกรรมใช้ในทางที่ผิด เช่น ดาวน์โหลดเนื้อหาจำนวนมากแล้วขอคืนเงิน หรือขอคืนเงินซ้ำซากโดยมีเจตนาทุจริต
-
-ติดต่อขอคืนเงิน/เปลี่ยนคอร์ส: hello@creatr365.com`,
-
-    en: `**Refund, Swap & Transfer Policy**
-Last updated: June 2026
-
-**1. Refund**
-- Request within 7 days of purchase.
-- Must have completed less than 20% of total course content (by lessons accessed).
-- Not available for: "Flash Sale" / non-refundable promotional courses; Bundles where >10% accessed; Gift purchases once activated; Onsite courses already attended.
-- Refunds issued to original payment method within 14 business days.
-
-**2. Course Swap**
-- Swap to a course of equal or lesser value once per purchase.
-- Request within 3 days of purchase and before completing 15%.
-- If new course costs less, difference held as account credit (not refunded in cash).
-- If new course costs more, you pay the difference.
-
-**3. Onsite Reschedule**
-- Notify at least 7 days before the session start date.
-- Maximum 1 reschedule per purchase.
-
-**4. Transfer**
-- Course access is non-transferable.
-- Account sharing or reselling access results in account suspension without refund.
-
-**5. Abuse Prevention**
-- Creatr365 reserves the right to deny refund or swap requests if abusive behavior is detected (e.g., bulk-downloading content before requesting a refund, or repeated suspicious refund patterns).
-
-Contact for refund/swap: hello@creatr365.com`,
-  },
-
-  terms: {
-    th: `**ข้อกำหนดการใช้บริการและสิทธิ์ทรัพย์สินทางปัญญา**
-อัปเดตล่าสุด: มิถุนายน 2569
-
-**1. การยอมรับเงื่อนไข**
-การลงทะเบียนหรือใช้บริการ Creatr365 ถือว่าท่านยอมรับข้อกำหนดนี้ทั้งหมด
-
-**2. การให้สิทธิ์การใช้งาน**
-Creatr365 ให้สิทธิ์แบบไม่ผูกขาด (non-exclusive), ไม่สามารถโอนได้, จำกัดเฉพาะการใช้ส่วนบุคคล ห้ามทำซ้ำ ดัดแปลง หรือเผยแพร่เนื้อหาโดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร
-
-**3. ทรัพย์สินทางปัญญาและลิขสิทธิ์**
-เนื้อหาทั้งหมด ได้แก่ วิดีโอคลิป, เสียง, สไลด์, ไฟล์ PDF, แบบฝึกหัด และซอร์สโค้ด เป็นทรัพย์สินทางปัญญาของ Creatr365 แต่เพียงผู้เดียว
-
-ผู้เรียนตกลงปฏิบัติตามเงื่อนไขดังนี้:
-- ห้ามบันทึกหน้าจอ, ดาวน์โหลดวิดีโอ (ยกเว้นระบบอนุญาต), ทำซ้ำ หรือดัดแปลงเนื้อหา
-- ห้ามนำวิดีโอ, เสียง หรือไฟล์ประกอบไปใช้ในเชิงพาณิชย์ หรือเปิดสอนต่อ
-- 1 บัญชีต่อ 1 ผู้เรียน ห้ามแชร์บัญชีหรือให้บุคคลอื่นร่วมรับชม
-
-**4. บทลงโทษหากละเมิด**
-หากพบการละเมิดลิขสิทธิ์ บริษัทฯ จะดำเนินการทันที:
-1. ระงับสิทธิ์การใช้งานบัญชีและตัดสิทธิ์เข้าเรียนถาวร (ไม่คืนเงิน)
-2. ดำเนินคดีทั้งทางแพ่งและทางอาญาตาม พ.ร.บ.ลิขสิทธิ์ มีโทษจำคุกสูงสุด 4 ปี และ/หรือปรับสูงสุด 800,000 บาท และเรียกค่าเสียหายทางแพ่ง
-
-**5. ข้อจำกัดความรับผิด**
-Creatr365 ไม่รับผิดชอบต่อความเสียหายทางอ้อม ความรับผิดทั้งหมดไม่เกินจำนวนเงินที่ท่านชำระสำหรับคอร์สที่เป็นประเด็น
-
-**6. การระงับบัญชี**
-ขอสงวนสิทธิ์ระงับหรือยกเลิกบัญชีโดยไม่คืนเงิน หากพบการแชร์บัญชี, ละเมิดลิขสิทธิ์ หรือกระทำที่เป็นภัยต่อธุรกิจ
-
-**7. กฎหมายที่ใช้บังคับ**
-ข้อกำหนดนี้อยู่ภายใต้กฎหมายไทย ศาลในกรุงเทพมหานครมีเขตอำนาจพิจารณาคดี
-
-**8. การเปลี่ยนแปลง**
-เราอาจแก้ไขข้อกำหนดได้ตลอดเวลา โดยแจ้งล่วงหน้าผ่านอีเมลและเว็บไซต์ การใช้บริการต่อถือว่ายอมรับ`,
-
-    en: `**Terms of Service & Intellectual Property**
-Last updated: June 2026
-
-**1. Acceptance**
-By registering or using Creatr365, you agree to be bound by these Terms.
-
-**2. License Grant**
-We grant you a limited, non-exclusive, non-transferable license to access course content for personal, non-commercial use only. Reproduction, modification, or redistribution without written permission is prohibited.
-
-**3. Intellectual Property & Copyright**
-All course materials (videos, audio, slides, PDFs, exercises, source code) are exclusively owned by Creatr365. Users agree to:
-- Not screen-record, download (unless permitted), copy, or modify content.
-- Not use materials commercially or to teach others.
-- 1 account = 1 learner; account sharing is prohibited.
-
-**4. Infringement & Penalties**
-If infringement is detected, we will immediately:
-1. Permanently suspend account access without refund.
-2. Pursue civil and criminal proceedings under Thai Copyright Law (max. 4 years imprisonment and/or 800,000 THB fine, plus civil damages).
-
-**5. Limitation of Liability**
-Creatr365 is not liable for indirect or consequential damages. Total liability is limited to the amount paid for the course in dispute.
-
-**6. Account Suspension**
-We reserve the right to suspend or terminate accounts without refund for account sharing, copyright infringement, or fraudulent activity.
-
-**7. Governing Law**
-Governed by Thai law; exclusive jurisdiction of courts in Bangkok.
-
-**8. Modifications**
-Terms may be updated at any time with advance notice via email and website. Continued use constitutes acceptance.`,
-  },
-};
-
-function SupportScreen({ onBack }) {
-  const [lang, setLang] = useState("th");
-  const [tab, setTab]   = useState("faq");
-  const [openIdx, setOpenIdx] = useState({});
-
-  const toggleQ = (sIdx, qIdx) => {
-    const key = `${sIdx}-${qIdx}`;
-    setOpenIdx(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const renderMarkdown = (text) =>
-    text.split("\n").map((line, i) => {
-      if (line.startsWith("**") && line.endsWith("**"))
-        return <p key={i} style={{ fontWeight:700, fontSize:14, marginTop:14, marginBottom:4, color:"#111" }}>{line.replace(/\*\*/g,"")}</p>;
-      if (line.startsWith("- "))
-        return <p key={i} style={{ fontSize:13, color:"#444", paddingLeft:14, marginBottom:2, lineHeight:1.6 }}>{"• " + line.slice(2)}</p>;
-      if (line.trim()==="") return <div key={i} style={{ height:6 }} />;
-      return <p key={i} style={{ fontSize:13, color:"#444", marginBottom:3, lineHeight:1.6 }}>{line}</p>;
-    });
-
-  return (
-    <div style={{ minHeight:"100vh", background:"#F8F8F8", fontFamily:"'Sarabun', Arial, sans-serif" }}>
-      {/* Header */}
-      <div style={{ background:"#111", padding:"14px 20px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <button onClick={onBack} style={{ background:"transparent", border:"1px solid #444", color:"#CCC", padding:"5px 12px", borderRadius:3, cursor:"pointer", fontSize:12 }}>← กลับ</button>
-        <span style={{ color:"#FFF", fontWeight:700, fontSize:14, letterSpacing:1 }}>ช่วยเหลือ / Help Center</span>
-        <div style={{ display:"flex", gap:6 }}>
-          <button onClick={()=>setLang("th")} style={{ padding:"4px 10px", borderRadius:3, cursor:"pointer", fontSize:12, fontWeight:700, border:"none", background:lang==="th"?"#FFF":"#333", color:lang==="th"?"#111":"#AAA" }}>ไทย</button>
-          <button onClick={()=>setLang("en")} style={{ padding:"4px 10px", borderRadius:3, cursor:"pointer", fontSize:12, fontWeight:700, border:"none", background:lang==="en"?"#FFF":"#333", color:lang==="en"?"#111":"#AAA" }}>EN</button>
-        </div>
-      </div>
-
-      <div style={{ maxWidth:820, margin:"0 auto", padding:"20px 16px 60px" }}>
-        {/* Tabs */}
-        <div style={{ display:"flex", gap:6, marginBottom:20, overflowX:"auto", paddingBottom:4 }}>
-          {SUPPORT_TABS.map(t => (
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{
-              padding:"8px 14px", borderRadius:3, cursor:"pointer", fontSize:13, fontWeight:600, whiteSpace:"nowrap",
-              border: tab===t.id ? "none" : "1.5px solid #CCC",
-              background: tab===t.id ? "#111" : "#FFF",
-              color: tab===t.id ? "#FFF" : "#555",
-            }}>
-              {lang==="th" ? t.th : t.en}
-            </button>
-          ))}
-        </div>
-
-        {/* FAQ Tab */}
-        {tab==="faq" && (
-          <div>
-            {SUPPORT_CONTENT.faq[lang].map((section, sIdx) => (
-              <div key={sIdx} style={{ marginBottom:20 }}>
-                <p style={{ fontSize:12, fontWeight:700, color:"#888", letterSpacing:1, textTransform:"uppercase", marginBottom:10 }}>{section.section}</p>
-                {section.items.map((item, qIdx) => {
-                  const key = `${sIdx}-${qIdx}`;
-                  const open = !!openIdx[key];
-                  return (
-                    <div key={qIdx} style={{ background:"#FFF", border:"1px solid #E0E0E0", borderRadius:3, marginBottom:6 }}>
-                      <button onClick={()=>toggleQ(sIdx,qIdx)} style={{ width:"100%", textAlign:"left", padding:"12px 16px", background:"transparent", border:"none", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:14, fontWeight:600, color:"#111", flex:1 }}>{item.q}</span>
-                        <span style={{ fontSize:16, color:"#888", flexShrink:0 }}>{open?"−":"+"}</span>
-                      </button>
-                      {open && (
-                        <div style={{ padding:"0 16px 14px", borderTop:"1px solid #F0F0F0" }}>
-                          <p style={{ fontSize:13, color:"#444", lineHeight:1.7, marginTop:10 }}>{item.a}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-            <div style={{ background:"#F0F0F0", borderRadius:3, padding:"14px 18px", marginTop:16 }}>
-              <p style={{ fontSize:13, color:"#555", margin:0 }}>
-                {lang==="th" ? "ยังมีข้อสงสัย? ติดต่อเราที่ LINE OA: @creatr365 หรืออีเมล hello@creatr365.com" : "Still have questions? Contact us via LINE OA: @creatr365 or email hello@creatr365.com"}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* PDPA / Refund / Terms Tabs */}
-        {(tab==="pdpa"||tab==="refund"||tab==="terms") && (
-          <div style={{ background:"#FFF", border:"1px solid #E0E0E0", borderRadius:3, padding:"24px", lineHeight:1.7 }}>
-            {renderMarkdown(SUPPORT_CONTENT[tab][lang])}
-          </div>
-        )}
-
-        {/* Footer note */}
-        <p style={{ fontSize:11, color:"#AAA", textAlign:"center", marginTop:24, lineHeight:1.6 }}>
-          {lang==="th"
-            ? "Creatr365 — สงวนลิขสิทธิ์ตาม พ.ร.บ.ลิขสิทธิ์ พ.ศ.2537 | PDPA: pdpc.or.th | ข้อมูลกฎหมาย: ipthailand.go.th"
-            : "Creatr365 — All rights reserved under Thai Copyright Act B.E.2537 | PDPA: pdpc.or.th | IP info: ipthailand.go.th"}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
 // 🚀  MAIN APP
 // ============================================================
-
-// ============================================================
-// 🚀  MAIN APP (MODIFIED — เพิ่ม free module + admin routing)
-// ============================================================
-
-// import ที่ต้องเพิ่มบนหัวไฟล์:
-//   import { FREE_MODULES_DEFAULT, markLessonDone as fmMarkDone } from "./data/freeModules";
-//   import FreeModuleScreen from "./screens/FreeModuleScreen";
-//   import AdminScreen from "./screens/AdminScreen";
-//
-// หรือถ้าต้องการ inline ทุกอย่างในไฟล์เดียว ให้ copy content จาก
-//   src/data/freeModules.js และ src/screens/FreeModuleScreen.jsx
-//   และ src/screens/AdminScreen.jsx มาวางก่อน export default นี้
-
 export default function Creatr365LMS() {
-  const [screen, setScreen]             = useState("login");
-  const [student, setStudent]           = useState(null);
+  const [screen, setScreen] = useState("login");
+  const [student, setStudent] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [courseProgress, setCourseProgress]   = useState({});
-  const [activeCourse, setActiveCourse]       = useState(null);
-  const [lessonStatus, setLessonStatus]       = useState({});
-  const [lessonScores, setLessonScores]       = useState({});
-  const [watchData, setWatchData]             = useState({});
-  const [activeLesson, setActiveLesson]       = useState(null);
-  const [quizCtx, setQuizCtx]                 = useState(null);
-  const [alertMsg, setAlertMsg]               = useState(null);
+  const [courseProgress, setCourseProgress] = useState({});     // { courseId: { lessonsCompleted } }
+  const [activeCourse, setActiveCourse] = useState(null);
+  const [lessonStatus, setLessonStatus] = useState({});         // { [courseId]: { [lessonId|__pretest__]: "done" } }
+  const [lessonScores, setLessonScores] = useState({});         // { [courseId]: { [lessonId]: { qg, pct } } }
+  const [watchData, setWatchData] = useState({});               // { lessonId: { count, seconds } }
+  const [activeLesson, setActiveLesson] = useState(null);
+  const [quizCtx, setQuizCtx] = useState(null);
+  const [alert, setAlert] = useState(null);                     // watch-count alert
 
-  // ── NEW: Free Modules state ──────────────────────────────
-  // ถ้า import จากไฟล์แยก: import { FREE_MODULES_DEFAULT } from "./data/freeModules"
-  // ถ้า inline: ใช้ FREE_MODULES_DEFAULT ที่ copy มาวางในไฟล์นี้
-  const [freeModules, setFreeModules] = useState(FREE_MODULES_DEFAULT);
-  const [focusFreeId, setFocusFreeId] = useState(null); // scroll to specific module
-
-  // ── NEW: Admin state ─────────────────────────────────────
-  const isAdmin = student?.id?.startsWith("ADMIN-");
-
-  // Font + no right-click
+  // Prevent right-click & copy globally
   useEffect(() => {
+    // โหลด Sarabun font
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap";
     document.head.appendChild(link);
+
     const noCtx = e => e.preventDefault();
     document.addEventListener("contextmenu", noCtx);
-    return () => document.removeEventListener("contextmenu", noCtx);
+    return () => {
+      document.removeEventListener("contextmenu", noCtx);
+    };
   }, []);
 
-  // ── Auth handlers ─────────────────────────────────────────
   function handleLogin(s, courses) {
     setStudent(s);
     setEnrolledCourses(courses);
-    // ADMIN-xxx ไปหน้า admin โดยตรง
-    setScreen(s.id?.startsWith("ADMIN-") ? "admin" : "dashboard");
+    setScreen("dashboard");
   }
 
   function handleLogout() {
     setStudent(null); setEnrolledCourses([]); setCourseProgress({});
     setActiveCourse(null); setLessonStatus({}); setLessonScores({});
-    setFreeModules(FREE_MODULES_DEFAULT);
     setScreen("login");
   }
 
-  // ── Course navigation ─────────────────────────────────────
   function selectCourse(cId) {
     setActiveCourse(cId);
     setScreen("course");
   }
 
-  // ── NEW: Free module lesson done ──────────────────────────
-  // ถ้า import จากไฟล์แยก: import { markLessonDone as fmMarkDone } from "./data/freeModules"
-  function handleFreeLessonDone(moduleId, lessonId) {
-    setFreeModules(prev =>
-      prev.map(m => m.id !== moduleId ? m : {
-        ...m,
-        lessons: m.lessons.map(l => l.id !== lessonId ? l : { ...l, done: true }),
-      })
-    );
-    // ส่ง API บันทึกถ้ามี student login
-    if (student?.id) {
-      api({ action:"save_free_module_progress", sid:student.id, module:moduleId, lesson:lessonId, status:"done" });
-    }
-  }
 
-  // ── NEW: Admin add handlers ───────────────────────────────
-  function handleAddFreeModule(data) {
-    setFreeModules(prev => [...prev, data]);
-  }
-
-  function handleAddCourse(data) {
-    // COURSES เป็น const object ใน file นี้ — ใน production ควรใช้ state แทน
-    // ตอนนี้แค่ alert แล้วให้ผู้ดูแลระบบเพิ่มใน COURSES object ด้วยตนเอง
-    alert(`บันทึก "${data.name}" แล้ว — เพิ่ม entry ใน COURSES object และ deploy ใหม่`);
-  }
-
-  // ── Quiz handlers (unchanged) ─────────────────────────────
+  // Pre-test
   function startPretest() {
     const course = COURSES[activeCourse];
-    setActiveLesson({ id:"__pretest__", qg:"pretest" });
+    // สำคัญ: ต้องเซ็ต activeLesson ให้เป็น __pretest__ เพื่อให้ finishLessonQuiz รู้ว่าทำอะไรเสร็จ
+    setActiveLesson({ id: "__pretest__", qg: "pretest" });
     const qs = getQsByQG(course.pretestQGs, "Pre", course.pretestCount);
     setQuizCtx({ questions:qs, title:"Pre-test", threshold:0, quizType:"pretest", qg:course.pretestQGs.join(",") });
     setScreen("quiz");
   }
 
+  // KC quiz after lesson video
   function startLessonQuiz(lesson) {
     const course = COURSES[activeCourse];
     const isLast = course.lessons[course.lessons.length-1].id === lesson.id;
-    let qs = isLast ? getDiagnosticQuiz(course) : getLessonQuiz(lesson);
-    if (!qs.length) { markLessonDoneLocal(lesson, 100); setScreen("course"); return; }
+    
+    let qs = [];
+    if (isLast) {
+      // Diagnostic: ดึงจากทุก QG ของคอร์ส, กระจายสมดุล, สูงสุด 15 ข้อ
+      qs = getDiagnosticQuiz(course);
+    } else {
+      // KC Quiz: ใช้ seededShuffle ตาม lesson.id → ข้อต่างกันทุกบท
+      qs = getLessonQuiz(lesson);
+    }
+
+    if (!qs.length) { markLessonDone(lesson, 100); setScreen("course"); return; }
     setActiveLesson(lesson);
-    setQuizCtx({
-      questions: qs,
-      title: isLast ? "แบบประเมินวินิจฉัย (Post-test)" : `KC: ${lesson.name}`,
-      threshold: CFG.passThreshold,
-      quizType: isLast ? "diagnostic" : "knowledge_check",
+    setQuizCtx({ 
+      questions: qs, 
+      title: isLast ? "แบบประเมินวินิจฉัย (Post-test)" : `KC: ${lesson.name}`, 
+      threshold: CFG.passThreshold, 
+      quizType: isLast ? "diagnostic" : "knowledge_check", 
       qg: lesson.qg,
     });
     setScreen("quiz");
   }
 
-  function markLessonDoneLocal(lesson, pct) {
+  function markLessonDone(lesson, pct) {
     setLessonStatus(prev => {
-      const cur = prev[activeCourse] || {};
-      return { ...prev, [activeCourse]: { ...cur, [lesson.id]:"done" } };
+      const courseLidStatus = prev[activeCourse] || {};
+      return { ...prev, [activeCourse]: { ...courseLidStatus, [lesson.id]: "done" } };
     });
     setLessonScores(prev => {
-      const cur = prev[activeCourse] || {};
-      return { ...prev, [activeCourse]: { ...cur, [lesson.id]:{ qg:lesson.qg, pct } } };
+      const courseLidScores = prev[activeCourse] || {};
+      return { ...prev, [activeCourse]: { ...courseLidScores, [lesson.id]: { qg: lesson.qg, pct } } };
     });
+
+    // Update course progress count
     setCourseProgress(prev => {
       const course = COURSES[activeCourse];
       if (!course) return prev;
+      // We calculate from current state plus the new done lesson
       const currentDone = lessonStatus[activeCourse] || {};
-      const doneCount = course.lessons.filter(l => currentDone[l.id]==="done" || l.id===lesson.id).length;
-      return { ...prev, [activeCourse]: { ...prev[activeCourse], lessonsCompleted:doneCount } };
+      const doneCount = course.lessons.filter(l => currentDone[l.id] === "done" || l.id === lesson.id).length;
+      return { ...prev, [activeCourse]: { ...prev[activeCourse], lessonsCompleted: doneCount } };
     });
+
     apiSaveProgress(student?.id, activeCourse, lesson.id, "done");
   }
 
   function handleQuizDone(result) {
     if (!result) { setScreen(activeCourse ? "course" : "dashboard"); return; }
+
     if (quizCtx.quizType === "pretest") {
       setLessonStatus(prev => {
         const cur = prev[activeCourse] || {};
-        return { ...prev, [activeCourse]: { ...cur, "__pretest__":"done" } };
+        return { ...prev, [activeCourse]: { ...cur, "__pretest__": "done" } };
       });
       apiSaveScore(student?.id, activeCourse, "pretest", quizCtx.qg, result.correct, result.total, result.pct, true);
       apiSaveProgress(student?.id, activeCourse, "__pretest__", "done");
       setScreen("course");
       return;
     }
-    markLessonDoneLocal(activeLesson, result.pct);
+
+    // Knowledge Check / Diagnostic
+    markLessonDone(activeLesson, result.pct);
     apiSaveScore(student?.id, activeCourse, quizCtx.quizType, quizCtx.qg, result.correct, result.total, result.pct, result.pct >= CFG.passThreshold);
     setActiveLesson(null);
     setScreen("course");
   }
 
+  // Session unlock (Onsite)
   function handleSessionUnlocked(lesson) {
     const qs = getLessonQuiz(lesson);
-    if (!qs.length) { markLessonDoneLocal(lesson, 100); setScreen("course"); return; }
+    if (!qs.length) { markLessonDone(lesson, 100); setScreen("course"); return; }
     setActiveLesson(lesson);
     setQuizCtx({ questions:qs, title:lesson.name, threshold:CFG.passThreshold, quizType:"knowledge_check", qg:lesson.qg });
     setScreen("quiz");
   }
 
+  // Track video watch (called from LessonViewer or when user clicks "ดูคลิป")
   function recordWatch(lessonId, qg) {
     const newCount = (watchData[lessonId]?.count || 0) + 1;
     setWatchData(prev => {
-      const cur  = prev[lessonId] || { count:0, seconds:0 };
+      const cur = prev[lessonId] || { count:0, seconds:0 };
       const next = { count:cur.count+1, seconds:cur.seconds };
       apiSaveWatch(student?.id, activeCourse, lessonId, next.seconds, next.count);
       return { ...prev, [lessonId]:next };
     });
     if (newCount > CFG.maxWatchCount) {
       const lesson = COURSES[activeCourse]?.lessons.find(l => l.id === lessonId);
-      if (lesson) setAlertMsg(lesson);
+      if (lesson) setAlert(lesson);
     }
   }
 
-  // ── Render ────────────────────────────────────────────────
+  const activeCourseStatus = lessonStatus[activeCourse] || {};
+  const allLessonsDone = activeCourse &&
+    COURSES[activeCourse].lessons.every(l => activeCourseStatus[l.id]==="done");
+
   return (
     <div style={S.page} onCopy={e=>e.preventDefault()}>
-      <Header student={screen!=="login" ? student : null} onLogout={handleLogout} />
+      <Header student={screen!=="login"?student:null} onLogout={handleLogout} />
 
-      {/* Watch-count alert */}
-      {alertMsg && (
+      {/* Watch-count alert popup */}
+      {alert && (
         <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,.5)",
           display:"flex", alignItems:"center", justifyContent:"center", zIndex:9999 }}>
           <div style={{ ...S.card, maxWidth:400, margin:20 }}>
             <div style={{ fontWeight:700, fontSize:15, marginBottom:10 }}>แจ้งเตือน</div>
             <div style={{ fontSize:14, color:"#333", lineHeight:1.6 }}>
-              คุณเข้าดูบท <strong>"{alertMsg.name}"</strong> เกิน {CFG.maxWatchCount} ครั้งแล้ว
+              คุณเข้าดูบท <strong>"{alert.name}"</strong> เกิน {CFG.maxWatchCount} ครั้งแล้ว
             </div>
             <div style={{ fontSize:13, color:"#555", marginTop:10, lineHeight:1.6 }}>
-              จากการวิเคราะห์ด้านการเรียนรู้ (Ebbinghaus Forgetting Curve)
-              การดูซ้ำหลายครั้งโดยไม่ฝึกปฏิบัติ มักแสดงว่าเนื้อหาบางส่วนยังไม่ชัดเจน
-              ทีมงานจะติดต่อเพื่อช่วยซ่อมเสริมตรงจุดที่ต้องการ
+              จากการวิเคราะห์ด้านการเรียนรู้ (Ebbinghaus Forgetting Curve) การดูซ้ำหลายครั้งโดยไม่ฝึกปฏิบัติ
+              มักแสดงว่าเนื้อหาบางส่วนยังไม่ชัดเจน ทีมงานจะติดต่อเพื่อช่วยซ่อมเสริมตรงจุดที่ต้องการ
             </div>
-            <button onClick={()=>setAlertMsg(null)} style={{ ...S.btn, marginTop:16, width:"100%" }}>รับทราบ</button>
+            <button onClick={()=>setAlert(null)} style={{ ...S.btn, marginTop:16, width:"100%" }}>รับทราบ</button>
           </div>
         </div>
       )}
 
-      {/* ── Screens ── */}
-
       {screen==="login" && <LoginScreen onLogin={handleLogin} />}
 
-      {/* MODIFIED Dashboard — รับ freeModules + onGoFreeModule */}
       {screen==="dashboard" && (
         <Dashboard
           student={student}
           enrolledCourses={enrolledCourses}
           courseProgress={courseProgress}
-          freeModules={freeModules}
           onSelect={selectCourse}
-          onGoFreeModule={() => { setFocusFreeId(null); setScreen("free_module"); }}
-        />
-      )}
-
-      {/* NEW: Free Module Screen */}
-      {screen==="free_module" && (
-        <FreeModuleScreen
-          freeModules={freeModules}
-          focusModuleId={focusFreeId}
-          onBack={() => setScreen(student ? "dashboard" : "login")}
-          onLessonDone={handleFreeLessonDone}
         />
       )}
 
@@ -1693,7 +1271,7 @@ export default function Creatr365LMS() {
           onBack={()=>setScreen("dashboard")}
           onPretest={startPretest}
           onLesson={startLessonQuiz}
-          onSessionUnlock={lesson=>{ setActiveLesson(lesson); setScreen("session_unlock"); }}
+          onSessionUnlock={lesson=>{setActiveLesson(lesson);setScreen("session_unlock");}}
           onViewResults={()=>setScreen("results")}
           onWatch={recordWatch}
         />
@@ -1725,49 +1303,14 @@ export default function Creatr365LMS() {
           lessonScores={lessonScores[activeCourse] || {}}
           enrolledCourses={enrolledCourses}
           onBack={()=>setScreen("course")}
-          onSelectCourse={(cId)=>{ setActiveCourse(cId); setScreen("course"); }}
+          onSelectCourse={(cId) => { setActiveCourse(cId); setScreen("course"); }}
         />
       )}
 
-      {/* NEW: Admin Screen — เปิดได้เมื่อ student.id ขึ้นต้นด้วย "ADMIN-" */}
-      {screen==="admin" && (
-        <AdminScreen
-          freeModules={freeModules}
-          paidCourses={Object.values(COURSES)}
-          onAddFreeModule={handleAddFreeModule}
-          onAddCourse={handleAddCourse}
-          onBack={()=>setScreen("dashboard")}
-        />
-      )}
-
-      {/* Support / Legal Screen */}
-      {screen==="support" && <SupportScreen onBack={()=>setScreen(student ? "dashboard" : "login")} />}
-      {/* Footer */}
-      {/* Footer */}
-      {screen !== "support" && (
-        <div style={{ textAlign:"center", padding:"32px 0 56px", borderTop:"1px solid #E5E5E5", marginTop:20 }}>
-          <img src={IMG.concept} alt="Concept" style={{ width:160, opacity:0.5, marginBottom:16 }} />
-          <div style={{ display:"flex", justifyContent:"center", gap:20, flexWrap:"wrap" }}>
-            {[
-              { label:"คำถามที่พบบ่อย / FAQ",      screen:"faq"    },
-              { label:"นโยบายความเป็นส่วนตัว / Privacy",   screen:"pdpa"   },
-              { label:"คืนเงิน / Refund",            screen:"refund" },
-              { label:"ข้อกำหนด / Terms & IP",      screen:"terms"  },
-            ].map(link => (
-              <button
-                key={link.screen}
-                onClick={() => { setScreen("support"); }}
-                style={{ background:"transparent", border:"none", color:"#888", fontSize:11, cursor:"pointer", textDecoration:"underline", padding:0 }}
-              >
-                {link.label}
-              </button>
-            ))}
-          </div>
-          <p style={{ fontSize:10, color:"#BBB", marginTop:12 }}>
-            © 2026 Creatr365 · hello@creatr365.com · All rights reserved
-          </p>
-        </div>
-      )}
+      {/* Footer Concept Logo */}
+      <div style={{ textAlign:"center", padding:"40px 0 60px", opacity:0.6 }}>
+        <img src={IMG.concept} alt="Concept" style={{ width:180 }} />
+      </div>
     </div>
   );
 }
