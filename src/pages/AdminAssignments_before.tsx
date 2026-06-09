@@ -25,6 +25,7 @@ const AdminAssignments = () => {
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
+    navigate('/auth?redirect=/admin/assignments');
     if (!session) { navigate('/auth'); return; }
     const { data: roles } = await supabase.from('user_roles').select('role')
       .eq('user_id', session.user.id).eq('role','admin').maybeSingle();
