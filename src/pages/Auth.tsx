@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -19,18 +19,18 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [liffLoading, setLiffLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const liff = useLiff();
-
+  const location = useLocation();                                              // ← เพิ่ม
+  const redirectTo = new URLSearchParams(location.search).get('redirect') || '/dashboard'; // ← เพิ่ม
+  
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/dashboard');
+      if (session) navigate(redirectTo);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate('/dashboard');
+      if (session) navigate(redirectTo);
     });
     return () => subscription.unsubscribe();
-  }, [navigate]);
+ }, [navigate, redirectTo]);
 
   // Auto sign-in when LIFF is ready and user is logged in to LINE
   useEffect(() => {
