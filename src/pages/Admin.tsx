@@ -70,7 +70,7 @@ const Admin = () => {
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      navigate('/auth');
+      navigate('/auth?redirect=/admin');
       return;
     }
     // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
