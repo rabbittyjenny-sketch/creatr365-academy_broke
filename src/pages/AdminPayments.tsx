@@ -21,6 +21,7 @@ const AdminPayments = () => {
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
+    navigate('/auth?redirect=/admin/payments');
     if (!session) { navigate('/auth'); return; }
     // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
     let q = supabase.from('course_enrollments').select('*, courses(title)').order('created_at',{ascending:false});
