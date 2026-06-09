@@ -125,6 +125,7 @@ const AdminCourses = () => {
 
   const checkAuthAndLoad = async () => {
     const { data: { session } } = await supabase.auth.getSession();
+    navigate('/auth?redirect=/admin/courses');
     if (!session) { navigate('/auth'); return; }
     // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
     setLoading(false);
