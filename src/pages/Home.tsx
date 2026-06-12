@@ -711,17 +711,22 @@ const Home: React.FC = () => {
               <p className="text-white font-bold text-lg tracking-tight">CREATR365</p>
               <p className="text-white/30 text-xs mt-1">A Creative House for the Future of Live Commerce.</p>
             </div>
-            <div className="flex flex-wrap gap-6 text-xs text-white/30">
+            <div className="flex flex-wrap gap-5 text-xs text-white/30">
               <Link to="/courses" className="hover:text-white/60 transition-colors">หลักสูตร</Link>
-              <Link to="/articles/diagnostic-quiz" className="hover:text-white/60 transition-colors">แบบทดสอบ</Link>
               <Link to="/articles" className="hover:text-white/60 transition-colors">บทความ</Link>
+              <Link to="/faq" className="hover:text-white/60 transition-colors">FAQ</Link>
               <Link to="/contact" className="hover:text-white/60 transition-colors">ติดต่อ</Link>
               <Link to="/auth" className="hover:text-white/60 transition-colors">เข้าสู่ระบบ</Link>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-2 text-xs text-white/20">
             <p>© 2025 CREATR365. All rights reserved.</p>
-            <p>Creator Transformation System™ | Key Collection System™</p>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/privacy" className="hover:text-white/40 transition-colors">นโยบายความเป็นส่วนตัว</Link>
+              <Link to="/terms" className="hover:text-white/40 transition-colors">ข้อกำหนดการใช้บริการ</Link>
+              <Link to="/refund-policy" className="hover:text-white/40 transition-colors">นโยบายการคืนเงิน</Link>
+              <Link to="/faq" className="hover:text-white/40 transition-colors">FAQ</Link>
+            </div>
           </div>
         </div>
       </footer>
