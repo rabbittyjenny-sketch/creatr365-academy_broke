@@ -41,7 +41,7 @@ export const CourseNavbar: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Creatr365" className="h-7 w-auto" />
+          <img src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png" alt="Creatr365" className="h-7 w-auto" />
         </Link>
 
         {/* Desktop links */}
