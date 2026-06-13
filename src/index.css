@@ -554,3 +554,101 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem;
   border-radius: 0.3rem; font-size: 0.85em;
 }
+
+/* ═══════════════════════════════════════════════
+   MOTION SYSTEM — CREATR365
+   "Apple keynote meets Prada campaign"
+═══════════════════════════════════════════════ */
+
+/* Cursor glow */
+.cursor-glow {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at center,
+    rgba(204, 0, 51, 0.07) 0%,
+    rgba(204, 0, 51, 0.03) 40%,
+    transparent 70%
+  );
+  will-change: left, top;
+  transition: opacity 0.3s ease;
+}
+
+/* Scroll reveal base state */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-reveal="left"]  { transform: translateX(-24px); }
+[data-reveal="right"] { transform: translateX(24px); }
+[data-reveal="scale"] { transform: scale(0.95); }
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Subtle parallax wrapper */
+.parallax-slow { will-change: transform; }
+
+/* Editorial text clip animation */
+@keyframes textReveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.text-reveal { animation: textReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Pulse ring for live indicators */
+@keyframes pulseRing {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulseRing 2s ease-out infinite;
+}
+
+/* Floating subtle animation */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+.float-y { animation: floatY 4s ease-in-out infinite; }
+
+/* Shimmer for skeleton loaders */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Number count-up animation class */
+@keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.count-up { animation: countUp 0.5s ease both; }
+
+/* Noise grain overlay for cinematic feel (opt-in) */
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
+}
