@@ -1,192 +1,113 @@
-import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-import { AuthSheet } from './AuthSheet';
-export const Navbar: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+const MAIN_NAV = [
+  { to: '/', label: 'หน้าแรก', accent: 'blue' },
+  { to: '/courses', label: 'หลักสูตร', accent: 'red' },
+  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'green' },
+  { to: '/articles', label: 'บทความ', accent: 'yellow' },
+  { to: '/contact', label: 'ติดต่อ', accent: 'blue' },
+] as const;
+
+export const CourseNavbar: React.FC = () => {
   const navigate = useNavigate();
-  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+  const location = useLocation();
+  const [user, setUser] = useState<any>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null));
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (user && pendingRoute) {
-      navigate(pendingRoute);
-      setPendingRoute(null);
-      setIsAuthOpen(false);
-    }
-  }, [user, pendingRoute]);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setOpen(false);
+    navigate('/');
+  };
 
-  return createPortal(
-    <>
-      <nav className="fixed top-8 left-4 md:left-8 z-[2000] flex items-center gap-0" >
-      {/* Logo */}
-      <div className="bg-black text-white h-[34px] w-[34px] border border-black flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" className="w-4 h-4">
-          <g id="smiley-smirk">
-            <path id="Subtract" fill="currentColor" stroke="currentColor" strokeWidth="0.5" fillRule="evenodd" d="M1.83645 1.83645C3.06046 0.612432 4.82797 0 7 0s3.9395 0.612432 5.1636 1.83645C13.3876 3.06046 14 4.82797 14 7s-0.612432 3.9395-1.83645 5.1636C10.9395 13.3876 9.17203 14 7 14s-3.9395-0.612432-5.1636-1.83645C0.612432 10.9395 0 9.17203 0 7s0.612432-3.9395 1.83645-5.1636zm6.18045 3.5395a0.7 0.7 0 1 0-1.4 0 0.7 0.7 0 0 0 1.4 0zm-2.8 0a0.7 0.7 0 1 0-1.4 0 0.7 0.7 0 0 0 1.4 0zm7 1.4a0.7 0.7 0 1 0 0-1.4 0.7 0.7 0 0 0 0 1.4zm-8.4 2.1a3.5 3.5 0 0 0 3.5 3.5 3.5 3.5 0 0 0 3.5-3.5h-1.4a2.1 2.1 0 0 1-2.1 2.1 2.1 2.1 0 0 1-2.1-2.1H2.83645z"/>
-          </g>
-        </svg>
-      </div>
+  const close = () => setOpen(false);
 
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center">
-        <Link 
-          to="/" 
-          className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border border-black leading-none group"
-        >
-          <span className="relative z-10">DISCOVER</span>
-          <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
+  const isActive = (to: string) => {
+    if (to === '/') return location.pathname === '/';
+    if (to === '/articles') return location.pathname === '/articles';
+    return location.pathname === to || location.pathname.startsWith(`${to}/`);
+  };
+
+  return (
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <Link to="/" onClick={close} className="flex items-center gap-2">
+          <img src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png" alt="Creatr365" className="h-7 w-auto" />
         </Link>
-        <button 
-          onClick={() => {
-            if (user) {
-              navigate('/create-event');
-            } else {
-              setPendingRoute('/create-event');
-              setIsAuthOpen(true);
-            }
-          }}
-          className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-black leading-none group"
-        >
-          <span className="relative z-10">CREATE EVENT</span>
-          <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
-        </button>
-        {user ? (
-          <>
-            <Link 
-              to="/my-events" 
-              className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-black leading-none group"
+
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {MAIN_NAV.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              data-accent={item.accent}
+              aria-current={isActive(item.to) ? 'page' : undefined}
+              className="nav-link text-foreground"
             >
-              <span className="relative z-10">MY EVENTS</span>
-              <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
+              {item.label}
             </Link>
-            <button 
-              onClick={async () => {
-                await supabase.auth.signOut();
-                localStorage.clear();
-                navigate('/auth');
-              }}
-              className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-black leading-none group"
-            >
-              <span className="relative z-10">SIGN OUT</span>
-              <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
-            </button>
-          </>
-        ) : (
-          <button 
-            onClick={() => setIsAuthOpen(true)}
-            className="relative overflow-hidden bg-white text-black h-[34px] px-3 flex items-center text-[11px] font-medium uppercase border-l-0 border border-black leading-none group"
-          >
-            <span className="relative z-10">SIGN IN</span>
-            <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
-          </button>
-        )}
+          ))}
+          {user ? (
+            <>
+              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
+              <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">ออกจากระบบ</button>
+            </>
+          ) : (
+            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
+              เข้าสู่ระบบ
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setOpen(o => !o)}
+          aria-label="Toggle menu"
+          className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md border border-border text-foreground"
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
 
-      {/* Mobile Navigation - Full Screen */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-[3000] flex flex-col animate-in slide-in-from-top duration-300">
-          {/* Close header */}
-          <div className="bg-[#1A1A1A] flex items-center justify-center py-16 animate-in fade-in duration-500">
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-white text-[11px] font-medium uppercase tracking-wider"
-            >
-              CLOSE
-            </button>
-          </div>
-          
-          {/* Menu items */}
-          <div className="flex-1 flex flex-col bg-white">
-            <Link 
-              to="/" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase border-b border-black tracking-[-0.34px] animate-fade-in"
-              style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
-            >
-              DISCOVER
-            </Link>
-            <button 
-              onClick={() => {
-                if (user) {
-                  navigate('/create-event');
-                } else {
-                  setPendingRoute('/create-event');
-                  setIsAuthOpen(true);
-                }
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase border-b border-black tracking-[-0.34px] animate-fade-in"
-              style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
-            >
-              CREATE EVENT
-            </button>
+      {/* Mobile drawer */}
+      {open && (
+        <div className="md:hidden border-t border-border bg-background">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-base font-medium">
+            {MAIN_NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={close}
+                data-accent={item.accent}
+                aria-current={isActive(item.to) ? 'page' : undefined}
+                className="nav-link py-3 text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
             {user ? (
               <>
-                <Link 
-                  to="/my-events" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase border-b border-black tracking-[-0.34px] animate-fade-in"
-                  style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
-                >
-                  MY EVENTS
-                </Link>
-                <button 
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    localStorage.clear();
-                    navigate('/auth');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase border-b border-black tracking-[-0.34px] animate-fade-in"
-                  style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
-                >
-                  SIGN OUT
-                </button>
+                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
+                <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">ออกจากระบบ</button>
               </>
             ) : (
-              <button 
-                onClick={() => {
-                  setIsAuthOpen(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex-1 flex items-center justify-center text-[#1A1A1A] text-[17px] font-medium uppercase border-b border-black tracking-[-0.34px] animate-fade-in"
-                style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
-              >
-                SIGN IN
-              </button>
+              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
+                เข้าสู่ระบบ
+              </Link>
             )}
           </div>
         </div>
       )}
-      
-      {/* Menu Button - Mobile Only */}
-      <button 
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden relative overflow-hidden bg-white text-black h-[34px] px-3 border border-l-0 border-black flex items-center justify-center text-[11px] font-medium uppercase leading-none group"
-      >
-        <span className="relative z-10">MENU</span>
-        <span className="absolute inset-0 bg-[#FA76FF] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
-      </button>
     </nav>
-    
-    <AuthSheet isOpen={isAuthOpen} onClose={() => { setIsAuthOpen(false); setPendingRoute(null); }} />
-    </>,
-    document.body
   );
 };
