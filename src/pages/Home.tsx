@@ -70,7 +70,11 @@ export const Home: React.FC = () => {
 
   return (
     <>
-      <SEOHead page="home" />
+      <SEOHead
+        title="Creatr365 — Be a Creator. Not a Consumer."
+        description="A Creative House for the Future of Live Commerce. สร้างทุกคอร์สด้วยพื้นฐานของความเข้าใจในปัญหา ถอดทุกประสบการณ์จริงในอาชีพ Live commerce เพื่อสร้างเนื้อหาการเรียนรู้ที่ครบในทุกมิติและมันต้องใช้ได้จริง
+"
+      />
       <CourseNavbar />
       <CursorGlow />
 
