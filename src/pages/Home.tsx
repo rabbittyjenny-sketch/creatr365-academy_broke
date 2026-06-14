@@ -325,7 +325,7 @@ export const Home: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.slice(0, 6).map((c, idx) => {
                 const hex = COLOR_HEX[c.color] || '#888';
-                const isFree = c.price?.toLowerCase().includes('ฟรี') || c.price === '0' || c.tag === 'FREE';
+                const isFree = (c.price?.toLowerCase() ?? '').includes('ฟรี') || c.price === '0' || c.tag === 'FREE';
                 const isCS = c.status === 'coming_soon';
                 return (
                   <Link key={c.id} to={isCS ? '#' : `/course/${c.slug}`}
