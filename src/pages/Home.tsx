@@ -1,597 +1,469 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CourseNavbar } from '@/components/CourseNavbar';
-import { SEOHead } from '@/components/SEOHead';
-import CursorGlow from '@/components/CursorGlow';
-import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Play, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
-
-interface CourseRow {
-  id: string; slug: string; tag: string; title: string; subtitle: string;
-  color: string; is_active: boolean; learning_type: string; status: string;
-  cover_image_url: string | null; price: string; duration: string; level: string | null;
-}
+import { ArrowRight, Check, X, ChevronDown, DollarSign, TrendingUp, BarChart3, Users, ExternalLink } from 'lucide-react';
 
 const RED = '#CC0033';
 
+/* ─── STATS (Section 2) ─────────────────────────────────── */
 const STATS = [
-  { v: '33.9%', label: 'CAGR 2024–2034', l: 'ตลาด Live-Streaming E-Commerce โลก', src: 'Grand View Research' },
-  { v: '$287B',  label: 'TARGET 2034',    l: 'มูลค่าตลาดโลกภายในปี 2034',          src: 'Grand View Research' },
-  { v: '+21.7%', label: 'TH GROWTH',     l: 'ไทยโตเร็วที่สุดใน SEA ปี 2024',      src: 'Momentum Works' },
-  { v: '73%',    label: 'CONSUMERS',     l: 'ผู้บริโภคไทยเคยใช้ Live Shopping',    src: 'Momentum Works' },
+  { v: '$172.9B', l: 'มูลค่าตลาด Live Commerce โลก 2025',   src: 'Grand View Research', icon: DollarSign },
+  { v: '41%',     l: 'CAGR คาดการณ์ปี 2026–2033',            src: 'Grand View Research', icon: TrendingUp },
+  { v: '1.1T฿',  l: 'ตลาด e-Commerce ไทย ปี 2024 (+14%)',   src: 'Priceza',             icon: BarChart3  },
+  { v: '+21.7%', l: 'ไทยโตเร็วที่สุดใน SEA ปี 2024',        src: 'Momentum Works',      icon: Users      },
 ];
 
+/* ─── BRAND NEEDS (Section 4) ───────────────────────────── */
 const BRAND_NEEDS = [
-  { title: 'ปิดการขาย · ช่วยสร้างยอด · ลดอัตราคืนสินค้า', detail: 'โฮสต์ที่แบรนด์ต้องการต้องสร้าง Conversion ได้จริง ไม่ใช่แค่พูดเก่ง' },
-  { title: 'รักษา Retention ระหว่างไลฟ์', detail: 'คนดูที่อยู่นาน = โอกาสขาย เรียนรู้เทคนิค Watch Time & Engagement ที่วัดผลได้' },
-  { title: 'สร้างความน่าเชื่อถือต่อตัวเองและผลิตภัณฑ์', detail: 'Authority ไม่ได้มาจากประสบการณ์อย่างเดียว แต่จากการสื่อสารที่ถูกต้อง' },
-  { title: 'คุมภาพลักษณ์แบรนด์ · สื่อสารสินค้าได้ตรงกลุ่ม', detail: 'รู้ว่าแบรนด์ต้องการอะไร สื่อสารตรง CI ได้ทุกช่วงของไลฟ์' },
-  { title: 'ทำงานแบบ Data-Driven + ปรับแคมเปญได้เร็ว', detail: 'อ่าน CCV, CTR, CVR, Retention ได้จริง และปรับกลยุทธ์ได้ทันที' },
-  { title: 'ทำงานร่วมกับทีมหลังบ้าน รู้หน้าที่และพร้อม Support', detail: 'โฮสต์มืออาชีพต้องทำงานเป็นทีม ไม่ใช่ดาราเดี่ยวที่ขาดไม่ได้' },
+  'ปิดการขาย · ช่วยสร้างยอด · ลดอัตราคืนสินค้า',
+  'รักษา Retention ระหว่างไลฟ์',
+  'สื่อสารสินค้าได้ตรงกลุ่ม',
+  'สร้างความน่าเชื่อถือต่อตัวเองและผลิตภัณฑ์',
+  'คุมภาพลักษณ์แบรนด์ได้ดี สื่อสารได้ตรง',
+  'ทำงานแบบ Data-Driven + ปรับแคมเปญได้เร็ว',
+  'ทำงานร่วมกับทีมหลังบ้านได้ รู้หน้าที่ Support',
 ];
 
-const BRAND_PROMISE_ITEMS = [
-  { img: '/images/pro-course-online.png',       label: 'Online Course',           desc: 'เรียนได้ทุกที่ ทุกเวลา' },
-  { img: '/images/pro-AI-Tech.png',              label: 'AI & Tech Tools',         desc: 'เครื่องมือระดับอาชีพ' },
-  { img: '/images/pro-workshop-liveclass.png',   label: 'Workshop & Live Class',   desc: 'ฝึกจริง วัดผลจริง' },
-  { img: '/images/pro-community-network.png',    label: 'Community & Network',     desc: 'เครือข่าย Creator ระดับมืออาชีพ' },
+/* ─── BRAND CATEGORIES (Section 5) ─────────────────────── */
+const BRAND_CATS = [
+  { img: '/images/pro-course-online.png',      label: 'คอร์สออนไลน์',         desc: 'เรียนได้ทุกที่ ทุกเวลา' },
+  { img: '/images/pro-AI-tech.png',            label: 'AI & Technology',       desc: 'เทคโนโลยีสำหรับ Live Commerce' },
+  { img: '/images/pro-workshop-liveclass.png', label: 'Workshop & Live Class', desc: 'เรียนสดกับผู้เชี่ยวชาญ' },
+  { img: '/images/pro-community.png',          label: 'Community',             desc: 'เข้าร่วมชุมชนครีเอเตอร์' },
 ];
 
-const CURRICULUM_TIERS = [
+/* ─── TIERS (Section 6) ─────────────────────────────────── */
+const TIERS = [
   {
-    tier: 'ไลฟ์ให้เป็น',
-    tagline: 'สร้างรากฐาน · เริ่มต้นอย่างถูกต้อง',
-    bg: '/images/i-can-live.png',
-    overlay: '/images/setmic1.png',
+    id: 't1', tier: 'TIER 1', headline: 'ไลฟ์ให้เป็น',
+    sub: 'เริ่มต้นอย่างถูกต้อง สร้างรากฐานที่แข็งแกร่ง',
+    outcome: 'ผลลัพธ์: รู้ทิศทาง มีรากฐานพร้อมก้าวต่อ',
+    fgImg: '/images/i-can-live.png', bgImg: '/images/setmic1.png', path: '/tier1',
     courses: [
-      { name: 'THE MAGNET',      sub: 'READY FOR LIVE · FREE',                   tag: 'FREE',        slug: 'the-magnet',    desc: 'เรียนรู้การวางระบบ การเตรียมอุปกรณ์ การเซตสตูดิโอและ Launch Plan ที่ทำให้เราเริ่มไลฟ์ได้จริง แม้มีงบจำกัด เน้นการแก้ปัญหาเรื่อง "ความกลัวและการเริ่มต้น" หยุดรอความพร้อม แล้วเริ่มสร้างโอกาสของตัวเอง' },
-      { name: 'THE FOUNDATION',  sub: 'LIVE EXPLORER · COURSE',                  tag: 'COURSE',      slug: 'the-foundation', desc: 'ถูกออกแบบมาเพื่อสร้างรากฐานให้คุณเข้าใจอุตสาหกรรมไลฟ์คอมเมอรซ์ เข้าใจในอาชีพ เรียนรู้เพื่อเตรียมความพร้อมและสร้างการไลฟ์ที่ใช้ได้จริง เพื่อให้คุณพร้อมรับงานไลฟ์แรก' },
+      { name: 'THE MAGNET',    sub: 'Live Commerce Blueprint', tag: 'FREE',   slug: 'the-magnet',
+        why: 'แก้ปัญหาเรื่อง "ความกลัวและการเริ่มต้น" ชี้จุดกำแพงทฤษฎี ให้คว้าทิศทางได้เร็ว' },
+      { name: 'THE FOUNDATION', sub: 'Core Host Framework',   tag: 'COURSE', slug: 'the-foundation',
+        why: 'เข้าใจภาพรวมอาชีพ อุตสาหกรรม เครื่องมือพื้นฐาน PPACT Framework' },
     ],
   },
   {
-    tier: 'ไลฟ์ให้ขายได้',
-    tagline: 'เปลี่ยนทักษะเป็นรายได้จริง',
-    bg: '/images/i-can-sale.png',
-    overlay: '/images/ringlight1.png',
+    id: 't2', tier: 'TIER 2', headline: 'ไลฟ์ให้ขายได้',
+    sub: 'เปลี่ยนทักษะเป็นรายได้จริง ปิดการขายได้อย่างมีระบบ',
+    outcome: 'ผลลัพธ์: มีรายได้จากไลฟ์ มีระบบขายที่ทำซ้ำได้',
+    fgImg: '/images/i-can-sale.png', bgImg: '/images/ringlight1.png', path: '/tier2',
     courses: [
-      { name: 'SIGNAL',  sub: 'THE CONVERSION HOST · ONLINE',           tag: 'COURSE',  slug: 'signal',  desc: 'หลักสูตรที่จัดการกับ (คนดูน้อย, ปิดการขายไม่ได้, ขายแข็ง, อ่านข้อมูลไม่เป็น) คอร์ส 9 ชั่วโมงเปลี่ยนทฤษฎีให้เป็นระบบทำเงิน เข้าใจ CCV, CTR, CVR, Retention ใช้ KPI ที่แบรนด์วัดผลจริง รวมถึงการใช้ AI เพื่อช่วยวางแผน' },
-      { name: 'STAGE',   sub: 'THE SIGNATURE INTENSIVE LAB · ONSITE 1 DAY', tag: 'COURSE', slug: 'stage', desc: 'แก้ปัญหาหน้างาน ตื่นกล้อง ของหมด ระบบล่ม ปรับพฤติกรรมตาม Dashboard Data แบบ Real-time ผ่านการฝึกปฏิบัติแบบ Intensive Lab 1 วันเต็ม' },
+      { name: 'SIGNAL', sub: 'The Conversion Host',          tag: 'COURSE', slug: 'signal',
+        why: 'แก้ปัญหาแกนหลัก คนดูน้อย ปิดการขายไม่ได้ 9 ชั่วโมงเปลี่ยนทฤษฎีเป็นระบบทำเงิน' },
+      { name: 'STAGE',  sub: 'The Signature Intensive Lab',  tag: 'COURSE', slug: 'stage',
+        why: 'แก้ปัญหาหน้างาน ตื่นกล้อง ของหมด ระบบล่ม ปรับพฤติกรรมตาม Dashboard Data' },
     ],
   },
   {
-    tier: 'ไลฟ์ให้วัดผลและทำซ้ำได้',
-    tagline: 'สร้างระบบ ขยายธุรกิจ ไม่ขึ้นกับโฮสต์คนเดียว',
-    bg: '/images/i-can-process.png',
-    overlay: '/images/mic1.png',
+    id: 't3', tier: 'TIER 3', headline: 'ไลฟ์ให้วัดผลและทำซ้ำได้',
+    sub: 'สร้างระบบ ขยายธุรกิจ ไม่ขึ้นกับโฮสต์คนเดียว',
+    outcome: 'ผลลัพธ์: ระบบขายแบบ End-to-End ที่วัดผลและปรับปรุงได้ต่อเนื่อง',
+    fgImg: '/images/i-can-process.png', bgImg: '/images/mic1.png', path: '/tier3',
     courses: [
-      { name: 'THE BRAND HOST ARCHITECT', sub: 'MASTERCLASS · COMING SOON', tag: 'COMING SOON', slug: '', desc: 'หลักสูตรสำหรับผู้ที่ต้องการสร้างระบบ สร้างทีม แก้ปัญหาเชิงโครงสร้างของ Seller และเจ้าของธุรกิจ (ทีมงานน้อย, งบจำกัด, ขาดทุนสะสม) ตอบโจทย์ระบบขายแบบ End-to-End ที่ตลาดต้องการระยะยาว' },
+      { name: 'BRAND HOST ARCHITECT', sub: 'Masterclass', tag: 'COMING SOON', slug: '',
+        why: 'แก้ปัญหาเชิงโครงสร้างระบบและตัวเลขหลังบ้าน ตอบโจทย์ระบบขายแบบ End-to-End' },
     ],
   },
 ];
 
+/* ─── WHY (Section 9) ───────────────────────────────────── */
 const WHY = [
-  { q: 'สอน "ทำไมได้ผล" ไม่ใช่แค่ "วิธีทำ"',       them: 'สูตรสำเร็จที่หาดูได้ฟรีบน YouTube',           us: 'PPACT Framework 5 มิติ ฝังในทุกคอร์ส' },
-  { q: 'สร้าง Identity ที่แบรนด์ต้องการ',           them: 'เน้นเทคนิคตะโกนขายหรือสร้าง Hype',            us: 'Host Archetype + Soul Blueprint เพื่อตัวตนที่ชัด' },
-  { q: 'ขับเคลื่อนด้วยข้อมูล ไม่ใช่ความรู้สึก',     them: 'สอนพูดตามสคริปต์โดยไม่วิเคราะห์ตัวเลข',      us: 'อ่าน KPI (CCV, CTR, CVR, Retention) + AI Tools' },
-  { q: 'ระบบที่รันได้เอง ไม่ต้องพึ่งโฮสต์คนเดียว',  them: 'ขึ้นกับโฮสต์คนเดียว ถ้าหายไปยอดหาย',         us: 'Brand Host Architect — วางระบบ Production ทั้งทีม' },
-  { q: 'มาตรฐานวิชาชีพที่วัดผลได้จริง',             them: 'เรียนจบไม่รู้จะทำอะไรต่อ',                     us: 'Key Collection System™ มาตรฐานอุตสาหกรรม' },
+  { q: 'สอน "ทำไมได้ผล" ไม่ใช่แค่ "วิธีทำ"',         them: 'สูตรสำเร็จที่หาดูได้ฟรีบน YouTube',              us: 'PPACT Framework 5 มิติ ฝังในทุกคอร์ส' },
+  { q: 'สร้าง Identity ที่แบรนด์ต้องการ',              them: 'เน้นเทคนิคตะโกนขายหรือสร้าง Hype',               us: 'Host Archetype + Soul Blueprint เพื่อตัวตนที่ชัด' },
+  { q: 'ขับเคลื่อนด้วยข้อมูล ไม่ใช่ความรู้สึก',       them: 'สอนพูดตามสคริปต์โดยไม่วิเคราะห์ตัวเลข',         us: 'อ่าน KPI (CCV, CTR, CVR, Retention) + AI Tools' },
+  { q: 'ระบบที่รันได้เอง ไม่ต้องพึ่งโฮสต์คนเดียว',   them: 'ขึ้นกับโฮสต์คนเดียว ถ้าหายไปยอดหาย',             us: 'Brand Host Architect — วางระบบ Production ทั้งทีม' },
+  { q: 'มาตรฐานวิชาชีพที่วัดผลได้จริง',                them: 'เรียนจบไม่รู้จะทำอะไรต่อ',                       us: 'Key Collection System™ มาตรฐานอุตสาหกรรม' },
 ];
 
-/* ─── Hooks ─────────────────────────────────────────────── */
-function useParallax(speed = 0.25) {
-  const ref = useRef<HTMLDivElement>(null);
+/* ─── SOFT SKILLS (Section 10) ─────────────────────────── */
+const SOFT_SKILLS = [
+  'Soft Skills', 'การสื่อสาร', 'การขาย', 'การวางแผนงาน',
+  'การวิเคราะห์ข้อมูล', 'Digital Marketing สำหรับ Live Commerce',
+  'ความคิดสร้างสรรค์ที่พร้อมออกนอกกรอบ',
+];
+
+/* ─── Scroll Reveal ─────────────────────────────────────── */
+function useScrollReveal() {
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const onScroll = () => { el.style.transform = `translateY(${window.scrollY * speed}px)`; };
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); }
+      }),
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+}
+
+/* ─── Count-Up ──────────────────────────────────────────── */
+function CountUp({ target, trigger }: { target: string; trigger: boolean }) {
+  const [val, setVal] = useState('—');
+  useEffect(() => {
+    if (!trigger) return;
+    const num = parseFloat(target.replace(/[^0-9.]/g, ''));
+    if (isNaN(num)) { setVal(target); return; }
+    const pre = target.match(/^[^0-9]*/)?.[0] ?? '';
+    const suf = target.replace(/^[^0-9]*[\d.]+/, '');
+    const dur = 1400; const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min((t - t0) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      setVal(pre + (Math.round(e * num * 10) / 10).toLocaleString() + suf);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [trigger, target]);
+  return <>{val}</>;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HOME
+══════════════════════════════════════════════════════════ */
+const Home = () => {
+  useScrollReveal();
+
+  /* Parallax hero */
+  const heroImgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const onScroll = () => {
+      if (heroImgRef.current) heroImgRef.current.style.transform = `scale(1.05) translateY(${window.scrollY * 0.25}px)`;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [speed]);
-  return ref;
-}
+  }, []);
 
-function useInView(rootMargin = '0px 0px -80px 0px') {
-  const ref = useRef<HTMLElement>(null);
+  /* Stats count-up trigger */
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsTrig, setStatsTrig] = useState(false);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach(e => {
-        if (e.isIntersecting) {
-          el.querySelectorAll('[data-reveal]').forEach((item) => {
-            const delay = (item as HTMLElement).dataset.revealDelay ?? '0';
-            setTimeout(() => item.classList.add('revealed'), parseInt(delay));
-          });
-          obs.unobserve(e.target);
-        }
-      }),
-      { rootMargin, threshold: 0.08 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [rootMargin]);
-  return ref;
-}
+    const el = statsRef.current; if (!el) return;
+    const obs = new IntersectionObserver(([en]) => { if (en.isIntersecting) { setStatsTrig(true); obs.disconnect(); } }, { threshold: 0.3 });
+    obs.observe(el); return () => obs.disconnect();
+  }, []);
 
-/* ─── AccordionItem ──────────────────────────────────────── */
-const AccordionItem: React.FC<{ item: typeof BRAND_NEEDS[0]; idx: number }> = ({ item, idx }) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-white/8 last:border-0 cursor-pointer group" onClick={() => setOpen(o => !o)}>
-      <div className="flex items-center justify-between py-4 gap-4">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-black text-white/30 w-5 flex-shrink-0 tabular-nums">{String(idx + 1).padStart(2, '0')}</span>
-          <p className="text-white font-semibold text-sm leading-snug">{item.title}</p>
-        </div>
-        <ChevronDown
-          className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-          style={{ color: open ? RED : 'rgba(255,255,255,0.3)' }} />
-      </div>
-      <div className={`overflow-hidden transition-all duration-400 ease-out ${open ? 'max-h-24 pb-4' : 'max-h-0'}`}>
-        <p className="text-white/60 text-sm leading-relaxed pl-8">{item.detail}</p>
-      </div>
-    </div>
-  );
-};
-
-/* ─── CurriculumPanel ────────────────────────────────────── */
-const CurriculumPanel: React.FC<{ data: typeof CURRICULUM_TIERS[0]; index: number }> = ({ data, index }) => {
-  const [active, setActive] = useState<number | null>(null);
-  const sec = useInView();
-  return (
-    <section ref={sec as any} className="relative min-h-screen flex items-center overflow-hidden" style={{ background: '#080808' }}>
-      <div className="absolute inset-0 z-0">
-        <img src={data.bg} alt="" className="w-full h-full object-cover object-center opacity-20 scale-105" />
-        <div className="absolute inset-0"
-          style={{ background: 'linear-gradient(105deg, #080808 50%, rgba(8,8,8,0.55) 80%, rgba(8,8,8,0.2) 100%)' }} />
-      </div>
-      <div className="absolute right-0 bottom-0 w-1/3 h-2/3 z-0 hidden lg:block pointer-events-none">
-        <img src={data.overlay} alt="" className="w-full h-full object-contain object-bottom opacity-12" />
-      </div>
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 w-full">
-        <div data-reveal className="mb-10">
-          <div className="flex items-center gap-4 mb-5">
-            <span className="text-xs font-black tracking-widest uppercase px-3 py-1.5 border"
-              style={{ color: RED, borderColor: `${RED}50` }}>TIER {index + 1}</span>
-            <div className="h-px flex-1 max-w-[60px]" style={{ background: `${RED}40` }} />
-          </div>
-          <h2 className="font-black text-white leading-tight mb-2"
-            style={{ fontSize: 'clamp(2.4rem,7vw,5rem)' }}>{data.tier}</h2>
-          <p className="text-white/55 text-base">{data.tagline}</p>
-        </div>
-
-        <div className={`grid gap-5 ${data.courses.length === 1 ? 'max-w-xl' : 'grid-cols-1 sm:grid-cols-2 max-w-3xl'}`}>
-          {data.courses.map((course, ci) => {
-            const isCS = course.tag === 'COMING SOON';
-            const isFree = course.tag === 'FREE';
-            return (
-              <div key={course.name}
-                data-reveal data-reveal-delay={String(ci * 120)}
-                className={`border bg-black/70 backdrop-blur-sm p-6 transition-all duration-500 ${isCS ? 'opacity-55 border-white/6' : 'border-white/12 hover:border-white/25'}`}>
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-white font-black text-lg leading-tight">{course.name}</p>
-                    <p className="text-white/45 text-xs tracking-wider mt-1">{course.sub}</p>
-                  </div>
-                  <span className={`text-xs font-black px-2 py-1 flex-shrink-0 ${isFree ? 'bg-[#34A853] text-white' : isCS ? 'border border-white/15 text-white/45' : 'border text-white/60'}`}
-                    style={!isFree && !isCS ? { borderColor: `${RED}50`, color: RED } : {}}>
-                    {course.tag}
-                  </span>
-                </div>
-
-                <button
-                  className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/65 transition-colors mt-2"
-                  onClick={() => setActive(active === ci ? null : ci)}>
-                  <ChevronRight className={`w-3 h-3 transition-transform ${active === ci ? 'rotate-90' : ''}`} />
-                  {active === ci ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'}
-                </button>
-                <div className={`overflow-hidden transition-all duration-400 ${active === ci ? 'max-h-48 mt-3' : 'max-h-0'}`}>
-                  <p className="text-white/65 text-sm leading-relaxed">{course.desc}</p>
-                </div>
-
-                {!isCS && (
-                  <div className="mt-5 pt-4 border-t border-white/8">
-                    <Link to={`/course/${course.slug}`}
-                      className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-colors"
-                      style={{ color: isFree ? '#34A853' : 'rgba(255,255,255,0.75)' }}>
-                      สมัครเรียน <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-/* ─── Home ──────────────────────────────────────────────── */
-const Home: React.FC = () => {
+  /* Stats modal */
   const [statsModal, setStatsModal] = useState(false);
-  const heroParallax = useParallax(0.2);
-  const sec2 = useInView();
-  const sec3 = useInView();
-  const sec4 = useInView();
-  const sec5 = useInView();
-  const sec9 = useInView();
-  const sec10 = useInView();
-
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-    return () => document.documentElement.classList.remove('dark');
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') setStatsModal(false); };
+    window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h);
   }, []);
 
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) setStatsModal(false);
-  }, []);
+  /* Accordion tier */
+  const [openTier, setOpenTier] = useState<string | null>(null);
 
   return (
-    <>
-      <SEOHead
-        title="CREATR365 — A Creative House for the Future of Live Commerce"
-        description="Be Creator. Not Consumer. สร้างตัวตน สื่อสารทรงพลัง สร้างยอดขายด้วย PPACT Framework"
-      />
-      <CourseNavbar />
-      <CursorGlow />
+    <main className="bg-[#0a0a0a] site-hover-scope">
 
-      {/* ═══ 1. HERO ═════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-16 grain"
-        style={{ background: '#070707' }}>
-        <div ref={heroParallax} className="absolute inset-0 z-0 parallax-slow">
-          <img src="/images/hero-team.jpg" alt="CREATR365 Team"
-            className="w-full h-full object-cover object-center opacity-55 scale-110" />
-          <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(105deg, #070707 42%, rgba(7,7,7,0.6) 70%, rgba(7,7,7,0.2) 100%)' }} />
-          <div className="absolute bottom-0 left-0 right-0 h-52"
-            style={{ background: 'linear-gradient(to top, #070707, transparent)' }} />
+      {/* ═══════════════════════════════════════════════
+          §1  HERO
+      ═══════════════════════════════════════════════ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden grain">
+        {/* BG image with parallax */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <img
+            ref={heroImgRef}
+            src="/images/hero-team.jpg"
+            alt="Creatr365 Team"
+            className="w-full h-full object-cover object-center opacity-55"
+            style={{ transform: 'scale(1.05)', transition: 'transform 0.05s linear' }}
+          />
+          <div className="hero-gradient absolute inset-0" />
+          <div className="absolute bottom-0 left-0 right-0 h-48"
+            style={{ background: 'linear-gradient(to top, #0a0a0a, transparent)' }} />
+          {/* Red radial */}
+          <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(204,0,51,0.18) 0%, transparent 70%)' }} />
         </div>
-        <div className="absolute left-0 top-20 bottom-20 w-[2px]"
-          style={{ background: `linear-gradient(to bottom, transparent, ${RED}, transparent)` }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 w-full">
-          <p className="text-[11px] font-bold tracking-[0.45em] text-white/40 mb-8 uppercase text-reveal"
-            style={{ animationDelay: '0.05s' }}>
-            CREATR365 · A Creative House for the Future of Live Commerce.
-          </p>
-          <div className="mb-10 overflow-hidden">
-            <h1 className="font-black leading-[0.88] tracking-tight" style={{ fontSize: 'clamp(3.6rem,10vw,8.5rem)' }}>
-              <span className="block text-white text-reveal" style={{ animationDelay: '0.12s' }}>BE</span>
-              <span className="block text-reveal" style={{ color: RED, animationDelay: '0.28s' }}>CREATOR.</span>
-              <span className="block text-white/22 text-reveal" style={{ fontSize: '0.6em', animationDelay: '0.44s' }}>NOT CONSUMER.</span>
-            </h1>
-          </div>
-          <div className="mb-10 border-l-2 pl-5 max-w-lg" style={{ borderColor: RED }}>
-            <p className="text-white/65 text-base md:text-lg leading-relaxed">
-              เมื่อ Live Commerce ไม่ใช่แค่การขายของ
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-20 w-full">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold tracking-[0.42em] text-white/55 mb-8 uppercase animate-fade-in-up">
+              CREATR365 &middot; Live Commerce Academy
             </p>
-            <p className="text-white/40 text-sm mt-1">แต่คือการสร้างคุณค่า · สร้างอิทธิพล · สร้างอาชีพที่ยั่งยืน</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/courses"
-              className="group inline-flex items-center justify-center gap-3 px-8 py-4 font-bold text-white text-sm tracking-widest uppercase transition-all duration-300"
-              style={{ background: RED }}>
-              ดูหลักสูตร <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link to="/articles/diagnostic-quiz"
-              className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold text-white/60 border border-white/15 hover:border-white/35 hover:text-white transition-all duration-300">
-              <Play className="w-4 h-4" /> Find Your Path
-            </Link>
+
+            <h1 className="font-black text-white leading-[0.95] mb-8 animate-fade-in-up"
+              style={{ fontSize: 'clamp(2.8rem,7.5vw,5.5rem)', animationDelay: '0.15s', animationFillMode: 'both' }}>
+              BE <span style={{ color: RED }}>CREATOR.</span><br />
+              <span className="text-white/25 block mt-2" style={{ fontSize: '0.55em', letterSpacing: '0.12em' }}>
+                NOT CONSUMER.
+              </span>
+            </h1>
+
+            <blockquote className="border-l-2 pl-5 mb-8 animate-fade-in-up"
+              style={{ borderColor: `${RED}70`, animationDelay: '0.28s', animationFillMode: 'both' }}>
+              <p className="text-white/75 text-lg md:text-xl leading-relaxed italic">
+                "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
+                แต่คือการสร้างธุรกิจที่เติบโตได้"
+              </p>
+            </blockquote>
+
+            <p className="text-white/50 text-base mb-10 animate-fade-in-up"
+              style={{ animationDelay: '0.38s', animationFillMode: 'both' }}>
+              หากคุณต้องการ "เรียนแค่ทฤษฎีการไลฟ์" หรือ "การสอนแบบจับมือทำ"&nbsp;&nbsp;
+              <span className="text-white font-bold">ที่นี่… ไม่ใช่ของคุณ</span>
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
+              style={{ animationDelay: '0.48s', animationFillMode: 'both' }}>
+              <Link to="/courses"
+                className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-white font-bold text-sm tracking-[0.22em] uppercase transition-all duration-300 animate-pulse-glow"
+                style={{ background: RED }}>
+                ดูหลักสูตร
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+              </Link>
+              <Link to="/auth"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-white/60 border border-white/18 hover:border-white/40 hover:text-white transition-all duration-300 text-sm font-semibold uppercase tracking-[0.18em]">
+                Free Account
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 opacity-25 float-y">
-          <div className="w-5 h-8 border border-white/40 rounded-full flex items-start justify-center pt-1.5">
-            <div className="w-0.5 h-2 bg-white/60 rounded-full" />
+
+        {/* Scroll mouse indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
+          <div className="w-6 h-10 border-2 border-white/25 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-white/50 rounded-full" />
           </div>
         </div>
       </section>
 
-      {/* ═══ 2. STATS STRIP ══════════════════════════════════════ */}
-      <section ref={sec2 as any} className="bg-[#111] border-y border-white/8 py-14 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <p data-reveal className="text-[11px] font-bold tracking-[0.35em] uppercase text-white/45">Market Opportunity</p>
-            <button data-reveal data-reveal-delay="100"
-              onClick={() => setStatsModal(true)}
-              className="text-xs text-white/40 border border-white/12 px-3 py-1.5 hover:border-white/30 hover:text-white/65 transition-all">
-              ดูกราฟตลาด →
+      {/* ═══════════════════════════════════════════════
+          §2  STATS STRIP  (click = modal)
+      ═══════════════════════════════════════════════ */}
+      <section className="relative z-10 border-y border-white/6 bg-[#080808]">
+        <div ref={statsRef} className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            {STATS.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <button key={i} onClick={() => setStatsModal(true)}
+                  className="reveal glass-card rounded-md p-6 text-center stat-card text-left"
+                  style={{ transitionDelay: `${i * 0.09}s` }}>
+                  <Icon className="w-5 h-5 mb-3" style={{ color: RED }} />
+                  <p className="text-3xl sm:text-4xl font-black text-white mb-1 tabular-nums">
+                    <CountUp target={s.v} trigger={statsTrig} />
+                  </p>
+                  <p className="text-white text-sm leading-relaxed mb-1" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.l}</p>
+                  <p className="text-white/35 text-xs uppercase tracking-widest">{s.src}</p>
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-5 flex items-center justify-between">
+            <p className="text-white/30 text-xs">
+              Sources: Grand View Research · Priceza · Momentum Works 2024–2025
+            </p>
+            <button onClick={() => setStatsModal(true)}
+              className="text-xs text-white/30 hover:text-white/55 transition-colors flex items-center gap-1 underline underline-offset-2">
+              ดูอ้างอิง <ExternalLink className="w-3 h-3" />
             </button>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {STATS.map((s, i) => (
-              <div key={s.label} data-reveal data-reveal-delay={String(i * 100)}
-                className="bg-[#0D0D0D] border border-white/8 p-6 hover:border-white/18 transition-all duration-500">
-                <p className="text-[10px] font-black tracking-[0.3em] uppercase text-white/35 mb-2">{s.label}</p>
-                <p className="text-3xl md:text-4xl font-black text-white leading-none mb-2">{s.v}</p>
-                <p className="text-white/65 text-sm leading-snug mb-2">{s.l}</p>
-                <p className="text-white/30 text-xs uppercase tracking-wider">{s.src}</p>
-              </div>
-            ))}
-          </div>
-          <p data-reveal data-reveal-delay="500"
-            className="mt-5 text-white/30 text-xs leading-relaxed">
-            แหล่งข้อมูล: Grand View Research (2024) · Momentum Works — SEA E-commerce (2025) · Priceza E-Commerce Thailand (2024)
-          </p>
         </div>
       </section>
 
-      {/* STATS MODAL (pop-up overlay) */}
+      {/* Stats Modal */}
       {statsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.87)' }} onClick={handleOverlayClick}>
-          <div className="bg-[#111] border border-white/12 max-w-2xl w-full p-8 relative"
-            style={{ animation: 'fadeInScale 0.3s cubic-bezier(0.16,1,0.3,1) both' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setStatsModal(false)}>
+          <div className="relative max-w-lg w-full bg-[#111] border border-white/10 p-8 rounded-md"
+            style={{ animation: 'modalScaleIn 0.25s cubic-bezier(0.16,1,0.3,1)' }}
+            onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setStatsModal(false)}
-              className="absolute top-4 right-5 text-white/40 hover:text-white text-2xl leading-none transition-colors">×</button>
-            <p className="text-[10px] font-black tracking-[0.35em] uppercase mb-4" style={{ color: RED }}>
-              Live-Streaming E-Commerce Market · Global
-            </p>
-            <h3 className="text-white font-black text-xl md:text-2xl mb-8">
-              ตลาดโลกคาดเติบโตสู่ $287 พันล้าน ภายในปี 2034
-            </h3>
-            <div className="space-y-4 mb-8">
-              {[
-                { year: '2024', val: 89.33, max: 287 },
-                { year: '2026', val: 119.62, max: 287 },
-                { year: '2028', val: 160.17, max: 287 },
-                { year: '2030', val: 210, max: 287 },
-                { year: '2034', val: 287, max: 287 },
-              ].map(b => (
-                <div key={b.year} className="flex items-center gap-4">
-                  <span className="text-white/40 text-xs font-mono w-10 flex-shrink-0">{b.year}</span>
-                  <div className="flex-1 bg-white/5 h-6 relative overflow-hidden">
-                    <div className="h-full" style={{
-                      width: `${(b.val / b.max) * 100}%`,
-                      background: `linear-gradient(to right, ${RED}cc, ${RED})`,
-                      transition: 'width 1s ease-out'
-                    }} />
-                  </div>
-                  <span className="text-white font-bold text-sm w-20 text-right">${b.val}B</span>
+              className="absolute top-4 right-4 text-white/35 hover:text-white transition-colors text-xl font-light">✕</button>
+            <p className="text-xs font-bold tracking-[0.42em] uppercase mb-6" style={{ color: RED }}>แหล่งข้อมูลอ้างอิง</p>
+            <div className="space-y-5">
+              {STATS.map((s, i) => (
+                <div key={i} className="border-b border-white/6 pb-5 last:border-0 last:pb-0">
+                  <p className="text-3xl font-black text-white mb-1">{s.v}</p>
+                  <p className="text-white text-sm leading-relaxed mb-1" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.l}</p>
+                  <p className="text-white/35 text-xs uppercase tracking-widest">Source: {s.src}</p>
                 </div>
               ))}
             </div>
-            <p className="text-white/30 text-xs">Source: Grand View Research, Livestream E-Commerce Market Size Report (2024)</p>
-            <p className="text-white/20 text-xs mt-1">CAGR 2024–2034: 33.9%</p>
+            <p className="mt-6 text-white/30 text-xs leading-relaxed border-t border-white/6 pt-5">
+              Grand View Research — Live Commerce Market Size Report 2025<br />
+              Priceza — Thailand E-Commerce Report 2024<br />
+              Momentum Works — E-commerce in Southeast Asia 3.0 (2025)
+            </p>
           </div>
         </div>
       )}
 
-      {/* ═══ 3. MARQUEE / เป็นเหมือนกันไหม? ════════════════════ */}
-      <section className="relative overflow-hidden" style={{ minHeight: '88vh', background: '#060606' }}>
+      {/* ═══════════════════════════════════════════════
+          §3  MARQUEE — "เป็นเหมือนกันไหม?"
+      ═══════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden border-b border-white/5">
+        {/* BG silhouette */}
         <div className="absolute inset-0 z-0">
           <img src="/images/identity-silhouette.jpg" alt=""
-            className="w-full h-full object-cover object-center opacity-35" />
+            className="w-full h-full object-cover opacity-12" />
           <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, #060606 0%, rgba(6,6,6,0.45) 50%, #060606 100%)' }} />
+            style={{ background: 'linear-gradient(to right, #0a0a0a 25%, transparent 55%, #0a0a0a 85%)' }} />
+          <div className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, #0a0a0a 0%, transparent 20%, transparent 80%, #0a0a0a 100%)' }} />
         </div>
-        <div className="relative z-10 flex flex-col justify-center min-h-[88vh] max-w-6xl mx-auto px-6 py-20">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-bold tracking-[0.45em] uppercase mb-6 text-white/40">เพราะเราเข้าใจ</p>
-            <h2 className="font-black text-white leading-tight mb-8"
-              style={{ fontSize: 'clamp(2.8rem,8vw,6rem)' }}>เป็นเหมือนกันไหม ?</h2>
-            <div className="space-y-3 mb-10">
-              {['ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?', 'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?', 'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?', 'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'].map((p, i) => (
-                <p key={i} className="text-white font-semibold" style={{ fontSize: 'clamp(1rem,2.5vw,1.35rem)', opacity: 1 - i * 0.16 }}>{p}</p>
-              ))}
-            </div>
-            <div className="border-l-2 pl-5 mb-8" style={{ borderColor: RED }}>
-              <p className="text-white/60 text-base md:text-lg leading-relaxed">
-                หากคุณต้องการ <span className="text-white">"เรียนแค่ทฤษฎีการไลฟ์"</span> หรือ <span className="text-white">"การสอนแบบจับมือทำ"</span>
-              </p>
-              <p className="text-white/40 text-base mt-1">ที่นี่…ไม่ใช่ของคุณ</p>
-            </div>
-            <p className="text-white/40 text-sm leading-relaxed max-w-xl">
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ<br />
-              แต่คือการสร้างคุณค่า สร้างอิทธิพล และสร้างอาชีพที่ยั่งยืน
+
+        {/* Marquee band top */}
+        <div className="relative z-10 py-3 border-b border-white/5 overflow-hidden bg-black/20">
+          <div className="flex whitespace-nowrap gap-10 animate-marquee">
+            {Array(2).fill([
+              'เป็นเหมือนกันไหม?', '"เรียนแค่ทฤษฎีการไลฟ์"',
+              '"การสอนแบบจับมือทำ"', 'ที่นี่… ไม่ใช่ของคุณ',
+              'Be Creator. Not Consumer.', 'Psychology First. Data Always.',
+            ]).flat().map((t, i) => (
+              <span key={i} className="text-xs font-bold tracking-[0.28em] uppercase text-white flex items-center gap-3 flex-shrink-0"
+                style={{ color: 'rgba(255,255,255,0.55)' }}>
+                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: RED }} />
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Center */}
+        <div className="relative z-10 py-28 px-6 text-center max-w-3xl mx-auto">
+          <div className="reveal">
+            <h2 className="text-4xl sm:text-6xl font-black text-white mb-6">เป็นเหมือนกันไหม?</h2>
+            <p className="text-white text-lg sm:text-xl leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              หากคุณต้องการ{' '}
+              <span className="text-white font-bold">"เรียนแค่ทฤษฎีการไลฟ์"</span>
+            </p>
+            <p className="text-white text-lg sm:text-xl leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              หรือ <span className="text-white font-bold">"การสอนแบบจับมือทำ"</span>
+            </p>
+            <p className="text-2xl sm:text-4xl font-black" style={{ color: RED }}>
+              ที่นี่… ไม่ใช่ของคุณ
             </p>
           </div>
         </div>
-        {/* Scrolling marquee at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 bg-black/55 border-t border-white/5 py-3 overflow-hidden">
-          <div className="flex whitespace-nowrap gap-14" style={{ animation: 'marquee 22s linear infinite' }}>
-            {['Creatr365 · A Creative House for the Future of Live Commerce', 'Be a Creator. Not a Consumer.', 'เมื่อ Live Commerce ไม่ใช่แค่การขายของ', 'Psychology First · Data Always', 'Communication Changes Behavior', 'Identity is not something you find. It\'s something you build.', 'Be a Creator. Not a Consumer.'].concat(['Creatr365 · A Creative House for the Future of Live Commerce', 'เมื่อ Live Commerce ไม่ใช่แค่การขายของ']).map((t, i) => (
-              <span key={i} className="text-xs font-semibold tracking-[0.2em] text-white/25 flex items-center gap-4 uppercase">
-                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: RED }} />{t}
+
+        {/* Marquee band bottom */}
+        <div className="relative z-10 py-3 border-t border-white/5 overflow-hidden bg-black/20">
+          <div className="flex whitespace-nowrap gap-10" style={{ animation: 'marquee 30s linear infinite reverse' }}>
+            {Array(2).fill([
+              'Attention is a Professional Skill.', 'Build a Business That Outlasts You.',
+              'Communication Changes Behavior.', 'Live Commerce ในไทยยังโตขึ้นอย่างมหาศาล',
+              'Psychology First. Data Always.', 'สร้างตัวตน สื่อสารทรงพลัง',
+            ]).flat().map((t, i) => (
+              <span key={i} className="text-xs font-bold tracking-[0.28em] uppercase flex items-center gap-3 flex-shrink-0"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: RED }} />
+                {t}
               </span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ 4. เพราะเราเจอปัญหามาก่อน ═══════════════════════════ */}
-      <section ref={sec3 as any} className="bg-[#0C0C0C] py-24 px-6 overflow-hidden">
-        <div className="max-w-6xl mx-auto">
-          {/* Row 1: image left + text right */}
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-start mb-10">
-            <div data-reveal data-reveal-delay="0">
-              <div className="relative overflow-hidden aspect-[4/3] group">
-                <img src="/images/problem-up.png" alt=""
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(135deg, transparent 55%, rgba(12,12,12,0.85) 100%)' }} />
-                <div className="absolute top-4 left-4">
-                  <span className="text-[10px] font-black tracking-widest uppercase px-2 py-1"
-                    style={{ background: RED, color: 'white' }}>เพราะเราเจอปัญหามาก่อน</span>
-                </div>
-              </div>
-            </div>
-            <div data-reveal data-reveal-delay="150">
-              <p className="text-[11px] font-bold tracking-[0.35em] uppercase mb-4" style={{ color: RED }}>เพราะเราเจอปัญหามาก่อน</p>
-              <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-5">
-                ทุกคอร์สการเรียนรู้<br /><span className="text-white/40">สร้างจากประสบการณ์จริง</span>
+      {/* ═══════════════════════════════════════════════
+          §4  เพราะเราเจอปัญหามาก่อน
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-14 lg:gap-24 items-center">
+            {/* Left text */}
+            <div className="reveal">
+              <p className="text-sm font-bold tracking-[0.38em] uppercase mb-5" style={{ color: RED }}>
+                เพราะเราเจอปัญหามาก่อน
+              </p>
+              <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight mb-7">
+                Creatr365<br />
+                <span style={{ color: 'rgba(255,255,255,0.45)' }}>สร้างจาก</span><br />
+                ประสบการณ์จริง
               </h2>
-              <p className="text-white/65 text-base leading-loose mb-5">
-                เราสร้างคอร์สทั้งหมดจากพื้นฐานความเข้าใจในปัญหา
-                และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
+              <p className="mb-7 leading-relaxed text-base" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                เราสร้างคอร์สทั้งหมดจากพื้นฐานความเข้าใจในปัญหา<br />
+                และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce<br />
                 มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
               </p>
-              <p className="text-white/60 text-base leading-loose border-l-2 pl-4" style={{ borderColor: RED }}>
-                ไม่ใช่แค่ไลฟ์ให้เป็น —<br />
-                แต่ต้องการให้คุณ <strong className="text-white">สร้างไลฟ์ที่มีคุณค่า</strong><br />
-                ด้วยมาตรฐานในอาชีพที่มีคุณภาพ<br />
-                พร้อมก้าวเข้าสู่ตลาดระดับ Global ได้ในอนาคต
-              </p>
-            </div>
-          </div>
+              <div className="border-l-2 pl-5 mb-10" style={{ borderColor: RED }}>
+                <p className="text-white leading-relaxed text-base" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                  ไม่ใช่แค่ไลฟ์ให้เป็น —<br />
+                  แต่ต้องการให้คุณ <strong className="text-white">สร้างไลฟ์ที่มีคุณค่า</strong><br />
+                  ด้วยมาตรฐานในอาชีพที่มีคุณภาพ<br />
+                  พร้อมก้าวเข้าสู่ตลาดระดับ Global ได้ในอนาคต
+                </p>
+              </div>
 
-          {/* Row 2: accordion left + image right */}
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-start">
-            <div data-reveal data-reveal-delay="200">
-              <p className="text-[11px] font-bold tracking-[0.35em] uppercase mb-5 text-white/45">
-                สิ่งที่แบรนด์ต้องการในตอนนี้
+              {/* Brand needs */}
+              <p className="text-xs font-bold tracking-[0.32em] uppercase mb-4" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                ปัจจุบันแบรนด์ใหญ่ๆ ต้องการ
               </p>
-              <div className="border border-white/8 px-4">
-                {BRAND_NEEDS.map((item, i) => <AccordionItem key={i} item={item} idx={i} />)}
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1">
+                {BRAND_NEEDS.map((n, i) => (
+                  <div key={i} className="flex items-start gap-2.5 py-2">
+                    <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: RED }} />
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{n}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div data-reveal data-reveal-delay="100">
-              <div className="relative overflow-hidden aspect-[4/3] group">
-                <img src="/images/creator-live2.png" alt=""
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(315deg, transparent 55%, rgba(12,12,12,0.85) 100%)' }} />
+
+            {/* Right images — stacked with offset (slide in from right) */}
+            <div className="reveal relative h-[420px] sm:h-[520px]" style={{ transitionDelay: '0.18s' }}>
+              <div className="absolute top-0 left-0 w-[82%] h-[56%] overflow-hidden rounded-sm">
+                <img src="/images/problem-up.png" alt="เพราะเราเจอปัญหามาก่อน (บนซ้าย)"
+                  className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 55%, #0a0a0a 100%)' }} />
+                <span className="absolute top-3 left-3 text-xs font-bold tracking-widest uppercase px-3 py-1 bg-black/50 border border-white/10"
+                  style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  เพราะเราเจอปัญหามาก่อน
+                </span>
               </div>
+              <div className="absolute bottom-0 right-0 w-[65%] h-[55%] overflow-hidden rounded-sm"
+                style={{ border: `2px solid ${RED}30` }}>
+                <img src="/images/creator-live2.png" alt="Creator Live (ล่างขวา)"
+                  className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, transparent 55%, #0a0a0a 100%)' }} />
+              </div>
+              {/* accent dot */}
+              <div className="absolute w-3 h-3 rounded-full z-10"
+                style={{ background: RED, boxShadow: `0 0 14px ${RED}80`, bottom: '43%', right: '38%' }} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ 5. BRAND PROMISE — Welcome to Creatr365's Family ════ */}
-      <section ref={sec4 as any} className="bg-[#0A0A0A] py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Team image */}
-          <div data-reveal className="relative overflow-hidden mb-10" style={{ aspectRatio: '21/8' }}>
-            <img src="/images/team-work.jpg" alt="CREATR365 Team"
-              className="w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8"
-              style={{ background: 'linear-gradient(to right, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0.7) 100%)' }}>
-              <p className="text-[11px] font-bold tracking-[0.45em] uppercase text-white/65 mb-3">
-                Welcome to Creatr365's Family
-              </p>
-              <h2 className="font-black text-white leading-tight" style={{ fontSize: 'clamp(1.8rem,4.5vw,3.2rem)' }}>
-                หลักสูตรที่เลือกเรียนได้ตามสไตล์คุณ
-              </h2>
-            </div>
-          </div>
-
-          {/* 4 promise icons */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {BRAND_PROMISE_ITEMS.map((item, i) => (
-              <div key={item.label}
-                data-reveal data-reveal-delay={String(i * 100)}
-                className="bg-[#111] border border-white/8 overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <div className="aspect-square overflow-hidden bg-[#0A0A0A]">
-                  <img src={item.img} alt={item.label}
-                    className="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-600" />
-                </div>
-                <div className="p-4">
-                  <p className="text-white font-bold text-sm mb-1">{item.label}</p>
-                  <p className="text-white/50 text-xs">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 6. CURRICULUM — 3 Full-Screen Panels ═══════════════ */}
-      <div>
-        {CURRICULUM_TIERS.map((tier, i) => (
-          <CurriculumPanel key={tier.tier} data={tier} index={i} />
-        ))}
-      </div>
-      <div className="bg-[#0A0A0A] py-6 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/35 text-sm">เลือกเรียนได้อย่างอิสระ · ไม่บังคับ flow · ระบบแนะนำเส้นทางให้อัตโนมัติ</p>
-          <Link to="/courses" className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white/55 hover:text-white transition-colors">
-            ดูหลักสูตรทั้งหมด <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </div>
-
-      {/* ═══ 7. BRAND CONCEPT ════════════════════════════════════ */}
-      <section className="relative overflow-hidden" style={{ minHeight: '75vh', background: '#060606' }}>
-        <div className="absolute inset-0 z-0">
-          <img src="/images/team-behind.png" alt=""
-            className="w-full h-full object-cover object-center opacity-28" />
-          <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, #060606 0%, rgba(6,6,6,0.4) 50%, #060606 100%)' }} />
-        </div>
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-[75vh] text-center px-6 py-20">
-          <div className="mb-8" style={{ animation: 'fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
-            <img src="/images/creatr365_center.png" alt="CREATR365"
-              className="h-14 md:h-18 object-contain mx-auto mb-6 opacity-90" />
-          </div>
-          <div style={{ animation: 'fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.25s both' }}>
-            <img src="/images/creatr365_concept_center.png" alt="Be a Creator. Not a Consumer."
-              className="max-w-xs md:max-w-sm mx-auto object-contain" />
-          </div>
-          <p className="mt-10 text-white/40 text-base italic max-w-md"
-            style={{ animation: 'fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.45s both' }}>
-            "เพราะ เป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
-            แต่คือการสร้างธุรกิจที่เติบโตได้"
-          </p>
-        </div>
-      </section>
-
-      {/* ═══ 8. JOURNEY — Full Image + Button Only ════════════════ */}
-      <section className="relative overflow-hidden" style={{ minHeight: '80vh', background: '#000' }}>
-        <div className="absolute inset-0 z-0">
-          <img src="/images/journey-stairs.jpg" alt="Journey — Consumer to Creator"
-            className="w-full h-full object-cover object-center opacity-80" />
-          <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.75) 100%)' }} />
-        </div>
-        <div className="relative z-10 flex flex-col items-center justify-end min-h-[80vh] pb-20 px-6">
-          <Link to="/courses"
-            className="group inline-flex items-center justify-center gap-3 px-10 py-5 font-black text-white text-sm tracking-widest uppercase transition-all duration-300 hover:opacity-90"
-            style={{ background: RED }}>
-            BEGIN YOUR JOURNEY
-            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </section>
-
-      {/* ═══ 9. WHY CREATR365 DIFFERENCE? ════════════════════════ */}
-      <section ref={sec9 as any} className="bg-[#0A0A0A] py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div data-reveal className="text-center mb-12">
-            <p className="text-[11px] font-bold tracking-[0.35em] uppercase mb-4 text-white/40">Comparison</p>
-            <h2 className="text-3xl md:text-5xl font-black text-white">
-              WHY <span style={{ color: RED }}>CREATR365</span><br />
-              <span className="text-white/30" style={{ fontSize: '0.75em' }}>DIFFERENCE ?</span>
+      {/* ═══════════════════════════════════════════════
+          §5  BRAND PROMISE — Welcome to Creatr365's Family
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="reveal text-center mb-10">
+            <p className="text-xs font-bold tracking-[0.46em] uppercase mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              WELCOME TO CREATR365'S FAMILY
+            </p>
+            <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight mb-3">
+              หลักสูตรที่เลือกเรียนได้<br />
+              <span style={{ color: RED }}>ตามสไตล์คุณ</span>
             </h2>
           </div>
 
-          <div className="border border-white/8">
-            <div className="grid grid-cols-[2fr_3fr_3fr] border-b border-white/8">
-              <div className="p-4 bg-[#0D0D0D]" />
-              <div className="p-4 border-l border-white/5 flex items-center justify-center">
-                <div className="text-center">
-                  <X className="w-3 h-3 text-white/25 mx-auto mb-1" />
-                  <span className="text-[10px] font-black text-white/35 tracking-widest uppercase">คอร์สทั่วไป</span>
+          {/* Team image */}
+          <div className="reveal mb-10 overflow-hidden" style={{ height: 'clamp(200px,38vw,420px)' }}>
+            <img src="/images/Team-work.jpg" alt="Creatr365 Team"
+              className="w-full h-full object-cover object-center hover:scale-[1.02] transition-transform duration-700"
+              style={{ filter: 'brightness(0.78) contrast(1.08)' }} />
+          </div>
+
+          {/* 4 cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {BRAND_CATS.map((c, i) => (
+              <div key={i} className="reveal glass-card rounded-md overflow-hidden group hover:border-white/18 transition-all duration-400"
+                style={{ transitionDelay: `${i * 0.09}s` }}>
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img src={c.img} alt={c.label}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-600 opacity-85 group-hover:opacity-100" />
                 </div>
-              </div>
-              <div className="p-4 border-l border-white/5 flex items-center justify-center"
-                style={{ background: `${RED}12` }}>
-                <div className="text-center">
-                  <Check className="w-3 h-3 mx-auto mb-1" style={{ color: RED }} />
-                  <span className="text-[10px] font-black tracking-widest uppercase" style={{ color: RED }}>CREATR365</span>
-                </div>
-              </div>
-            </div>
-            {WHY.map((row, i) => (
-              <div key={i} data-reveal data-reveal-delay={String(i * 80)}
-                className="grid grid-cols-[2fr_3fr_3fr] border-b border-white/5 last:border-0">
-                <div className="p-5 bg-[#0D0D0D] flex items-center">
-                  <p className="text-white/65 text-sm font-medium leading-snug">{row.q}</p>
-                </div>
-                <div className="p-5 border-l border-white/5 flex items-start gap-2">
-                  <X className="w-3 h-3 text-white/25 flex-shrink-0 mt-0.5" />
-                  <p className="text-white/35 text-sm leading-relaxed hidden md:block">{row.them}</p>
-                </div>
-                <div className="p-5 border-l border-white/5 flex items-start gap-2"
-                  style={{ background: `${RED}06` }}>
-                  <Check className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#34A853' }} />
-                  <p className="text-white/80 text-sm leading-relaxed hidden md:block">{row.us}</p>
+                <div className="p-4">
+                  <p className="text-white font-bold text-sm mb-1">{c.label}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{c.desc}</p>
                 </div>
               </div>
             ))}
@@ -599,77 +471,370 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* ═══ 10. SOFT SKILLS / CTA ═══════════════════════════════ */}
-      <section ref={sec10 as any} className="bg-[#060606] py-32 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <p data-reveal className="text-[11px] font-bold tracking-[0.45em] uppercase mb-10 text-white/30">
-            Welcome to Creatr365's Family
-          </p>
-          <h2 data-reveal data-reveal-delay="80"
-            className="font-black text-white leading-tight mb-6"
-            style={{ fontSize: 'clamp(2.2rem,7vw,5.5rem)' }}>
-            เราไม่สัญญาว่า<br />
-            <span style={{ color: RED }}>เรียนจบแล้วคุณจะรวย</span>
-          </h2>
-          <p data-reveal data-reveal-delay="180"
-            className="text-white/55 text-base md:text-lg leading-relaxed mb-10 max-w-lg mx-auto">
-            แต่เราจะให้คุณ <span className="text-white/80 font-semibold">"ได้ทำ"</span>{' '}
-            เพื่อเอาไปปรับใช้ในการไลฟ์ที่คุณ{' '}
-            <span className="text-white/80 font-semibold">"ทำได้"</span> จริง
-          </p>
-
-          <div data-reveal data-reveal-delay="260"
-            className="mb-12 py-8 border-y border-white/8">
-            <p className="font-black text-white tracking-widest uppercase mb-1"
-              style={{ fontSize: 'clamp(1.8rem,5vw,3.5rem)' }}>
-              BE A CREATOR.
+      {/* ═══════════════════════════════════════════════
+          §6  CURRICULUM 3 TIERS — Accordion
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="reveal mb-14">
+            <p className="text-xs font-bold tracking-[0.42em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.38)' }}>
+              CURRICULUM
             </p>
-            <p className="font-black text-white/22 tracking-widest uppercase"
-              style={{ fontSize: 'clamp(1.1rem,3vw,2rem)' }}>
-              NOT A CONSUMER.
+            <h2 className="text-3xl sm:text-5xl font-black text-white mb-2">หลักสูตร 3 ชั้น</h2>
+            <p className="text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              เรียนได้อย่างอิสระ · ไม่บังคับ flow · ระบบแนะนำเส้นทางให้อัตโนมัติ
             </p>
           </div>
 
-          <div data-reveal data-reveal-delay="360"
-            className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/courses"
-              className="group inline-flex items-center justify-center gap-3 px-10 py-5 font-black text-white text-sm tracking-widest uppercase transition-all duration-300"
-              style={{ background: RED }}>
-              BEGIN NOW <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link to="/auth"
-              className="inline-flex items-center justify-center px-10 py-5 font-bold text-white/60 text-sm border border-white/15 hover:border-white/30 hover:text-white/80 transition-all uppercase tracking-widest">
-              Create Free Account
-            </Link>
+          <div className="space-y-3">
+            {TIERS.map((tier, ti) => {
+              const isOpen = openTier === tier.id;
+              return (
+                <div key={tier.id}
+                  className={`reveal border overflow-hidden transition-all duration-400 ${isOpen ? 'tier-section' : ''}`}
+                  style={{
+                    transitionDelay: `${ti * 0.08}s`,
+                    borderColor: isOpen ? `${RED}35` : 'rgba(255,255,255,0.07)',
+                    background: isOpen ? '#0e0e0e' : '#090909',
+                    boxShadow: isOpen ? `0 0 0 1px ${RED}20, inset 0 0 40px rgba(204,0,51,0.025)` : 'none',
+                  }}>
+                  {/* Accordion header */}
+                  <button className="w-full flex items-center gap-5 p-6 md:p-8 text-left group"
+                    onClick={() => setOpenTier(isOpen ? null : tier.id)}>
+                    <span className="text-xs font-black tracking-widest uppercase px-2 py-1 border flex-shrink-0 transition-colors duration-300"
+                      style={{
+                        color: isOpen ? RED : 'rgba(255,255,255,0.3)',
+                        borderColor: isOpen ? `${RED}55` : 'rgba(255,255,255,0.1)',
+                      }}>
+                      {tier.tier}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-black text-lg sm:text-2xl truncate">{tier.headline}</p>
+                      <p className="text-sm mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.42)' }}>{tier.sub}</p>
+                    </div>
+                    <ChevronDown className="w-5 h-5 flex-shrink-0 transition-transform duration-400"
+                      style={{ color: isOpen ? RED : 'rgba(255,255,255,0.28)', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+                  </button>
+
+                  {/* Accordion body */}
+                  <div className="accordion-content" style={{ maxHeight: isOpen ? '1000px' : '0px', opacity: isOpen ? 1 : 0 }}>
+                    <div className="px-6 md:px-8 pb-10">
+                      {/* Tier imagery */}
+                      <div className="relative mb-8 overflow-hidden rounded-sm" style={{ height: 'clamp(180px,30vw,340px)' }}>
+                        <img src={tier.bgImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-18" />
+                        <img src={tier.fgImg} alt={tier.headline}
+                          className="relative z-10 h-full mx-auto object-contain drop-shadow-2xl" />
+                        <div className="absolute inset-0"
+                          style={{ background: 'linear-gradient(to right, #0e0e0e 0%, transparent 35%, transparent 65%, #0e0e0e 100%)' }} />
+                        <div className="absolute inset-0"
+                          style={{ background: 'linear-gradient(to bottom, transparent 45%, #0e0e0e 100%)' }} />
+                        {/* Outcome */}
+                        <div className="absolute bottom-4 inset-x-0 flex justify-center">
+                          <span className="px-4 py-1.5 text-xs font-bold border border-white/12 bg-black/55 backdrop-blur-sm tracking-wider"
+                            style={{ color: 'rgba(255,255,255,0.75)' }}>
+                            {tier.outcome}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Course cards — slide in from right on open */}
+                      <div className={`grid gap-4 ${tier.courses.length === 1 ? 'max-w-lg' : 'sm:grid-cols-2'}`}>
+                        {tier.courses.map((course, ci) => {
+                          const isCS = course.tag === 'COMING SOON';
+                          const isFree = course.tag === 'FREE';
+                          return (
+                            <div key={course.name} className="glass-card rounded-sm p-6 hover:border-white/14 transition-all duration-350"
+                              style={{ animation: isOpen ? `slideInFromRight 0.45s cubic-bezier(0.16,1,0.3,1) ${ci * 90}ms both` : 'none' }}>
+                              <div className="flex items-start justify-between mb-4">
+                                <div>
+                                  <p className="text-white font-black text-base sm:text-lg">{course.name}</p>
+                                  <p className="text-xs mt-0.5 tracking-widest" style={{ color: 'rgba(255,255,255,0.38)' }}>{course.sub}</p>
+                                </div>
+                                <span className="text-xs font-black px-2 py-1 border flex-shrink-0 ml-3"
+                                  style={{
+                                    color: isFree ? '#34A853' : isCS ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)',
+                                    borderColor: isFree ? '#34A85345' : isCS ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.1)',
+                                  }}>
+                                  {course.tag}
+                                </span>
+                              </div>
+                              <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.58)' }}>{course.why}</p>
+                              {!isCS ? (
+                                <Link to={`/courses`}
+                                  className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:opacity-75"
+                                  style={{ color: isFree ? '#34A853' : 'rgba(255,255,255,0.42)' }}>
+                                  สมัครเรียน <ArrowRight className="w-3 h-3" />
+                                </Link>
+                              ) : (
+                                <p className="text-xs uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>Coming Soon</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-6 flex justify-end">
+                        <Link to={tier.path}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors"
+                          style={{ color: RED }}>
+                          ดูรายละเอียดเพิ่มเติม <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ═══ FOOTER ══════════════════════════════════════════════ */}
-      <footer className="bg-[#040404] border-t border-white/5 py-14 px-6">
-        <div className="max-w-6xl mx-auto">
+      {/* ═══════════════════════════════════════════════
+          §7  BRAND CONCEPT
+      ═══════════════════════════════════════════════ */}
+      <section className="relative py-24 lg:py-32 border-t border-white/5 overflow-hidden">
+        {/* BG image */}
+        <div className="absolute inset-0 z-0">
+          <img src="/images/Team-behind.png" alt="Brand Concept"
+            className="w-full h-full object-cover opacity-22" />
+          <div className="absolute inset-0"
+            style={{ background: 'linear-gradient(135deg, #0a0a0a 45%, rgba(10,10,10,0.65) 70%, rgba(10,10,10,0.25) 100%)' }} />
+        </div>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6">
+          <div className="reveal text-center mb-14">
+            <p className="text-xs font-bold tracking-[0.46em] uppercase mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              BRAND CONCEPT
+            </p>
+            <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
+              เราไม่สัญญาว่าเรียนจบแล้ว<br />
+              <span style={{ color: RED }}>คุณจะรวย</span>
+            </h2>
+          </div>
+
+          <div className="reveal flex flex-col md:flex-row items-center gap-12 justify-center" style={{ transitionDelay: '0.12s' }}>
+            {/* Logos */}
+            <div className="flex flex-col items-center gap-4">
+              <img src="/images/Creatr365_center.png" alt="Creatr365 Logo"
+                className="h-20 md:h-28 object-contain"
+                style={{ filter: 'brightness(0) invert(1)' }} />
+              <img src="/images/creatr365_concept_center.png" alt="Creatr365 Concept"
+                className="h-8 md:h-12 object-contain"
+                style={{ filter: 'brightness(0) invert(1)', opacity: 0.55 }} />
+            </div>
+
+            {/* Manifesto */}
+            <div className="max-w-sm">
+              <p className="text-base leading-loose mb-5" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                แต่เราจะให้คุณ{' '}
+                <span className="text-white font-bold">"ได้ทำ"</span>{' '}
+                เพื่อเอาไปปรับใช้ในการไลฟ์ที่คุณ{' '}
+                <span className="text-white font-bold">"ทำได้"</span>{' '}
+                จริง
+              </p>
+              <blockquote className="border-l-2 pl-4 italic" style={{ borderColor: `${RED}60` }}>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
+                  แต่คือการสร้างธุรกิจที่เติบโตได้"
+                </p>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════
+          §8  JOURNEY — full-bleed image + buttons only
+      ═══════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden" style={{ minHeight: '88vh' }}>
+        {/* Full bleed */}
+        <img src="/images/journey-stairs.jpg" alt="Consumer to Creator Journey"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ filter: 'brightness(0.72)' }} />
+        <div className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(10,10,10,0.38) 0%, rgba(10,10,10,0.2) 40%, rgba(10,10,10,0.72) 85%, #0a0a0a 100%)' }} />
+
+        {/* Buttons bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-14 px-6">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6">
+            <div className="reveal">
+              <p className="text-xs font-bold tracking-[0.46em] uppercase mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                CONSUMER → CREATOR
+              </p>
+              <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
+                YOUR JOURNEY<br /><span style={{ color: RED }}>STARTS HERE.</span>
+              </h2>
+            </div>
+            <div className="reveal flex flex-col sm:flex-row gap-4 flex-shrink-0" style={{ transitionDelay: '0.12s' }}>
+              <Link to="/courses"
+                className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-white font-bold text-sm tracking-[0.22em] uppercase transition-all duration-300 animate-pulse-glow"
+                style={{ background: RED }}>
+                เริ่มเส้นทางของคุณ
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link to="/journey"
+                className="inline-flex items-center justify-center px-8 py-4 font-bold text-sm border border-white/22 hover:border-white/45 hover:text-white transition-all uppercase tracking-[0.18em]"
+                style={{ color: 'rgba(255,255,255,0.68)' }}>
+                ดูเส้นทางทั้งหมด
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════
+          §9  WHY CREATR365 DIFFERENCE?
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="reveal mb-14">
+            <p className="text-xs font-bold tracking-[0.42em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              COMPARISON
+            </p>
+            <h2 className="text-3xl sm:text-5xl font-black text-white">
+              WHY <span style={{ color: RED }}>CREATR365</span><br />DIFFERENCE?
+            </h2>
+          </div>
+
+          <div className="reveal border border-white/7 overflow-hidden rounded-sm">
+            {/* Header */}
+            <div className="grid border-b border-white/7" style={{ gridTemplateColumns: '2fr 3fr 3fr' }}>
+              <div className="p-4 bg-white/[0.02]" />
+              <div className="p-4 border-l border-white/5 flex items-center justify-center bg-white/[0.02]">
+                <span className="text-xs font-black tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.42)' }}>คอร์สทั่วไป</span>
+              </div>
+              <div className="p-4 border-l border-white/5 flex items-center justify-center table-row-highlight">
+                <span className="text-xs font-black tracking-widest uppercase" style={{ color: RED }}>CREATR365</span>
+              </div>
+            </div>
+            {WHY.map((row, i) => (
+              <div key={i} className="grid border-b border-white/5 last:border-0 hover:bg-white/[0.015] transition-colors duration-200"
+                style={{ gridTemplateColumns: '2fr 3fr 3fr' }}>
+                <div className="p-5 bg-white/[0.015] border-r border-white/5 flex items-center">
+                  <p className="text-sm font-medium leading-snug" style={{ color: 'rgba(255,255,255,0.68)' }}>{row.q}</p>
+                </div>
+                <div className="p-5 border-r border-white/5 flex items-start gap-2.5">
+                  <X className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'rgba(255,255,255,0.28)' }} />
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.38)' }}>{row.them}</p>
+                </div>
+                <div className="p-5 flex items-start gap-2.5 table-row-highlight">
+                  <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>{row.us}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════
+          §10  SOFT SKILLS + CTA
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center mb-24">
+            {/* Soft skills list */}
+            <div className="reveal">
+              <p className="text-xs font-bold tracking-[0.42em] uppercase mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                ทักษะที่สำคัญที่สุดในอาชีพนี้
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-8">
+                ไม่ใช่แค่ทักษะไลฟ์<br />
+                <span style={{ color: RED }}>แต่คือทักษะชีวิต</span>
+              </h2>
+              {SOFT_SKILLS.map((s, i) => (
+                <div key={i} className="flex items-center gap-4 py-4 border-b border-white/6 last:border-0 group cursor-default">
+                  <span className="text-xs font-black w-6 flex-shrink-0 tabular-nums" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }} />
+                  <p className="text-sm sm:text-base group-hover:text-white transition-colors duration-300"
+                    style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    {s}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Big manifesto */}
+            <div className="reveal text-center lg:text-left" style={{ transitionDelay: '0.12s' }}>
+              <p className="text-base italic mb-6" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                "เราไม่สัญญาว่าเรียนจบแล้วคุณจะรวย"
+              </p>
+              <h2 className="font-black text-white leading-[1.0] mb-6"
+                style={{ fontSize: 'clamp(3.2rem,8.5vw,6.5rem)' }}>
+                BE A<br />
+                <span style={{ color: RED }}>CREATOR.</span><br />
+                <span style={{ fontSize: '0.52em', color: 'rgba(255,255,255,0.22)', letterSpacing: '0.08em' }}>NOT A CONSUMER.</span>
+              </h2>
+              <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                เพราะโจทย์ของตลาดตอนนี้คือ{' '}
+                <span style={{ color: 'rgba(255,255,255,0.62)' }}>Performance · Data · ระบบขายแบบ End-to-End</span>
+              </p>
+            </div>
+          </div>
+
+          {/* CTA strip */}
+          <div className="reveal border border-white/7 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 cta-strip-shimmer"
+            style={{ background: 'linear-gradient(135deg,#0e0e0e 0%,#0b0b0b 100%)' }}>
+            <div>
+              <p className="text-xs font-bold tracking-[0.46em] uppercase mb-2" style={{ color: 'rgba(255,255,255,0.32)' }}>
+                WELCOME TO CREATR365'S FAMILY
+              </p>
+              <h3 className="text-2xl sm:text-4xl font-black text-white">พร้อมเริ่มต้นแล้วหรือยัง?</h3>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 flex-shrink-0">
+              <Link to="/courses"
+                className="group inline-flex items-center justify-center gap-3 px-9 py-4 text-white font-black text-sm tracking-[0.22em] uppercase transition-all duration-300 animate-pulse-glow"
+                style={{ background: RED }}>
+                BEGIN NOW
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+              </Link>
+              <Link to="/auth"
+                className="inline-flex items-center justify-center px-9 py-4 font-bold text-sm border border-white/14 hover:border-white/30 transition-all uppercase tracking-[0.15em]"
+                style={{ color: 'rgba(255,255,255,0.55)' }}>
+                Free Account
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════
+          §11  FOOTER — Creatr365 original (preserved)
+      ═══════════════════════════════════════════════ */}
+      <footer className="border-t border-white/5 py-16 bg-[#070707]">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-10">
             <div>
-              <p className="text-white font-black text-base tracking-widest">CREATR365</p>
-              <p className="text-white/40 text-xs mt-1">A Creative House for the Future of Live Commerce.</p>
+              <p className="font-black text-xl tracking-widest text-white">
+                CREATR<span style={{ color: RED }}>365</span>
+              </p>
+              <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                A Creative House for the Future of Live Commerce.
+              </p>
             </div>
             <div className="flex flex-wrap gap-6">
-              {[['หลักสูตร', '/courses'], ['บทความ', '/articles'], ['FAQ', '/faq'], ['ติดต่อ', '/contact'], ['เข้าสู่ระบบ', '/auth']].map(([l, h]) => (
-                <Link key={l} to={h} className="text-white/40 hover:text-white/70 transition-colors uppercase tracking-wider text-xs">{l}</Link>
+              {([['หลักสูตร', '/courses'], ['บทความ', '/articles'], ['FAQ', '/faq'], ['ติดต่อ', '/contact'], ['เข้าสู่ระบบ', '/auth']] as [string, string][]).map(([l, h]) => (
+                <Link key={l} to={h} className="text-xs uppercase tracking-wider transition-colors hover:text-white"
+                  style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {l}
+                </Link>
               ))}
             </div>
           </div>
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-3 text-[10px] text-white/25 uppercase tracking-wider">
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-3 text-xs uppercase tracking-wider"
+            style={{ color: 'rgba(255,255,255,0.28)' }}>
             <p>© 2025 CREATR365. All rights reserved.</p>
-            <div className="flex flex-wrap gap-4">
-              {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy']].map(([l, h]) => (
-                <Link key={l} to={h} className="hover:text-white/50 transition-colors">{l}</Link>
+            <div className="flex flex-wrap gap-5">
+              {([['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy']] as [string, string][]).map(([l, h]) => (
+                <Link key={l} to={h} className="hover:text-white/55 transition-colors normal-case">{l}</Link>
               ))}
             </div>
           </div>
         </div>
       </footer>
-    </>
+    </main>
   );
 };
 
