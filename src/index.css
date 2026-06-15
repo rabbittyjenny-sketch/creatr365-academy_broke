@@ -652,3 +652,240 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   opacity: 0.4;
   z-index: 1;
 }
+
+/* ══════════════════════════════════════════════
+   HOME PAGE — UX TRANSITIONS
+   "Professional motion: deliberate, purposeful"
+══════════════════════════════════════════════ */
+
+/* Stats modal pop-up */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Course card slide in from right (used in accordion tiers) */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Fade up for stagger items */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in for hero elements */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Number flip */
+@keyframes numFlip {
+  0%   { opacity: 0; transform: translateY(100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Tier panel open — slide down content */
+@keyframes tierOpen {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Brand card image reveal */
+.brand-card-img {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand-card-img.revealed {
+  clip-path: inset(0 0% 0 0);
+}
+
+/* Marquee — two-direction support */
+.marquee-reverse { animation-direction: reverse !important; }
+
+/* Stats grid hover glow */
+.stat-card-hover {
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.stat-card-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(ellipse at 50% 100%, rgba(204,0,51,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.stat-card-hover:hover::after { opacity: 1; }
+
+/* Journey section — full-bleed parallax feel */
+.journey-bg-fixed {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+/* WHY table highlight row */
+.why-row-highlight:hover .why-us-col {
+  background: rgba(204, 0, 51, 0.08);
+  transition: background 0.25s ease;
+}
+
+/* CTA strip shimmer */
+.cta-strip-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.cta-strip-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
+  animation: ctaShimmer 4s ease-in-out infinite;
+}
+@keyframes ctaShimmer {
+  0%   { left: -100%; }
+  50%  { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* Scroll-triggered text clip for hero */
+@keyframes heroTextIn {
+  from { opacity: 0; transform: translateY(40px) skewY(2deg); }
+  to   { opacity: 1; transform: translateY(0) skewY(0deg); }
+}
+
+/* Tier accordion border glow */
+.tier-active-border {
+  box-shadow: 0 0 0 1px rgba(204, 0, 51, 0.25), inset 0 0 30px rgba(204, 0, 51, 0.03);
+}
+
+/* ════════════════════════════════════════════════════════
+   MERGED FROM KIMI — animation + component classes
+   Added to support new Home.tsx sections
+════════════════════════════════════════════════════════ */
+
+/* Marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+
+/* Fade in up (Hero) */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+
+/* Floating scroll indicator */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+.animate-float { animation: floatY 3s ease-in-out infinite; }
+
+/* Pulse glow on CTA buttons */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(204,0,51,0.28); }
+  50%       { box-shadow: 0 0 36px rgba(204,0,51,0.55); }
+}
+.animate-pulse-glow { animation: pulseGlow 2.2s ease-in-out infinite; }
+
+/* Glass card — used in stats, brand cats, course cards */
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+/* Stat card hover */
+.stat-card { transition: all 0.3s ease; }
+.stat-card:hover {
+  background: rgba(204,0,51,0.07);
+  border-color: rgba(204,0,51,0.28);
+}
+
+/* Hero gradient overlay */
+.hero-gradient {
+  background: linear-gradient(
+    110deg,
+    rgba(10,10,10,0.96) 38%,
+    rgba(10,10,10,0.72) 62%,
+    rgba(10,10,10,0.28) 100%
+  );
+}
+
+/* Tier section ambient glow */
+.tier-section {
+  position: relative;
+  overflow: hidden;
+}
+.tier-section::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -18%;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,0,51,0.055) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Accordion smooth open/close */
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+}
+
+/* WHY table right column highlight */
+.table-row-highlight {
+  background: linear-gradient(90deg, rgba(204,0,51,0.07) 0%, rgba(204,0,51,0.02) 100%);
+}
+
+/* Stats modal scale in */
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Course card slide in from right (accordion open) */
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Scroll reveal — base (used by .reveal class) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.72s cubic-bezier(0.16,1,0.3,1), transform 0.72s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #CC0033; }
+
+/* Selection */
+::selection { background: rgba(204,0,51,0.38); color: white; }
