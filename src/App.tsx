@@ -60,7 +60,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
       if (!session) { navigate('/auth?redirect=/admin/courses', { replace: true }); setChecked(true); return; }
       const { data: roles } = await supabase
         .from('user_roles').select('role')
-        .eq('user_id', session.user.id).eq('role', 'admin').single();
+        .eq('user_id', session.user.id).eq('role', 'admin').maybeSingle();
       if (!roles) { navigate('/', { replace: true }); setChecked(true); return; }
       setOk(true); setChecked(true);
     })();
