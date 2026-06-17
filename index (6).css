@@ -1,0 +1,746 @@
+/* Fonts loaded via index.html: Google Sans + Noto Sans Thai Looped */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 10%;
+
+    --destructive: 348 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 53% 46%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 20%;
+
+    --radius: 0.75rem;
+
+    /* Brand color palette — refined */
+    --google-blue: 217 89% 61%;
+    --google-red: 348 100% 40%;   /* #CC0033 */
+    --google-yellow: 51 100% 50%; /* #FFD700 Gold */
+    --google-green: 142 53% 46%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 348 100% 40%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 348 100% 40%;
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 348 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 62%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 348 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 53% 46%;
+    --success-foreground: 0 0% 100%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 348 100% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Reveal/Slide hover effect utilities */
+@layer utilities {
+  .reveal-slide {
+    @apply relative overflow-hidden;
+  }
+  
+  .reveal-slide .reveal-content {
+    @apply absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-500 ease-out;
+  }
+  
+  .reveal-slide:hover .reveal-content {
+    @apply translate-y-0;
+  }
+
+  .reveal-slide .reveal-overlay {
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 ease-out;
+  }
+
+  .reveal-slide:hover .reveal-overlay {
+    @apply opacity-100;
+  }
+
+  .slide-up-text {
+    @apply transform translate-y-4 opacity-0 transition-all duration-500 ease-out;
+  }
+
+  .reveal-slide:hover .slide-up-text {
+    @apply translate-y-0 opacity-100;
+  }
+}
+
+/* === Creative Hover Effects === */
+
+/* Passing underline: line sweeps left-to-right under text */
+.passing-underline {
+  position: relative;
+  display: inline-block;
+}
+.passing-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--hover-accent, currentColor);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+.passing-underline:hover::after,
+.passing-underline-wrapper:hover .passing-underline::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Bracket hover: [ ] brackets appear on hover */
+.bracket-hover {
+  position: relative;
+  display: inline-block;
+  transition: padding 0.3s ease;
+}
+.bracket-hover::before,
+.bracket-hover::after {
+  position: absolute;
+  color: var(--hover-accent, currentColor);
+  opacity: 0;
+  transition: all 0.3s ease;
+  font-weight: 700;
+}
+.bracket-hover::before {
+  content: '[';
+  left: -8px;
+  transform: translateX(6px);
+}
+.bracket-hover::after {
+  content: ']';
+  right: -8px;
+  transform: translateX(-6px);
+}
+.bracket-hover:hover {
+  padding: 0 6px;
+}
+.bracket-hover:hover::before,
+.bracket-hover:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Sweep hover: background sweeps from left */
+.sweep-hover {
+  position: relative;
+  z-index: 1;
+}
+.sweep-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hover-accent, currentColor);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  border-radius: inherit;
+  z-index: -1;
+}
+.sweep-hover:hover::before {
+  transform: scaleX(1);
+  opacity: 0.08;
+}
+
+/* Feature item: left border slides in */
+.feature-item {
+  position: relative;
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+.feature-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--hover-accent, currentColor);
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all 0.3s ease;
+}
+.feature-item:hover {
+  padding-left: 12px;
+}
+.feature-item:hover::before {
+  opacity: 0.5;
+  transform: scaleY(1);
+}
+
+.accent-hover-text {
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.group:hover .accent-hover-text,
+.accent-hover-text:hover {
+  color: var(--hover-accent, currentColor);
+  transform: translateX(4px);
+}
+
+/* Button slide arrow */
+.btn-slide .lucide-arrow-right {
+  transition: transform 0.3s ease;
+}
+.btn-slide:hover .lucide-arrow-right {
+  transform: translateX(4px);
+}
+
+/* === Unified hover effect: text color + slight shift === */
+/* Apply to any element. Cycles through 4 brand accents based on data attribute. */
+.hover-shift {
+  display: inline-block;
+  transition: color 0.28s ease, transform 0.28s ease;
+  cursor: pointer;
+}
+.hover-shift:hover,
+.group\/shift:hover .hover-shift,
+.group:hover .hover-shift {
+  transform: translateY(-1px);
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
+}
+.hover-shift[data-accent="blue"]:hover,
+.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-red)); }
+.hover-shift[data-accent="red"]:hover,
+.group:hover .hover-shift[data-accent="red"]    { color: hsl(var(--google-red)); }
+.hover-shift[data-accent="yellow"]:hover,
+.group:hover .hover-shift[data-accent="yellow"] { color: hsl(var(--google-yellow)); }
+.hover-shift[data-accent="green"]:hover,
+.group:hover .hover-shift[data-accent="green"]  { color: hsl(var(--google-green)); }
+
+/* === Card Water Hover (smooth accent wash + lift) === */
+.card-water {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 0.32s ease,
+              box-shadow 0.32s ease,
+              border-color 0.32s ease,
+              background-color 0.32s ease;
+  will-change: transform;
+}
+.card-water::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hover-accent, hsl(var(--foreground)));
+  opacity: 0;
+  transform: none;
+  transform-origin: left center;
+  transition: opacity 0.32s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+.card-water:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -24px hsl(var(--foreground) / 0.2);
+  border-color: var(--hover-accent, hsl(var(--border)));
+}
+.card-water:hover::before {
+  opacity: 0.055;
+}
+.card-water[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.card-water[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.card-water[data-accent="yellow"] { --hover-accent: hsl(var(--google-yellow)); }
+.card-water[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+.card-water:hover .card-water-title {
+  color: var(--hover-accent, hsl(var(--foreground)));
+  transition: color 0.45s ease;
+}
+
+/* === Per-letter Hover Effect ===
+   Wraps each character in a span; when cursor passes a letter,
+   that single letter changes color/underline/highlight independently.
+*/
+.hover-letters {
+  display: inline-block;
+  --hover-accent: hsl(var(--foreground));
+}
+.hover-letters[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.hover-letters[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.hover-letters[data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); } /* darker for contrast on white */
+.hover-letters[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.hover-letters .hl-char {
+  display: inline-block;
+  position: relative;
+  transition: color 220ms ease, transform 220ms ease;
+  will-change: color, transform;
+}
+.hover-letters .hl-char:hover {
+  color: var(--hover-accent);
+  transform: translateY(-2px);
+}
+
+/* Underline variant: each letter gets its own underline that fills on hover */
+.hover-letters--underline .hl-char::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: var(--hover-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+.hover-letters--underline .hl-char:hover::after { transform: scaleX(1); }
+
+/* Highlight variant: background bar appears behind each letter on hover */
+.hover-letters--highlight .hl-char {
+  padding: 0 1px;
+  border-radius: 2px;
+}
+.hover-letters--highlight .hl-char:hover {
+  background: var(--hover-accent);
+  color: hsl(var(--background));
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* === Global Heading + Text Hover Effect ===
+   ONE consistent style across the whole site.
+   Color is driven by --section-accent set on the parent <section data-accent="...">.
+   Each section uses ONE color — never mixed inside the same section.
+*/
+.section-accent[data-accent="blue"]   { --section-accent: hsl(var(--google-blue)); }
+.section-accent[data-accent="red"]    { --section-accent: hsl(var(--google-red)); }
+.section-accent[data-accent="yellow"] { --section-accent: hsl(45 95% 42%); }
+.section-accent[data-accent="green"]  { --section-accent: hsl(var(--google-green)); }
+
+/* Inherit section accent for hover-shift / card-water when no override */
+.section-accent .hover-shift:not([data-accent]),
+.section-accent .card-water:not([data-accent]) {
+  --hover-accent: var(--section-accent, hsl(var(--foreground)));
+}
+
+h1, h2, h3, h4, h5, h6, .heading-hover {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  transition: color 500ms ease;
+  --heading-accent: hsl(var(--google-red));
+}
+.section-accent h1,
+.section-accent h2,
+.section-accent h3,
+.section-accent h4,
+.section-accent h5,
+.section-accent h6,
+.section-accent .heading-hover {
+  --heading-accent: var(--section-accent);
+}
+h1::after, h2::after, h3::after, h4::after, h5::after, h6::after, .heading-hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  width: 0;
+  background-color: var(--heading-accent);
+  transition: width 500ms ease;
+}
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
+  color: var(--heading-accent);
+}
+h1:hover::after, h2:hover::after, h3:hover::after,
+h4:hover::after, h5:hover::after, h6:hover::after,
+.heading-hover:hover::after {
+  width: 100%;
+}
+
+/* === App-wide professional hover language ===
+   Simple, consistent state changes: color for text, subtle lift for cards,
+   and soft accent wash for buttons. Driven only by the brand accents.
+*/
+.site-hover-scope,
+.site-hover-scope [data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.site-hover-scope [data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.site-hover-scope [data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); }
+.site-hover-scope [data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.site-hover-scope p,
+.site-hover-scope li,
+.site-hover-scope label,
+.site-hover-scope small,
+.site-hover-scope span:not(.sr-only):not(.hl-char),
+.site-hover-scope a:not(.btn-brand),
+.site-hover-scope button:not(.btn-brand) {
+  transition: color 0.28s ease, border-color 0.28s ease, background-color 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
+}
+
+.site-hover-scope p:hover,
+.site-hover-scope li:hover,
+.site-hover-scope label:hover,
+.site-hover-scope small:hover,
+.site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+.site-hover-scope a:not(.btn-brand):hover,
+.site-hover-scope button:not(.btn-brand):hover {
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: hsl(var(--foreground));
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--hover-accent, hsl(var(--google-red)));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s ease;
+}
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--hover-accent, hsl(var(--google-red)));
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.btn-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border: 1px solid hsl(var(--foreground));
+  transition: color 0.28s ease, border-color 0.28s ease, transform 0.28s ease, background-color 0.28s ease;
+}
+.btn-brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--hover-accent, hsl(var(--google-red)));
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.btn-brand:hover {
+  transform: translateY(-1px);
+  border-color: var(--hover-accent, hsl(var(--foreground)));
+}
+.btn-brand:hover::before {
+  opacity: 1;
+}
+.btn-brand span,
+.btn-brand svg {
+  color: inherit;
+}
+.btn-brand--outline {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+}
+.btn-brand--outline:hover {
+  color: hsl(var(--background));
+}
+
+@media (hover: none) {
+  .site-hover-scope p:hover,
+  .site-hover-scope li:hover,
+  .site-hover-scope label:hover,
+  .site-hover-scope small:hover,
+  .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+  .site-hover-scope a:not(.btn-brand):hover,
+  .site-hover-scope button:not(.btn-brand):hover,
+  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
+    color: inherit;
+  }
+}
+
+
+/* ─── Marquee animation for Home ticker strip ─── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Article body rich text styles ─── */
+.article-body h1,.article-body h2,.article-body h3,.article-body h4 {
+  color: rgba(255,255,255,0.9); font-weight: 700; margin: 1.5rem 0 0.75rem;
+}
+.article-body h1 { font-size: 2rem; }
+.article-body h2 { font-size: 1.5rem; }
+.article-body h3 { font-size: 1.25rem; }
+.article-body p  { margin: 0 0 1rem; line-height: 1.75; }
+.article-body ul,.article-body ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+.article-body li { margin-bottom: 0.4rem; }
+.article-body a  { color: #D4A843; text-decoration: underline; }
+.article-body strong { color: rgba(255,255,255,0.85); }
+.article-body blockquote {
+  border-left: 3px solid #D4A843; padding: 0.75rem 1rem;
+  margin: 1.5rem 0; color: rgba(255,255,255,0.5);
+  background: rgba(212,168,67,0.06); border-radius: 0 0.5rem 0.5rem 0;
+}
+.article-body img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; }
+.article-body code {
+  background: rgba(255,255,255,0.08); padding: 0.15rem 0.4rem;
+  border-radius: 0.3rem; font-size: 0.85em;
+}
+
+/* ═══════════════════════════════════════════════
+   MOTION SYSTEM — CREATR365
+   "Apple keynote meets Prada campaign"
+═══════════════════════════════════════════════ */
+
+/* Cursor glow */
+.cursor-glow {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle at center,
+    rgba(204, 0, 51, 0.07) 0%,
+    rgba(204, 0, 51, 0.03) 40%,
+    transparent 70%
+  );
+  will-change: left, top;
+  transition: opacity 0.3s ease;
+}
+
+/* Scroll reveal base state */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-reveal="left"]  { transform: translateX(-24px); }
+[data-reveal="right"] { transform: translateX(24px); }
+[data-reveal="scale"] { transform: scale(0.95); }
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Subtle parallax wrapper */
+.parallax-slow { will-change: transform; }
+
+/* Editorial text clip animation */
+@keyframes textReveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.text-reveal { animation: textReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Pulse ring for live indicators */
+@keyframes pulseRing {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulseRing 2s ease-out infinite;
+}
+
+/* Floating subtle animation */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+.float-y { animation: floatY 4s ease-in-out infinite; }
+
+/* Shimmer for skeleton loaders */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Number count-up animation class */
+@keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.count-up { animation: countUp 0.5s ease both; }
+
+/* Noise grain overlay for cinematic feel (opt-in) */
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════
+   HOME v3 — UX animations & transitions
+══════════════════════════════════════════════════════ */
+
+/* Hero staggered fade-in */
+@keyframes heroIn { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+.hero-fade-1 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .1s both; }
+.hero-fade-2 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .28s both; }
+.hero-fade-3 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .44s both; }
+.hero-fade-4 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .58s both; }
+
+/* Scroll reveal */
+.js-reveal { opacity:0; transform:translateY(26px); transition: opacity .72s cubic-bezier(.16,1,.3,1), transform .72s cubic-bezier(.16,1,.3,1); }
+.js-reveal.is-visible { opacity:1; transform:translateY(0); }
+
+/* Marquee */
+@keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* Stats bar slide in */
+@keyframes popIn { from{opacity:0;transform:scale(.93) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+/* Course card slide from right */
+@keyframes slideRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:#0a0a0a; }
+::-webkit-scrollbar-thumb { background:#222; border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:#CC0033; }
+::selection { background:rgba(204,0,51,.35); color:#fff; }
+
+/* ══════════════════════════════════════════
+   HOME v3 animations
+══════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes marqueeRun {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .68s cubic-bezier(.16,1,.3,1), transform .68s cubic-bezier(.16,1,.3,1);
+}
+.reveal.revealed { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════
+   HOME — AOS + Parallax + Animations
+══════════════════════════════════════════ */
+[data-aos] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .68s cubic-bezier(.16,1,.3,1), transform .68s cubic-bezier(.16,1,.3,1);
+}
+[data-aos].aos-in { opacity: 1; transform: translateY(0); }
+[data-aos="fade-in"]        { transform: none; }
+[data-aos="fade-in"].aos-in { opacity: 1; }
+[data-aos="fade-right"]        { transform: translateX(-32px); opacity: 0; }
+[data-aos="fade-right"].aos-in { transform: translateX(0); opacity: 1; }
+[data-aos="fade-left"]        { transform: translateX(32px); opacity: 0; }
+[data-aos="fade-left"].aos-in { transform: translateX(0); opacity: 1; }
+[data-aos-delay="60"].aos-in  { transition-delay: 60ms; }
+[data-aos-delay="80"].aos-in  { transition-delay: 80ms; }
+[data-aos-delay="100"].aos-in { transition-delay: 100ms; }
+[data-aos-delay="160"].aos-in { transition-delay: 160ms; }
+[data-aos-delay="180"].aos-in { transition-delay: 180ms; }
+[data-aos-delay="240"].aos-in { transition-delay: 240ms; }
+[data-aos-delay="320"].aos-in { transition-delay: 320ms; }
+[data-aos-delay="400"].aos-in { transition-delay: 400ms; }
+[data-aos-delay="500"].aos-in { transition-delay: 500ms; }
+
+@keyframes marqueeRun {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #CC0033; }
+::selection { background: rgba(204,0,51,.34); color: #fff; }
