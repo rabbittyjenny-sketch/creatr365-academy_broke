@@ -233,7 +233,6 @@ export default function Home() {
             </h2>
 
             {[
-              'เป็นเหมือนกันไหม ?',
               'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
               'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
               'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
@@ -248,11 +247,7 @@ export default function Home() {
               </div>
             ))}
 
-            {/* logo + tagline กึ่งกลางล่าง */}
-            <div data-aos="fade-up" data-aos-delay="500" style={{ marginTop: 'clamp(40px,5vw,64px)', textAlign: 'center' }}>
-              <img src={LOGO} alt="Creatr365" style={{ height: '22px', width: 'auto', filter: 'brightness(0) invert(1)', display: 'inline-block', marginBottom: '6px' }} />
-              <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.55)' }}>A Creative House for the Future of Live Commerce.</p>
-            </div>
+           
           </div>
         </div>
       </section>
@@ -434,24 +429,7 @@ export default function Home() {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,10,10,0.78) 38%, rgba(10,10,10,0.32) 70%, rgba(10,10,10,0.1) 100%)' }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '62vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-          <div data-aos="fade-up">
-            <p style={{ fontSize: '10px', letterSpacing: '0.48em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', marginBottom: '18px' }}>
-              BRAND CONCEPT
-            </p>
-            <h2 style={{ fontSize: 'clamp(2rem,4.5vw,3.6rem)', fontWeight: 900, color: '#fff', lineHeight: 1.18, marginBottom: '18px' }}>
-              เราไม่สัญญาว่าเรียนจบแล้ว<br />
-              <span style={{ color: RED }}>คุณจะรวย</span>
-            </h2>
-            <p style={{ fontSize: 'clamp(14px,1.6vw,17px)', lineHeight: 1.9, color: 'rgba(255,255,255,0.68)', maxWidth: '480px', margin: '0 auto 14px' }}>
-              แต่เราจะให้คุณ <strong style={{ color: '#fff' }}>"ได้ทำ"</strong>{' '}
-              เพื่อเอาไปปรับใช้ในการไลฟ์ที่คุณ{' '}
-              <strong style={{ color: '#fff' }}>"ทำได้"</strong> จริง
-            </p>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
-              "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
-              แต่คือการสร้างธุรกิจที่เติบโตได้"
-            </p>
-          </div>
+         
         </div>
       </section>
 
@@ -563,7 +541,9 @@ export default function Home() {
           <div data-aos="fade-up">
             <p style={{ fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '20px' }}>
               "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
-              แต่คือการสร้างธุรกิจที่เติบโตได้"
+              แต่คือการสร้างมาตรฐานและคุณภาพ<br />
+              เพื่อการเติบโตในอาชีพที่พร้อมเข้าสู่ตลาดในระดับ Global<br />
+              ด้วยอาชีพที่ยั่งยืนและธุรกิจที่เติบโตได้อย่างมีศักยภาพ"
             </p>
             <p style={{ fontSize: '10px', letterSpacing: '0.52em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: '18px' }}>
               WELCOME TO CREATR365'S FAMILY
