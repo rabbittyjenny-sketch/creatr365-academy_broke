@@ -92,7 +92,7 @@ const AdminCourses = () => {
     const { data:{ session } } = await supabase.auth.getSession();
     if (!session) { navigate('/auth'); return; }
     const { data:roles } = await supabase.from('user_roles').select('role')
-      .eq('user_id', session.user.id).eq('role','admin').single();
+      .eq('user_id', session.user.id).eq('role','admin').maybeSingle();
     if (!roles) { toast({ title:'ไม่มีสิทธิ์เข้าถึง', variant:'destructive' }); navigate('/'); return; }
     setLoading(false); fetchCourses(); fetchPromos();
   };
