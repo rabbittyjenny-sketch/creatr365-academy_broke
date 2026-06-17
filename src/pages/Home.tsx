@@ -182,7 +182,7 @@ export default function Home() {
             style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}
           >
             <img
-              src="/images/brand1.png"
+              src="/images/brand2.png"
               alt=""
               style={{ width: '100%', height: 'auto', display: 'block' }}
             />
@@ -258,13 +258,13 @@ export default function Home() {
           Parallax: BG เลื่อนช้า (0.1) / text เลื่อนเร็วกว่า = depth
           Text ซ้าย วางบนพื้นหลัง
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '70vh', overflow: 'hidden' }}>
-        {/* BG parallax layer */}
-        <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
+      
+      <section style={{ position: 'relative',  lineHeight: 0 }}>
+       
           <img
             src="/images/problem-up.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+            style={{ width: '100%', height:'auto', display: 'block' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(10,10,10,0.88) 32%, rgba(10,10,10,0.45) 62%, rgba(10,10,10,0.1) 100%)' }} />
         </div>
