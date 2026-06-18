@@ -4,7 +4,7 @@ import { ArrowRight, Check, X } from 'lucide-react';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
-const LOGO = '/images/w-logo-oneline.png';
+const LOGO = '/images/w-logo-side.png';
 
 /* ════════════════════════════════════════════
    PARALLAX HOOK
@@ -90,7 +90,7 @@ export default function Home() {
   const journeyBgRef = useParallax(0.1);
 
   return (
-    <main className="home-scroll"  style={{ background: '#0a0a0a', overflowX: 'hidden' }}> 
+    <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden', fontSize: '18px' }}>
 
       {/* ══════════════════════════════════════
           §1  HERO
@@ -208,9 +208,7 @@ export default function Home() {
         />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
-          <div /> {/* left col — ringlight image shows through */}
-
-          {/* right col — text */}
+          {/* left col — text */}
           <div>
             <h2
               data-aos="fade-up"
@@ -233,6 +231,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div /> {/* right col — ringlight image shows through */}
         </div>
       </section>
 
@@ -254,6 +253,7 @@ export default function Home() {
 
         {/* Text — faster layer = depth effect */}
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start', minHeight: '100vh' }}>
+          {/* left col — heading + bullet text */}
           <div data-aos="fade-up">
             <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
               ทุกคอร์สการเรียนรู้<br />
@@ -269,7 +269,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          {/* right col — เพราะเราเคยเจอปัญหามาก่อน */}
+          {/* right col — heading เท่านั้น */}
           <div data-aos="fade-up" data-aos-delay="120">
             <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2 }}>
               เพราะเราเคยเจอปัญหามาก่อน
@@ -551,12 +551,12 @@ export default function Home() {
       {/* ══════════════════════════════════════
           FOOTER
       ══════════════════════════════════════ */}
-      <footer style={{ background: '#050505', borderTop: '1px solid rgba(255,255,255,0.05)', padding: 'clamp(40px,5vw,60px) clamp(20px,4vw,48px) clamp(24px,3vw,40px)' }}>
+      <footer style={{ background: '#050505', borderTop: '1px solid rgba(255,255,255,0.08)', padding: 'clamp(40px,5vw,60px) clamp(20px,4vw,48px) clamp(24px,3vw,40px)', fontFamily: 'inherit' }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 'clamp(24px,4vw,48px)', marginBottom: 'clamp(28px,3vw,40px)' }}>
             <div>
-              <img src={LOGO} alt="Creatr365" style={{ height: '22px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '10px' }} />
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7, maxWidth: '260px' }}>
+              <img src={LOGO} alt="Creatr365" style={{ height: '28px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '12px' }} />
+              <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, maxWidth: '260px', fontFamily: 'inherit' }}>
                 A Creative House for the Future of Live Commerce.
               </p>
             </div>
@@ -566,12 +566,12 @@ export default function Home() {
                 'เกี่ยวกับ': [['/about','เกี่ยวกับเรา'],['/articles','บทความ'],['/contact','ติดต่อ']],
               }).map(([title, links]) => (
                 <div key={title}>
-                  <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.38em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)', marginBottom: '12px' }}>{title}</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: '14px', fontFamily: 'inherit' }}>{title}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {(links as string[][]).map(([href, label]) => (
-                      <Link key={href} to={href} style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', textDecoration: 'none', transition: 'color .2s' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.72)')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.38)')}>
+                      <Link key={href} to={href} style={{ fontSize: '14px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', textDecoration: 'none', transition: 'color .2s', fontFamily: 'inherit' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
                         {label}
                       </Link>
                     ))}
@@ -580,13 +580,13 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '22px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '10px', fontSize: '11px', color: 'rgba(255,255,255,0.24)' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '22px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '10px', fontSize: '13px', color: 'rgba(255,255,255,0.45)', fontFamily: 'inherit' }}>
             <p>© 2025 CREATR365. All rights reserved.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
               {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy']].map(([l, h]) => (
-                <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.24)', textDecoration: 'none', transition: 'color .2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.52)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.24)')}>
+                <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color .2s', fontFamily: 'inherit', fontSize: '13px' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}>
                   {l}
                 </Link>
               ))}
@@ -643,15 +643,15 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
         paddingBottom: 'clamp(40px,6vw,72px)',
       }}>
 
-        {/* col 1-4: course block ชิดซ้าย-ล่าง ตัวหนังสือสีดำ */}
-        <div style={{ gridColumn: '1 / 5' }}>
+        {/* col 1-7: course block ชิดซ้าย-ล่าง เรียงแนวนอน */}
+        <div style={{ gridColumn: '1 / 8', paddingLeft: 'clamp(20px,4vw,48px)' }}>
 
           {/* Badge (§9 only) — เหนือ course list */}
           {badge && (
             <div data-aos="fade-in" style={{ marginBottom: '16px' }}>
               <span style={{
                 display: 'inline-block',
-                fontSize: '11px', fontWeight: 900,
+                fontSize: '13px', fontWeight: 900,
                 padding: '4px 12px',
                 border: `1px solid ${RED}`, color: RED,
                 letterSpacing: '0.14em', textTransform: 'uppercase',
@@ -659,32 +659,32 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
             </div>
           )}
 
-          {/* Course list — vertical red bar, เรียงตาม courses[] */}
+          {/* Course list — เรียงแนวนอน */}
           <div
             data-aos="fade-up"
-            style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(18px,2.5vw,28px)' }}
+            style={{ display: 'flex', flexDirection: 'row', gap: 'clamp(24px,3vw,48px)', alignItems: 'flex-end' }}
           >
             {courses.map((c, i) => (
               <div key={i} style={{ borderLeft: `3px solid ${RED}`, paddingLeft: '16px' }}>
                 <p style={{
-                  fontSize: 'clamp(15px,1.7vw,18px)', fontWeight: 900,
+                  fontSize: 'clamp(17px,1.9vw,22px)', fontWeight: 900,
                   color: '#000', letterSpacing: '0.05em',
                   marginBottom: '3px',
                 }}>{c.name}</p>
                 <p style={{
-                  fontSize: 'clamp(11px,1.2vw,13px)',
+                  fontSize: 'clamp(13px,1.3vw,15px)',
                   color: 'rgba(0,0,0,0.55)',
                   fontStyle: 'italic', marginBottom: '8px',
                 }}>{c.sub}</p>
                 {c.tag === 'COMING SOON' ? (
-                  <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.38)', letterSpacing: '0.14em' }}>
+                  <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.38)', letterSpacing: '0.14em' }}>
                     (coming soon)
                   </p>
                 ) : (
                   <Link
                     to={c.slug ? `/course/${c.slug}` : '/courses'}
                     style={{
-                      fontSize: '12px', fontWeight: 700,
+                      fontSize: '14px', fontWeight: 700,
                       color: 'rgba(0,0,0,0.52)',
                       textDecoration: 'underline', textUnderlineOffset: '3px',
                       letterSpacing: '0.14em', transition: 'color .2s',
