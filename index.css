@@ -47,36 +47,36 @@
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 348 100% 40%;
+    --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 348 100% 40%;
+    --sidebar-ring: 217 89% 61%;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 7%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
     --card-foreground: 0 0% 95%;
-    --popover: 0 0% 7%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 95%;
-    --primary: 348 100% 40%;
+    --primary: 217 89% 61%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 62%;
-    --accent: 0 0% 12%;
+    --secondary: 45 98% 50%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 15%;
     --accent-foreground: 0 0% 95%;
     --destructive: 348 100% 40%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 53% 46%;
     --success-foreground: 0 0% 100%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 348 100% 40%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 217 89% 61%;
   }
 }
 
@@ -88,6 +88,45 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Global scroll behaviour + Home page snap system
+   • html: smooth scrolling sitewide
+   • body: prevent horizontal scroll (belt-and-suspenders with overflowX on main)
+   • .home-scroll: full-page vertical snap container
+   • .home-scroll section: each section snaps at its start edge
+     min-height:100vh ensures no section is smaller than the viewport
+     (individual sections may set their own min-height on top of this)
+───────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.home-scroll {
+  scroll-snap-type: y mandatory;
+}
+
+.home-scroll section {
+  scroll-snap-align: start;
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Navbar — transparent variant (home hero)
+   The JS in Navbar.tsx toggles classes; these rules provide the
+   smooth transition so the fade from transparent → dark feels
+   intentional rather than a flash.
+───────────────────────────────────────────────────────────── */
+nav.fixed {
+  transition: background-color 0.45s ease, border-color 0.45s ease, backdrop-filter 0.45s ease;
+}
+
+/* Tailwind JIT doesn't generate border-white/8 by default, define it */
+.border-white\/8 { border-color: rgba(255,255,255,0.08); }
 
 /* Reveal/Slide hover effect utilities */
 @layer utilities {
@@ -257,10 +296,10 @@
 .group\/shift:hover .hover-shift,
 .group:hover .hover-shift {
   transform: translateY(-1px);
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
 }
 .hover-shift[data-accent="blue"]:hover,
-.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-red)); }
+.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
 .hover-shift[data-accent="red"]:hover,
 .group:hover .hover-shift[data-accent="red"]    { color: hsl(var(--google-red)); }
 .hover-shift[data-accent="yellow"]:hover,
@@ -382,7 +421,7 @@ h1, h2, h3, h4, h5, h6, .heading-hover {
   display: inline-block;
   cursor: default;
   transition: color 500ms ease;
-  --heading-accent: hsl(var(--google-red));
+  --heading-accent: hsl(var(--google-blue));
 }
 .section-accent h1,
 .section-accent h2,
@@ -439,7 +478,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
 .site-hover-scope a:not(.btn-brand):hover,
 .site-hover-scope button:not(.btn-brand):hover {
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
 }
 
 .nav-link {
@@ -456,14 +495,14 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   right: 0;
   bottom: -4px;
   height: 1px;
-  background: var(--hover-accent, hsl(var(--google-red)));
+  background: var(--hover-accent, hsl(var(--google-blue)));
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s ease;
 }
 .nav-link:hover,
 .nav-link[aria-current="page"] {
-  color: var(--hover-accent, hsl(var(--google-red)));
+  color: var(--hover-accent, hsl(var(--google-blue)));
 }
 .nav-link:hover::after,
 .nav-link[aria-current="page"]::after {
@@ -488,7 +527,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--hover-accent, hsl(var(--google-red)));
+  background: var(--hover-accent, hsl(var(--google-blue)));
   opacity: 0;
   transition: opacity 0.28s ease;
 }
@@ -653,94 +692,296 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   z-index: 1;
 }
 
-/* ══════════════════════════════════════════════════════
-   HOME v3 — UX animations & transitions
-══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   HOME PAGE — UX TRANSITIONS
+   "Professional motion: deliberate, purposeful"
+══════════════════════════════════════════════ */
 
-/* Hero staggered fade-in */
-@keyframes heroIn { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
-.hero-fade-1 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .1s both; }
-.hero-fade-2 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .28s both; }
-.hero-fade-3 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .44s both; }
-.hero-fade-4 { animation: heroIn .9s cubic-bezier(.16,1,.3,1) .58s both; }
+/* Stats modal pop-up */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
 
-/* Scroll reveal */
-.js-reveal { opacity:0; transform:translateY(26px); transition: opacity .72s cubic-bezier(.16,1,.3,1), transform .72s cubic-bezier(.16,1,.3,1); }
-.js-reveal.is-visible { opacity:1; transform:translateY(0); }
+/* Course card slide in from right (used in accordion tiers) */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
-/* Marquee */
-@keyframes marqueeScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+/* Slide in from left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
-/* Stats bar slide in */
-@keyframes popIn { from{opacity:0;transform:scale(.93) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
-
-/* Course card slide from right */
-@keyframes slideRight { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-track { background:#0a0a0a; }
-::-webkit-scrollbar-thumb { background:#222; border-radius:3px; }
-::-webkit-scrollbar-thumb:hover { background:#CC0033; }
-::selection { background:rgba(204,0,51,.35); color:#fff; }
-
-/* ══════════════════════════════════════════
-   HOME v3 animations
-══════════════════════════════════════════ */
+/* Fade up for stagger items */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.94) translateY(10px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
+
+/* Scale in for hero elements */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
-@keyframes slideInRight {
+
+/* Number flip */
+@keyframes numFlip {
+  0%   { opacity: 0; transform: translateY(100%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Tier panel open — slide down content */
+@keyframes tierOpen {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Brand card image reveal */
+.brand-card-img {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand-card-img.revealed {
+  clip-path: inset(0 0% 0 0);
+}
+
+/* Marquee — two-direction support */
+.marquee-reverse { animation-direction: reverse !important; }
+
+/* Stats grid hover glow */
+.stat-card-hover {
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.stat-card-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(ellipse at 50% 100%, rgba(204,0,51,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.stat-card-hover:hover::after { opacity: 1; }
+
+/* Journey section — full-bleed parallax feel */
+.journey-bg-fixed {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+/* WHY table highlight row */
+.why-row-highlight:hover .why-us-col {
+  background: rgba(204, 0, 51, 0.08);
+  transition: background 0.25s ease;
+}
+
+/* CTA strip shimmer */
+.cta-strip-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.cta-strip-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
+  animation: ctaShimmer 4s ease-in-out infinite;
+}
+@keyframes ctaShimmer {
+  0%   { left: -100%; }
+  50%  { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* Scroll-triggered text clip for hero */
+@keyframes heroTextIn {
+  from { opacity: 0; transform: translateY(40px) skewY(2deg); }
+  to   { opacity: 1; transform: translateY(0) skewY(0deg); }
+}
+
+/* Tier accordion border glow */
+.tier-active-border {
+  box-shadow: 0 0 0 1px rgba(204, 0, 51, 0.25), inset 0 0 30px rgba(204, 0, 51, 0.03);
+}
+
+/* ════════════════════════════════════════════════════════
+   MERGED FROM KIMI — animation + component classes
+   Added to support new Home.tsx sections
+════════════════════════════════════════════════════════ */
+
+/* Marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+
+/* Fade in up (Hero) */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+
+/* Floating scroll indicator */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+.animate-float { animation: floatY 3s ease-in-out infinite; }
+
+/* Pulse glow on CTA buttons */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(204,0,51,0.28); }
+  50%       { box-shadow: 0 0 36px rgba(204,0,51,0.55); }
+}
+.animate-pulse-glow { animation: pulseGlow 2.2s ease-in-out infinite; }
+
+/* Glass card — used in stats, brand cats, course cards */
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+/* Stat card hover */
+.stat-card { transition: all 0.3s ease; }
+.stat-card:hover {
+  background: rgba(204,0,51,0.07);
+  border-color: rgba(204,0,51,0.28);
+}
+
+/* Hero gradient overlay */
+.hero-gradient {
+  background: linear-gradient(
+    110deg,
+    rgba(10,10,10,0.96) 38%,
+    rgba(10,10,10,0.72) 62%,
+    rgba(10,10,10,0.28) 100%
+  );
+}
+
+/* Tier section ambient glow */
+.tier-section {
+  position: relative;
+  overflow: hidden;
+}
+.tier-section::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -18%;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,0,51,0.055) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Accordion smooth open/close */
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+}
+
+/* WHY table right column highlight */
+.table-row-highlight {
+  background: linear-gradient(90deg, rgba(204,0,51,0.07) 0%, rgba(204,0,51,0.02) 100%);
+}
+
+/* Stats modal scale in */
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Course card slide in from right (accordion open) */
+@keyframes slideInFromRight {
   from { opacity: 0; transform: translateX(28px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-@keyframes marqueeRun {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
+
+/* Scroll reveal — base (used by .reveal class) */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .68s cubic-bezier(.16,1,.3,1), transform .68s cubic-bezier(.16,1,.3,1);
+  transform: translateY(28px);
+  transition: opacity 0.72s cubic-bezier(0.16,1,0.3,1), transform 0.72s cubic-bezier(0.16,1,0.3,1);
 }
-.reveal.revealed { opacity: 1; transform: translateY(0); }
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-/* ══════════════════════════════════════════
-   HOME — AOS + Parallax + Animations
-══════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────
+   AOS (Animate On Scroll) — [data-aos] system used on Home.tsx
+   useAOS() adds the .aos-in class once an element scrolls into
+   view. These rules define the hidden → revealed states for
+   every data-aos value used in Home.tsx, plus the per-element
+   delay forwarded as the --aos-delay custom property.
+───────────────────────────────────────────────────────────── */
 [data-aos] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .68s cubic-bezier(.16,1,.3,1), transform .68s cubic-bezier(.16,1,.3,1);
+  transition-property: opacity, transform;
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.16,1,0.3,1);
+  transition-delay: var(--aos-delay, 0ms);
+  will-change: opacity, transform;
 }
-[data-aos].aos-in { opacity: 1; transform: translateY(0); }
-[data-aos="fade-in"]        { transform: none; }
-[data-aos="fade-in"].aos-in { opacity: 1; }
-[data-aos="fade-right"]        { transform: translateX(-32px); opacity: 0; }
-[data-aos="fade-right"].aos-in { transform: translateX(0); opacity: 1; }
-[data-aos="fade-left"]        { transform: translateX(32px); opacity: 0; }
-[data-aos="fade-left"].aos-in { transform: translateX(0); opacity: 1; }
-[data-aos-delay="60"].aos-in  { transition-delay: 60ms; }
-[data-aos-delay="80"].aos-in  { transition-delay: 80ms; }
-[data-aos-delay="100"].aos-in { transition-delay: 100ms; }
-[data-aos-delay="160"].aos-in { transition-delay: 160ms; }
-[data-aos-delay="180"].aos-in { transition-delay: 180ms; }
-[data-aos-delay="240"].aos-in { transition-delay: 240ms; }
-[data-aos-delay="320"].aos-in { transition-delay: 320ms; }
-[data-aos-delay="400"].aos-in { transition-delay: 400ms; }
-[data-aos-delay="500"].aos-in { transition-delay: 500ms; }
 
-@keyframes marqueeRun {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+[data-aos="fade-up"] {
+  opacity: 0;
+  transform: translateY(36px);
 }
-::-webkit-scrollbar       { width: 6px; }
+
+[data-aos="fade-in"] {
+  opacity: 0;
+  transform: translateY(0);
+}
+
+[data-aos="fade-left"] {
+  opacity: 0;
+  transform: translateX(48px);
+}
+
+[data-aos="fade-right"] {
+  opacity: 0;
+  transform: translateX(-48px);
+}
+
+[data-aos].aos-in {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Respect reduced-motion preference: skip the animated offset,
+   just fade, so content never gets stuck invisible for users
+   who disable motion at the OS level. */
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    transition-duration: 0.4s;
+    transform: none !important;
+  }
+}
+
+/* Marquee strip — alias kept in sync with the `marquee` keyframe
+   above; Home.tsx's free-gift ticker animates with this name. */
+@keyframes marqueeRun {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #CC0033; }
-::selection { background: rgba(204,0,51,.34); color: #fff; }
+
+/* Selection */
+::selection { background: rgba(204,0,51,0.38); color: white; }
