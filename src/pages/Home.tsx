@@ -266,7 +266,7 @@ export default function Home() {
           รูปซ้าย / text ขวา (ตาม CREATR365__5_.png)
           Logo + tagline กึ่งกลางล่างสุด
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '80vh', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
         <img
           src="/images/ringlight-back1.png"
           alt=""
@@ -312,7 +312,7 @@ export default function Home() {
           Parallax: BG เลื่อนช้า (0.1) / text เลื่อนเร็วกว่า = depth
           Text ซ้าย วางบนพื้นหลัง
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '70vh', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
         {/* BG parallax layer */}
         <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
@@ -355,7 +355,7 @@ export default function Home() {
           ซ้าย 2×2: 4 รูป ตามไฟล์ที่ระบุ ไม่มีชื่อใต้รูป
           Marquee ล่างสุด
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', overflow: 'hidden', paddingBottom: 0 }}>
+     <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
         {/* BG */}
         <img
           src="/images/Team-work1.jpg"
