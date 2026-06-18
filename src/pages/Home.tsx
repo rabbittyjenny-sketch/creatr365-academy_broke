@@ -104,7 +104,7 @@ export default function Home() {
           <img
             src="/images/Hero-team1.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right', filter: 'brightness(0.72)' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right' }}
           />
         </div>
 
@@ -119,17 +119,6 @@ export default function Home() {
           </div>
 
           {/* bottom: headline + buttons + tagline */}
-          <div style={{ marginTop: 'auto', paddingTop: 'clamp(80px,12vh,160px)' }}>
-            {/* Headline ตาม spec: BE A (ขาว) / CREATOR. (แดง) / NOT A CONSUMER. (ขาว) */}
-            <h1
-              data-aos="fade-up"
-              style={{ fontWeight: 900, lineHeight: 0.95, marginBottom: 'clamp(24px,3vw,36px)', fontSize: 'clamp(3.6rem,8.5vw,7rem)' }}
-            >
-              <span style={{ color: '#fff', display: 'block' }}>BE A</span>
-              <span style={{ color: RED, display: 'block' }}>CREATOR.</span>
-              <span style={{ color: '#fff', display: 'block' }}>NOT A CONSUMER.</span>
-            </h1>
-
             <div data-aos="fade-up" data-aos-delay="100" style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: 'clamp(22px,3vw,32px)' }}>
               <Link to="/courses"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
