@@ -289,7 +289,8 @@ export default function Home() {
         <img
           src="/images/Team-work1.jpg"
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }}
+
         />
 
         {/* Content */}
