@@ -6,31 +6,85 @@ import { ArrowRight, Check, X } from 'lucide-react';
 const RED  = '#CC0033';
 const LOGO = '/images/w-logo-oneline.png';
 
-/* ─── parallax hook ─────────────────────── */
+/* ─── parallax hook ─────────────────────────────────────────
+   Moves the BG layer at a fraction of scroll speed relative to
+   the section's own position in the viewport (not raw page
+   scrollY), so the offset is always bounded and starts correct
+   on first paint — no snap, no flying off-screen.
+──────────────────────────────────────────────────────────── */
 function useParallax(speed = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const fn = () => { el.style.transform = `translateY(${window.scrollY * speed}px)`; };
-    window.addEventListener('scroll', fn, { passive: true });
-    return () => window.removeEventListener('scroll', fn);
+    const el = ref.current;
+    if (!el) return;
+    const section = el.parentElement as HTMLElement | null;
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const target = section ?? el;
+      const rect = target.getBoundingClientRect();
+      // distance of the section's center from the viewport center
+      const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
+      el.style.transform = `translate3d(0, ${offset}px, 0)`;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    update(); // set correct position immediately on mount
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, [speed]);
   return ref;
 }
 
-/* ─── AOS hook ──────────────────────────── */
+/* ─── AOS hook ──────────────────────────────────────────────
+   Adds .aos-in to any [data-aos] element once it enters the
+   viewport. data-aos-delay (ms) is forwarded as the --aos-delay
+   CSS variable so index.css can apply it as transition-delay.
+──────────────────────────────────────────────────────────── */
 function useAOS() {
   useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-aos]'));
+
+    // forward data-aos-delay -> --aos-delay custom property once
+    els.forEach(el => {
+      const delay = el.getAttribute('data-aos-delay');
+      if (delay) el.style.setProperty('--aos-delay', `${delay}ms`);
+    });
+
+    let ticking = false;
     const run = () => {
-      document.querySelectorAll('[data-aos]').forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 50)
+      ticking = false;
+      els.forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 50) {
           el.classList.add('aos-in');
+        }
       });
     };
-    run();
-    window.addEventListener('scroll', run, { passive: true });
-    return () => window.removeEventListener('scroll', run);
-  });
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(run);
+      }
+    };
+
+    run(); // reveal anything already in view on first paint
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 }
 
 /* ─── WHY data ──────────────────────────── */
@@ -258,13 +312,13 @@ export default function Home() {
           Parallax: BG เลื่อนช้า (0.1) / text เลื่อนเร็วกว่า = depth
           Text ซ้าย วางบนพื้นหลัง
       ══════════════════════════════════════ */}
-      
-      <section style={{ position: 'relative',  lineHeight: 0 }}>
-       
+      <section style={{ position: 'relative', minHeight: '70vh', overflow: 'hidden' }}>
+        {/* BG parallax layer */}
+        <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/problem-up.png"
             alt=""
-            style={{ width: '100%', height:'auto', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(10,10,10,0.88) 32%, rgba(10,10,10,0.45) 62%, rgba(10,10,10,0.1) 100%)' }} />
         </div>
