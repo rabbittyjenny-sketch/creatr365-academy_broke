@@ -269,8 +269,13 @@ export default function Home() {
       <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
         <img
           src="/images/ringlight-back1.png"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }}
+           style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+           }}    
         />
         {/* gradient: left transparent → right darker for text readability */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,10,10,0.05) 0%, rgba(10,10,10,0.05) 35%, rgba(10,10,10,0.82) 55%, rgba(10,10,10,0.97) 100%)' }} />
@@ -317,8 +322,13 @@ export default function Home() {
         <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/problem-up.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+           style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+  }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(10,10,10,0.88) 32%, rgba(10,10,10,0.45) 62%, rgba(10,10,10,0.1) 100%)' }} />
         </div>
@@ -359,8 +369,13 @@ export default function Home() {
         {/* BG */}
         <img
           src="/images/Team-work1.jpg"
-          alt=""
-         style={{ width: '100%', height: 'auto', display: 'block' }}
+          style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+           }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.62)' }} />
 
@@ -420,12 +435,18 @@ export default function Home() {
           Course list แนวตั้ง มี red vertical bar
           Link → /course/:slug
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier1BgRef}
-        bgSrc="/images/i-can-live2.png"
-        logoSrc={LOGO}
-        headline="ไลฟ์ให้"
-        headlineRed="เป็น"
+        <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
+        {/* BG */}
+        <img
+          src="/images/i-can-live2.png"
+          style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+           }}
+        />
         courses={[
           { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
           { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' },
@@ -436,12 +457,17 @@ export default function Home() {
           §8  ไลฟ์ให้ขายได้
           BG: i-can-sale2.png เต็มหน้า ไม่ filter
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier2BgRef}
-        bgSrc="/images/i-can-sale2.png"
-        logoSrc={LOGO}
-        headline="ไลฟ์ให้"
-        headlineRed="ขายได้"
+      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
+        {/* BG */}
+        <img
+          src="/images/i-can-sale2.png"
+          style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+           }}
         courses={[
           { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',              tag: 'COURSE', slug: 'signal' },
           { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' },
@@ -452,12 +478,17 @@ export default function Home() {
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
           BG: i-can-reply1.png เต็มหน้า ไม่ filter
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier3BgRef}
-        bgSrc="/images/i-can-reply1.png"
-        logoSrc={LOGO}
-        headline="ไลฟ์ให้"
-        headlineRed="วัดผลและทำซ้ำได้"
+          <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
+        {/* BG */}
+        <img
+          src="/images/i-can-reply1.png"
+          style={{
+          position:"absolute",
+          inset:0,
+          width:"100%",
+          height:"100%",
+          objectFit:"cover"
+           }}
         badge="DON'T MISS!"
         courses={[
           { name: 'The BRAND ARCHITECT', sub: 'MASTERCLASS : ONSITE 2 DAYS', tag: 'COMING SOON', slug: '' },
@@ -477,8 +508,13 @@ export default function Home() {
       <section style={{ position: 'relative', minHeight: '62vh', overflow: 'hidden' }}>
         <img
           src="/images/Team-behind1.png"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+           style={{
+             position:"absolute",
+             inset:0,
+             width:"100%",
+             height:"100%",
+             objectFit:"cover"
+        }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,10,10,0.78) 38%, rgba(10,10,10,0.32) 70%, rgba(10,10,10,0.1) 100%)' }} />
 
@@ -498,8 +534,13 @@ export default function Home() {
         <div ref={journeyBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/journey-stairs2.jpg"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+            style={{
+            position:"absolute",
+            inset:0,
+            width:"100%",
+            height:"100%",
+            objectFit:"cover"
+  }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,10,10,0.28) 0%, rgba(10,10,10,0.1) 45%, rgba(10,10,10,0.62) 82%, #0a0a0a 100%)' }} />
         </div>
