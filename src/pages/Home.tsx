@@ -360,7 +360,7 @@ export default function Home() {
         <img
           src="/images/Team-work1.jpg"
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+         style={{ width: '100%', height: 'auto', display: 'block' }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.62)' }} />
 
