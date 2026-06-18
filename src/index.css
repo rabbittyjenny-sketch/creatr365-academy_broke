@@ -881,6 +881,63 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   transform: translateY(0);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   AOS (Animate On Scroll) — [data-aos] system used on Home.tsx
+   useAOS() adds the .aos-in class once an element scrolls into
+   view. These rules define the hidden → revealed states for
+   every data-aos value used in Home.tsx, plus the per-element
+   delay forwarded as the --aos-delay custom property.
+───────────────────────────────────────────────────────────── */
+[data-aos] {
+  transition-property: opacity, transform;
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.16,1,0.3,1);
+  transition-delay: var(--aos-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-aos="fade-up"] {
+  opacity: 0;
+  transform: translateY(36px);
+}
+
+[data-aos="fade-in"] {
+  opacity: 0;
+  transform: translateY(0);
+}
+
+[data-aos="fade-left"] {
+  opacity: 0;
+  transform: translateX(48px);
+}
+
+[data-aos="fade-right"] {
+  opacity: 0;
+  transform: translateX(-48px);
+}
+
+[data-aos].aos-in {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Respect reduced-motion preference: skip the animated offset,
+   just fade, so content never gets stuck invisible for users
+   who disable motion at the OS level. */
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    transition-duration: 0.4s;
+    transform: none !important;
+  }
+}
+
+/* Marquee strip — alias kept in sync with the `marquee` keyframe
+   above; Home.tsx's free-gift ticker animates with this name. */
+@keyframes marqueeRun {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
