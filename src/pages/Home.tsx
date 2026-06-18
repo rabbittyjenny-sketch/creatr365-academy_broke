@@ -90,7 +90,7 @@ export default function Home() {
   const journeyBgRef = useParallax(0.1);
 
   return (
-    <main className="home-scroll"   
+    <main className="home-scroll"  style={{ background: '#0a0a0a', overflowX: 'hidden' }}> 
 
       {/* ══════════════════════════════════════
           §1  HERO
