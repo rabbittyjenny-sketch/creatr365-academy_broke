@@ -90,7 +90,7 @@ export default function Home() {
   const journeyBgRef = useParallax(0.1);
 
   return (
-    <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden' }}>
+    <main className="home-scroll"   
 
       {/* ══════════════════════════════════════
           §1  HERO
@@ -104,22 +104,14 @@ export default function Home() {
           <img
             src="/images/Hero-team1.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right'}}
           />
         </div>
 
-        {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)' }}>
-          {/* top: Logo + eyebrow */}
-          <div data-aos="fade-in">
-            <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(20px,2.2vw,28px)', width: 'auto', filter: 'brightness(0) invert(1)', display: 'block', marginBottom: '8px' }} />
-            <p style={{ fontSize: '11px', letterSpacing: '0.32em', color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase' }}>
-              CREATR365 · A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE.
-            </p>
-          </div>
-
-          {/* bottom: headline + buttons + tagline */}
-            <div data-aos="fade-up" data-aos-delay="100" style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: 'clamp(22px,3vw,32px)' }}>
+        {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 'clamp(40px,6vw,72px)' }}>
+          <div data-aos="fade-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link to="/courses"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
@@ -133,9 +125,7 @@ export default function Home() {
                 FREE ACCOUNT
               </Link>
             </div>
-
-            <p data-aos="fade-up" data-aos-delay="180"
-              style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', maxWidth: '580px' }}>
+            <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
@@ -263,12 +253,8 @@ export default function Home() {
         </div>
 
         {/* Text — faster layer = depth effect */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start', minHeight: '100vh' }}>
           <div data-aos="fade-up">
-            <img src={LOGO} alt="Creatr365" style={{ height: '20px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '6px' }} />
-            <p style={{ fontSize: '10px', letterSpacing: '0.42em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '24px' }}>
-              WELCOME TO CREATR365'S FAMILY
-            </p>
             <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
               ทุกคอร์สการเรียนรู้<br />
               <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
@@ -283,7 +269,12 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div /> {/* right — BG image shows through */}
+          {/* right col — เพราะเราเคยเจอปัญหามาก่อน */}
+          <div data-aos="fade-up" data-aos-delay="120">
+            <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2 }}>
+              เพราะเราเคยเจอปัญหามาก่อน
+            </h2>
+          </div>
         </div>
       </section>
 
@@ -312,9 +303,9 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 4 รูป 2×2 ไม่มีชื่อใต้รูป hover zoom */}
+          {/* 4 รูป 2×2 ชิดซ้าย */}
           <div data-aos="fade-up" data-aos-delay="80"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxWidth: '600px' }}>
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: 'clamp(280px,42vw,560px)', marginLeft: '0' }}>
             {[
               '/images/pro-course-online.png',
               '/images/pro-AI-tech.png',
@@ -637,11 +628,10 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
         />
       </div>
 
-      {/* ── Content layer — 12-col grid, content วางใน col 1-5 ชิดซ้าย-ล่าง ── */}
+      {/* ── Content layer — 12-col grid, content วางใน col 1-4 ชิดซ้าย-ล่าง ── */}
       <div style={{
         position: 'relative',
         zIndex: 1,
-        /* 12-col grid baseline: 1320px max, gutter 24px */
         maxWidth: '1320px',
         margin: '0 auto',
         padding: '0 clamp(20px,4vw,48px)',
@@ -649,12 +639,12 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
         columnGap: 'clamp(12px,2vw,24px)',
-        alignItems: 'end',           /* ดัน content ลงล่าง */
+        alignItems: 'end',
         paddingBottom: 'clamp(40px,6vw,72px)',
       }}>
 
-        {/* col 1-5: course block ชิดซ้าย-ล่าง */}
-        <div style={{ gridColumn: '1 / 6' }}>
+        {/* col 1-4: course block ชิดซ้าย-ล่าง ตัวหนังสือสีดำ */}
+        <div style={{ gridColumn: '1 / 5' }}>
 
           {/* Badge (§9 only) — เหนือ course list */}
           {badge && (
@@ -678,16 +668,16 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
               <div key={i} style={{ borderLeft: `3px solid ${RED}`, paddingLeft: '16px' }}>
                 <p style={{
                   fontSize: 'clamp(15px,1.7vw,18px)', fontWeight: 900,
-                  color: '#fff', letterSpacing: '0.05em',
+                  color: '#000', letterSpacing: '0.05em',
                   marginBottom: '3px',
                 }}>{c.name}</p>
                 <p style={{
                   fontSize: 'clamp(11px,1.2vw,13px)',
-                  color: 'rgba(255,255,255,0.52)',
+                  color: 'rgba(0,0,0,0.55)',
                   fontStyle: 'italic', marginBottom: '8px',
                 }}>{c.sub}</p>
                 {c.tag === 'COMING SOON' ? (
-                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.14em' }}>
+                  <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.38)', letterSpacing: '0.14em' }}>
                     (coming soon)
                   </p>
                 ) : (
@@ -695,12 +685,12 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
                     to={c.slug ? `/course/${c.slug}` : '/courses'}
                     style={{
                       fontSize: '12px', fontWeight: 700,
-                      color: 'rgba(255,255,255,0.52)',
+                      color: 'rgba(0,0,0,0.52)',
                       textDecoration: 'underline', textUnderlineOffset: '3px',
                       letterSpacing: '0.14em', transition: 'color .2s',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.52)')}>
+                    onMouseEnter={e => (e.currentTarget.style.color = '#000')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(0,0,0,0.52)')}>
                     เพิ่มเติม →
                   </Link>
                 )}
@@ -708,46 +698,51 @@ function TierSection({ bgRef, bgSrc, badge, courses, also }: {
             ))}
           </div>
 
-          {/* §9 "Also" sub-list — หลังเส้นแบ่ง */}
-          {also && (
-            <div
-              data-aos="fade-up" data-aos-delay="120"
-              style={{
-                marginTop: 'clamp(20px,2.5vw,32px)',
-                paddingTop: 'clamp(16px,2vw,24px)',
-                borderTop: '1px solid rgba(255,255,255,0.14)',
-              }}
-            >
-              <p style={{
-                fontSize: '9px', letterSpacing: '0.38em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.28)', marginBottom: '14px',
-              }}>And</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(14px,2vw,20px)' }}>
-                {also.map((a, i) => (
-                  <div key={i} style={{ borderLeft: `3px solid rgba(255,255,255,0.22)`, paddingLeft: '16px' }}>
-                    <p style={{ fontSize: 'clamp(13px,1.4vw,15px)', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>{a.name}</p>
-                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', marginBottom: '6px' }}>{a.sub}</p>
-                    <Link
-                      to={`/course/${a.slug}`}
-                      style={{
-                        fontSize: '11px', fontWeight: 700,
-                        color: 'rgba(255,255,255,0.48)',
-                        textDecoration: 'underline', textUnderlineOffset: '3px',
-                        transition: 'color .2s',
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.48)')}>
-                      เพิ่มเติม →
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* col 6-12: BG image เห็นเต็ม — ไม่มี element ทับ */}
+        {/* §9 "Also" sub-list — ฝั่งขวาล่างสุด วางแนวนอน 1 แถว col 6-12 */}
+        {also && (
+          <div
+            data-aos="fade-up" data-aos-delay="120"
+            style={{
+              gridColumn: '6 / 13',
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 'clamp(20px,3vw,40px)',
+              alignItems: 'flex-end',
+            }}
+          >
+            <p style={{
+              fontSize: '9px', letterSpacing: '0.38em',
+              textTransform: 'uppercase',
+              color: 'rgba(0,0,0,0.38)',
+              flexShrink: 0,
+              marginBottom: '0',
+              alignSelf: 'flex-end',
+              paddingBottom: '4px',
+            }}>And</p>
+            {also.map((a, i) => (
+              <div key={i} style={{ borderLeft: `3px solid rgba(0,0,0,0.22)`, paddingLeft: '12px' }}>
+                <p style={{ fontSize: 'clamp(12px,1.2vw,14px)', fontWeight: 700, color: '#000', marginBottom: '2px' }}>{a.name}</p>
+                <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.45)', fontStyle: 'italic', marginBottom: '4px' }}>{a.sub}</p>
+                <Link
+                  to={`/course/${a.slug}`}
+                  style={{
+                    fontSize: '11px', fontWeight: 700,
+                    color: 'rgba(0,0,0,0.48)',
+                    textDecoration: 'underline', textUnderlineOffset: '3px',
+                    transition: 'color .2s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#000')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(0,0,0,0.48)')}>
+                  เพิ่มเติม →
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* col right: BG image เห็นเต็ม — ไม่มี element ทับ */}
       </div>
     </section>
   );
