@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
 
@@ -6,84 +6,58 @@ import { ArrowRight, Check, X } from 'lucide-react';
 const RED  = '#CC0033';
 const LOGO = '/images/w-logo-oneline.png';
 
-/* ─── parallax hook ─────────────────────────────────────────
-   Moves the BG layer at a fraction of scroll speed relative to
-   the section's own position in the viewport (not raw page
-   scrollY), so the offset is always bounded and starts correct
-   on first paint — no snap, no flying off-screen.
-──────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════
+   PARALLAX HOOK
+   Offset คำนวณจากตำแหน่ง section ใน viewport
+   (ไม่ใช่ raw scrollY) → เริ่มต้นถูกทันที mount
+════════════════════════════════════════════ */
 function useParallax(speed = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const section = el.parentElement as HTMLElement | null;
-
     let ticking = false;
     const update = () => {
       ticking = false;
       const target = section ?? el;
       const rect = target.getBoundingClientRect();
-      // distance of the section's center from the viewport center
       const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) * speed;
-      el.style.transform = `translate3d(0, ${offset}px, 0)`;
+      el.style.transform = `translate3d(0,${offset}px,0)`;
     };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    };
-
-    update(); // set correct position immediately on mount
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, [speed]);
   return ref;
 }
 
-/* ─── AOS hook ──────────────────────────────────────────────
-   Adds .aos-in to any [data-aos] element once it enters the
-   viewport. data-aos-delay (ms) is forwarded as the --aos-delay
-   CSS variable so index.css can apply it as transition-delay.
-──────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════
+   AOS HOOK
+   เพิ่ม .aos-in เมื่อ element เข้า viewport
+   ส่ง data-aos-delay → --aos-delay CSS var
+════════════════════════════════════════════ */
 function useAOS() {
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>('[data-aos]'));
-
-    // forward data-aos-delay -> --aos-delay custom property once
     els.forEach(el => {
       const delay = el.getAttribute('data-aos-delay');
       if (delay) el.style.setProperty('--aos-delay', `${delay}ms`);
     });
-
     let ticking = false;
     const run = () => {
       ticking = false;
       els.forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 50) {
-          el.classList.add('aos-in');
-        }
+        if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('aos-in');
       });
     };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(run);
-      }
-    };
-
-    run(); // reveal anything already in view on first paint
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(run); } };
+    run();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
 }
 
@@ -97,65 +71,63 @@ const WHY = [
 ];
 
 /* ════════════════════════════════════════════
+   TIERSECTION TYPES
+════════════════════════════════════════════ */
+type CourseItem = { name: string; sub: string; tag: string; slug: string };
+type AlsoItem   = { name: string; sub: string; slug: string };
+
+/* ════════════════════════════════════════════
    HOME
 ════════════════════════════════════════════ */
 export default function Home() {
   useAOS();
 
-  /* §1 hero BG parallax — moves slower than content */
-  const heroBgRef = useParallax(0.18);
-
-  /* §5 problem BG parallax */
+  const heroBgRef    = useParallax(0.18);
   const problemBgRef = useParallax(0.1);
-
-  /* §7-9 tier BG parallax refs */
-  const tier1BgRef = useParallax(0.1);
-  const tier2BgRef = useParallax(0.1);
-  const tier3BgRef = useParallax(0.1);
-
-  /* §11 journey BG parallax */
+  const tier1BgRef   = useParallax(0.1);
+  const tier2BgRef   = useParallax(0.1);
+  const tier3BgRef   = useParallax(0.1);
   const journeyBgRef = useParallax(0.1);
 
   return (
-    <main style={{ background: '#0a0a0a', overflowX: 'hidden' }}>
+    <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden' }}>
 
       {/* ══════════════════════════════════════
           §1  HERO
-          BG: Hero-team1.png — filter brightness(0.72) hero only
-          Text left: Logo → eyebrow → gap → headline → buttons → tagline
+          BG: Hero-team1.png — brightness(0.72) เฉพาะ hero
+          ไม่มี overlay gradient ทั้ง 2 อัน (ลบตามสเปก)
+          layout: ซ้ายทั้งหมด
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* BG — parallax slow */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG parallax layer — brightness filter only, no overlays */}
         <div ref={heroBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/Hero-team1.png"
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right', filter: 'brightness(0.72)' }}
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(100deg, rgba(10,10,10,0.92) 32%, rgba(10,10,10,0.55) 62%, rgba(10,10,10,0.1) 100%)' }} />
-          <div style={{ position: 'absolute', bottom: 0, inset: 'auto 0 0 0', height: '180px', background: 'linear-gradient(to top, #0a0a0a, transparent)' }} />
         </div>
 
-        {/* Content — faster than BG = parallax depth */}
+        {/* Content */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)' }}>
           {/* top: Logo + eyebrow */}
           <div data-aos="fade-in">
             <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(20px,2.2vw,28px)', width: 'auto', filter: 'brightness(0) invert(1)', display: 'block', marginBottom: '8px' }} />
             <p style={{ fontSize: '11px', letterSpacing: '0.32em', color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase' }}>
-              A Creative House for the Future of Live Commerce.
+              CREATR365 · A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE.
             </p>
           </div>
 
           {/* bottom: headline + buttons + tagline */}
           <div style={{ marginTop: 'auto', paddingTop: 'clamp(80px,12vh,160px)' }}>
+            {/* Headline ตาม spec: BE A (ขาว) / CREATOR. (แดง) / NOT A CONSUMER. (ขาว) */}
             <h1
               data-aos="fade-up"
-              style={{ fontWeight: 900, lineHeight: 0.92, marginBottom: 'clamp(24px,3vw,36px)', fontSize: 'clamp(3.6rem,8.5vw,7rem)' }}
+              style={{ fontWeight: 900, lineHeight: 0.95, marginBottom: 'clamp(24px,3vw,36px)', fontSize: 'clamp(3.6rem,8.5vw,7rem)' }}
             >
-              <span style={{ color: '#fff', display: 'block' }}>BE</span>
-              <span style={{ color: '#fff', display: 'block' }}>CREATOR</span>
-              <span style={{ color: RED, display: 'block' }}>.</span>
-              <span style={{ color: 'rgba(255,255,255,0.22)', display: 'block', fontSize: '0.5em', letterSpacing: '0.07em', marginTop: '6px' }}>NOT A CONSUMER.</span>
+              <span style={{ color: '#fff', display: 'block' }}>BE A</span>
+              <span style={{ color: RED, display: 'block' }}>CREATOR.</span>
+              <span style={{ color: '#fff', display: 'block' }}>NOT A CONSUMER.</span>
             </h1>
 
             <div data-aos="fade-up" data-aos-delay="100" style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: 'clamp(22px,3vw,32px)' }}>
@@ -173,7 +145,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* tagline — bold on keywords only */}
             <p data-aos="fade-up" data-aos-delay="180"
               style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', maxWidth: '580px' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
@@ -186,28 +157,27 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════
-          §2  STATS
-          BG: graph-section2.png เต็มหน้า
-          ไม่มีอะไรทับ ไม่ filter ไม่ overlay
+          §2  STATS / MARKET DATA
+          BG: graph-section2.png เต็มหน้า 100vh
+          ไม่มีอะไรทับ ไม่ filter ไม่ overlay เลย
           รูปมีข้อมูลครบในตัวเอง
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', lineHeight: 0 }}>
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         <img
           src="/images/graph-section2.png"
           alt="Live-Streaming E-Commerce Market Data"
-          style={{ width: '100%', height: 'auto', display: 'block' }}
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
         />
       </section>
 
       {/* ══════════════════════════════════════
           §3  อยากร่วมงานกับแบรนด์ใหญ่?
           BG: สีพื้น #1a1a1a ไม่มีรูป BG
-          แถวบน: brand1.png slide-in from left
-          แถวล่าง: brand2.png slide-in from right
-          ไม่มีกรอบ ไม่มีข้อความใต้รูป
+          แถวบน: brand1.png (4 กรอบ) slide-in from left
+          แถวล่าง: brand2.png (3 กรอบ) slide-in from right
       ══════════════════════════════════════ */}
-      <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0' }}>
-        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)' }}>
+      <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)', width: '100%' }}>
           <div data-aos="fade-up" style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
             <h2 style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
               อยากร่วมงานกับแบรนด์ใหญ่ ?
@@ -218,28 +188,13 @@ export default function Home() {
           </div>
 
           {/* แถวบน: brand1.png — slide in from left */}
-          <div
-            data-aos="fade-right"
-            style={{ marginBottom: '16px', lineHeight: 0 }}
-          >
-            <img
-              src="/images/brand1.png"
-              alt=""
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
+          <div data-aos="fade-right" style={{ marginBottom: '16px', lineHeight: 0 }}>
+            <img src="/images/brand1.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* แถวล่าง: brand2.png — slide in from right */}
-          <div
-            data-aos="fade-left"
-            data-aos-delay="100"
-            style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}
-          >
-            <img
-              src="/images/brand2.png"
-              alt=""
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
+          <div data-aos="fade-left" data-aos-delay="100" style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}>
+            <img src="/images/brand2.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* ปุ่มกึ่งกลางล่าง */}
@@ -262,25 +217,18 @@ export default function Home() {
 
       {/* ══════════════════════════════════════
           §4  เป็นเหมือนกันไหม?
-          BG: ringlight-back1.png เต็มหน้า ไม่ filter
-          รูปซ้าย / text ขวา (ตาม CREATR365__5_.png)
-          Logo + tagline กึ่งกลางล่างสุด
+          BG: ringlight-back1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
+          รูปซ้าย / text ขวา (CREATR365__5_.png)
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG เต็มหน้า ไม่มี overlay ไม่มี filter */}
         <img
           src="/images/ringlight-back1.png"
-           style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-           }}    
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }}
         />
-        {/* gradient: left transparent → right darker for text readability */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,10,10,0.05) 0%, rgba(10,10,10,0.05) 35%, rgba(10,10,10,0.82) 55%, rgba(10,10,10,0.97) 100%)' }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '80vh' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
           <div /> {/* left col — ringlight image shows through */}
 
           {/* right col — text */}
@@ -305,36 +253,28 @@ export default function Home() {
                 <p style={{ fontSize: 'clamp(15px,2vw,19px)', fontWeight: 500, color: '#fff', lineHeight: 1.5 }}>{q}</p>
               </div>
             ))}
-
-           
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════
           §5  เพราะเราเจอปัญหามาก่อน
-          BG: problem-up.png เต็มหน้า ไม่ filter
-          Parallax: BG เลื่อนช้า (0.1) / text เลื่อนเร็วกว่า = depth
-          Text ซ้าย วางบนพื้นหลัง
+          BG: problem-up.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
+          Parallax: BG เลื่อนช้า / text เลื่อนเร็วกว่า = depth
+          Text ซ้าย
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
-        {/* BG parallax layer */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG parallax layer — ไม่มี overlay gradient */}
         <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/problem-up.png"
-           style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-  }}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(10,10,10,0.88) 32%, rgba(10,10,10,0.45) 62%, rgba(10,10,10,0.1) 100%)' }} />
         </div>
 
         {/* Text — faster layer = depth effect */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '70vh' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
           <div data-aos="fade-up">
             <img src={LOGO} alt="Creatr365" style={{ height: '20px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '6px' }} />
             <p style={{ fontSize: '10px', letterSpacing: '0.42em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '24px' }}>
@@ -354,33 +294,26 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div /> {/* right — BG image shows */}
+          <div /> {/* right — BG image shows through */}
         </div>
       </section>
 
       {/* ══════════════════════════════════════
-          §6  BRAND PROMISE
-          BG: Team-work1.jpg เต็มหน้า ไม่ filter
-          ข้อความบนสุด: Welcome + subtitle
-          ซ้าย 2×2: 4 รูป ตามไฟล์ที่ระบุ ไม่มีชื่อใต้รูป
-          Marquee ล่างสุด
+          §6  BRAND PROMISE / WELCOME FAMILY
+          BG: Team-work1.jpg เต็มหน้า 100vh ไม่ filter ไม่ overlay
+          ซ้าย: 2×2 grid ของ 4 รูป
+          Marquee strip ล่างสุดของ section
       ══════════════════════════════════════ */}
-     <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
-        {/* BG */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* BG เต็มหน้า ไม่มี overlay */}
         <img
           src="/images/Team-work1.jpg"
-          style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-           }}
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,10,10,0.62)' }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(50px,7vw,80px) clamp(20px,4vw,48px) clamp(40px,5vw,60px)' }}>
-          {/* header */}
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(50px,7vw,80px) clamp(20px,4vw,48px) clamp(40px,5vw,60px)', flex: 1 }}>
           <div data-aos="fade-up" style={{ marginBottom: 'clamp(32px,4vw,48px)' }}>
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
               Welcome to Creatr365's Family
@@ -390,10 +323,8 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 4 รูป ซ้าย 2×2 — ไม่มีชื่อใต้รูป */}
-          <div
-            data-aos="fade-up"
-            data-aos-delay="80"
+          {/* 4 รูป 2×2 ไม่มีชื่อใต้รูป hover zoom */}
+          <div data-aos="fade-up" data-aos-delay="80"
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', maxWidth: '600px' }}>
             {[
               '/images/pro-course-online.png',
@@ -414,7 +345,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Marquee strip ล่างสุด */}
+        {/* Marquee strip ล่างสุด section */}
         <div style={{ position: 'relative', zIndex: 1, overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.7)', padding: '11px 0' }}>
           <div style={{ display: 'flex', whiteSpace: 'nowrap', gap: '52px', animation: 'marqueeRun 28s linear infinite' }}>
             {Array(6).fill(['Free Gift ทั้งหมด : Free - Template', 'Free - Ebook', 'Free - Vocabulary guide', 'Free - Document Form', 'Free - Checklist']).flat().map((t, i) => (
@@ -429,24 +360,12 @@ export default function Home() {
 
       {/* ══════════════════════════════════════
           §7  ไลฟ์ให้เป็น
-          BG: i-can-live2.png เต็มหน้า ไม่ filter
-          Parallax BG เลื่อนช้า
-          ข้อความวางบนพื้นหลัง ซ้ายล่าง
-          Course list แนวตั้ง มี red vertical bar
-          Link → /course/:slug
+          BG: i-can-live2.png — เต็มหน้า ไม่ filter ไม่ overlay
+          TierSection — parallax BG ล้วนๆ ไม่ตัดออก
       ══════════════════════════════════════ */}
-        <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
-        {/* BG */}
-        <img
-          src="/images/i-can-live2.png"
-          style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-           }}
-        />
+      <TierSection
+        bgRef={tier1BgRef}
+        bgSrc="/images/i-can-live2.png"
         courses={[
           { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
           { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' },
@@ -455,94 +374,67 @@ export default function Home() {
 
       {/* ══════════════════════════════════════
           §8  ไลฟ์ให้ขายได้
-          BG: i-can-sale2.png เต็มหน้า ไม่ filter
+          BG: i-can-sale2.png — เต็มหน้า ไม่ filter ไม่ overlay
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
-        {/* BG */}
-        <img
-          src="/images/i-can-sale2.png"
-          style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-           }}
+      <TierSection
+        bgRef={tier2BgRef}
+        bgSrc="/images/i-can-sale2.png"
         courses={[
-          { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',              tag: 'COURSE', slug: 'signal' },
+          { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
           { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' },
         ]}
       />
 
       {/* ══════════════════════════════════════
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
-          BG: i-can-reply1.png เต็มหน้า ไม่ filter
+          BG: i-can-reply1.png — เต็มหน้า ไม่ filter ไม่ overlay
       ══════════════════════════════════════ */}
-          <section style={{ position: 'relative', minHeight:'100vh', overflow: 'hidden' }}>
-        {/* BG */}
-        <img
-          src="/images/i-can-reply1.png"
-          style={{
-          position:"absolute",
-          inset:0,
-          width:"100%",
-          height:"100%",
-          objectFit:"cover"
-           }}
+      <TierSection
+        bgRef={tier3BgRef}
+        bgSrc="/images/i-can-reply1.png"
         badge="DON'T MISS!"
         courses={[
           { name: 'The BRAND ARCHITECT', sub: 'MASTERCLASS : ONSITE 2 DAYS', tag: 'COMING SOON', slug: '' },
         ]}
         also={[
-          { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                        slug: 'the-foundation' },
-          { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',          slug: 'signal' },
+          { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
+          { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
           { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' },
         ]}
       />
 
       {/* ══════════════════════════════════════
           §10  Brand Concept
-          BG: Team-behind1.png เต็มหน้า ไม่ filter
-          ข้อความตาม PDF ref page 10
+          BG: Team-behind1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '62vh', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG เต็มหน้า ไม่มี overlay */}
         <img
           src="/images/Team-behind1.png"
-           style={{
-             position:"absolute",
-             inset:0,
-             width:"100%",
-             height:"100%",
-             objectFit:"cover"
-        }}
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,10,10,0.78) 38%, rgba(10,10,10,0.32) 70%, rgba(10,10,10,0.1) 100%)' }} />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '62vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-         
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          {/* §10 content area — รูป Team-behind1.png คือตัวเนื้อหาเอง ตาม spec page 10 */}
         </div>
       </section>
 
       {/* ══════════════════════════════════════
           §11  JOURNEY
-          BG: journey-stairs2.jpg เต็มหน้า ไม่ filter
+          BG: journey-stairs2.jpg เต็มหน้า 100vh ไม่ filter ไม่ overlay
           Parallax BG
           บนซ้าย: CONSUMER→CREATOR / YOUR JOURNEY / STARTS HERE.
           ล่างขวา: ปุ่ม
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '90vh', overflow: 'hidden' }}>
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG parallax — ไม่มี overlay gradient */}
         <div ref={journeyBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
             src="/images/journey-stairs2.jpg"
-            style={{
-            position:"absolute",
-            inset:0,
-            width:"100%",
-            height:"100%",
-            objectFit:"cover"
-  }}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,10,10,0.28) 0%, rgba(10,10,10,0.1) 45%, rgba(10,10,10,0.62) 82%, #0a0a0a 100%)' }} />
         </div>
 
         {/* top-left */}
@@ -577,8 +469,8 @@ export default function Home() {
           BG: #0a0a0a สีพื้น
           ตาราง 2 col: คอร์สทั่วไป / CREATR365
       ══════════════════════════════════════ */}
-      <section style={{ background: '#0a0a0a', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
+      <section style={{ background: '#0a0a0a', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', width: '100%' }}>
           <div data-aos="fade-up" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>WHY</h2>
             <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(26px,3vw,40px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
@@ -586,7 +478,7 @@ export default function Home() {
           </div>
 
           <div data-aos="fade-up" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-            {/* header */}
+            {/* header row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ padding: '14px 22px', textAlign: 'center', background: 'rgba(255,255,255,0.025)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
                 <span style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.42em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)' }}>คอร์สทั่วไป</span>
@@ -620,7 +512,7 @@ export default function Home() {
               style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              เริ่มเส้นทางของคุณ <ArrowRight size={15} />
+              เลือกคอร์ส <ArrowRight size={15} />
             </Link>
           </div>
         </div>
@@ -628,59 +520,83 @@ export default function Home() {
 
       {/* ══════════════════════════════════════
           §13  CTA
-          BG: #080808
-          Quote → WELCOME → BE A CREATOR → ปุ่ม
+          BG: #080808 สีพื้น
+          ข้อความตาม spec: quote ใหญ่ / tagline / ปุ่ม
       ══════════════════════════════════════ */}
-      <section style={{ background: '#080808', padding: 'clamp(70px,9vw,110px) clamp(20px,4vw,48px)' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto', textAlign: 'center' }}>
+      <section style={{ background: '#080808', padding: 'clamp(80px,10vw,140px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%' }}>
           <div data-aos="fade-up">
-            <p style={{ fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '20px' }}>
-              "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง<br />
-              แต่คือการสร้างมาตรฐานและคุณภาพ<br />
+            {/* Quote */}
+            <p style={{ fontSize: 'clamp(1.4rem,3vw,2.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.35, marginBottom: 'clamp(24px,3vw,40px)' }}>
+              "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง
+            </p>
+            <p style={{ fontSize: 'clamp(1rem,2vw,1.5rem)', lineHeight: 1.8, color: 'rgba(255,255,255,0.72)', marginBottom: 'clamp(32px,4vw,56px)' }}>
+              แต่คือการ<span style={{ textDecoration: 'underline', textUnderlineOffset: '4px' }}>สร้างมาตรฐานและคุณภาพ</span><br />
               เพื่อการเติบโตในอาชีพที่พร้อมเข้าสู่ตลาดในระดับ Global<br />
               ด้วยอาชีพที่ยั่งยืนและธุรกิจที่เติบโตได้อย่างมีศักยภาพ"
             </p>
-            <p style={{ fontSize: '10px', letterSpacing: '0.52em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: '18px' }}>
-              WELCOME TO CREATR365'S FAMILY
-            </p>
-            <h2 style={{ fontSize: 'clamp(3.8rem,9.5vw,8rem)', fontWeight: 900, lineHeight: 0.9, marginBottom: '36px' }}>
-              <span style={{ color: '#fff', display: 'block' }}>BE A</span>
-              <span style={{ color: RED, display: 'block' }}>CREATOR.</span>
-              <span style={{ color: 'rgba(255,255,255,0.18)', display: 'block', fontSize: '0.48em', letterSpacing: '0.07em', marginTop: '6px' }}>NOT A CONSUMER.</span>
-            </h2>
-            <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          </div>
+
+          <div data-aos="fade-up" data-aos-delay="100">
+            {/* Be a creatr mark */}
+            <div style={{ marginBottom: 'clamp(16px,2vw,24px)' }}>
+              <p style={{ fontSize: 'clamp(1.1rem,2.2vw,1.6rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff', lineHeight: 1.1 }}>Be a creatr.</p>
+              <p style={{ fontSize: 'clamp(1rem,2vw,1.4rem)', fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.65)', lineHeight: 1.1 }}>Not a consumer.</p>
+              <p style={{ fontSize: '10px', letterSpacing: '0.42em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', marginTop: '8px' }}>WELCOME TO CREATR365'S FAMILY</p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
               <Link to="/courses"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px clamp(32px,4vw,52px)', background: RED, color: '#fff', fontWeight: 900, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-                BEGIN NOW <ArrowRight size={16} />
+                BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '15px clamp(24px,3vw,40px)', border: '1px solid rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.52)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.42)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.color = 'rgba(255,255,255,0.52)'; }}>
-                Free Account
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+                FREE ACCOUNT
               </Link>
             </div>
+          </div>
+
+          {/* bottom-right logo */}
+          <div style={{ marginTop: 'clamp(40px,6vw,80px)', display: 'flex', justifyContent: 'flex-end' }}>
+            <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{ background: '#040404', borderTop: '1px solid rgba(255,255,255,0.05)', padding: 'clamp(44px,6vw,72px) clamp(20px,4vw,48px)' }}>
+      {/* ══════════════════════════════════════
+          FOOTER
+      ══════════════════════════════════════ */}
+      <footer style={{ background: '#050505', borderTop: '1px solid rgba(255,255,255,0.05)', padding: 'clamp(40px,5vw,60px) clamp(20px,4vw,48px) clamp(24px,3vw,40px)' }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '28px', marginBottom: '36px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 'clamp(24px,4vw,48px)', marginBottom: 'clamp(28px,3vw,40px)' }}>
             <div>
-              <img src={LOGO} alt="Creatr365" style={{ height: '20px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '7px' }} />
-              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.36)' }}>A Creative House for the Future of Live Commerce.</p>
+              <img src={LOGO} alt="Creatr365" style={{ height: '22px', width: 'auto', filter: 'brightness(0) invert(1)', marginBottom: '10px' }} />
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.7, maxWidth: '260px' }}>
+                A Creative House for the Future of Live Commerce.
+              </p>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '22px' }}>
-              {[['หลักสูตร', '/courses'], ['บทความ', '/articles'], ['FAQ', '/faq'], ['ติดต่อ', '/contact'], ['เข้าสู่ระบบ', '/auth']].map(([l, h]) => (
-                <Link key={l} to={h} style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', textDecoration: 'none', transition: 'color .2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.72)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.38)')}>
-                  {l}
-                </Link>
+            <div style={{ display: 'flex', gap: 'clamp(28px,4vw,56px)', flexWrap: 'wrap' }}>
+              {Object.entries({
+                'หลักสูตร': [['/courses','ดูทั้งหมด'],['/course/the-magnet','THE MAGNET'],['/course/the-foundation','THE FOUNDATION'],['/course/signal','SIGNAL'],['/course/stage','STAGE']],
+                'เกี่ยวกับ': [['/about','เกี่ยวกับเรา'],['/articles','บทความ'],['/contact','ติดต่อ']],
+              }).map(([title, links]) => (
+                <div key={title}>
+                  <p style={{ fontSize: '10px', fontWeight: 900, letterSpacing: '0.38em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)', marginBottom: '12px' }}>{title}</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(links as string[][]).map(([href, label]) => (
+                      <Link key={href} to={href} style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', textDecoration: 'none', transition: 'color .2s' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.72)')}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.38)')}>
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -702,106 +618,147 @@ export default function Home() {
   );
 }
 
-/* ─── TierSection component ─────────────────
-   §7, §8, §9 — BG image เต็มหน้า ไม่ filter
-   ข้อความวางทับพื้นหลัง ซ้ายล่าง
-   Parallax: BG เลื่อนช้า (ref จาก parent)
-   Course list แนวตั้ง + vertical red bar
-   Link → /course/:slug
-─────────────────────────────────────────── */
-type CourseItem = { name: string; sub: string; tag: string; slug: string };
-type AlsoItem   = { name: string; sub: string; slug: string };
-
-function TierSection({ bgRef, bgSrc, logoSrc, headline, headlineRed, badge, courses, also }: {
+/* ════════════════════════════════════════════
+   TIERSECTION  §7 §8 §9
+   ─ BG เต็มหน้า 100vh, ไม่มี filter, ไม่มี overlay
+   ─ ไม่มีโลโก้, ไม่มี headline "ไลฟ์ให้..."
+   ─ content zone: 12-col grid, course list
+     วางชิดซ้าย-ล่าง ใน col 1-5 (40% กว้าง)
+     เพื่อให้ BG ด้านขวา-บนเห็นเต็มเฟรม
+════════════════════════════════════════════ */
+function TierSection({ bgRef, bgSrc, badge, courses, also }: {
   bgRef: React.RefObject<HTMLDivElement>;
   bgSrc: string;
-  logoSrc: string;
-  headline: string;
-  headlineRed: string;
+  logoSrc?: string;
+  headline?: string;
+  headlineRed?: string;
   badge?: string;
   courses: CourseItem[];
   also?: AlsoItem[];
 }) {
-  const RED = '#CC0033';
   return (
-    <section style={{ position: 'relative', minHeight: '80vh', overflow: 'hidden' }}>
-      {/* BG parallax */}
+    <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+
+      {/* ── BG parallax layer — เต็ม 100vh, ไม่มี overlay, ไม่มี filter ── */}
       <div ref={bgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
         <img
           src={bgSrc}
           alt=""
           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
-        {/* subtle gradient only on left for text readability — right stays full image */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.45) 42%, rgba(10,10,10,0.05) 70%, transparent 100%)' }} />
-        <div style={{ position: 'absolute', bottom: 0, inset: 'auto 0 0 0', height: '120px', background: 'linear-gradient(to top, rgba(10,10,10,0.6), transparent)' }} />
       </div>
 
-      {/* Content — faster layer */}
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(40px,6vw,70px) clamp(20px,4vw,48px)', minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        {/* Logo + welcome top-left */}
-        <div data-aos="fade-in" style={{ position: 'absolute', top: 'clamp(20px,3vw,36px)', left: 'clamp(20px,4vw,48px)' }}>
-          <img src={logoSrc} alt="Creatr365" style={{ height: 'clamp(18px,2vw,26px)', width: 'auto', filter: 'brightness(0) invert(1)', display: 'block', marginBottom: '4px' }} />
-          <p style={{ fontSize: '8px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)' }}>WELCOME TO CREATR365'S FAMILY</p>
-        </div>
+      {/* ── Content layer — 12-col grid, content วางใน col 1-5 ชิดซ้าย-ล่าง ── */}
+      <div style={{
+        position: 'relative',
+        zIndex: 1,
+        /* 12-col grid baseline: 1320px max, gutter 24px */
+        maxWidth: '1320px',
+        margin: '0 auto',
+        padding: '0 clamp(20px,4vw,48px)',
+        minHeight: '100vh',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        columnGap: 'clamp(12px,2vw,24px)',
+        alignItems: 'end',           /* ดัน content ลงล่าง */
+        paddingBottom: 'clamp(40px,6vw,72px)',
+      }}>
 
-        {/* Badge */}
-        {badge && (
-          <div style={{ position: 'absolute', top: 'clamp(52px,7vw,80px)', left: 'clamp(20px,4vw,48px)' }}>
-            <span style={{ fontSize: '11px', fontWeight: 900, padding: '4px 10px', border: `1px solid ${RED}`, color: RED, letterSpacing: '0.12em' }}>{badge}</span>
-          </div>
-        )}
+        {/* col 1-5: course block ชิดซ้าย-ล่าง */}
+        <div style={{ gridColumn: '1 / 6' }}>
 
-        {/* Headline — huge Thai font */}
-        <h2
-          data-aos="fade-up"
-          style={{ fontWeight: 900, lineHeight: 0.92, marginBottom: 'clamp(24px,3vw,36px)', fontSize: 'clamp(4rem,9vw,8rem)' }}>
-          <span style={{ color: '#fff' }}>{headline}</span>
-          <span style={{ color: RED }}>{headlineRed}</span>
-        </h2>
-
-        {/* Course list — vertical with red bar */}
-        <div data-aos="fade-up" data-aos-delay="100" style={{ display: 'flex', gap: 'clamp(24px,4vw,56px)', flexWrap: 'wrap' }}>
-          {courses.map((c, i) => (
-            <div key={i} style={{ borderLeft: `3px solid ${RED}`, paddingLeft: '14px' }}>
-              <p style={{ fontSize: 'clamp(14px,1.6vw,17px)', fontWeight: 900, color: '#fff', letterSpacing: '0.04em' }}>{c.name}</p>
-              <p style={{ fontSize: 'clamp(11px,1.2vw,13px)', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic', marginBottom: '6px' }}>{c.sub}</p>
-              {c.tag === 'COMING SOON' ? (
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.12em' }}>(coming soon)</p>
-              ) : (
-                <Link
-                  to={c.slug ? `/course/${c.slug}` : '/courses'}
-                  style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.55)', textDecoration: 'underline', textUnderlineOffset: '3px', letterSpacing: '0.14em', transition: 'color .2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}>
-                  เพิ่มเติม →
-                </Link>
-              )}
+          {/* Badge (§9 only) — เหนือ course list */}
+          {badge && (
+            <div data-aos="fade-in" style={{ marginBottom: '16px' }}>
+              <span style={{
+                display: 'inline-block',
+                fontSize: '11px', fontWeight: 900,
+                padding: '4px 12px',
+                border: `1px solid ${RED}`, color: RED,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+              }}>{badge}</span>
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* §9 "And" section */}
-        {also && (
-          <div data-aos="fade-up" data-aos-delay="160" style={{ marginTop: 'clamp(16px,2vw,24px)', paddingTop: 'clamp(14px,2vw,20px)', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
-            <p style={{ fontSize: '10px', letterSpacing: '0.34em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: '12px' }}>And</p>
-            <div style={{ display: 'flex', gap: 'clamp(24px,4vw,56px)', flexWrap: 'wrap' }}>
-              {also.map((a, i) => (
-                <div key={i} style={{ borderLeft: `3px solid rgba(255,255,255,0.2)`, paddingLeft: '14px' }}>
-                  <p style={{ fontSize: 'clamp(13px,1.4vw,15px)', fontWeight: 700, color: '#fff' }}>{a.name}</p>
-                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', marginBottom: '5px' }}>{a.sub}</p>
+          {/* Course list — vertical red bar, เรียงตาม courses[] */}
+          <div
+            data-aos="fade-up"
+            style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(18px,2.5vw,28px)' }}
+          >
+            {courses.map((c, i) => (
+              <div key={i} style={{ borderLeft: `3px solid ${RED}`, paddingLeft: '16px' }}>
+                <p style={{
+                  fontSize: 'clamp(15px,1.7vw,18px)', fontWeight: 900,
+                  color: '#fff', letterSpacing: '0.05em',
+                  marginBottom: '3px',
+                }}>{c.name}</p>
+                <p style={{
+                  fontSize: 'clamp(11px,1.2vw,13px)',
+                  color: 'rgba(255,255,255,0.52)',
+                  fontStyle: 'italic', marginBottom: '8px',
+                }}>{c.sub}</p>
+                {c.tag === 'COMING SOON' ? (
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.14em' }}>
+                    (coming soon)
+                  </p>
+                ) : (
                   <Link
-                    to={`/course/${a.slug}`}
-                    style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textDecoration: 'underline', textUnderlineOffset: '3px', transition: 'color .2s' }}
+                    to={c.slug ? `/course/${c.slug}` : '/courses'}
+                    style={{
+                      fontSize: '12px', fontWeight: 700,
+                      color: 'rgba(255,255,255,0.52)',
+                      textDecoration: 'underline', textUnderlineOffset: '3px',
+                      letterSpacing: '0.14em', transition: 'color .2s',
+                    }}
                     onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}>
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.52)')}>
                     เพิ่มเติม →
                   </Link>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            ))}
           </div>
-        )}
+
+          {/* §9 "Also" sub-list — หลังเส้นแบ่ง */}
+          {also && (
+            <div
+              data-aos="fade-up" data-aos-delay="120"
+              style={{
+                marginTop: 'clamp(20px,2.5vw,32px)',
+                paddingTop: 'clamp(16px,2vw,24px)',
+                borderTop: '1px solid rgba(255,255,255,0.14)',
+              }}
+            >
+              <p style={{
+                fontSize: '9px', letterSpacing: '0.38em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.28)', marginBottom: '14px',
+              }}>And</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(14px,2vw,20px)' }}>
+                {also.map((a, i) => (
+                  <div key={i} style={{ borderLeft: `3px solid rgba(255,255,255,0.22)`, paddingLeft: '16px' }}>
+                    <p style={{ fontSize: 'clamp(13px,1.4vw,15px)', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>{a.name}</p>
+                    <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', marginBottom: '6px' }}>{a.sub}</p>
+                    <Link
+                      to={`/course/${a.slug}`}
+                      style={{
+                        fontSize: '11px', fontWeight: 700,
+                        color: 'rgba(255,255,255,0.48)',
+                        textDecoration: 'underline', textUnderlineOffset: '3px',
+                        transition: 'color .2s',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.48)')}>
+                      เพิ่มเติม →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* col 6-12: BG image เห็นเต็ม — ไม่มี element ทับ */}
       </div>
     </section>
   );
