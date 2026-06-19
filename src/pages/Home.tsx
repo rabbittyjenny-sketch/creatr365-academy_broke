@@ -187,9 +187,9 @@ export default function Home() {
         </div>
       </section>
 
-/* =========================
-   §4  เป็นเหมือนกันไหม ?
-========================= */
+{/* =========================
+    §4  เป็นเหมือนกันไหม ?
+========================= */}
 <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
   {/* BG */}
   <img
@@ -219,67 +219,62 @@ export default function Home() {
       gap: '40px'
     }}
   >
-  
+    {/* LEFT — empty, background shows through */}
+    <div />
 
     {/* RIGHT — TEXT */}
-<div
-  style={{
-    maxWidth: '560px',
-    marginLeft: 'auto'
-  }}
->
-  <h2
-    data-aos="fade-up"
-    style={{
-      fontSize: 'clamp(2.4rem,5vw,4rem)',
-      fontWeight: 900,
-      color: '#fff',
-      marginBottom: '40px',
-      lineHeight: 1.05
-    }}
-  >
-    เป็นเหมือนกันไหม ?
-  </h2>
-
-  {[
-    'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
-    'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
-    'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
-    'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
-  ].map((q, i) => (
-    <div
-      key={i}
-      data-aos="fade-up"
-      data-aos-delay={i * 80}
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '14px',
-        marginBottom: '18px'
-      }}
-    >
-      <div
+    <div style={{ maxWidth: '560px', marginLeft: 'auto' }}>
+      <h2
+        data-aos="fade-up"
         style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: RED,
-          marginTop: '10px',
-          flexShrink: 0
-        }}
-      />
-
-      <p
-        style={{
-          fontSize: 'clamp(15px,2vw,19px)',
-          fontWeight: 500,
+          fontSize: 'clamp(2.4rem,5vw,4rem)',
+          fontWeight: 900,
           color: '#fff',
-          lineHeight: 1.55
+          marginBottom: '40px',
+          lineHeight: 1.05
         }}
       >
-        {q}
-      </p>
-    </div>
+        เป็นเหมือนกันไหม ?
+      </h2>
+
+      {[
+        'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
+        'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
+        'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
+        'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
+      ].map((q, i) => (
+        <div
+          key={i}
+          data-aos="fade-up"
+          data-aos-delay={String(i * 80)}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px',
+            marginBottom: '18px'
+          }}
+        >
+          <div
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: RED,
+              marginTop: '10px',
+              flexShrink: 0
+            }}
+          />
+          <p
+            style={{
+              fontSize: 'clamp(15px,2vw,19px)',
+              fontWeight: 500,
+              color: '#fff',
+              lineHeight: 1.55
+            }}
+          >
+            {q}
+          </p>
+        </div>
       ))}
     </div>
   </div>
@@ -424,37 +419,39 @@ export default function Home() {
       </p>
     </div>
 
-    {/* GRID — shifted left */}
-    <div
+   {/* GRID — absolute, ฝั่งซ้าย, กึ่งกลางแนวตั้ง, รูปแสดงเต็ม ratio ไม่ crop */}
+<div
+  data-aos="fade-up"
+  style={{
+    position: 'absolute',
+    top: '50%',
+    left: 'clamp(20px,4vw,48px)',
+    transform: 'translateY(-50%)',
+    zIndex: 2,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, clamp(150px,14vw,200px))',
+    gap: '12px'
+  }}
+>
+  {[
+    '/images/pro-course-online.png',
+    '/images/pro-workshop-liveclass.png',
+    '/images/pro-AI-tech.png',
+    '/images/pro-community.png'
+  ].map((src, i) => (
+    <img
+      key={i}
+      src={src}
+      alt=""
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 220px)',
-        gap: '18px',
-        justifyContent: 'flex-start',
-        marginLeft: 0
+        width: '100%',
+        height: 'auto',
+        display: 'block',
+        borderRadius: '10px'
       }}
-    >
-      {[
-        '/images/pro-course-online.png',
-        '/images/pro-workshop-liveclass.png',
-        '/images/pro-AI-tech.png',
-        '/images/pro-community.png'
-      ].map((src, i) => (
-        <img
-          key={i}
-          src={src}
-          alt=""
-          data-aos="fade-up"
-          style={{
-            width: '220px',
-            height: '160px',
-            objectFit: 'cover',
-            borderRadius: '10px'
-          }}
-        />
-      ))}
-    </div>
-  </div>
+    />
+  ))}
+</div>
 
   {/* MARQUEE */}
   <div
@@ -512,87 +509,63 @@ export default function Home() {
     </div>
   </div>
 </section>
-      {/* ══════════════════════════════════════
-          §7  ไลฟ์ให้เป็น
-          Full-screen image — width:100%, height:100vh, object-fit:cover
-          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
-      ══════════════════════════════════════ */}
-   <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+    {/* =========================
+    §7  ไลฟ์ให้เป็น
+========================= */}
+<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
   <img
     src="/images/i-can-live2.png"
     alt="ไลฟ์ให้เป็น"
-    style={{
-      width: '100%',
-      height: '100vh',
-      objectFit: 'cover',
-      display: 'block'
-    }}
+    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
   />
 
   <div
     style={{
       position: 'absolute',
       left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(24px,4vw,50px)',
+      bottom: 'clamp(28px,4vw,52px)',
       zIndex: 2,
       display: 'flex',
-      gap: '28px',
+      gap: '40px',
       alignItems: 'flex-end'
     }}
   >
     {[
-      {
-        name: 'THE MAGNET',
-        sub: 'READY FOR LIVE',
-        tag: 'FREE',
-        slug: 'the-magnet'
-      },
-      {
-        name: 'THE FOUNDATION',
-        sub: 'LIVE EXPLORER',
-        tag: 'COURSE',
-        slug: 'the-foundation'
-      }
+      { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
+      { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' }
     ].map((course) => (
       <Link
         key={course.name}
         to={`/course/${course.slug}`}
-        style={{
-          textDecoration: 'none',
-          color: '#fff'
-        }}
+        style={{ textDecoration: 'none' }}
       >
-        <div style={{ marginBottom: '6px' }}>
-          <span
-            style={{
-              fontSize: '8px',
-              letterSpacing: '0.2em',
-              color: '#CC0033',
-              fontWeight: 700
-            }}
-          >
-            {course.tag}
-          </span>
+        <div style={{
+          fontSize: '9px',
+          letterSpacing: '0.22em',
+          fontWeight: 500,
+          color: 'rgba(0,0,0,0.5)',
+          textTransform: 'uppercase',
+          marginBottom: '5px'
+        }}>
+          {course.tag}
         </div>
-
-        <div
-          style={{
-            fontSize: 'clamp(18px,2vw,28px)',
-            fontWeight: 900,
-            lineHeight: 1.1
-          }}
-        >
+        <div style={{
+          fontSize: 'clamp(12px,1vw,15px)',
+          fontWeight: 600,
+          color: '#1a1a1a',
+          lineHeight: 1.2,
+          letterSpacing: '0.04em'
+        }}>
           {course.name}
         </div>
-
-        <div
-          style={{
-            fontSize: '8px',
-            letterSpacing: '0.15em',
-            color: 'rgba(255,255,255,.65)',
-            textTransform: 'uppercase'
-          }}
-        >
+        <div style={{
+          fontSize: '10px',
+          letterSpacing: '0.16em',
+          color: 'rgba(0,0,0,0.5)',
+          textTransform: 'uppercase',
+          marginTop: '3px',
+          fontWeight: 400
+        }}>
           {course.sub}
         </div>
       </Link>
@@ -600,87 +573,63 @@ export default function Home() {
   </div>
 </section>
 
-      {/* ══════════════════════════════════════
-          §8  ไลฟ์ให้ขายได้
-          Full-screen image — width:100%, height:100vh, object-fit:cover
-          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
-      ══════════════════════════════════════ */}
-     <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+     {/* =========================
+    §8  ไลฟ์ให้ขายได้
+========================= */}
+<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
   <img
     src="/images/i-can-sale2.png"
     alt="ไลฟ์ให้ขายได้"
-    style={{
-      width: '100%',
-      height: '100vh',
-      objectFit: 'cover',
-      display: 'block'
-    }}
+    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
   />
 
   <div
     style={{
       position: 'absolute',
       left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(24px,4vw,50px)',
+      bottom: 'clamp(28px,4vw,52px)',
       zIndex: 2,
       display: 'flex',
-      gap: '28px',
+      gap: '40px',
       alignItems: 'flex-end'
     }}
   >
     {[
-      {
-        name: 'SIGNAL',
-        sub: 'THE CONVERSION HOST : ONLINE',
-        tag: 'COURSE',
-        slug: 'signal'
-      },
-      {
-        name: 'STAGE',
-        sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY',
-        tag: 'COURSE',
-        slug: 'stage'
-      }
+      { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
+      { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' }
     ].map((course) => (
       <Link
         key={course.name}
         to={`/course/${course.slug}`}
-        style={{
-          textDecoration: 'none',
-          color: '#fff'
-        }}
+        style={{ textDecoration: 'none' }}
       >
-        <div style={{ marginBottom: '6px' }}>
-          <span
-            style={{
-              fontSize: '10px',
-              letterSpacing: '0.24em',
-              color: '#CC0033',
-              fontWeight: 700
-            }}
-          >
-            {course.tag}
-          </span>
+        <div style={{
+          fontSize: '9px',
+          letterSpacing: '0.22em',
+          fontWeight: 500,
+          color: 'rgba(0,0,0,0.5)',
+          textTransform: 'uppercase',
+          marginBottom: '5px'
+        }}>
+          {course.tag}
         </div>
-
-        <div
-          style={{
-            fontSize: 'clamp(18px,2vw,28px)',
-            fontWeight: 900,
-            lineHeight: 1.1
-          }}
-        >
+        <div style={{
+          fontSize: 'clamp(12px,1vw,15px)',
+          fontWeight: 600,
+          color: '#1a1a1a',
+          lineHeight: 1.2,
+          letterSpacing: '0.04em'
+        }}>
           {course.name}
         </div>
-
-        <div
-          style={{
-            fontSize: '12px',
-            letterSpacing: '0.18em',
-            color: 'rgba(255,255,255,.65)',
-            textTransform: 'uppercase'
-          }}
-        >
+        <div style={{
+          fontSize: '10px',
+          letterSpacing: '0.16em',
+          color: 'rgba(0,0,0,0.5)',
+          textTransform: 'uppercase',
+          marginTop: '3px',
+          fontWeight: 400
+        }}>
           {course.sub}
         </div>
       </Link>
