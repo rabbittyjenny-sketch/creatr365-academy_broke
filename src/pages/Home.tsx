@@ -687,120 +687,96 @@ export default function Home() {
     ))}
   </div>
 </section>
-      {/* ══════════════════════════════════════
-          §9  ไลฟ์ให้วัดผลและทำซ้ำได้
-          Full-screen image — width:100%, height:100vh, object-fit:cover
-          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+     {/* =========================
+    §9  ไลฟ์ให้วัดผลและทำซ้ำได้
+========================= */}
+<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
   <img
     src="/images/i-can-reply1.png"
     alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-    style={{
-      width: '100%',
-      height: '100vh',
-      objectFit: 'cover',
-      display: 'block'
-    }}
+    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
   />
 
-  {/* ซ้ายล่าง */}
+  {/* ซ้ายล่าง — main course */}
   <div
     style={{
       position: 'absolute',
       left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(24px,4vw,50px)',
+      bottom: 'clamp(28px,4vw,52px)',
       zIndex: 2
     }}
   >
-    <div
-      style={{
-        fontSize: '10px',
-        letterSpacing: '0.24em',
-        color: '#CC0033',
-        fontWeight: 700,
-        marginBottom: '6px'
-      }}
-    >
+    <div style={{
+      fontSize: '9px',
+      letterSpacing: '0.22em',
+      fontWeight: 500,
+      color: 'rgba(0,0,0,0.5)',
+      textTransform: 'uppercase',
+      marginBottom: '5px'
+    }}>
       COMING SOON
     </div>
-
-    <div
-      style={{
-        fontSize: 'clamp(20px,2.2vw,30px)',
-        fontWeight: 900,
-        color: '#fff'
-      }}
-    >
+    <div style={{
+      fontSize: 'clamp(12px,1vw,15px)',
+      fontWeight: 600,
+      color: '#1a1a1a',
+      lineHeight: 1.2,
+      letterSpacing: '0.04em'
+    }}>
       THE BRAND ARCHITECT
     </div>
-
-    <div
-      style={{
-        fontSize: '12px',
-        letterSpacing: '0.18em',
-        color: 'rgba(255,255,255,.65)',
-        textTransform: 'uppercase'
-      }}
-    >
+    <div style={{
+      fontSize: '10px',
+      letterSpacing: '0.16em',
+      color: 'rgba(0,0,0,0.5)',
+      textTransform: 'uppercase',
+      marginTop: '3px',
+      fontWeight: 400
+    }}>
       MASTERCLASS : ONSITE 2 DAYS
     </div>
   </div>
 
-  {/* กลางล่าง → ขวา */}
+  {/* กลาง–ขวาล่าง — also list */}
   <div
     style={{
       position: 'absolute',
-      bottom: 'clamp(24px,4vw,50px)',
+      bottom: 'clamp(28px,4vw,52px)',
       left: '50%',
       transform: 'translateX(-10%)',
       zIndex: 2,
       display: 'flex',
-      gap: '32px'
+      gap: '36px',
+      alignItems: 'flex-end'
     }}
   >
     {[
-      {
-        name: 'THE FOUNDATION',
-        sub: 'LIVE EXPLORER',
-        slug: 'the-foundation'
-      },
-      {
-        name: 'SIGNAL',
-        sub: 'THE CONVERSION HOST : ONLINE',
-        slug: 'signal'
-      },
-      {
-        name: 'STAGE',
-        sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY',
-        slug: 'stage'
-      }
+      { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
+      { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
+      { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
     ].map((course) => (
       <Link
         key={course.name}
         to={`/course/${course.slug}`}
-        style={{
-          textDecoration: 'none',
-          color: '#fff'
-        }}
+        style={{ textDecoration: 'none' }}
       >
-        <div
-          style={{
-            fontSize: 'clamp(18px,2vw,26px)',
-            fontWeight: 900
-          }}
-        >
+        <div style={{
+          fontSize: 'clamp(11px,0.9vw,14px)',
+          fontWeight: 600,
+          color: '#1a1a1a',
+          lineHeight: 1.2,
+          letterSpacing: '0.04em'
+        }}>
           {course.name}
         </div>
-
-        <div
-          style={{
-            fontSize: '12px',
-            letterSpacing: '0.18em',
-            color: 'rgba(255,255,255,.65)',
-            textTransform: 'uppercase'
-          }}
-        >
+        <div style={{
+          fontSize: '10px',
+          letterSpacing: '0.16em',
+          color: 'rgba(0,0,0,0.5)',
+          textTransform: 'uppercase',
+          marginTop: '3px',
+          fontWeight: 400
+        }}>
           {course.sub}
         </div>
       </Link>
