@@ -219,72 +219,67 @@ export default function Home() {
       gap: '40px'
     }}
   >
-    {/* LEFT — IMAGE */}
-    <div data-aos="fade-up">
-      <img
-        src="/images/CREATR365__5_.png"
-        alt=""
-        style={{ width: '100%', maxWidth: '520px', height: 'auto' }}
-      />
-    </div>
+  
 
     {/* RIGHT — TEXT */}
-    <div>
-      <h2
-        data-aos="fade-up"
+<div
+  style={{
+    maxWidth: '560px',
+    marginLeft: 'auto'
+  }}
+>
+  <h2
+    data-aos="fade-up"
+    style={{
+      fontSize: 'clamp(2.4rem,5vw,4rem)',
+      fontWeight: 900,
+      color: '#fff',
+      marginBottom: '40px',
+      lineHeight: 1.05
+    }}
+  >
+    เป็นเหมือนกันไหม ?
+  </h2>
+
+  {[
+    'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
+    'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
+    'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
+    'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
+  ].map((q, i) => (
+    <div
+      key={i}
+      data-aos="fade-up"
+      data-aos-delay={i * 80}
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '14px',
+        marginBottom: '18px'
+      }}
+    >
+      <div
         style={{
-          fontSize: 'clamp(2.4rem,5vw,4rem)',
-          fontWeight: 900,
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          background: RED,
+          marginTop: '10px',
+          flexShrink: 0
+        }}
+      />
+
+      <p
+        style={{
+          fontSize: 'clamp(15px,2vw,19px)',
+          fontWeight: 500,
           color: '#fff',
-          marginBottom: 'clamp(28px,3.5vw,44px)',
-          lineHeight: 1.05,
-          textAlign: 'right'
+          lineHeight: 1.55
         }}
       >
-        เป็นเหมือนกันไหม ?
-      </h2>
-
-      {[
-        'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
-        'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
-        'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
-        'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
-      ].map((q, i) => (
-        <div
-          key={i}
-          data-aos="fade-up"
-          data-aos-delay={i * 80}
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'flex-start',
-            gap: '14px',
-            marginBottom: '16px',
-            textAlign: 'right'
-          }}
-        >
-          <p
-            style={{
-              fontSize: 'clamp(15px,2vw,19px)',
-              fontWeight: 500,
-              color: '#fff',
-              lineHeight: 1.5
-            }}
-          >
-            {q}
-          </p>
-
-          <div
-            style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: RED,
-              marginTop: '10px',
-              flexShrink: 0
-            }}
-          />
-        </div>
+        {q}
+      </p>
+    </div>
       ))}
     </div>
   </div>
@@ -361,15 +356,15 @@ export default function Home() {
 
     {/* RIGHT — bottom aligned text */}
     <div
-      style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'flex-end',
-        height: '100%',
-        paddingBottom: '12vh',
-        textAlign: 'right'
-      }}
-    >
+  style={{
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    height: '100%',
+    paddingBottom: '24vh',
+    textAlign: 'right'
+  }}
+>
       <h2
         data-aos="fade-up"
         style={{
@@ -383,6 +378,31 @@ export default function Home() {
       </h2>
     </div>
   </div>
+   <div
+  style={{
+    position: 'absolute',
+    left: '50%',
+    bottom: '60px',
+    transform: 'translateX(-50%)',
+    zIndex: 2
+  }}
+>
+  <p
+    style={{
+      color: 'rgba(255,255,255,0.75)',
+      fontSize: '16px',
+      fontWeight: 400,
+      textAlign: 'center'
+    }}
+  >
+   <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+              หากคุณต้องการ {' '}
+              <strong style={{ color: '#fff', fontWeight: 700 }}> “เรียนแค่ทฤษฎีการไลฟ์” </strong> {' '}
+              หรือ
+              <strong style={{ color: '#fff', fontWeight: 700 }}>“การสอนแบบจับมือทํา” </strong>{' '}
+              <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ  </strong>{' '}  
+  </p>
+</div>
 </section>
 
 /* =========================
