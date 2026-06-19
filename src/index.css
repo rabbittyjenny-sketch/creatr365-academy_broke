@@ -39,11 +39,8 @@
 
     --radius: 0.75rem;
 
-    /* Brand color palette — refined */
-    --google-blue: 217 89% 61%;
-    --google-red: 348 100% 40%;   /* #CC0033 */
-    --google-yellow: 51 100% 50%; /* #FFD700 Gold */
-    --google-green: 142 53% 46%;
+    /* Brand color — only #CC0033 for hover */
+    --brand-red: #CC0033;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -89,287 +86,60 @@
   }
 }
 
-/* Reveal/Slide hover effect utilities */
+/* ─────────────────────────────────────────────
+   HOME SCROLL — no scroll-snap
+───────────────────────────────────────────── */
+.home-scroll {
+  scroll-snap-type: none;
+}
+
+/* ─────────────────────────────────────────────
+   REVEAL SLIDE utilities (kept)
+───────────────────────────────────────────── */
 @layer utilities {
   .reveal-slide {
     @apply relative overflow-hidden;
   }
-  
   .reveal-slide .reveal-content {
     @apply absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-500 ease-out;
   }
-  
   .reveal-slide:hover .reveal-content {
     @apply translate-y-0;
   }
-
   .reveal-slide .reveal-overlay {
     @apply absolute inset-0 opacity-0 transition-opacity duration-500 ease-out;
   }
-
   .reveal-slide:hover .reveal-overlay {
     @apply opacity-100;
   }
-
   .slide-up-text {
     @apply transform translate-y-4 opacity-0 transition-all duration-500 ease-out;
   }
-
   .reveal-slide:hover .slide-up-text {
     @apply translate-y-0 opacity-100;
   }
 }
 
-/* === Creative Hover Effects (removed: passing-underline, bracket-hover, sweep-hover) === */
-
-/* Feature item: left border slides in */
-.feature-item {
-  position: relative;
-  padding-left: 0;
-  transition: padding-left 0.3s ease;
-}
-.feature-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--hover-accent, currentColor);
-  opacity: 0;
-  transform: scaleY(0);
-  transition: all 0.3s ease;
-}
-.feature-item:hover {
-  padding-left: 12px;
-}
-.feature-item:hover::before {
-  opacity: 0.5;
-  transform: scaleY(1);
-}
-
-.accent-hover-text {
-  transition: color 0.3s ease, transform 0.3s ease;
-  display: inline-block;
-}
-
-.group:hover .accent-hover-text,
-.accent-hover-text:hover {
-  color: var(--hover-accent, currentColor);
-  transform: translateX(4px);
-}
-
-/* Button slide arrow */
-.btn-slide .lucide-arrow-right {
-  transition: transform 0.3s ease;
-}
-.btn-slide:hover .lucide-arrow-right {
-  transform: translateX(4px);
-}
-
-/* === Unified hover effect: text color + slight shift === */
-/* Apply to any element. Cycles through 4 brand accents based on data attribute. */
-.hover-shift {
-  display: inline-block;
-  transition: color 0.28s ease, transform 0.28s ease;
-  cursor: pointer;
-}
-.hover-shift:hover,
-.group\/shift:hover .hover-shift,
-.group:hover .hover-shift {
-  transform: translateY(-1px);
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
-}
-.hover-shift[data-accent="blue"]:hover,
-.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
-.hover-shift[data-accent="red"]:hover,
-.group:hover .hover-shift[data-accent="red"]    { color: hsl(var(--google-red)); }
-.hover-shift[data-accent="yellow"]:hover,
-.group:hover .hover-shift[data-accent="yellow"] { color: hsl(var(--google-yellow)); }
-.hover-shift[data-accent="green"]:hover,
-.group:hover .hover-shift[data-accent="green"]  { color: hsl(var(--google-green)); }
-
-/* === Card Water Hover (smooth accent wash + lift) === */
-.card-water {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  transition: transform 0.32s ease,
-              box-shadow 0.32s ease,
-              border-color 0.32s ease,
-              background-color 0.32s ease;
-  will-change: transform;
-}
-.card-water::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--hover-accent, hsl(var(--foreground)));
-  opacity: 0;
-  transform: none;
-  transform-origin: left center;
-  transition: opacity 0.32s ease;
-  z-index: -1;
-  border-radius: inherit;
-}
-.card-water:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px -24px hsl(var(--foreground) / 0.2);
-  border-color: var(--hover-accent, hsl(var(--border)));
-}
-.card-water:hover::before {
-  opacity: 0.055;
-}
-.card-water[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
-.card-water[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
-.card-water[data-accent="yellow"] { --hover-accent: hsl(var(--google-yellow)); }
-.card-water[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
-.card-water:hover .card-water-title {
-  color: var(--hover-accent, hsl(var(--foreground)));
-  transition: color 0.45s ease;
-}
-
-/* === Per-letter Hover Effect ===
-   Wraps each character in a span; when cursor passes a letter,
-   that single letter changes color/underline/highlight independently.
-*/
-.hover-letters {
-  display: inline-block;
-  --hover-accent: hsl(var(--foreground));
-}
-.hover-letters[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
-.hover-letters[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
-.hover-letters[data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); } /* darker for contrast on white */
-.hover-letters[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
-
-.hover-letters .hl-char {
-  display: inline-block;
-  position: relative;
-  transition: color 220ms ease, transform 220ms ease;
-  will-change: color, transform;
-}
-.hover-letters .hl-char:hover {
-  color: var(--hover-accent);
-  transform: translateY(-2px);
-}
-
-/* Underline variant: each letter gets its own underline that fills on hover */
-.hover-letters--underline .hl-char::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: -2px;
-  height: 2px;
-  background: var(--hover-accent);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 220ms ease;
-}
-.hover-letters--underline .hl-char:hover::after { transform: scaleX(1); }
-
-/* Highlight variant: background bar appears behind each letter on hover */
-.hover-letters--highlight .hl-char {
-  padding: 0 1px;
-  border-radius: 2px;
-}
-.hover-letters--highlight .hl-char:hover {
-  background: var(--hover-accent);
-  color: hsl(var(--background));
-}
-
+/* ─────────────────────────────────────────────
+   SR-ONLY
+───────────────────────────────────────────── */
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
-/* === Global Heading + Text Hover Effect ===
-   ONE consistent style across the whole site.
-   Color is driven by --section-accent set on the parent <section data-accent="...">.
-   Each section uses ONE color — never mixed inside the same section.
-*/
-.section-accent[data-accent="blue"]   { --section-accent: hsl(var(--google-blue)); }
-.section-accent[data-accent="red"]    { --section-accent: hsl(var(--google-red)); }
-.section-accent[data-accent="yellow"] { --section-accent: hsl(45 95% 42%); }
-.section-accent[data-accent="green"]  { --section-accent: hsl(var(--google-green)); }
-
-/* Inherit section accent for hover-shift / card-water when no override */
-.section-accent .hover-shift:not([data-accent]),
-.section-accent .card-water:not([data-accent]) {
-  --hover-accent: var(--section-accent, hsl(var(--foreground)));
-}
-
-h1, h2, h3, h4, h5, h6, .heading-hover {
-  position: relative;
-  display: inline-block;
-  cursor: default;
-  transition: color 500ms ease;
-  --heading-accent: hsl(var(--google-blue));
-}
-.section-accent h1,
-.section-accent h2,
-.section-accent h3,
-.section-accent h4,
-.section-accent h5,
-.section-accent h6,
-.section-accent .heading-hover {
-  --heading-accent: var(--section-accent);
-}
-h1::after, h2::after, h3::after, h4::after, h5::after, h6::after, .heading-hover::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  height: 2px;
-  width: 0;
-  background-color: var(--heading-accent);
-  transition: width 500ms ease;
-}
-h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
-  color: var(--heading-accent);
-}
-h1:hover::after, h2:hover::after, h3:hover::after,
-h4:hover::after, h5:hover::after, h6:hover::after,
-.heading-hover:hover::after {
-  width: 100%;
-}
-
-/* === App-wide professional hover language ===
-   Simple, consistent state changes: color for text, subtle lift for cards,
-   and soft accent wash for buttons. Driven only by the brand accents.
-*/
-.site-hover-scope,
-.site-hover-scope [data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
-.site-hover-scope [data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
-.site-hover-scope [data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); }
-.site-hover-scope [data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
-
-.site-hover-scope p,
-.site-hover-scope li,
-.site-hover-scope label,
-.site-hover-scope small,
-.site-hover-scope span:not(.sr-only):not(.hl-char),
-.site-hover-scope a:not(.btn-brand),
-.site-hover-scope button:not(.btn-brand) {
-  transition: color 0.28s ease, border-color 0.28s ease, background-color 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
-}
-
-.site-hover-scope p:hover,
-.site-hover-scope li:hover,
-.site-hover-scope label:hover,
-.site-hover-scope small:hover,
-.site-hover-scope span:not(.sr-only):not(.hl-char):hover,
-.site-hover-scope a:not(.btn-brand):hover,
-.site-hover-scope button:not(.btn-brand):hover {
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
-}
-
+/* ─────────────────────────────────────────────
+   NAV LINK — hover color = #CC0033 only
+───────────────────────────────────────────── */
 .nav-link {
   position: relative;
   display: inline-flex;
   align-items: center;
   width: fit-content;
   color: hsl(var(--foreground));
+  transition: color 0.25s ease;
+  text-decoration: none;
 }
 .nav-link::after {
   content: "";
@@ -378,20 +148,23 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   right: 0;
   bottom: -4px;
   height: 1px;
-  background: var(--hover-accent, hsl(var(--google-blue)));
+  background: #CC0033;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.28s ease;
+  transition: transform 0.25s ease;
 }
 .nav-link:hover,
 .nav-link[aria-current="page"] {
-  color: var(--hover-accent, hsl(var(--google-blue)));
+  color: #CC0033;
 }
 .nav-link:hover::after,
 .nav-link[aria-current="page"]::after {
   transform: scaleX(1);
 }
 
+/* ─────────────────────────────────────────────
+   BTN BRAND — hover = #CC0033
+───────────────────────────────────────────── */
 .btn-brand {
   position: relative;
   isolation: isolate;
@@ -403,20 +176,20 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   background: hsl(var(--foreground));
   color: hsl(var(--background));
   border: 1px solid hsl(var(--foreground));
-  transition: color 0.28s ease, border-color 0.28s ease, transform 0.28s ease, background-color 0.28s ease;
+  transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
 }
 .btn-brand::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--hover-accent, hsl(var(--google-blue)));
+  background: #CC0033;
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transition: opacity 0.25s ease;
 }
 .btn-brand:hover {
   transform: translateY(-1px);
-  border-color: var(--hover-accent, hsl(var(--foreground)));
+  border-color: #CC0033;
 }
 .btn-brand:hover::before {
   opacity: 1;
@@ -434,27 +207,67 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   color: hsl(var(--background));
 }
 
-@media (hover: none) {
-  .site-hover-scope p:hover,
-  .site-hover-scope li:hover,
-  .site-hover-scope label:hover,
-  .site-hover-scope small:hover,
-  .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
-  .site-hover-scope a:not(.btn-brand):hover,
-  .site-hover-scope button:not(.btn-brand):hover,
-  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
-    color: inherit;
-  }
+/* ─────────────────────────────────────────────
+   CARD WATER — hover lift, accent = #CC0033
+───────────────────────────────────────────── */
+.card-water {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
+}
+.card-water::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #CC0033;
+  opacity: 0;
+  transition: opacity 0.32s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+.card-water:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -24px rgba(0,0,0,0.2);
+  border-color: #CC0033;
+}
+.card-water:hover::before {
+  opacity: 0.055;
+}
+.card-water:hover .card-water-title {
+  color: #CC0033;
+  transition: color 0.3s ease;
 }
 
-
-/* ─── Marquee animation for Home ticker strip ─── */
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* ─────────────────────────────────────────────
+   FEATURE ITEM (kept, uses #CC0033)
+───────────────────────────────────────────── */
+.feature-item {
+  position: relative;
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
 }
+.feature-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: #CC0033;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all 0.3s ease;
+}
+.feature-item:hover { padding-left: 12px; }
+.feature-item:hover::before { opacity: 0.5; transform: scaleY(1); }
 
-/* ─── Article body rich text styles ─── */
+/* Button slide arrow */
+.btn-slide .lucide-arrow-right { transition: transform 0.3s ease; }
+.btn-slide:hover .lucide-arrow-right { transform: translateX(4px); }
+
+/* ─────────────────────────────────────────────
+   ARTICLE BODY
+───────────────────────────────────────────── */
 .article-body h1,.article-body h2,.article-body h3,.article-body h4 {
   color: rgba(255,255,255,0.9); font-weight: 700; margin: 1.5rem 0 0.75rem;
 }
@@ -477,58 +290,134 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   border-radius: 0.3rem; font-size: 0.85em;
 }
 
-/* ═══════════════════════════════════════════════
-   MOTION SYSTEM — CREATR365
-   "Apple keynote meets Prada campaign"
-═══════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────
+   ██████████  AOS SYSTEM  ██████████
+   useAOS() adds .aos-in when element enters viewport.
+   Initial states below keep elements hidden.
+   .aos-in resets to visible.
+   NO will-change here (was causing stacking context conflicts).
+───────────────────────────────────────────── */
 
-/* Cursor glow */
-.cursor-glow {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    circle at center,
-    rgba(204, 0, 51, 0.07) 0%,
-    rgba(204, 0, 51, 0.03) 40%,
-    transparent 70%
-  );
-  will-change: left, top;
-  transition: opacity 0.3s ease;
-}
-
-/* Scroll reveal base state */
-[data-reveal] {
+/* Default initial state for all AOS elements */
+[data-aos] {
   opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: opacity, transform;
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--aos-delay, 0ms);
 }
-[data-reveal="left"]  { transform: translateX(-24px); }
-[data-reveal="right"] { transform: translateX(24px); }
-[data-reveal="scale"] { transform: scale(0.95); }
 
-[data-reveal].revealed {
+/* Per-type initial transforms */
+[data-aos="fade-up"] {
+  transform: translateY(30px);
+}
+
+[data-aos="fade-in"] {
+  transform: none;
+}
+
+[data-aos="fade-left"] {
+  transform: translateX(40px);
+}
+
+[data-aos="fade-right"] {
+  transform: translateX(-40px);
+}
+
+/* Revealed state — JavaScript adds .aos-in */
+[data-aos].aos-in {
   opacity: 1;
   transform: none;
 }
 
-/* Subtle parallax wrapper */
-.parallax-slow { will-change: transform; }
-
-/* Editorial text clip animation */
-@keyframes textReveal {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0 0 0); }
+/* Reduced motion: still fade, just no movement */
+@media (prefers-reduced-motion: reduce) {
+  [data-aos] {
+    transform: none;
+    transition-duration: 0.3s;
+    /* NO transform: none !important — that was killing animations */
+  }
 }
-.text-reveal { animation: textReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-/* Pulse ring for live indicators */
+/* ─────────────────────────────────────────────
+   SCROLL REVEAL (.reveal class — alternative system)
+───────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.72s cubic-bezier(0.16,1,0.3,1), transform 0.72s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─────────────────────────────────────────────
+   MARQUEE ANIMATIONS
+───────────────────────────────────────────── */
+@keyframes marqueeRun {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 30s linear infinite; }
+.marquee-reverse { animation-direction: reverse !important; }
+
+/* ─────────────────────────────────────────────
+   KEYFRAME ANIMATIONS
+───────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes heroTextIn {
+  from { opacity: 0; transform: translateY(40px) skewY(2deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(204,0,51,0.28); }
+  50%       { box-shadow: 0 0 36px rgba(204,0,51,0.55); }
+}
+.animate-pulse-glow { animation: pulseGlow 2.2s ease-in-out infinite; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-9px); }
+}
+.animate-float { animation: floatY 3s ease-in-out infinite; }
+.float-y { animation: floatY 4s ease-in-out infinite; }
+
 @keyframes pulseRing {
   0%   { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(2.2); opacity: 0; }
@@ -542,14 +431,6 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   animation: pulseRing 2s ease-out infinite;
 }
 
-/* Floating subtle animation */
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-6px); }
-}
-.float-y { animation: floatY 4s ease-in-out infinite; }
-
-/* Shimmer for skeleton loaders */
 @keyframes shimmer {
   from { background-position: -200% 0; }
   to   { background-position:  200% 0; }
@@ -560,69 +441,27 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   animation: shimmer 1.6s infinite;
 }
 
-/* Number count-up animation class */
-@keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes textReveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.text-reveal { animation: textReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
 .count-up { animation: countUp 0.5s ease both; }
 
-/* Noise grain overlay for cinematic feel (opt-in) */
-.grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  opacity: 0.4;
-  z-index: 1;
+@keyframes ctaShimmer {
+  0%   { left: -100%; }
+  50%  { left: 150%; }
+  100% { left: 150%; }
 }
 
-/* ══════════════════════════════════════════════
-   HOME PAGE — UX TRANSITIONS
-   "Professional motion: deliberate, purposeful"
-══════════════════════════════════════════════ */
-
-/* Stats modal pop-up */
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Course card slide in from right (used in accordion tiers) */
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(32px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-/* Slide in from left */
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-32px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-/* Fade up for stagger items */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Scale in for hero elements */
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* Number flip */
-@keyframes numFlip {
-  0%   { opacity: 0; transform: translateY(100%); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-/* Tier panel open — slide down content */
-@keyframes tierOpen {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Brand card image reveal */
+/* ─────────────────────────────────────────────
+   BRAND CARD IMAGE REVEAL
+───────────────────────────────────────────── */
 .brand-card-img {
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -631,10 +470,15 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   clip-path: inset(0 0% 0 0);
 }
 
-/* Marquee — two-direction support */
-.marquee-reverse { animation-direction: reverse !important; }
+/* ─────────────────────────────────────────────
+   STAT / WHY TABLE / MISC UTILITIES
+───────────────────────────────────────────── */
+.stat-card { transition: all 0.3s ease; }
+.stat-card:hover {
+  background: rgba(204,0,51,0.07);
+  border-color: rgba(204,0,51,0.28);
+}
 
-/* Stats grid hover glow */
 .stat-card-hover {
   position: relative;
   cursor: pointer;
@@ -651,20 +495,24 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 }
 .stat-card-hover:hover::after { opacity: 1; }
 
-/* Journey section — full-bleed parallax feel */
-.journey-bg-fixed {
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-}
-
-/* WHY table highlight row */
 .why-row-highlight:hover .why-us-col {
   background: rgba(204, 0, 51, 0.08);
   transition: background 0.25s ease;
 }
 
-/* CTA strip shimmer */
+.table-row-highlight {
+  background: linear-gradient(90deg, rgba(204,0,51,0.07) 0%, rgba(204,0,51,0.02) 100%);
+}
+
+.tier-active-border {
+  box-shadow: 0 0 0 1px rgba(204, 0, 51, 0.25), inset 0 0 30px rgba(204, 0, 51, 0.03);
+}
+
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+}
+
 .cta-strip-shimmer {
   position: relative;
   overflow: hidden;
@@ -676,195 +524,38 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
   animation: ctaShimmer 4s ease-in-out infinite;
 }
-@keyframes ctaShimmer {
-  0%   { left: -100%; }
-  50%  { left: 150%; }
-  100% { left: 150%; }
-}
 
-/* Scroll-triggered text clip for hero */
-@keyframes heroTextIn {
-  from { opacity: 0; transform: translateY(40px) skewY(2deg); }
-  to   { opacity: 1; transform: translateY(0) skewY(0deg); }
-}
-
-/* Tier accordion border glow */
-.tier-active-border {
-  box-shadow: 0 0 0 1px rgba(204, 0, 51, 0.25), inset 0 0 30px rgba(204, 0, 51, 0.03);
-}
-
-/* ════════════════════════════════════════════════════════
-   MERGED FROM KIMI — animation + component classes
-   Added to support new Home.tsx sections
-════════════════════════════════════════════════════════ */
-
-/* Marquee */
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-marquee { animation: marquee 30s linear infinite; }
-
-/* Fade in up (Hero) */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(36px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
-
-/* Floating scroll indicator */
-@keyframes floatY {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-9px); }
-}
-.animate-float { animation: floatY 3s ease-in-out infinite; }
-
-/* Pulse glow on CTA buttons */
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 18px rgba(204,0,51,0.28); }
-  50%       { box-shadow: 0 0 36px rgba(204,0,51,0.55); }
-}
-.animate-pulse-glow { animation: pulseGlow 2.2s ease-in-out infinite; }
-
-/* Glass card — used in stats, brand cats, course cards */
-.glass-card {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.06);
-  transition: border-color 0.3s ease, background 0.3s ease;
-}
-
-/* Stat card hover */
-.stat-card { transition: all 0.3s ease; }
-.stat-card:hover {
-  background: rgba(204,0,51,0.07);
-  border-color: rgba(204,0,51,0.28);
-}
-
-/* Hero gradient overlay */
-.hero-gradient {
-  background: linear-gradient(
-    110deg,
-    rgba(10,10,10,0.96) 38%,
-    rgba(10,10,10,0.72) 62%,
-    rgba(10,10,10,0.28) 100%
-  );
-}
-
-/* Tier section ambient glow */
-.tier-section {
-  position: relative;
-  overflow: hidden;
-}
-.tier-section::before {
+/* Grain overlay */
+.grain::before {
   content: '';
   position: absolute;
-  top: -40%;
-  right: -18%;
-  width: 560px;
-  height: 560px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(204,0,51,0.055) 0%, transparent 70%);
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   pointer-events: none;
+  opacity: 0.4;
+  z-index: 1;
 }
 
-/* Accordion smooth open/close */
-.accordion-content {
-  overflow: hidden;
-  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+/* Cursor glow */
+.cursor-glow {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at center, rgba(204,0,51,0.07) 0%, rgba(204,0,51,0.03) 40%, transparent 70%);
+  transition: opacity 0.3s ease;
 }
 
-/* WHY table right column highlight */
-.table-row-highlight {
-  background: linear-gradient(90deg, rgba(204,0,51,0.07) 0%, rgba(204,0,51,0.02) 100%);
-}
+.parallax-slow { will-change: transform; }
 
-/* Stats modal scale in */
-@keyframes modalScaleIn {
-  from { opacity: 0; transform: scale(0.94) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Course card slide in from right (accordion open) */
-@keyframes slideInFromRight {
-  from { opacity: 0; transform: translateX(28px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-/* Scroll reveal — base (used by .reveal class) */
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.72s cubic-bezier(0.16,1,0.3,1), transform 0.72s cubic-bezier(0.16,1,0.3,1);
-}
-.reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   AOS (Animate On Scroll) — [data-aos] system used on Home.tsx
-   useAOS() adds the .aos-in class once an element scrolls into
-   view. These rules define the hidden → revealed states for
-   every data-aos value used in Home.tsx, plus the per-element
-   delay forwarded as the --aos-delay custom property.
-───────────────────────────────────────────────────────────── */
-[data-aos] {
-  transition-property: opacity, transform;
-  transition-duration: 0.8s;
-  transition-timing-function: cubic-bezier(0.16,1,0.3,1);
-  transition-delay: var(--aos-delay, 0ms);
-  will-change: opacity, transform;
-}
-
-[data-aos="fade-up"] {
-  opacity: 0;
-  transform: translateY(36px);
-}
-
-[data-aos="fade-in"] {
-  opacity: 0;
-  transform: translateY(0);
-}
-
-[data-aos="fade-left"] {
-  opacity: 0;
-  transform: translateX(48px);
-}
-
-[data-aos="fade-right"] {
-  opacity: 0;
-  transform: translateX(-48px);
-}
-
-[data-aos].aos-in {
-  opacity: 1;
-  transform: translate(0, 0);
-}
-
-/* Respect reduced-motion preference: skip the animated offset,
-   just fade, so content never gets stuck invisible for users
-   who disable motion at the OS level. */
-@media (prefers-reduced-motion: reduce) {
-  [data-aos] {
-    transition-duration: 0.4s;
-    transform: none !important;
-  }
-}
-
-/* Marquee strip — alias kept in sync with the `marquee` keyframe
-   above; Home.tsx's free-gift ticker animates with this name. */
-@keyframes marqueeRun {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* Custom scrollbar */
+/* ─────────────────────────────────────────────
+   CUSTOM SCROLLBAR + SELECTION
+───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 7px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
 ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #CC0033; }
 
-/* Selection */
 ::selection { background: rgba(204,0,51,0.38); color: white; }
