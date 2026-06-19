@@ -102,17 +102,17 @@ export default function Home() {
         </div>
 
         {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 'clamp(40px,6vw,72px)' }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end' }}>
           <div data-aos="fade-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Link to="/courses"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
                 FREE ACCOUNT
@@ -172,13 +172,13 @@ export default function Home() {
           {/* ปุ่มกึ่งกลางล่าง */}
           <div data-aos="fade-up" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
               ดูหลักสูตร <ArrowRight size={15} />
             </Link>
             <Link to="/articles/diagnostic-quiz"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.62)'; }}>
               ▷ Find Your Path
@@ -187,551 +187,555 @@ export default function Home() {
         </div>
       </section>
 
-{/* =========================
-    §4  เป็นเหมือนกันไหม ?
-========================= */}
-<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-  {/* BG */}
-  <img
-    src="/images/ringlight-back1.png"
-    alt=""
-    style={{
-      position: 'absolute',
-      inset: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      objectPosition: 'left center'
-    }}
-  />
-
-  <div
-    style={{
-      position: 'relative',
-      zIndex: 1,
-      maxWidth: '1320px',
-      margin: '0 auto',
-      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      alignItems: 'center',
-      minHeight: '100vh',
-      gap: '40px'
-    }}
-  >
-    {/* LEFT — empty, background shows through */}
-    <div />
-
-    {/* RIGHT — TEXT */}
-    <div style={{ maxWidth: '560px', marginLeft: 'auto' }}>
-      <h2
-        data-aos="fade-up"
-        style={{
-          fontSize: 'clamp(2.4rem,5vw,4rem)',
-          fontWeight: 900,
-          color: '#fff',
-          marginBottom: '40px',
-          lineHeight: 1.05
-        }}
-      >
-        เป็นเหมือนกันไหม ?
-      </h2>
-
-      {[
-        'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
-        'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
-        'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
-        'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
-      ].map((q, i) => (
-        <div
-          key={i}
-          data-aos="fade-up"
-          data-aos-delay={String(i * 80)}
+      {/* ═════════════════════════════════════
+          §4  เป็นเหมือนกันไหม ?
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG */}
+        <img
+          src="/images/ringlight-back1.png"
+          alt=""
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '14px',
-            marginBottom: '18px'
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'left center'
+          }}
+        />
+
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: '1320px',
+            margin: '0 auto',
+            padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            alignItems: 'center',
+            minHeight: '100vh',
+            gap: '40px'
           }}
         >
-          <div
+          {/* LEFT — empty, background shows through */}
+          <div />
+
+          {/* RIGHT — TEXT */}
+          <div style={{ maxWidth: '560px', marginLeft: 'auto' }}>
+            <h2
+              data-aos="fade-up"
+              style={{
+                fontSize: 'clamp(2.4rem,5vw,4rem)',
+                fontWeight: 900,
+                color: '#fff',
+                marginBottom: '40px',
+                lineHeight: 1.05
+              }}
+            >
+              เป็นเหมือนกันไหม ?
+            </h2>
+
+            {[
+              'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
+              'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
+              'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
+              'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
+            ].map((q, i) => (
+              <div
+                key={i}
+                data-aos="fade-up"
+                data-aos-delay={String(i * 80)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '14px',
+                  marginBottom: '18px'
+                }}
+              >
+                <div
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: RED,
+                    marginTop: '10px',
+                    flexShrink: 0
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: 'clamp(15px,2vw,19px)',
+                    fontWeight: 500,
+                    color: '#fff',
+                    lineHeight: 1.55
+                  }}
+                >
+                  {q}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═════════════════════════════════════
+          §5  เพราะเราเจอปัญหามาก่อน
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG Parallax */}
+        <div
+          ref={problemBgRef}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            willChange: 'transform'
+          }}
+        >
+          <img
+            src="/images/problem-up.png"
+            alt=""
             style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: RED,
-              marginTop: '10px',
-              flexShrink: 0
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center'
             }}
           />
-          <p
-            style={{
-              fontSize: 'clamp(15px,2vw,19px)',
-              fontWeight: 500,
-              color: '#fff',
-              lineHeight: 1.55
-            }}
-          >
-            {q}
-          </p>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
 
-/* =========================
-   §5  เพราะเราเจอปัญหามาก่อน
-========================= */
-<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-  {/* BG Parallax */}
-  <div
-    ref={problemBgRef}
-    style={{
-      position: 'absolute',
-      inset: 0,
-      zIndex: 0,
-      willChange: 'transform'
-    }}
-  >
-    <img
-      src="/images/problem-up.png"
-      alt=""
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        objectPosition: 'center'
-      }}
-    />
-  </div>
-
-  <div
-    style={{
-      position: 'relative',
-      zIndex: 1,
-      maxWidth: '1320px',
-      margin: '0 auto',
-      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      minHeight: '100vh',
-      alignItems: 'center',
-      gap: '40px'
-    }}
-  >
-    {/* LEFT */}
-    <div data-aos="fade-up">
-      <h2
-        style={{
-          fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-          fontWeight: 900,
-          color: '#fff',
-          lineHeight: 1.2,
-          marginBottom: '20px'
-        }}
-      >
-        ทุกคอร์สการเรียนรู้
-        <br />
-        <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
-      </h2>
-
-      <div style={{ borderLeft: `2px solid ${RED}55`, paddingLeft: '18px' }}>
-        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
-          ด้วยพื้นฐานความเข้าใจในปัญหา
-        </p>
-        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
-          และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
-        </p>
-        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
-          มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
-        </p>
-      </div>
-    </div>
-
-    {/* RIGHT — bottom aligned text */}
-    <div
-  style={{
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
-    height: '100%',
-    paddingBottom: '24vh',
-    textAlign: 'right'
-  }}
->
-      <h2
-        data-aos="fade-up"
-        style={{
-          fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-          fontWeight: 900,
-          color: '#fff',
-          lineHeight: 1.2
-        }}
-      >
-        เพราะเราเคยเจอปัญหามาก่อน
-      </h2>
-    </div>
-  </div>
-   <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
-              หากคุณต้องการ{' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}>เรียนแค่ทฤษฎีการไลฟ์</strong> {' '}
-              หรือ<strong style={{ color: '#fff', fontWeight: 700 }}>การสอนแบบจับมือทํา</strong>{' '}
-              <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
-  </p>
-</section>
-   
-/* =========================
-   §6  BRAND PROMISE
-========================= */
-<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-  {/* BG */}
-  <img
-    src="/images/Team-work1.jpg"
-    alt=""
-    style={{
-      position: 'absolute',
-      inset: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      objectPosition: 'left center'
-    }}
-  />
-
-  <div
-    style={{
-      position: 'relative',
-      zIndex: 1,
-      maxWidth: '1320px',
-      margin: '0 auto',
-      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-      minHeight: '100vh'
-    }}
-  >
-    {/* HEADER */}
-    <div data-aos="fade-up" style={{ marginBottom: '40px' }}>
-      <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
-        Welcome to Creatr365's Family
-      </h2>
-      <p style={{ color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
-        หลักสูตรที่เลือกได้ตามสไตล์คุณ
-      </p>
-    </div>
-
-   {/* GRID — absolute, ฝั่งซ้าย, กึ่งกลางแนวตั้ง, รูปแสดงเต็ม ratio ไม่ crop */}
-<div
-  data-aos="fade-up"
-  style={{
-    position: 'absolute',
-    top: '50%',
-    left: 'clamp(20px,4vw,48px)',
-    transform: 'translateY(-50%)',
-    zIndex: 2,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, clamp(150px,14vw,200px))',
-    gap: '12px'
-  }}
->
-  {[
-    '/images/pro-course-online.png',
-    '/images/pro-workshop-liveclass.png',
-    '/images/pro-AI-tech.png',
-    '/images/pro-community.png'
-  ].map((src, i) => (
-    <img
-      key={i}
-      src={src}
-      alt=""
-      style={{
-        width: '100%',
-        height: 'auto',
-        display: 'block',
-        borderRadius: '10px'
-      }}
-    />
-  ))}
-</div>
-
-  {/* MARQUEE */}
-  <div
-    style={{
-      position: 'absolute',
-      bottom: 0,
-      width: '100%',
-      overflow: 'hidden',
-      borderTop: '1px solid rgba(255,255,255,0.08)',
-      background: 'rgba(0,0,0,0.7)',
-      padding: '10px 0'
-    }}
-  >
-    <div
-      style={{
-        display: 'flex',
-        whiteSpace: 'nowrap',
-        gap: '52px',
-        animation: 'marqueeRun 28s linear infinite'
-      }}
-    >
-      {Array(6)
-        .fill([
-          'Free Template',
-          'Free Ebook',
-          'Free Guide',
-          'Free Form',
-          'Free Checklist'
-        ])
-        .flat()
-        .map((t, i) => (
-          <span
-            key={i}
-            style={{
-              fontSize: '12px',
-              fontWeight: 700,
-              letterSpacing: '0.28em',
-              color: 'rgba(255,255,255,0.55)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}
-          >
-            <span
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: '1320px',
+            margin: '0 auto',
+            padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            minHeight: '100vh',
+            alignItems: 'center',
+            gap: '40px'
+          }}
+        >
+          {/* LEFT */}
+          <div data-aos="fade-up">
+            <h2
               style={{
-                width: '5px',
-                height: '5px',
-                borderRadius: '50%',
-                background: RED
+                fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+                fontWeight: 900,
+                color: '#fff',
+                lineHeight: 1.2,
+                marginBottom: '20px'
               }}
-            />
-            {t}
-          </span>
-        ))}
-    </div>
-  </div>
-</section>
-    {/* =========================
-    §7  ไลฟ์ให้เป็น
-========================= */}
-<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-  <img
-    src="/images/i-can-live2.png"
-    alt="ไลฟ์ให้เป็น"
-    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-  />
+            >
+              ทุกคอร์สการเรียนรู้
+              <br />
+              <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
+            </h2>
 
-  <div
-    style={{
-      position: 'absolute',
-      left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(28px,4vw,52px)',
-      zIndex: 2,
-      display: 'flex',
-      gap: '40px',
-      alignItems: 'flex-end'
-    }}
-  >
-    {[
-      { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
-      { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' }
-    ].map((course) => (
-      <Link
-        key={course.name}
-        to={`/course/${course.slug}`}
-        style={{ textDecoration: 'none' }}
-      >
-        <div style={{
-          fontSize: '9px',
-          letterSpacing: '0.22em',
-          fontWeight: 500,
-          color: 'rgba(0,0,0,0.5)',
-          textTransform: 'uppercase',
-          marginBottom: '5px'
-        }}>
-          {course.tag}
-        </div>
-        <div style={{
-          fontSize: 'clamp(12px,1vw,15px)',
-          fontWeight: 600,
-          color: '#1a1a1a',
-          lineHeight: 1.2,
-          letterSpacing: '0.04em'
-        }}>
-          {course.name}
-        </div>
-        <div style={{
-          fontSize: '10px',
-          letterSpacing: '0.16em',
-          color: 'rgba(0,0,0,0.5)',
-          textTransform: 'uppercase',
-          marginTop: '3px',
-          fontWeight: 400
-        }}>
-          {course.sub}
-        </div>
-      </Link>
-    ))}
-  </div>
-</section>
+            <div style={{ borderLeft: `2px solid ${RED}55`, paddingLeft: '18px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+                ด้วยพื้นฐานความเข้าใจในปัญหา
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+                และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+                มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
+              </p>
+            </div>
+          </div>
 
-     {/* =========================
-    §8  ไลฟ์ให้ขายได้
-========================= */}
-<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-  <img
-    src="/images/i-can-sale2.png"
-    alt="ไลฟ์ให้ขายได้"
-    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-  />
+          {/* RIGHT — bottom aligned text */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'flex-end',
+              height: '100%',
+              paddingBottom: '24vh',
+              textAlign: 'right'
+            }}
+          >
+            <h2
+              data-aos="fade-up"
+              style={{
+                fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+                fontWeight: 900,
+                color: '#fff',
+                lineHeight: 1.2
+              }}
+            >
+              เพราะเราเคยเจอปัญหามาก่อน
+            </h2>
+          </div>
+        </div>
+        <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+          หากคุณต้องการ{' '}
+          <strong style={{ color: '#fff', fontWeight: 700 }}>เรียนแค่ทฤษฎีการไลฟ์</strong> {' '}
+          หรือ<strong style={{ color: '#fff', fontWeight: 700 }}>การสอนแบบจับมือทํา</strong>{' '}
+          <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
+        </p>
+      </section>
 
-  <div
-    style={{
-      position: 'absolute',
-      left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(28px,4vw,52px)',
-      zIndex: 2,
-      display: 'flex',
-      gap: '40px',
-      alignItems: 'flex-end'
-    }}
-  >
-    {[
-      { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
-      { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' }
-    ].map((course) => (
-      <Link
-        key={course.name}
-        to={`/course/${course.slug}`}
-        style={{ textDecoration: 'none' }}
-      >
-        <div style={{
-          fontSize: '9px',
-          letterSpacing: '0.22em',
-          fontWeight: 500,
-          color: 'rgba(0,0,0,0.5)',
-          textTransform: 'uppercase',
-          marginBottom: '5px'
-        }}>
-          {course.tag}
-        </div>
-        <div style={{
-          fontSize: 'clamp(12px,1vw,15px)',
-          fontWeight: 600,
-          color: '#1a1a1a',
-          lineHeight: 1.2,
-          letterSpacing: '0.04em'
-        }}>
-          {course.name}
-        </div>
-        <div style={{
-          fontSize: '10px',
-          letterSpacing: '0.16em',
-          color: 'rgba(0,0,0,0.5)',
-          textTransform: 'uppercase',
-          marginTop: '3px',
-          fontWeight: 400
-        }}>
-          {course.sub}
-        </div>
-      </Link>
-    ))}
-  </div>
-</section>
-     {/* =========================
-    §9  ไลฟ์ให้วัดผลและทำซ้ำได้
-========================= */}
-<section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-  <img
-    src="/images/i-can-reply1.png"
-    alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-    style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-  />
+      {/* ═════════════════════════════════════
+          §6  BRAND PROMISE
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        {/* BG */}
+        <img
+          src="/images/Team-work1.jpg"
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'left center'
+          }}
+        />
 
-  {/* ซ้ายล่าง — main course */}
-  <div
-    style={{
-      position: 'absolute',
-      left: 'clamp(24px,4vw,60px)',
-      bottom: 'clamp(28px,4vw,52px)',
-      zIndex: 2
-    }}
-  >
-    <div style={{
-      fontSize: '9px',
-      letterSpacing: '0.22em',
-      fontWeight: 500,
-      color: 'rgba(0,0,0,0.5)',
-      textTransform: 'uppercase',
-      marginBottom: '5px'
-    }}>
-      COMING SOON
-    </div>
-    <div style={{
-      fontSize: 'clamp(12px,1vw,15px)',
-      fontWeight: 600,
-      color: '#1a1a1a',
-      lineHeight: 1.2,
-      letterSpacing: '0.04em'
-    }}>
-      THE BRAND ARCHITECT
-    </div>
-    <div style={{
-      fontSize: '10px',
-      letterSpacing: '0.16em',
-      color: 'rgba(0,0,0,0.5)',
-      textTransform: 'uppercase',
-      marginTop: '3px',
-      fontWeight: 400
-    }}>
-      MASTERCLASS : ONSITE 2 DAYS
-    </div>
-  </div>
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            maxWidth: '1320px',
+            margin: '0 auto',
+            padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+            minHeight: '100vh'
+          }}
+        >
+          {/* HEADER */}
+          <div data-aos="fade-up" style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
+              Welcome to Creatr365's Family
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
+              หลักสูตรที่เลือกได้ตามสไตล์คุณ
+            </p>
+          </div>
 
-  {/* กลาง–ขวาล่าง — also list */}
-  <div
-    style={{
-      position: 'absolute',
-      bottom: 'clamp(28px,4vw,52px)',
-      left: '50%',
-      transform: 'translateX(-10%)',
-      zIndex: 2,
-      display: 'flex',
-      gap: '36px',
-      alignItems: 'flex-end'
-    }}
-  >
-    {[
-      { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
-      { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
-      { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
-    ].map((course) => (
-      <Link
-        key={course.name}
-        to={`/course/${course.slug}`}
-        style={{ textDecoration: 'none' }}
-      >
-        <div style={{
-          fontSize: 'clamp(11px,0.9vw,14px)',
-          fontWeight: 600,
-          color: '#1a1a1a',
-          lineHeight: 1.2,
-          letterSpacing: '0.04em'
-        }}>
-          {course.name}
+          {/* GRID — absolute, ฝั่งซ้าย, กึ่งกลางแนวตั้ง, รูปแสดงเต็ม ratio ไม่ crop */}
+          <div
+            data-aos="fade-up"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: 'clamp(20px,4vw,48px)',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, clamp(150px,14vw,200px))',
+              gap: '12px'
+            }}
+          >
+            {[
+              '/images/pro-course-online.png',
+              '/images/pro-workshop-liveclass.png',
+              '/images/pro-AI-tech.png',
+              '/images/pro-community.png'
+            ].map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '10px'
+                }}
+              />
+            ))}
+          </div>
+
+          {/* MARQUEE */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              width: '100%',
+              overflow: 'hidden',
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(0,0,0,0.7)',
+              padding: '10px 0'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                whiteSpace: 'nowrap',
+                gap: '52px',
+                animation: 'marqueeRun 28s linear infinite'
+              }}
+            >
+              {Array(6)
+                .fill([
+                  'Free Template',
+                  'Free Ebook',
+                  'Free Guide',
+                  'Free Form',
+                  'Free Checklist'
+                ])
+                .flat()
+                .map((t, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      letterSpacing: '0.28em',
+                      color: 'rgba(255,255,255,0.55)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: '5px',
+                        height: '5px',
+                        borderRadius: '50%',
+                        background: RED
+                      }}
+                    />
+                    {t}
+                  </span>
+                ))}
+            </div>
+          </div>
         </div>
-        <div style={{
-          fontSize: '10px',
-          letterSpacing: '0.16em',
-          color: 'rgba(0,0,0,0.5)',
-          textTransform: 'uppercase',
-          marginTop: '3px',
-          fontWeight: 400
-        }}>
-          {course.sub}
+      </section>
+
+      {/* ═════════════════════════════════════
+          §7  ไลฟ์ให้เป็น
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-live2.png"
+          alt="ไลฟ์ให้เป็น"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            left: 'clamp(24px,4vw,60px)',
+            bottom: 'clamp(28px,4vw,52px)',
+            zIndex: 2,
+            display: 'flex',
+            gap: '40px',
+            alignItems: 'flex-end'
+          }}
+        >
+          {[
+            { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' }
+          ].map((course) => (
+            <Link
+              key={course.name}
+              to={`/course/${course.slug}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{
+                fontSize: '9px',
+                letterSpacing: '0.22em',
+                fontWeight: 500,
+                color: 'rgba(0,0,0,0.5)',
+                textTransform: 'uppercase',
+                marginBottom: '5px'
+              }}>
+                {course.tag}
+              </div>
+              <div style={{
+                fontSize: 'clamp(12px,1vw,15px)',
+                fontWeight: 600,
+                color: '#1a1a1a',
+                lineHeight: 1.2,
+                letterSpacing: '0.04em'
+              }}>
+                {course.name}
+              </div>
+              <div style={{
+                fontSize: '10px',
+                letterSpacing: '0.16em',
+                color: 'rgba(0,0,0,0.5)',
+                textTransform: 'uppercase',
+                marginTop: '3px',
+                fontWeight: 400
+              }}>
+                {course.sub}
+              </div>
+            </Link>
+          ))}
         </div>
-      </Link>
-    ))}
-  </div>
-</section>
+      </section>
+
+      {/* ═════════════════════════════════════
+          §8  ไลฟ์ให้ขายได้
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-sale2.png"
+          alt="ไลฟ์ให้ขายได้"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            left: 'clamp(24px,4vw,60px)',
+            bottom: 'clamp(28px,4vw,52px)',
+            zIndex: 2,
+            display: 'flex',
+            gap: '40px',
+            alignItems: 'flex-end'
+          }}
+        >
+          {[
+            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
+            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' }
+          ].map((course) => (
+            <Link
+              key={course.name}
+              to={`/course/${course.slug}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{
+                fontSize: '9px',
+                letterSpacing: '0.22em',
+                fontWeight: 500,
+                color: 'rgba(0,0,0,0.5)',
+                textTransform: 'uppercase',
+                marginBottom: '5px'
+              }}>
+                {course.tag}
+              </div>
+              <div style={{
+                fontSize: 'clamp(12px,1vw,15px)',
+                fontWeight: 600,
+                color: '#1a1a1a',
+                lineHeight: 1.2,
+                letterSpacing: '0.04em'
+              }}>
+                {course.name}
+              </div>
+              <div style={{
+                fontSize: '10px',
+                letterSpacing: '0.16em',
+                color: 'rgba(0,0,0,0.5)',
+                textTransform: 'uppercase',
+                marginTop: '3px',
+                fontWeight: 400
+              }}>
+                {course.sub}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ═════════════════════════════════════
+          §9  ไลฟ์ให้วัดผลและทำซ้ำได้
+      ═════════════════════════════════════ */}
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-reply1.png"
+          alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+
+        {/* ซ้ายล่าง — main course */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 'clamp(24px,4vw,60px)',
+            bottom: 'clamp(28px,4vw,52px)',
+            zIndex: 2
+          }}
+        >
+          <div style={{
+            fontSize: '9px',
+            letterSpacing: '0.22em',
+            fontWeight: 500,
+            color: 'rgba(0,0,0,0.5)',
+            textTransform: 'uppercase',
+            marginBottom: '5px'
+          }}>
+            COMING SOON
+          </div>
+          <div style={{
+            fontSize: 'clamp(12px,1vw,15px)',
+            fontWeight: 600,
+            color: '#1a1a1a',
+            lineHeight: 1.2,
+            letterSpacing: '0.04em'
+          }}>
+            THE BRAND ARCHITECT
+          </div>
+          <div style={{
+            fontSize: '10px',
+            letterSpacing: '0.16em',
+            color: 'rgba(0,0,0,0.5)',
+            textTransform: 'uppercase',
+            marginTop: '3px',
+            fontWeight: 400
+          }}>
+            MASTERCLASS : ONSITE 2 DAYS
+          </div>
+        </div>
+
+        {/* กลาง–ขวาล่าง — also list */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 'clamp(28px,4vw,52px)',
+            left: '50%',
+            transform: 'translateX(-10%)',
+            zIndex: 2,
+            display: 'flex',
+            gap: '36px',
+            alignItems: 'flex-end'
+          }}
+        >
+          {[
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
+            { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
+            { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
+          ].map((course) => (
+            <Link
+              key={course.name}
+              to={`/course/${course.slug}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <div style={{
+                fontSize: 'clamp(11px,0.9vw,14px)',
+                fontWeight: 600,
+                color: '#1a1a1a',
+                lineHeight: 1.2,
+                letterSpacing: '0.04em'
+              }}>
+                {course.name}
+              </div>
+              <div style={{
+                fontSize: '10px',
+                letterSpacing: '0.16em',
+                color: 'rgba(0,0,0,0.5)',
+                textTransform: 'uppercase',
+                marginTop: '3px',
+                fontWeight: 400
+              }}>
+                {course.sub}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* ══════════════════════════════════════
           §10  Brand Concept
           BG: Team-behind1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
@@ -744,7 +748,7 @@ export default function Home() {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
         />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           {/* §10 content area — รูป Team-behind1.png คือตัวเนื้อหาเอง ตาม spec page 10 */}
         </div>
       </section>
@@ -779,13 +783,13 @@ export default function Home() {
         {/* bottom-right buttons */}
         <div data-aos="fade-up" style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <Link to="/courses"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
             onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
             เริ่มเส้นทางของคุณ <ArrowRight size={15} />
           </Link>
           <Link to="/auth"
-            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.52)'; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.26)'; e.currentTarget.style.color = 'rgba(255,255,255,0.68)'; }}>
             Free Account
@@ -838,7 +842,7 @@ export default function Home() {
 
           <div data-aos="fade-up" style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
               เลือกคอร์ส <ArrowRight size={15} />
@@ -876,13 +880,13 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
               <Link to="/courses"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', transition: 'opacity .2s' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.18em', textTransform: 'uppercase', textDecoration: 'none', transition: 'border-color .2s, color .2s' }}
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
                 FREE ACCOUNT
@@ -929,10 +933,10 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '22px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '10px', fontSize: '13px', color: 'rgba(255,255,255,0.45)', fontFamily: 'inherit' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '22px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '10px', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
             <p>© 2025 CREATR365. All rights reserved.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
-              {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy']].map(([l, h]) => (
+              {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายคุกกี้', '/cookies']].map(([l, h]) => (
                 <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color .2s', fontFamily: 'inherit', fontSize: '13px' }}
                   onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}
                   onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}>
