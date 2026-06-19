@@ -70,11 +70,7 @@ const WHY = [
   { them: 'เรียนจบไม่รู้จะทำอะไรต่อ',                  us: 'Key Collection System™ มาตรฐานอุตสาหกรรม' },
 ];
 
-/* ════════════════════════════════════════════
-   TIERSECTION TYPES
-════════════════════════════════════════════ */
-type CourseItem = { name: string; sub: string; tag: string; slug: string };
-type AlsoItem   = { name: string; sub: string; slug: string };
+
 
 /* ════════════════════════════════════════════
    HOME
@@ -84,9 +80,6 @@ export default function Home() {
 
   const heroBgRef    = useParallax(0.18);
   const problemBgRef = useParallax(0.1);
-  const tier1BgRef   = useParallax(0.1);
-  const tier2BgRef   = useParallax(0.1);
-  const tier3BgRef   = useParallax(0.1);
   const journeyBgRef = useParallax(0.1);
 
   return (
@@ -253,8 +246,13 @@ export default function Home() {
 
         {/* Text — faster layer = depth effect */}
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start', minHeight: '100vh' }}>
-          {/* left col — heading + bullet text */}
+          {/* left col — empty, background shows through */}
+          <div />
+          {/* right col — all text content moved from left */}
           <div data-aos="fade-up">
+            <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '12px' }}>
+              เพราะเราเคยเจอปัญหามาก่อน
+            </h2>
             <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
               ทุกคอร์สการเรียนรู้<br />
               <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
@@ -268,12 +266,6 @@ export default function Home() {
                 <p key={i} style={{ fontSize: 'clamp(14px,1.5vw,16px)', lineHeight: 1.85, color: 'rgba(255,255,255,0.75)' }}>{t}</p>
               ))}
             </div>
-          </div>
-          {/* right col — heading เท่านั้น */}
-          <div data-aos="fade-up" data-aos-delay="120">
-            <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2 }}>
-              เพราะเราเคยเจอปัญหามาก่อน
-            </h2>
           </div>
         </div>
       </section>
@@ -304,9 +296,9 @@ export default function Home() {
             </p>
           </div>
 
-          {/* 4 รูป 2×2 ชิดซ้าย */}
+          {/* 4 รูป 2×2 ชิดขอบซ้าย */}
           <div data-aos="fade-up" data-aos-delay="80"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: 'clamp(280px,42vw,560px)', marginLeft: '0' }}>
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: 'clamp(280px,42vw,560px)', marginLeft: 'calc(-1 * clamp(20px, 4vw, 48px))' }}>
             {[
               '/images/pro-course-online.png',
               '/images/pro-AI-tech.png',
@@ -341,48 +333,42 @@ export default function Home() {
 
       {/* ══════════════════════════════════════
           §7  ไลฟ์ให้เป็น
-          BG: i-can-live2.png — เต็มหน้า ไม่ filter ไม่ overlay
-          TierSection — parallax BG ล้วนๆ ไม่ตัดออก
+          Full-screen image — width:100%, height:100vh, object-fit:cover
+          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier1BgRef}
-        bgSrc="/images/i-can-live2.png"
-        courses={[
-          { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
-          { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' },
-        ]}
-      />
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-live2.png"
+          alt="ไลฟ์ให้เป็น"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+      </section>
 
       {/* ══════════════════════════════════════
           §8  ไลฟ์ให้ขายได้
-          BG: i-can-sale2.png — เต็มหน้า ไม่ filter ไม่ overlay
+          Full-screen image — width:100%, height:100vh, object-fit:cover
+          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier2BgRef}
-        bgSrc="/images/i-can-sale2.png"
-        courses={[
-          { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
-          { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' },
-        ]}
-      />
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-sale2.png"
+          alt="ไลฟ์ให้ขายได้"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+      </section>
 
       {/* ══════════════════════════════════════
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
-          BG: i-can-reply1.png — เต็มหน้า ไม่ filter ไม่ overlay
+          Full-screen image — width:100%, height:100vh, object-fit:cover
+          ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
-      <TierSection
-        bgRef={tier3BgRef}
-        bgSrc="/images/i-can-reply1.png"
-        badge="DON'T MISS!"
-        courses={[
-          { name: 'The BRAND ARCHITECT', sub: 'MASTERCLASS : ONSITE 2 DAYS', tag: 'COMING SOON', slug: '' },
-        ]}
-        also={[
-          { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
-          { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
-          { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' },
-        ]}
-      />
+      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+        <img
+          src="/images/i-can-reply1.png"
+          alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
+          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+        />
+      </section>
 
       {/* ══════════════════════════════════════
           §10  Brand Concept
@@ -596,155 +582,5 @@ export default function Home() {
         </div>
       </footer>
     </main>
-  );
-}
-
-/* ════════════════════════════════════════════
-   TIERSECTION  §7 §8 §9
-   ─ BG เต็มหน้า 100vh, ไม่มี filter, ไม่มี overlay
-   ─ ไม่มีโลโก้, ไม่มี headline "ไลฟ์ให้..."
-   ─ content zone: 12-col grid, course list
-     วางชิดซ้าย-ล่าง ใน col 1-5 (40% กว้าง)
-     เพื่อให้ BG ด้านขวา-บนเห็นเต็มเฟรม
-════════════════════════════════════════════ */
-function TierSection({ bgRef, bgSrc, badge, courses, also }: {
-  bgRef: React.RefObject<HTMLDivElement>;
-  bgSrc: string;
-  logoSrc?: string;
-  headline?: string;
-  headlineRed?: string;
-  badge?: string;
-  courses: CourseItem[];
-  also?: AlsoItem[];
-}) {
-  return (
-    <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-
-      {/* ── BG parallax layer — เต็ม 100vh, ไม่มี overlay, ไม่มี filter ── */}
-      <div ref={bgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
-        <img
-          src={bgSrc}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-        />
-      </div>
-
-      {/* ── Content layer — 12-col grid, content วางใน col 1-4 ชิดซ้าย-ล่าง ── */}
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-        maxWidth: '1320px',
-        margin: '0 auto',
-        padding: '0 clamp(20px,4vw,48px)',
-        minHeight: '100vh',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        columnGap: 'clamp(12px,2vw,24px)',
-        alignItems: 'end',
-        paddingBottom: 'clamp(40px,6vw,72px)',
-      }}>
-
-        {/* col 1-7: course block ชิดซ้าย-ล่าง เรียงแนวนอน */}
-        <div style={{ gridColumn: '1 / 8', paddingLeft: 'clamp(20px,4vw,48px)' }}>
-
-          {/* Badge (§9 only) — เหนือ course list */}
-          {badge && (
-            <div data-aos="fade-in" style={{ marginBottom: '16px' }}>
-              <span style={{
-                display: 'inline-block',
-                fontSize: '13px', fontWeight: 900,
-                padding: '4px 12px',
-                border: `1px solid ${RED}`, color: RED,
-                letterSpacing: '0.14em', textTransform: 'uppercase',
-              }}>{badge}</span>
-            </div>
-          )}
-
-          {/* Course list — เรียงแนวนอน */}
-          <div
-            data-aos="fade-up"
-            style={{ display: 'flex', flexDirection: 'row', gap: 'clamp(24px,3vw,48px)', alignItems: 'flex-end' }}
-          >
-            {courses.map((c, i) => (
-              <div key={i} style={{ borderLeft: `3px solid ${RED}`, paddingLeft: '16px' }}>
-                <p style={{
-                  fontSize: 'clamp(17px,1.9vw,22px)', fontWeight: 900,
-                  color: '#000', letterSpacing: '0.05em',
-                  marginBottom: '3px',
-                }}>{c.name}</p>
-                <p style={{
-                  fontSize: 'clamp(13px,1.3vw,15px)',
-                  color: 'rgba(0,0,0,0.55)',
-                  fontStyle: 'italic', marginBottom: '8px',
-                }}>{c.sub}</p>
-                {c.tag === 'COMING SOON' ? (
-                  <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.38)', letterSpacing: '0.14em' }}>
-                    (coming soon)
-                  </p>
-                ) : (
-                  <Link
-                    to={c.slug ? `/course/${c.slug}` : '/courses'}
-                    style={{
-                      fontSize: '14px', fontWeight: 700,
-                      color: 'rgba(0,0,0,0.52)',
-                      textDecoration: 'underline', textUnderlineOffset: '3px',
-                      letterSpacing: '0.14em', transition: 'color .2s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#000')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(0,0,0,0.52)')}>
-                    เพิ่มเติม →
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-
-        </div>
-
-        {/* §9 "Also" sub-list — ฝั่งขวาล่างสุด วางแนวนอน 1 แถว col 6-12 */}
-        {also && (
-          <div
-            data-aos="fade-up" data-aos-delay="120"
-            style={{
-              gridColumn: '6 / 13',
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 'clamp(20px,3vw,40px)',
-              alignItems: 'flex-end',
-            }}
-          >
-            <p style={{
-              fontSize: '9px', letterSpacing: '0.38em',
-              textTransform: 'uppercase',
-              color: 'rgba(0,0,0,0.38)',
-              flexShrink: 0,
-              marginBottom: '0',
-              alignSelf: 'flex-end',
-              paddingBottom: '4px',
-            }}>And</p>
-            {also.map((a, i) => (
-              <div key={i} style={{ borderLeft: `3px solid rgba(0,0,0,0.22)`, paddingLeft: '12px' }}>
-                <p style={{ fontSize: 'clamp(12px,1.2vw,14px)', fontWeight: 700, color: '#000', marginBottom: '2px' }}>{a.name}</p>
-                <p style={{ fontSize: '10px', color: 'rgba(0,0,0,0.45)', fontStyle: 'italic', marginBottom: '4px' }}>{a.sub}</p>
-                <Link
-                  to={`/course/${a.slug}`}
-                  style={{
-                    fontSize: '11px', fontWeight: 700,
-                    color: 'rgba(0,0,0,0.48)',
-                    textDecoration: 'underline', textUnderlineOffset: '3px',
-                    transition: 'color .2s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#000')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(0,0,0,0.48)')}>
-                  เพิ่มเติม →
-                </Link>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* col right: BG image เห็นเต็ม — ไม่มี element ทับ */}
-      </div>
-    </section>
   );
 }
