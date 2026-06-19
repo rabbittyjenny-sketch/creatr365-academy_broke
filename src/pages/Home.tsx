@@ -429,8 +429,8 @@ export default function Home() {
               transform: 'translateY(-50%)',
               zIndex: 2,
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, clamp(150px,14vw,200px))',
-              gap: '12px'
+              gridTemplateColumns: 'repeat(2, clamp(220px,20vw,320px))',
+              gap: '14px'
             }}
           >
             {[
