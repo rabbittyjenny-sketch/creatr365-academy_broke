@@ -187,22 +187,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          §4  เป็นเหมือนกันไหม?
-          BG: ringlight-back1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
-          รูปซ้าย / text ขวา (CREATR365__5_.png)
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-        {/* BG เต็มหน้า ไม่มี overlay ไม่มี filter */}
-        <img
-          src="/images/ringlight-back1.png"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }}
-        />
-
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
-          {/* left col — text */}
-         <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+/* =========================
+   §4  เป็นเหมือนกันไหม ?
+========================= */
+<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  {/* BG */}
   <img
     src="/images/ringlight-back1.png"
     alt=""
@@ -225,368 +214,303 @@ export default function Home() {
       padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
-      gap: '40px',
       alignItems: 'center',
-      minHeight: '100vh'
+      minHeight: '100vh',
+      gap: '40px'
     }}
   >
-    <div />
-
-```
-<div>
-  <h2
-    data-aos="fade-up"
-    style={{
-      fontSize: 'clamp(2.4rem,5vw,4rem)',
-      fontWeight: 900,
-      color: '#fff',
-      marginBottom: 'clamp(28px,3.5vw,44px)',
-      lineHeight: 1.05
-    }}
-  >
-    เป็นเหมือนกันไหม ?
-  </h2>
-
-  {[
-    'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
-    'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
-    'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
-    'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?',
-  ].map((q, i) => (
-    <div
-      key={i}
-      data-aos="fade-up"
-      data-aos-delay={String(i * 80)}
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '14px',
-        marginBottom: 'clamp(12px,2vw,20px)'
-      }}
-    >
-      <div
-        style={{
-          width: '6px',
-          height: '6px',
-          borderRadius: '50%',
-          background: RED,
-          flexShrink: 0,
-          marginTop: '10px'
-        }}
+    {/* LEFT — IMAGE */}
+    <div data-aos="fade-up">
+      <img
+        src="/images/CREATR365__5_.png"
+        alt=""
+        style={{ width: '100%', maxWidth: '520px', height: 'auto' }}
       />
+    </div>
 
-      <p
+    {/* RIGHT — TEXT */}
+    <div>
+      <h2
+        data-aos="fade-up"
         style={{
-          fontSize: 'clamp(15px,2vw,19px)',
-          fontWeight: 500,
+          fontSize: 'clamp(2.4rem,5vw,4rem)',
+          fontWeight: 900,
           color: '#fff',
-          lineHeight: 1.5
+          marginBottom: 'clamp(28px,3.5vw,44px)',
+          lineHeight: 1.05,
+          textAlign: 'right'
         }}
       >
-        {q}
-      </p>
-    </div>
-  ))}
-</div>
+        เป็นเหมือนกันไหม ?
+      </h2>
 
-      </section>
+      {[
+        'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
+        'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
+        'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
+        'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?'
+      ].map((q, i) => (
+        <div
+          key={i}
+          data-aos="fade-up"
+          data-aos-delay={i * 80}
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-start',
+            gap: '14px',
+            marginBottom: '16px',
+            textAlign: 'right'
+          }}
+        >
+          <p
+            style={{
+              fontSize: 'clamp(15px,2vw,19px)',
+              fontWeight: 500,
+              color: '#fff',
+              lineHeight: 1.5
+            }}
+          >
+            {q}
+          </p>
 
-      {/* ══════════════════════════════════════
-          §5  เพราะเราเจอปัญหามาก่อน
-          BG: problem-up.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
-          Parallax: BG เลื่อนช้า / text เลื่อนเร็วกว่า = depth
-          Text ซ้าย
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-        {/* BG parallax layer — ไม่มี overlay gradient */}
-        <div ref={problemBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
-          <img
-            src="/images/problem-up.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          <div
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: RED,
+              marginTop: '10px',
+              flexShrink: 0
+            }}
           />
         </div>
-<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-  <div
-    ref={problemBgRef}
-    style={{
-      position: 'absolute',
-      inset: 0,
-      zIndex: 0,
-      willChange: 'transform'
-    }}
-  >
-    <img
-      src="/images/problem-up.png"
-      alt=""
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        objectPosition: 'center'
-      }}
-    />
-  </div>
-
-  <div
-    style={{
-      position: 'relative',
-      zIndex: 1,
-      maxWidth: '1320px',
-      margin: '0 auto',
-      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '40px',
-      minHeight: '100vh'
-    }}
-  >
-    {/* LEFT */}
-<div data-aos="fade-up">
-  <h2
-    style={{
-      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-      fontWeight: 900,
-      color: '#fff',
-      lineHeight: 1.2,
-      marginBottom: '20px'
-    }}
-  >
-    ทุกคอร์สการเรียนรู้
-    <br />
-    <span style={{ color: RED }}>
-      สร้างจากประสบการณ์จริง
-    </span>
-  </h2>
-
-  <div
-    style={{
-      borderLeft: `2px solid ${RED}55`,
-      paddingLeft: '18px'
-    }}
-  >
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      ด้วยพื้นฐานความเข้าใจในปัญหา
-    </p>
-
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
-    </p>
-
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
-    </p>
-  </div>
-</div>
-
-{/* RIGHT */}
-
-<div
-  style={{
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    paddingBottom: '18vh'
-  }}
->
-  <h2
-    data-aos="fade-up"
-    style={{
-      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-      fontWeight: 900,
-      color: '#fff',
-      lineHeight: 1.2
-    }}
-  >
-    เพราะเราเคยเจอปัญหามาก่อน
-  </h2>
-</div>
-
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════
-          §6  BRAND PROMISE / WELCOME FAMILY
-          BG: Team-work1.jpg เต็มหน้า 100vh ไม่ filter ไม่ overlay
-          ซ้าย: 2×2 grid ของ 4 รูป
-          Marquee strip ล่างสุดของ section
-      ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {/* BG เต็มหน้า ไม่มี overlay */}
-        <img
-          src="/images/Team-work1.jpg"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }}
-
-        />
-
-        {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(50px,7vw,80px) clamp(20px,4vw,48px) clamp(40px,5vw,60px)', flex: 1 }}>
-          <div data-aos="fade-up" style={{ marginBottom: 'clamp(32px,4vw,48px)' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
-              Welcome to Creatr365's Family
-            </h2>
-            <p style={{ fontSize: 'clamp(14px,1.8vw,18px)', color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
-              หลักสูตรที่เลือกได้ตามสไตล์คุณ
-            </p>
-          </div>
-
-          {/* 4 รูป 2×2 ชิดขอบซ้าย */}
-         <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-  <div
-    ref={problemBgRef}
-    style={{
-      position: 'absolute',
-      inset: 0,
-      zIndex: 0,
-      willChange: 'transform'
-    }}
-  >
-    <img
-      src="/images/problem-up.png"
-      alt=""
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        objectPosition: 'center'
-      }}
-    />
-  </div>
-
-  <div
-    style={{
-      position: 'relative',
-      zIndex: 1,
-      maxWidth: '1320px',
-      margin: '0 auto',
-      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '40px',
-      minHeight: '100vh'
-    }}
-  >
-    {/* LEFT */}
-
-```
-<div data-aos="fade-up">
-  <h2
-    style={{
-      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-      fontWeight: 900,
-      color: '#fff',
-      lineHeight: 1.2,
-      marginBottom: '20px'
-    }}
-  >
-    ทุกคอร์สการเรียนรู้
-    <br />
-    <span style={{ color: RED }}>
-      สร้างจากประสบการณ์จริง
-    </span>
-  </h2>
-
-  <div
-    style={{
-      borderLeft: `2px solid ${RED}55`,
-      paddingLeft: '18px'
-    }}
-  >
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      ด้วยพื้นฐานความเข้าใจในปัญหา
-    </p>
-
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
-    </p>
-
-    <p
-      style={{
-        fontSize: 'clamp(14px,1.5vw,16px)',
-        lineHeight: 1.85,
-        color: 'rgba(255,255,255,0.75)'
-      }}
-    >
-      มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
-    </p>
-  </div>
-</div>
-
-{/* RIGHT */}
-
-<div
-  style={{
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    paddingBottom: '18vh'
-  }}
->
-  <h2
-    data-aos="fade-up"
-    style={{
-      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
-      fontWeight: 900,
-      color: '#fff',
-      lineHeight: 1.2
-    }}
-  >
-    เพราะเราเคยเจอปัญหามาก่อน
-  </h2>
-</div>
-```
-
+      ))}
+    </div>
   </div>
 </section>
 
-            ))}
-          </div>
-        </div>
+/* =========================
+   §5  เพราะเราเจอปัญหามาก่อน
+========================= */
+<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  {/* BG Parallax */}
+  <div
+    ref={problemBgRef}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 0,
+      willChange: 'transform'
+    }}
+  >
+    <img
+      src="/images/problem-up.png"
+      alt=""
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        objectPosition: 'center'
+      }}
+    />
+  </div>
 
-        {/* Marquee strip ล่างสุด section */}
-        <div style={{ position: 'relative', zIndex: 1, overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.7)', padding: '11px 0' }}>
-          <div style={{ display: 'flex', whiteSpace: 'nowrap', gap: '52px', animation: 'marqueeRun 28s linear infinite' }}>
-            {Array(6).fill(['Free Gift ทั้งหมด : Free - Template', 'Free - Ebook', 'Free - Vocabulary guide', 'Free - Document Form', 'Free - Checklist']).flat().map((t, i) => (
-              <span key={i} style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: RED, display: 'inline-block', flexShrink: 0 }} />
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 1,
+      maxWidth: '1320px',
+      margin: '0 auto',
+      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      minHeight: '100vh',
+      alignItems: 'center',
+      gap: '40px'
+    }}
+  >
+    {/* LEFT */}
+    <div data-aos="fade-up">
+      <h2
+        style={{
+          fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+          fontWeight: 900,
+          color: '#fff',
+          lineHeight: 1.2,
+          marginBottom: '20px'
+        }}
+      >
+        ทุกคอร์สการเรียนรู้
+        <br />
+        <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
+      </h2>
 
+      <div style={{ borderLeft: `2px solid ${RED}55`, paddingLeft: '18px' }}>
+        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+          ด้วยพื้นฐานความเข้าใจในปัญหา
+        </p>
+        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+          และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
+        </p>
+        <p style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.85 }}>
+          มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
+        </p>
+      </div>
+    </div>
+
+    {/* RIGHT — bottom aligned text */}
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        height: '100%',
+        paddingBottom: '12vh',
+        textAlign: 'right'
+      }}
+    >
+      <h2
+        data-aos="fade-up"
+        style={{
+          fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+          fontWeight: 900,
+          color: '#fff',
+          lineHeight: 1.2
+        }}
+      >
+        เพราะเราเคยเจอปัญหามาก่อน
+      </h2>
+    </div>
+  </div>
+</section>
+
+/* =========================
+   §6  BRAND PROMISE
+========================= */
+<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  {/* BG */}
+  <img
+    src="/images/Team-work1.jpg"
+    alt=""
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: 'left center'
+    }}
+  />
+
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 1,
+      maxWidth: '1320px',
+      margin: '0 auto',
+      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+      minHeight: '100vh'
+    }}
+  >
+    {/* HEADER */}
+    <div data-aos="fade-up" style={{ marginBottom: '40px' }}>
+      <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
+        Welcome to Creatr365's Family
+      </h2>
+      <p style={{ color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
+        หลักสูตรที่เลือกได้ตามสไตล์คุณ
+      </p>
+    </div>
+
+    {/* GRID — shifted left */}
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 220px)',
+        gap: '18px',
+        justifyContent: 'flex-start',
+        marginLeft: 0
+      }}
+    >
+      {[
+        '/images/f1.jpg',
+        '/images/f2.jpg',
+        '/images/f3.jpg',
+        '/images/f4.jpg'
+      ].map((src, i) => (
+        <img
+          key={i}
+          src={src}
+          alt=""
+          data-aos="fade-up"
+          style={{
+            width: '220px',
+            height: '160px',
+            objectFit: 'cover',
+            borderRadius: '10px'
+          }}
+        />
+      ))}
+    </div>
+  </div>
+
+  {/* MARQUEE */}
+  <div
+    style={{
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      overflow: 'hidden',
+      borderTop: '1px solid rgba(255,255,255,0.08)',
+      background: 'rgba(0,0,0,0.7)',
+      padding: '10px 0'
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        whiteSpace: 'nowrap',
+        gap: '52px',
+        animation: 'marqueeRun 28s linear infinite'
+      }}
+    >
+      {Array(6)
+        .fill([
+          'Free Template',
+          'Free Ebook',
+          'Free Guide',
+          'Free Form',
+          'Free Checklist'
+        ])
+        .flat()
+        .map((t, i) => (
+          <span
+            key={i}
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              letterSpacing: '0.28em',
+              color: 'rgba(255,255,255,0.55)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}
+          >
+            <span
+              style={{
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                background: RED
+              }}
+            />
+            {t}
+          </span>
+        ))}
+    </div>
+  </div>
+</section>
       {/* ══════════════════════════════════════
           §7  ไลฟ์ให้เป็น
           Full-screen image — width:100%, height:100vh, object-fit:cover
