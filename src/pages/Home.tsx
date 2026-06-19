@@ -373,15 +373,33 @@ export default function Home() {
             </h2>
           </div>
         </div>
-        <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+
+        {/* บรรทัดสุดท้าย — ยึดขอบล่างสุดของ BG, ขนาดใหญ่ขึ้น */}
+        <p
+          data-aos="fade-up"
+          style={{
+            position: 'absolute',
+            bottom: 'clamp(28px,4.5vw,56px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1,
+            width: '100%',
+            maxWidth: '880px',
+            padding: '0 24px',
+            fontSize: 'clamp(15px,1.8vw,20px)',
+            lineHeight: 1.8,
+            color: 'rgba(255,255,255,0.55)',
+            textAlign: 'center'
+          }}
+        >
           หากคุณต้องการ{' '}
-          <strong style={{ color: '#fff', fontWeight: 700 }}>เรียนแค่ทฤษฎีการไลฟ์</strong> {' '}
+          <strong style={{ color: '#fff', fontWeight: 700 }}>เรียนแค่ทฤษฎีการไลฟ์</strong>{' '}
           หรือ<strong style={{ color: '#fff', fontWeight: 700 }}>การสอนแบบจับมือทํา</strong>{' '}
-          <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
+          <strong style={{ color: '#fff', fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
         </p>
       </section>
-
-      {/* ═════════════════════════════════════
+       
+     {/* ═════════════════════════════════════
           §6  BRAND PROMISE
       ═════════════════════════════════════ */}
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
@@ -406,7 +424,9 @@ export default function Home() {
             maxWidth: '1320px',
             margin: '0 auto',
             padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
-            minHeight: '100vh'
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column'
           }}
         >
           {/* HEADER */}
@@ -419,38 +439,42 @@ export default function Home() {
             </p>
           </div>
 
-          {/* GRID — absolute, ฝั่งซ้าย, กึ่งกลางแนวตั้ง, รูปแสดงเต็ม ratio ไม่ crop */}
+          {/* GRID wrapper — เติมพื้นที่ที่เหลือใต้ header, จัดกึ่งกลางแนวตั้งในพื้นที่นั้น, ชิดซ้าย */}
           <div
-            data-aos="fade-up"
             style={{
-              position: 'absolute',
-              top: '50%',
-              left: 'clamp(20px,4vw,48px)',
-              transform: 'translateY(-50%)',
-              zIndex: 2,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, clamp(220px,20vw,320px))',
-              gap: '14px'
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              paddingBottom: 'clamp(50px,6vw,70px)'
             }}
           >
-            {[
-              '/images/pro-course-online.png',
-              '/images/pro-workshop-liveclass.png',
-              '/images/pro-AI-tech.png',
-              '/images/pro-community.png'
-            ].map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt=""
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  display: 'block',
-                  borderRadius: '10px'
-                }}
-              />
-            ))}
+            <div
+              data-aos="fade-up"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, clamp(200px,18vw,280px))',
+                gap: '10px'
+              }}
+            >
+              {[
+                '/images/pro-course-online.png',
+                '/images/pro-workshop-liveclass.png',
+                '/images/pro-AI-tech.png',
+                '/images/pro-community.png'
+              ].map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt=""
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    borderRadius: '10px'
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           {/* MARQUEE */}
