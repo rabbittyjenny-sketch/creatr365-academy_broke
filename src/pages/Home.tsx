@@ -378,8 +378,6 @@ export default function Home() {
       </h2>
     </div>
   </div>
-   <div
-        
    <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
               หากคุณต้องการ {' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}> “เรียนแค่ทฤษฎีการไลฟ์” </strong> {' '}
