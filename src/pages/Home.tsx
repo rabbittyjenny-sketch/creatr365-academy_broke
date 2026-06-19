@@ -384,7 +384,6 @@ export default function Home() {
               หรือ<strong style={{ color: '#fff', fontWeight: 700 }}>การสอนแบบจับมือทํา</strong>{' '}
               <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
   </p>
-</div>
 </section>
    
 /* =========================
