@@ -202,30 +202,93 @@ export default function Home() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'center', minHeight: '100vh' }}>
           {/* left col — text */}
-          <div>
-            <h2
-              data-aos="fade-up"
-              style={{ fontSize: 'clamp(2.4rem,5vw,4rem)', fontWeight: 900, color: '#fff', marginBottom: 'clamp(28px,3.5vw,44px)', lineHeight: 1.05 }}>
-              เป็นเหมือนกันไหม ?
-            </h2>
+         <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  <img
+    src="/images/ringlight-back1.png"
+    alt=""
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      objectPosition: 'left center'
+    }}
+  />
 
-            {[
-              'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
-              'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
-              'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
-              'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?',
-            ].map((q, i) => (
-              <div key={i}
-                data-aos="fade-up"
-                data-aos-delay={String(i * 80)}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: 'clamp(12px,2vw,20px)' }}>
-                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: RED, flexShrink: 0, marginTop: '10px' }} />
-                <p style={{ fontSize: 'clamp(15px,2vw,19px)', fontWeight: 500, color: '#fff', lineHeight: 1.5 }}>{q}</p>
-              </div>
-            ))}
-          </div>
-          <div /> {/* right col — ringlight image shows through */}
-        </div>
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 1,
+      maxWidth: '1320px',
+      margin: '0 auto',
+      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '40px',
+      alignItems: 'center',
+      minHeight: '100vh'
+    }}
+  >
+    <div />
+
+```
+<div>
+  <h2
+    data-aos="fade-up"
+    style={{
+      fontSize: 'clamp(2.4rem,5vw,4rem)',
+      fontWeight: 900,
+      color: '#fff',
+      marginBottom: 'clamp(28px,3.5vw,44px)',
+      lineHeight: 1.05
+    }}
+  >
+    เป็นเหมือนกันไหม ?
+  </h2>
+
+  {[
+    'ไลฟ์แล้วไม่มีคนดู? ไม่มีคนแชร์?',
+    'ทำยังไงให้คนอยู่ต่อ? ปิดการขายยังไง?',
+    'ต้องใช้สคริปต์หรือเทคนิคอะไรดี?',
+    'จะพูดอย่างไรเพื่อให้เกิดรายรับในไลฟ์?',
+  ].map((q, i) => (
+    <div
+      key={i}
+      data-aos="fade-up"
+      data-aos-delay={String(i * 80)}
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '14px',
+        marginBottom: 'clamp(12px,2vw,20px)'
+      }}
+    >
+      <div
+        style={{
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
+          background: RED,
+          flexShrink: 0,
+          marginTop: '10px'
+        }}
+      />
+
+      <p
+        style={{
+          fontSize: 'clamp(15px,2vw,19px)',
+          fontWeight: 500,
+          color: '#fff',
+          lineHeight: 1.5
+        }}
+      >
+        {q}
+      </p>
+    </div>
+  ))}
+</div>
+
       </section>
 
       {/* ══════════════════════════════════════
@@ -243,30 +306,120 @@ export default function Home() {
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
         </div>
+<section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  <div
+    ref={problemBgRef}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 0,
+      willChange: 'transform'
+    }}
+  >
+    <img
+      src="/images/problem-up.png"
+      alt=""
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        objectPosition: 'center'
+      }}
+    />
+  </div>
 
-        {/* Text — faster layer = depth effect */}
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '1320px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start', minHeight: '100vh' }}>
-          {/* left col — empty, background shows through */}
-          <div />
-          {/* right col — all text content moved from left */}
-          <div data-aos="fade-up">
-            <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '12px' }}>
-              เพราะเราเคยเจอปัญหามาก่อน
-            </h2>
-            <h2 style={{ fontSize: 'clamp(1.8rem,3.8vw,3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: '20px' }}>
-              ทุกคอร์สการเรียนรู้<br />
-              <span style={{ color: RED }}>สร้างจากประสบการณ์จริง</span>
-            </h2>
-            <div style={{ borderLeft: `2px solid ${RED}55`, paddingLeft: '18px' }}>
-              {[
-                'ด้วยพื้นฐานความเข้าใจในปัญหา',
-                'และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce',
-                'มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ',
-              ].map((t, i) => (
-                <p key={i} style={{ fontSize: 'clamp(14px,1.5vw,16px)', lineHeight: 1.85, color: 'rgba(255,255,255,0.75)' }}>{t}</p>
-              ))}
-            </div>
-          </div>
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 1,
+      maxWidth: '1320px',
+      margin: '0 auto',
+      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '40px',
+      minHeight: '100vh'
+    }}
+  >
+    {/* LEFT */}
+<div data-aos="fade-up">
+  <h2
+    style={{
+      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+      fontWeight: 900,
+      color: '#fff',
+      lineHeight: 1.2,
+      marginBottom: '20px'
+    }}
+  >
+    ทุกคอร์สการเรียนรู้
+    <br />
+    <span style={{ color: RED }}>
+      สร้างจากประสบการณ์จริง
+    </span>
+  </h2>
+
+  <div
+    style={{
+      borderLeft: `2px solid ${RED}55`,
+      paddingLeft: '18px'
+    }}
+  >
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      ด้วยพื้นฐานความเข้าใจในปัญหา
+    </p>
+
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
+    </p>
+
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
+    </p>
+  </div>
+</div>
+
+{/* RIGHT */}
+
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingBottom: '18vh'
+  }}
+>
+  <h2
+    data-aos="fade-up"
+    style={{
+      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+      fontWeight: 900,
+      color: '#fff',
+      lineHeight: 1.2
+    }}
+  >
+    เพราะเราเคยเจอปัญหามาก่อน
+  </h2>
+</div>
+
         </div>
       </section>
 
@@ -297,23 +450,126 @@ export default function Home() {
           </div>
 
           {/* 4 รูป 2×2 ชิดขอบซ้าย */}
-          <div data-aos="fade-up" data-aos-delay="80"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: 'clamp(280px,42vw,560px)', marginLeft: 'calc(-1 * clamp(20px, 4vw, 48px))' }}>
-            {[
-              '/images/pro-course-online.png',
-              '/images/pro-AI-tech.png',
-              '/images/pro-workshop-liveclass.png',
-              '/images/pro-community.png',
-            ].map((src, i) => (
-              <div key={i} style={{ aspectRatio: '1', overflow: 'hidden' }}>
-                <img
-                  src={src}
-                  alt=""
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .65s' }}
-                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.06)')}
-                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-                />
-              </div>
+         <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+  <div
+    ref={problemBgRef}
+    style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 0,
+      willChange: 'transform'
+    }}
+  >
+    <img
+      src="/images/problem-up.png"
+      alt=""
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        objectPosition: 'center'
+      }}
+    />
+  </div>
+
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 1,
+      maxWidth: '1320px',
+      margin: '0 auto',
+      padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)',
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '40px',
+      minHeight: '100vh'
+    }}
+  >
+    {/* LEFT */}
+
+```
+<div data-aos="fade-up">
+  <h2
+    style={{
+      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+      fontWeight: 900,
+      color: '#fff',
+      lineHeight: 1.2,
+      marginBottom: '20px'
+    }}
+  >
+    ทุกคอร์สการเรียนรู้
+    <br />
+    <span style={{ color: RED }}>
+      สร้างจากประสบการณ์จริง
+    </span>
+  </h2>
+
+  <div
+    style={{
+      borderLeft: `2px solid ${RED}55`,
+      paddingLeft: '18px'
+    }}
+  >
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      ด้วยพื้นฐานความเข้าใจในปัญหา
+    </p>
+
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      และถอดทุกประสบการณ์จริงจากอาชีพ Live Commerce
+    </p>
+
+    <p
+      style={{
+        fontSize: 'clamp(14px,1.5vw,16px)',
+        lineHeight: 1.85,
+        color: 'rgba(255,255,255,0.75)'
+      }}
+    >
+      มาสร้างเป็นเนื้อหาการเรียนรู้ที่ครบในทุกมิติ
+    </p>
+  </div>
+</div>
+
+{/* RIGHT */}
+
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingBottom: '18vh'
+  }}
+>
+  <h2
+    data-aos="fade-up"
+    style={{
+      fontSize: 'clamp(1.8rem,3.8vw,3rem)',
+      fontWeight: 900,
+      color: '#fff',
+      lineHeight: 1.2
+    }}
+  >
+    เพราะเราเคยเจอปัญหามาก่อน
+  </h2>
+</div>
+```
+
+  </div>
+</section>
+
             ))}
           </div>
         </div>
@@ -336,40 +592,296 @@ export default function Home() {
           Full-screen image — width:100%, height:100vh, object-fit:cover
           ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-live2.png"
-          alt="ไลฟ์ให้เป็น"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
-      </section>
+   <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+  <img
+    src="/images/i-can-live2.png"
+    alt="ไลฟ์ให้เป็น"
+    style={{
+      width: '100%',
+      height: '100vh',
+      objectFit: 'cover',
+      display: 'block'
+    }}
+  />
+
+  <div
+    style={{
+      position: 'absolute',
+      left: 'clamp(24px,4vw,60px)',
+      bottom: 'clamp(24px,4vw,50px)',
+      zIndex: 2,
+      display: 'flex',
+      gap: '28px',
+      alignItems: 'flex-end'
+    }}
+  >
+    {[
+      {
+        name: 'THE MAGNET',
+        sub: 'READY FOR LIVE',
+        tag: 'FREE',
+        slug: 'the-magnet'
+      },
+      {
+        name: 'THE FOUNDATION',
+        sub: 'LIVE EXPLORER',
+        tag: 'COURSE',
+        slug: 'the-foundation'
+      }
+    ].map((course) => (
+      <Link
+        key={course.name}
+        to={`/course/${course.slug}`}
+        style={{
+          textDecoration: 'none',
+          color: '#fff'
+        }}
+      >
+        <div style={{ marginBottom: '6px' }}>
+          <span
+            style={{
+              fontSize: '10px',
+              letterSpacing: '0.24em',
+              color: '#CC0033',
+              fontWeight: 700
+            }}
+          >
+            {course.tag}
+          </span>
+        </div>
+
+        <div
+          style={{
+            fontSize: 'clamp(18px,2vw,28px)',
+            fontWeight: 900,
+            lineHeight: 1.1
+          }}
+        >
+          {course.name}
+        </div>
+
+        <div
+          style={{
+            fontSize: '12px',
+            letterSpacing: '0.18em',
+            color: 'rgba(255,255,255,.65)',
+            textTransform: 'uppercase'
+          }}
+        >
+          {course.sub}
+        </div>
+      </Link>
+    ))}
+  </div>
+</section>
 
       {/* ══════════════════════════════════════
           §8  ไลฟ์ให้ขายได้
           Full-screen image — width:100%, height:100vh, object-fit:cover
           ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-sale2.png"
-          alt="ไลฟ์ให้ขายได้"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
-      </section>
+     <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+  <img
+    src="/images/i-can-sale2.png"
+    alt="ไลฟ์ให้ขายได้"
+    style={{
+      width: '100%',
+      height: '100vh',
+      objectFit: 'cover',
+      display: 'block'
+    }}
+  />
 
+  <div
+    style={{
+      position: 'absolute',
+      left: 'clamp(24px,4vw,60px)',
+      bottom: 'clamp(24px,4vw,50px)',
+      zIndex: 2,
+      display: 'flex',
+      gap: '28px',
+      alignItems: 'flex-end'
+    }}
+  >
+    {[
+      {
+        name: 'SIGNAL',
+        sub: 'THE CONVERSION HOST : ONLINE',
+        tag: 'COURSE',
+        slug: 'signal'
+      },
+      {
+        name: 'STAGE',
+        sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY',
+        tag: 'COURSE',
+        slug: 'stage'
+      }
+    ].map((course) => (
+      <Link
+        key={course.name}
+        to={`/course/${course.slug}`}
+        style={{
+          textDecoration: 'none',
+          color: '#fff'
+        }}
+      >
+        <div style={{ marginBottom: '6px' }}>
+          <span
+            style={{
+              fontSize: '10px',
+              letterSpacing: '0.24em',
+              color: '#CC0033',
+              fontWeight: 700
+            }}
+          >
+            {course.tag}
+          </span>
+        </div>
+
+        <div
+          style={{
+            fontSize: 'clamp(18px,2vw,28px)',
+            fontWeight: 900,
+            lineHeight: 1.1
+          }}
+        >
+          {course.name}
+        </div>
+
+        <div
+          style={{
+            fontSize: '12px',
+            letterSpacing: '0.18em',
+            color: 'rgba(255,255,255,.65)',
+            textTransform: 'uppercase'
+          }}
+        >
+          {course.sub}
+        </div>
+      </Link>
+    ))}
+  </div>
+</section>
       {/* ══════════════════════════════════════
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
           Full-screen image — width:100%, height:100vh, object-fit:cover
           ไม่มี grid, ไม่มี card, ไม่มี overlay, ไม่มี glass effect
       ══════════════════════════════════════ */}
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-reply1.png"
-          alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
-      </section>
+  <img
+    src="/images/i-can-reply1.png"
+    alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
+    style={{
+      width: '100%',
+      height: '100vh',
+      objectFit: 'cover',
+      display: 'block'
+    }}
+  />
 
+  {/* ซ้ายล่าง */}
+  <div
+    style={{
+      position: 'absolute',
+      left: 'clamp(24px,4vw,60px)',
+      bottom: 'clamp(24px,4vw,50px)',
+      zIndex: 2
+    }}
+  >
+    <div
+      style={{
+        fontSize: '10px',
+        letterSpacing: '0.24em',
+        color: '#CC0033',
+        fontWeight: 700,
+        marginBottom: '6px'
+      }}
+    >
+      COMING SOON
+    </div>
+
+    <div
+      style={{
+        fontSize: 'clamp(20px,2.2vw,30px)',
+        fontWeight: 900,
+        color: '#fff'
+      }}
+    >
+      THE BRAND ARCHITECT
+    </div>
+
+    <div
+      style={{
+        fontSize: '12px',
+        letterSpacing: '0.18em',
+        color: 'rgba(255,255,255,.65)',
+        textTransform: 'uppercase'
+      }}
+    >
+      MASTERCLASS : ONSITE 2 DAYS
+    </div>
+  </div>
+
+  {/* กลางล่าง → ขวา */}
+  <div
+    style={{
+      position: 'absolute',
+      bottom: 'clamp(24px,4vw,50px)',
+      left: '50%',
+      transform: 'translateX(-10%)',
+      zIndex: 2,
+      display: 'flex',
+      gap: '32px'
+    }}
+  >
+    {[
+      {
+        name: 'THE FOUNDATION',
+        sub: 'LIVE EXPLORER',
+        slug: 'the-foundation'
+      },
+      {
+        name: 'SIGNAL',
+        sub: 'THE CONVERSION HOST : ONLINE',
+        slug: 'signal'
+      },
+      {
+        name: 'STAGE',
+        sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY',
+        slug: 'stage'
+      }
+    ].map((course) => (
+      <Link
+        key={course.name}
+        to={`/course/${course.slug}`}
+        style={{
+          textDecoration: 'none',
+          color: '#fff'
+        }}
+      >
+        <div
+          style={{
+            fontSize: 'clamp(18px,2vw,26px)',
+            fontWeight: 900
+          }}
+        >
+          {course.name}
+        </div>
+
+        <div
+          style={{
+            fontSize: '12px',
+            letterSpacing: '0.18em',
+            color: 'rgba(255,255,255,.65)',
+            textTransform: 'uppercase'
+          }}
+        >
+          {course.sub}
+        </div>
+      </Link>
+    ))}
+  </div>
+</section>
       {/* ══════════════════════════════════════
           §10  Brand Concept
           BG: Team-behind1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
