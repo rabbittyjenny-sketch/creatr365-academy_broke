@@ -379,22 +379,7 @@ export default function Home() {
     </div>
   </div>
    <div
-  style={{
-    position: 'absolute',
-    left: '50%',
-    bottom: '60px',
-    transform: 'translateX(-50%)',
-    zIndex: 2
-  }}
->
-  <p
-    style={{
-      color: 'rgba(255,255,255,0.75)',
-      fontSize: '16px',
-      fontWeight: 400,
-      textAlign: 'center'
-    }}
-  >
+        
    <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
               หากคุณต้องการ {' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}> “เรียนแค่ทฤษฎีการไลฟ์” </strong> {' '}
