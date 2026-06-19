@@ -89,45 +89,6 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Global scroll behaviour + Home page snap system
-   • html: smooth scrolling sitewide
-   • body: prevent horizontal scroll (belt-and-suspenders with overflowX on main)
-   • .home-scroll: full-page vertical snap container
-   • .home-scroll section: each section snaps at its start edge
-     min-height:100vh ensures no section is smaller than the viewport
-     (individual sections may set their own min-height on top of this)
-───────────────────────────────────────────────────────────── */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  overflow-x: hidden;
-}
-
-.home-scroll {
-  scroll-snap-type: y mandatory;
-}
-
-.home-scroll section {
-  scroll-snap-align: start;
-  min-height: 100vh;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Navbar — transparent variant (home hero)
-   The JS in Navbar.tsx toggles classes; these rules provide the
-   smooth transition so the fade from transparent → dark feels
-   intentional rather than a flash.
-───────────────────────────────────────────────────────────── */
-nav.fixed {
-  transition: background-color 0.45s ease, border-color 0.45s ease, backdrop-filter 0.45s ease;
-}
-
-/* Tailwind JIT doesn't generate border-white/8 by default, define it */
-.border-white\/8 { border-color: rgba(255,255,255,0.08); }
-
 /* Reveal/Slide hover effect utilities */
 @layer utilities {
   .reveal-slide {
@@ -159,85 +120,7 @@ nav.fixed {
   }
 }
 
-/* === Creative Hover Effects === */
-
-/* Passing underline: line sweeps left-to-right under text */
-.passing-underline {
-  position: relative;
-  display: inline-block;
-}
-.passing-underline::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--hover-accent, currentColor);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
-}
-.passing-underline:hover::after,
-.passing-underline-wrapper:hover .passing-underline::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-/* Bracket hover: [ ] brackets appear on hover */
-.bracket-hover {
-  position: relative;
-  display: inline-block;
-  transition: padding 0.3s ease;
-}
-.bracket-hover::before,
-.bracket-hover::after {
-  position: absolute;
-  color: var(--hover-accent, currentColor);
-  opacity: 0;
-  transition: all 0.3s ease;
-  font-weight: 700;
-}
-.bracket-hover::before {
-  content: '[';
-  left: -8px;
-  transform: translateX(6px);
-}
-.bracket-hover::after {
-  content: ']';
-  right: -8px;
-  transform: translateX(-6px);
-}
-.bracket-hover:hover {
-  padding: 0 6px;
-}
-.bracket-hover:hover::before,
-.bracket-hover:hover::after {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Sweep hover: background sweeps from left */
-.sweep-hover {
-  position: relative;
-  z-index: 1;
-}
-.sweep-hover::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--hover-accent, currentColor);
-  opacity: 0;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-  border-radius: inherit;
-  z-index: -1;
-}
-.sweep-hover:hover::before {
-  transform: scaleX(1);
-  opacity: 0.08;
-}
+/* === Creative Hover Effects (removed: passing-underline, bracket-hover, sweep-hover) === */
 
 /* Feature item: left border slides in */
 .feature-item {
