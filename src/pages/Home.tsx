@@ -379,15 +379,14 @@ export default function Home() {
     </div>
   </div>
    <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
-              หากคุณต้องการ {' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}> “เรียนแค่ทฤษฎีการไลฟ์” </strong> {' '}
-              หรือ
-              <strong style={{ color: '#fff', fontWeight: 700 }}>“การสอนแบบจับมือทํา” </strong>{' '}
-              <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ  </strong>{' '}  
+              หากคุณต้องการ{' '}
+              <strong style={{ color: '#fff', fontWeight: 700 }}>เรียนแค่ทฤษฎีการไลฟ์</strong> {' '}
+              หรือ<strong style={{ color: '#fff', fontWeight: 700 }}>การสอนแบบจับมือทํา</strong>{' '}
+              <strong style={{ color: '#fff',  fontWeight: 800 }}> ที่นี่…ไม่ใช่ของคุณ</strong>
   </p>
 </div>
 </section>
-
+   
 /* =========================
    §6  BRAND PROMISE
 ========================= */
