@@ -434,10 +434,10 @@ export default function Home() {
       }}
     >
       {[
-        '/images/f1.jpg',
-        '/images/f2.jpg',
-        '/images/f3.jpg',
-        '/images/f4.jpg'
+        '/images/pro-course-online.png',
+        '/images/pro-workshop-liveclass.png',
+        '/images/pro-AI-tech.png',
+        '/images/pro-community.png'
       ].map((src, i) => (
         <img
           key={i}
@@ -564,8 +564,8 @@ export default function Home() {
         <div style={{ marginBottom: '6px' }}>
           <span
             style={{
-              fontSize: '10px',
-              letterSpacing: '0.24em',
+              fontSize: '8px',
+              letterSpacing: '0.2em',
               color: '#CC0033',
               fontWeight: 700
             }}
@@ -586,8 +586,8 @@ export default function Home() {
 
         <div
           style={{
-            fontSize: '12px',
-            letterSpacing: '0.18em',
+            fontSize: '8px',
+            letterSpacing: '0.15em',
             color: 'rgba(255,255,255,.65)',
             textTransform: 'uppercase'
           }}
