@@ -24,9 +24,7 @@ const AdminAssignments = () => {
   const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({});
 
   const load = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate('/auth'); return; }
-    // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
+    // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
     let q = supabase.from('assignments').select('*, courses(title), course_modules(code,name)').order('created_at',{ascending:false});
     if (filter !== 'all') q = q.eq('status', filter);
     const { data } = await q;

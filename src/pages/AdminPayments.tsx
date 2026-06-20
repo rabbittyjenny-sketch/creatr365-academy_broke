@@ -20,10 +20,7 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    navigate('/auth?redirect=/admin/payments');
-    if (!session) { navigate('/auth'); return; }
-    // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
+    // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
     let q = supabase.from('course_enrollments').select('*, courses(title)').order('created_at',{ascending:false});
     if (filter !== 'all') q = q.eq('status', filter);
     const { data } = await q;

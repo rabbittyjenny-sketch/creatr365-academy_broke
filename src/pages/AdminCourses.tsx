@@ -84,16 +84,13 @@ const AdminCourses = () => {
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    checkAuthAndLoad();
+    loadData();
     return () => document.documentElement.classList.remove('dark');
   }, []);
 
-  const checkAuthAndLoad = async () => {
-    const { data:{ session } } = await supabase.auth.getSession();
-    if (!session) { navigate('/auth'); return; }
-    const { data:roles } = await supabase.from('user_roles').select('role')
-      .eq('user_id', session.user.id).eq('role','admin').maybeSingle();
-    if (!roles) { toast({ title:'ไม่มีสิทธิ์เข้าถึง', variant:'destructive' }); navigate('/'); return; }
+  // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
+  // This page only loads data — no redundant per-page guard (avoids double-guard redirects).
+  const loadData = async () => {
     setLoading(false); fetchCourses(); fetchPromos();
   };
 
