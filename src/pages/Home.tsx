@@ -36,7 +36,9 @@ function useParallax(speed = 0.12) {
 
 /* ════════════════════════════════════════════
    AOS HOOK
-   เพิ่ม .aos-in เมื่อ element เข้า viewport
+   เพิ่ม .aos-in เมื่อ element เข้า viewport, ถอดออกเมื่อออกจาก viewport
+   → reveal เล่นใหม่ทุกครั้งที่เลื่อนกลับมาเจอ element (ไม่ใช่ครั้งเดียวจบ)
+   ใส่ data-aos-once="true" บน element ที่ต้องการให้ค้างค่าหลังเล่นครั้งแรก
    ส่ง data-aos-delay → --aos-delay CSS var
 ════════════════════════════════════════════ */
 function useAOS() {
@@ -46,18 +48,23 @@ function useAOS() {
       const delay = el.getAttribute('data-aos-delay');
       if (delay) el.style.setProperty('--aos-delay', `${delay}ms`);
     });
-    let ticking = false;
-    const run = () => {
-      ticking = false;
-      els.forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('aos-in');
-      });
-    };
-    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(run); } };
-    run();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target as HTMLElement;
+          if (entry.isIntersecting) {
+            el.classList.add('aos-in');
+          } else if (el.getAttribute('data-aos-once') !== 'true') {
+            el.classList.remove('aos-in');
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+    );
+
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 }
 
@@ -78,9 +85,15 @@ const WHY = [
 export default function Home() {
   useAOS();
 
-  const heroBgRef    = useParallax(0.18);
-  const problemBgRef = useParallax(0.1);
-  const journeyBgRef = useParallax(0.1);
+  const heroBgRef    = useParallax(0.2);
+  const problemBgRef = useParallax(0.13);
+  const journeyBgRef = useParallax(0.13);
+
+  // เพิ่ม parallax ให้ BG ที่เคยนิ่งสนิท (ยกเว้น §2 และ §10 ตามสเปก — ปล่อยให้นิ่งเพื่อให้อ่านง่าย)
+  const familyBgRef  = useParallax(0.08);   // §6  Team-work1.jpg
+  const sec7BgRef     = useParallax(0.08);  // §7  i-can-live2.png
+  const sec8BgRef     = useParallax(0.08);  // §8  i-can-sale2.png
+  const sec9BgRef     = useParallax(0.08);  // §9  i-can-reply1.png
 
   return (
     <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden', fontSize: '18px' }}>
@@ -103,22 +116,22 @@ export default function Home() {
 
         {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <div data-aos="fade-up" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Link to="/courses"
+              <Link to="/courses" data-aos="fade-up"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
-              <Link to="/auth"
+              <Link to="/auth" data-aos="fade-up" data-aos-delay="90"
                 style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
                 FREE ACCOUNT
               </Link>
             </div>
-            <p style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
@@ -150,27 +163,27 @@ export default function Home() {
       ══════════════════════════════════════ */}
       <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)', width: '100%' }}>
-          <div data-aos="fade-up" style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
-            <h2 style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
+          <div style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
+            <h2 data-aos="fade-up" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
               อยากร่วมงานกับแบรนด์ใหญ่ ?
             </h2>
-            <p style={{ fontSize: 'clamp(15px,2vw,20px)', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>
+            <p data-aos="fade-up" data-aos-delay="80" style={{ fontSize: 'clamp(15px,2vw,20px)', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>
               สิ่งที่ตลาดต้องการ คือ…
             </p>
           </div>
 
           {/* แถวบน: brand1.png — slide in from left */}
-          <div data-aos="fade-right" style={{ marginBottom: '16px', lineHeight: 0 }}>
+          <div data-aos="fade-right" data-aos-delay="180" style={{ marginBottom: '16px', lineHeight: 0 }}>
             <img src="/images/brand1.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* แถวล่าง: brand2.png — slide in from right */}
-          <div data-aos="fade-left" data-aos-delay="100" style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}>
+          <div data-aos="fade-left" data-aos-delay="260" style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}>
             <img src="/images/brand2.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* ปุ่มกึ่งกลางล่าง */}
-          <div data-aos="fade-up" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div data-aos="fade-up" data-aos-delay="360" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/courses"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
@@ -246,7 +259,7 @@ export default function Home() {
               <div
                 key={i}
                 data-aos="fade-up"
-                data-aos-delay={String(i * 80)}
+                data-aos-delay={String(i * 80 + 100)}
                 style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -255,6 +268,7 @@ export default function Home() {
                 }}
               >
                 <div
+                  className="float-y"
                   style={{
                     width: '6px',
                     height: '6px',
@@ -349,7 +363,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* RIGHT — bottom aligned text */}
+          {/* RIGHT — bottom aligned text, เลื่อนเข้าจากขวาให้สวนทางกับฝั่งซ้าย */}
           <div
             style={{
               display: 'flex',
@@ -361,7 +375,8 @@ export default function Home() {
             }}
           >
             <h2
-              data-aos="fade-up"
+              data-aos="fade-left"
+              data-aos-delay="150"
               style={{
                 fontSize: 'clamp(1.8rem,3.8vw,3rem)',
                 fontWeight: 900,
@@ -377,6 +392,7 @@ export default function Home() {
         {/* บรรทัดสุดท้าย — ยึดขอบล่างสุดของ BG, ขนาดใหญ่ขึ้น */}
         <p
           data-aos="fade-up"
+          data-aos-delay="300"
           style={{
             position: 'absolute',
             bottom: 'clamp(28px,4.5vw,56px)',
@@ -404,18 +420,18 @@ export default function Home() {
       ═════════════════════════════════════ */}
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG */}
-        <img
-          src="/images/Team-work1.jpg"
-          alt=""
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'left center'
-          }}
-        />
+        <div ref={familyBgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            src="/images/Team-work1.jpg"
+            alt=""
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'left center'
+            }}
+          />
+        </div>
 
         <div
           style={{
@@ -449,7 +465,6 @@ export default function Home() {
             }}
           >
             <div
-              data-aos="fade-up"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, clamp(200px,18vw,280px))',
@@ -466,6 +481,8 @@ export default function Home() {
                   key={i}
                   src={src}
                   alt=""
+                  data-aos="zoom-in"
+                  data-aos-delay={String(i * 80 + 120)}
                   style={{
                     width: '100%',
                     height: 'auto',
@@ -539,11 +556,13 @@ export default function Home() {
           §7  ไลฟ์ให้เป็น
       ═════════════════════════════════════ */}
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-live2.png"
-          alt="ไลฟ์ให้เป็น"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
+        <div ref={sec7BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            src="/images/i-can-live2.png"
+            alt="ไลฟ์ให้เป็น"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
 
         <div
           style={{
@@ -559,10 +578,12 @@ export default function Home() {
           {[
             { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
             { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' }
-          ].map((course) => (
+          ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              data-aos="fade-up"
+              data-aos-delay={String(i * 100)}
               style={{ textDecoration: 'none' }}
             >
               <div style={{
@@ -603,11 +624,13 @@ export default function Home() {
           §8  ไลฟ์ให้ขายได้
       ═════════════════════════════════════ */}
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-sale2.png"
-          alt="ไลฟ์ให้ขายได้"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
+        <div ref={sec8BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            src="/images/i-can-sale2.png"
+            alt="ไลฟ์ให้ขายได้"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
 
         <div
           style={{
@@ -623,10 +646,12 @@ export default function Home() {
           {[
             { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
             { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' }
-          ].map((course) => (
+          ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              data-aos="fade-up"
+              data-aos-delay={String(i * 100)}
               style={{ textDecoration: 'none' }}
             >
               <div style={{
@@ -667,14 +692,17 @@ export default function Home() {
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
       ═════════════════════════════════════ */}
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-        <img
-          src="/images/i-can-reply1.png"
-          alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
-        />
+        <div ref={sec9BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
+          <img
+            src="/images/i-can-reply1.png"
+            alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </div>
 
         {/* ซ้ายล่าง — main course */}
         <div
+          data-aos="fade-up"
           style={{
             position: 'absolute',
             left: 'clamp(24px,4vw,60px)',
@@ -730,10 +758,12 @@ export default function Home() {
             { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'the-foundation' },
             { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
             { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
-          ].map((course) => (
+          ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              data-aos="fade-up"
+              data-aos-delay={String(i * 80 + 120)}
               style={{ textDecoration: 'none' }}
             >
               <div style={{
@@ -795,24 +825,24 @@ export default function Home() {
         </div>
 
         {/* top-left */}
-        <div data-aos="fade-in" style={{ position: 'absolute', top: 'clamp(32px,5vw,56px)', left: 'clamp(20px,6vw,80px)', zIndex: 1 }}>
-          <p style={{ fontSize: '11px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.52)', marginBottom: '10px' }}>
+        <div style={{ position: 'absolute', top: 'clamp(32px,5vw,56px)', left: 'clamp(20px,6vw,80px)', zIndex: 1 }}>
+          <p data-aos="fade-in" style={{ fontSize: '11px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.52)', marginBottom: '10px' }}>
             CONSUMER → CREATOR
           </p>
-          <h2 style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
+          <h2 data-aos="fade-up" data-aos-delay="120" style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
             YOUR JOURNEY<br /><span style={{ color: RED }}>STARTS HERE.</span>
           </h2>
         </div>
 
         {/* bottom-right buttons */}
-        <div data-aos="fade-up" style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Link to="/courses"
+        <div style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <Link to="/courses" data-aos="fade-up" data-aos-delay="260"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
             onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
             เริ่มเส้นทางของคุณ <ArrowRight size={15} />
           </Link>
-          <Link to="/auth"
+          <Link to="/auth" data-aos="fade-up" data-aos-delay="340"
             style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.52)'; e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.26)'; e.currentTarget.style.color = 'rgba(255,255,255,0.68)'; }}>
@@ -834,7 +864,7 @@ export default function Home() {
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>DIFFERENCE?</h2>
           </div>
 
-          <div data-aos="fade-up" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+          <div data-aos="fade-up" data-aos-delay="120" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
             {/* header row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ padding: '14px 22px', textAlign: 'center', background: 'rgba(255,255,255,0.025)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
@@ -864,7 +894,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div data-aos="fade-up" style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
+          <div data-aos="fade-up" data-aos-delay={String(WHY.length * 60 + 150)} style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
             <Link to="/courses"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
@@ -894,7 +924,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div data-aos="fade-up" data-aos-delay="100">
+          <div data-aos="fade-up" data-aos-delay="150">
             {/* Be a creatr mark */}
             <div style={{ marginBottom: 'clamp(16px,2vw,24px)' }}>
               <p style={{ fontSize: 'clamp(1.1rem,2.2vw,1.6rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff', lineHeight: 1.1 }}>Be a creatr.</p>
@@ -903,13 +933,13 @@ export default function Home() {
             </div>
 
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-              <Link to="/courses"
+              <Link to="/courses" data-aos="fade-up" data-aos-delay="280"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
-              <Link to="/auth"
+              <Link to="/auth" data-aos="fade-up" data-aos-delay="360"
                 style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
@@ -918,9 +948,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* bottom-right logo */}
-          <div style={{ marginTop: 'clamp(40px,6vw,80px)', display: 'flex', justifyContent: 'flex-end' }}>
-            <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
+          {/* bottom-right logo — ปั๊มตราปิดท้าย แล้วลอยเบาๆต่อเนื่อง */}
+          <div data-aos="fade-in" data-aos-delay="480" data-aos-once="true" style={{ marginTop: 'clamp(40px,6vw,80px)', display: 'flex', justifyContent: 'flex-end' }}>
+            <img src={LOGO} alt="Creatr365" className="float-y" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
           </div>
         </div>
       </section>
