@@ -56,27 +56,35 @@
   }
 
   .dark {
-    --background: 0 0% 5%;
+    /* Cinematic dark — base matches Home.tsx (#0a0a0a) so public pages
+       blend seamlessly with the landing page. */
+    --background: 0 0% 4%;            /* #0a0a0a */
     --foreground: 0 0% 95%;
-    --card: 0 0% 8%;
+    --card: 0 0% 8%;                  /* #141414 */
     --card-foreground: 0 0% 95%;
-    --popover: 0 0% 8%;
+    --popover: 0 0% 6%;
     --popover-foreground: 0 0% 95%;
-    --primary: 217 89% 61%;
+    --primary: 348 100% 40%;          /* brand red #CC0033 as primary action */
     --primary-foreground: 0 0% 100%;
-    --secondary: 45 98% 50%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 0 0% 15%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 14%;
     --accent-foreground: 0 0% 95%;
     --destructive: 348 100% 40%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 53% 46%;
     --success-foreground: 0 0% 100%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 217 89% 61%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 348 100% 40%;
+
+    /* Warm accent — amber/gold (#D4A843) for break cards, badges, dividers.
+       Used to add cinematic warmth against the dark base. */
+    --warm: 43 60% 55%;              /* #D4A843 */
+    --warm-foreground: 0 0% 8%;      /* dark text on warm surfaces */
+    --warm-soft: 43 60% 55% / 0.08;  /* faint warm wash for card backgrounds */
   }
 }
 
@@ -447,6 +455,104 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   }
 }
 
+
+/* ═══════════════════════════════════════════════
+   STANDARD SURFACE & CONTROL TOKENS
+   Reusable building blocks so every page shares one
+   visual language. Built on the design tokens above —
+   no hardcoded colors. Use these instead of inline styles.
+═══════════════════════════════════════════════ */
+
+/* Page shell — consistent dark cinematic background + vertical rhythm.
+   Apply to the top-level wrapper of a page (under a `.dark` scope). */
+.page-shell {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+}
+
+/* Standard surface card — neutral dark card with subtle border. */
+.surface-card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+/* Warm break card — amber/gold accented card to add cinematic warmth.
+   Use sparingly: highlight blocks, callouts, "info" cards. */
+.warm-card {
+  background: linear-gradient(135deg, hsl(43 60% 55% / 0.10), hsl(43 60% 55% / 0.03));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--warm) / 0.35);
+  border-radius: var(--radius);
+}
+
+/* Warm badge / eyebrow label — small uppercase accent text. */
+.warm-badge {
+  color: hsl(var(--warm));
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* Standard section title scale — keeps headings consistent across pages. */
+.section-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.01em;
+}
+.section-subtitle {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.7;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Primary action button — brand red, consistent sizing everywhere. */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.875rem;            /* 46px — matches Home CTA height */
+  padding: 0 clamp(1.5rem, 3vw, 2.5rem);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.btn-primary:hover { opacity: 0.88; }
+
+/* Secondary / outline button — subtle bordered, same height as primary. */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.875rem;
+  padding: 0 clamp(1.25rem, 2.5vw, 2rem);
+  background: transparent;
+  color: hsl(var(--foreground) / 0.7);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border: 1px solid hsl(var(--foreground) / 0.22);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.btn-outline:hover {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground) / 0.48);
+}
 
 /* ─── Marquee animation for Home ticker strip ─── */
 @keyframes marquee {
