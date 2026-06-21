@@ -612,57 +612,38 @@ export default function Home() {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </div>
-
-        <div
+<div
           style={{
             position: 'absolute',
-            left: 'clamp(24px,4vw,60px)',
-            bottom: 'clamp(110px,15vw,150px)',
+            left: 'clamp(28px,5vw,72px)',
+            bottom: 'clamp(56px,8vh,100px)',
             zIndex: 2,
             display: 'flex',
-            gap: '40px',
-            alignItems: 'flex-end'
+            gap: 'clamp(32px,4vw,56px)',
           }}
         >
           {[
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               tag: 'COURSE', slug: 'signal' },
-            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', tag: 'COURSE', slug: 'stage' }
+            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
+            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
           ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
-              style={{ textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
+              style={{ display: 'flex', gap: '14px', alignItems: 'stretch', textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
             >
-              <div style={{
-                fontSize: '9px',
-                letterSpacing: '0.22em',
-                fontWeight: 500,
-                color: 'rgba(0,0,0,0.5)',
-                textTransform: 'uppercase',
-                marginBottom: '5px'
-              }}>
-                {course.tag}
-              </div>
-              <div style={{
-                fontSize: 'clamp(12px,1vw,15px)',
-                fontWeight: 600,
-                color: '#1a1a1a',
-                lineHeight: 1.2,
-                letterSpacing: '0.04em'
-              }}>
-                {course.name}
-              </div>
-              <div style={{
-                fontSize: '10px',
-                letterSpacing: '0.16em',
-                color: 'rgba(0,0,0,0.5)',
-                textTransform: 'uppercase',
-                marginTop: '3px',
-                fontWeight: 400
-              }}>
-                {course.sub}
+              <div style={{ width: '4px', background: RED, flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2 }}>
+                  {course.name}
+                </p>
+                <p style={{ fontSize: 'clamp(13px,1.1vw,15px)', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>
+                  {course.sub}
+                </p>
+                <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.7)', textDecoration: 'underline', textUnderlineOffset: '3px', marginTop: '8px' }}>
+                  เพิ่มเติม
+                </p>
               </div>
             </Link>
           ))}
@@ -686,42 +667,41 @@ export default function Home() {
           data-aos="fade-up"
           style={{
             position: 'absolute',
-            left: 'clamp(24px,4vw,60px)',
-             bottom: 'clamp(110px,15vw,150px)',
-            zIndex: 2
+            left: 'clamp(28px,5vw,72px)',
+            bottom: 'clamp(48px,6vh,90px)',
+            zIndex: 2,
           }}
         >
           <div style={{
-            fontSize: '9px',
-            letterSpacing: '0.22em',
-            fontWeight: 500,
-            color: 'rgba(0,0,0,0.5)',
-            textTransform: 'uppercase',
-            marginBottom: '5px'
-          }}>
-            COMING SOON
-          </div>
-          <div style={{
-            fontSize: 'clamp(12px,1vw,15px)',
-            fontWeight: 600,
-            color: '#1a1a1a',
-            lineHeight: 1.2,
-            letterSpacing: '0.04em'
-          }}>
-            THE BRAND ARCHITECT
-          </div>
-          <div style={{
+            display: 'inline-block',
+            background: '#F67C8C',
+            color: 'rgba(0,0,0,0.55)',
             fontSize: '10px',
-            letterSpacing: '0.16em',
-            color: 'rgba(0,0,0,0.5)',
-            textTransform: 'uppercase',
-            marginTop: '3px',
-            fontWeight: 400
+            fontWeight: 800,
+            letterSpacing: '0.04em',
+            padding: '4px 10px 10px',
+            transform: 'rotate(-6deg)',
+            clipPath: 'polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%)',
+            marginBottom: '12px',
+            marginLeft: '-2px',
           }}>
-            MASTERCLASS : ONSITE 2 DAYS
+            DON'T MISS!
+          </div>
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'stretch' }}>
+            <div style={{ width: '4px', background: RED, flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2 }}>
+                The BRAND ARCHITECT
+              </p>
+              <p style={{ fontSize: 'clamp(13px,1.1vw,15px)', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>
+                ONSITE 2 DAYS
+              </p>
+              <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.45)', marginTop: '8px' }}>
+                (coming soon)
+              </p>
+            </div>
           </div>
         </div>
-
         {/* กลาง–ขวาล่าง — also list */}
         <div
           style={{
