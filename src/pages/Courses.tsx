@@ -4,6 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Monitor, Users, Layers } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 interface CourseRow {
   id: string;
@@ -116,6 +117,7 @@ const Courses: React.FC = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 };
