@@ -563,57 +563,38 @@ export default function Home() {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </div>
-
-        <div
+<div
           style={{
             position: 'absolute',
-            left: 'clamp(24px,4vw,60px)',
-            bottom: 'clamp(110px,15vw,150px)',
+            left: 'clamp(28px,5vw,72px)',
+            bottom: 'clamp(56px,8vh,100px)',
             zIndex: 2,
             display: 'flex',
-            gap: '40px',
-            alignItems: 'flex-end'
+            gap: 'clamp(32px,4vw,56px)',
           }}
         >
           {[
-            { name: 'THE MAGNET',     sub: 'READY FOR LIVE',  tag: 'FREE',   slug: 'the-magnet' },
-            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   tag: 'COURSE', slug: 'the-foundation' }
+            { name: 'THE MAGNET',     sub: 'READY FOR LIVE', slug: 'the-magnet' },
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',   slug: 'the-foundation' }
           ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
-               style={{ textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
+              style={{ display: 'flex', gap: '14px', alignItems: 'stretch', textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
             >
-              <div style={{
-                fontSize: '9px',
-                letterSpacing: '0.22em',
-                fontWeight: 500,
-                color: 'rgba(0,0,0,0.5)',
-                textTransform: 'uppercase',
-                marginBottom: '5px'
-              }}>
-                {course.tag}
-              </div>
-              <div style={{
-                fontSize: 'clamp(12px,1vw,15px)',
-                fontWeight: 600,
-                color: '#1a1a1a',
-                lineHeight: 1.2,
-                letterSpacing: '0.04em'
-              }}>
-                {course.name}
-              </div>
-              <div style={{
-                fontSize: '10px',
-                letterSpacing: '0.16em',
-                color: 'rgba(0,0,0,0.5)',
-                textTransform: 'uppercase',
-                marginTop: '3px',
-                fontWeight: 400
-              }}>
-                {course.sub}
+              <div style={{ width: '4px', background: RED, flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2 }}>
+                  {course.name}
+                </p>
+                <p style={{ fontSize: 'clamp(13px,1.1vw,15px)', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>
+                  {course.sub}
+                </p>
+                <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.7)', textDecoration: 'underline', textUnderlineOffset: '3px', marginTop: '8px' }}>
+                  เพิ่มเติม
+                </p>
               </div>
             </Link>
           ))}
