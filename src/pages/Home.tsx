@@ -568,7 +568,7 @@ export default function Home() {
           style={{
             position: 'absolute',
             left: 'clamp(24px,4vw,60px)',
-            bottom: 'clamp(28px,4vw,52px)',
+            bottom: 'clamp(110px,15vw,150px)',
             zIndex: 2,
             display: 'flex',
             gap: '40px',
@@ -584,7 +584,7 @@ export default function Home() {
               to={`/course/${course.slug}`}
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
-              style={{ textDecoration: 'none' }}
+               style={{ textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
             >
               <div style={{
                 fontSize: '9px',
@@ -636,7 +636,7 @@ export default function Home() {
           style={{
             position: 'absolute',
             left: 'clamp(24px,4vw,60px)',
-            bottom: 'clamp(28px,4vw,52px)',
+            bottom: 'clamp(110px,15vw,150px)',
             zIndex: 2,
             display: 'flex',
             gap: '40px',
@@ -652,7 +652,7 @@ export default function Home() {
               to={`/course/${course.slug}`}
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
-              style={{ textDecoration: 'none' }}
+              style={{ textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
             >
               <div style={{
                 fontSize: '9px',
@@ -706,7 +706,7 @@ export default function Home() {
           style={{
             position: 'absolute',
             left: 'clamp(24px,4vw,60px)',
-            bottom: 'clamp(28px,4vw,52px)',
+             bottom: 'clamp(110px,15vw,150px)',
             zIndex: 2
           }}
         >
