@@ -1,6 +1,3 @@
-/* Fonts loaded via index.html: Google Sans + Noto Sans Thai Looped */
-@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@200;300;400;500;600;700&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
-
 body {
   font-family: 'Google Sans Flex', 'Mitr', sans-serif;
 }
