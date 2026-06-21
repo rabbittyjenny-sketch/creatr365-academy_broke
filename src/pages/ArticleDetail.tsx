@@ -4,6 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
@@ -157,6 +158,7 @@ const ArticleDetail: React.FC = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 };
