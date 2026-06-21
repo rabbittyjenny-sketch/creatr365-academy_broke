@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Mail, Globe, MessageCircle } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 const LINE_QR_URL = 'https://ik.imagekit.io/ideas365logo/L_926gxgxq_BW-1.png?updatedAt=1774500421226';
 
@@ -76,6 +77,7 @@ const Contact: React.FC = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 };
