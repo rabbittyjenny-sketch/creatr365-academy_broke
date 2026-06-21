@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
+import { CourseNavbar } from '@/components/CourseNavbar';
+import { Footer } from '@/components/Footer';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
@@ -97,7 +99,7 @@ export default function Home() {
 
   return (
     <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden', fontSize: '18px' }}>
-
+<CourseNavbar />
       {/* ══════════════════════════════════════
           §1  HERO
           BG: Hero-team1.png — brightness(0.72) เฉพาะ hero
