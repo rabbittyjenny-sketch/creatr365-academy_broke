@@ -5,6 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { AuthSheet } from '@/components/AuthSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Check, ArrowRight, Play } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 interface KpiNote { label: string; value: string; note?: string }
 
@@ -269,6 +270,7 @@ const CourseDetail: React.FC = () => {
       </section>
 
       <AuthSheet isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <Footer />
     </>
   );
 };
