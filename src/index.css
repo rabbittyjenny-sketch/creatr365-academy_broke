@@ -320,7 +320,7 @@ h1, h2, h3, h4, h5, h6, .heading-hover {
   display: inline-block;
   cursor: default;
   transition: color 500ms ease;
-  --heading-accent: hsl(var(--google-blue));
+ --heading-accent: hsl(var(--brand-gold));
 }
 .section-accent h1,
 .section-accent h2,
@@ -336,10 +336,10 @@ h1::after, h2::after, h3::after, h4::after, h5::after, h6::after, .heading-hover
   position: absolute;
   left: 0;
   bottom: -6px;
-  height: 2px;
+  height: 3px;
   width: 0;
   background-color: var(--heading-accent);
-  transition: width 500ms ease;
+  transition: width 700ms ease;
 }
 h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
   color: var(--heading-accent);
