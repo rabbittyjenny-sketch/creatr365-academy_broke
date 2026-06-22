@@ -380,24 +380,21 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
 }
 
-.nav-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  color: hsl(var(--foreground));
-}
 .nav-link::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: -4px;
-  height: 1px;
-  background: var(--hover-accent, hsl(var(--google-blue)));
+  height: 2px;
+  background: var(--hover-accent, hsl(var(--brand-gold)));
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.28s ease;
+  transition: transform 0.6s ease;
+}
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--hover-accent, hsl(var(--brand-gold)));
 }
 .nav-link:hover,
 .nav-link[aria-current="page"] {
