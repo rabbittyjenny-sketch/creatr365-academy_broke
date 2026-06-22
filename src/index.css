@@ -46,7 +46,13 @@ body {
     --google-red: 348 100% 40%;   /* #CC0033 */
     --google-yellow: 51 100% 50%; /* #FFD700 Gold */
     --google-green: 142 53% 46%;
+    --brand-gold: 44 53% 48%;     /* #BD9A3A — สี pop/เน้น ของแบรนด์ */
 
+    /* Brand type scale — ใช้แทน fontSize ทั้งเว็บ */
+    --text-remark: clamp(12px,1vw,14px);    /* ตัวเล็ก/อ้างอิง */
+    --text-base: clamp(13px,1.1vw,15px);    /* ตัวอักษรปกติ */
+    --text-display: clamp(18px,1.8vw,24px); /* ตัวใหญ่สุด/หัวข้อพิเศษ */
+ 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
