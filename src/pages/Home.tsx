@@ -573,6 +573,8 @@ export default function Home() {
             zIndex: 2,
             display: 'flex',
             gap: 'clamp(32px,4vw,56px)',
+              right: 'clamp(20px,5vw,72px)',
+            flexWrap: 'wrap',
           }}
         >
           {[
@@ -622,6 +624,8 @@ export default function Home() {
             zIndex: 2,
             display: 'flex',
             gap: 'clamp(32px,4vw,56px)',
+              right: 'clamp(20px,5vw,72px)',
+            flexWrap: 'wrap',
           }}
         >
           {[
@@ -714,6 +718,12 @@ export default function Home() {
             zIndex: 2,
             display: 'flex',
             gap: '36px',
+             transform: 'translateX(-10%)',
+            zIndex: 2,
+            display: 'flex',
+            gap: '36px',
+            flexWrap: 'wrap',
+            right: 'clamp(16px,4vw,60px)',
             alignItems: 'flex-end'
           }}
         >
