@@ -110,7 +110,7 @@ export default function Home() {
         {/* BG parallax layer — brightness filter only, no overlays */}
         <div ref={heroBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
-            src="/images/Hero-new2.png"
+            src="/images/hero_new2.png"
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right'}}
           />
