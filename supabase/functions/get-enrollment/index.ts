@@ -6,18 +6,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// slug → LMS course ID mapping (matches COURSES object in Creatr365_LMS_v2.jsx)
+// slug → LMS course ID mapping (matches COURSES / LMS_TO_SLUG object in Creatr365_LMS_v2.jsx)
+// ต้องแก้คู่กับ LMS_TO_SLUG ในฝั่ง LMS เสมอ ไม่งั้น enrollment จะ resolve คอร์สผิด
 const SLUG_TO_LMS: Record<string, string> = {
-  "micro-express": "MICRO_EXPRESS",
-  "signal":        "SIGNAL",
-  "matrix":        "MATRIX",
-  "stage":         "STAGE",
-  "blueprint":     "BLUEPRINT",
-  "frontier":      "FRONTIER",
+  "magnet":                "FR_MAGNET",
+  "foundation":             "COURSE_0_FOUNDATION",
+  "signal":                 "COURSE_1_SIGNAL",
+  "stage":                  "COURSE_2_STAGE",
+  "brand-host-architect":   "COURSE_3_BRAND_HOST",
 };
 
 // Free / lead-magnet course always visible to every registered student
-const FREE_COURSE_SLUG = "micro-express";
+const FREE_COURSE_SLUG = "magnet";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
