@@ -14,7 +14,7 @@ interface Props {
  * Splits text into per-letter spans so each character animates
  * independently as the cursor passes across it.
  */
-export const HoverLetters: React.FC<Props> = ({ text, accent = 'blue', className = '', variant = 'color' }) => {
+export const HoverLetters: React.FC<Props> = ({ text, accent = 'red', className = '', variant = 'color' }) => {
   const cls =
     variant === 'underline' ? 'hover-letters hover-letters--underline' :
     variant === 'highlight' ? 'hover-letters hover-letters--highlight' :
