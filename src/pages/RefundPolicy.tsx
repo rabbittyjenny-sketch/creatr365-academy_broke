@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { Check, X, AlertTriangle } from 'lucide-react';
+import { Check, X, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 const RefundPolicy: React.FC = () => {
   useEffect(() => {
@@ -15,6 +16,9 @@ const RefundPolicy: React.FC = () => {
       <CourseNavbar />
       <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> กลับหน้าแรก
+          </Link>
           <div className="mb-12">
             <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Legal</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">นโยบายการคืนเงิน</h1>
@@ -87,7 +91,7 @@ const RefundPolicy: React.FC = () => {
                   'หากคอร์สใหม่ราคาสูงกว่า ผู้เรียนต้องชำระส่วนต่าง',
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <Check className="w-4 h-4 text-[#4285F4] flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-[#34A853] flex-shrink-0 mt-0.5" />
                     <p className="text-white/60 text-sm">{item}</p>
                   </div>
                 ))}
