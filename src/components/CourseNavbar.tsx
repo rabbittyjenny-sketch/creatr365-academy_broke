@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 
 const MAIN_NAV = [
   { to: '/', label: 'หน้าแรก', accent: 'red' },
@@ -24,7 +25,7 @@ export const CourseNavbar: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await fullSignOut();
     setOpen(false);
     navigate('/');
   };
