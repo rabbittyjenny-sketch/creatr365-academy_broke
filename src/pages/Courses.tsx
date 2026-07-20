@@ -39,8 +39,6 @@ const STATUS_META: Record<string, { label: string } | null> = {
   none: null,
 };
 
-const ACCENT_CYCLE = ['blue', 'red', 'yellow', 'green'] as const;
-
 const Courses: React.FC = () => {
   const [courses, setCourses] = useState<CourseRow[]>([]);
 
@@ -63,16 +61,16 @@ const Courses: React.FC = () => {
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4" data-accent="red">
             หลักสูตรทั้งหมด
           </h1>
-          <p className="text-muted-foreground text-lg mb-12" data-accent="blue">
+          <p className="text-muted-foreground text-lg mb-12" data-accent="red">
             ครอบคลุมทุกระดับ
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course, idx) => {
+            {courses.map((course) => {
               const learning = LEARNING_META[course.learning_type] || LEARNING_META.offline;
               const status = STATUS_META[course.status as keyof typeof STATUS_META];
               const LearnIcon = learning.Icon;
-              const accent = ACCENT_CYCLE[idx % 4];
+              const accent = 'red' as const;
               return (
                 <Link key={course.id} to={`/course/${course.slug}`} className="group">
                   <div className="card-water border border-border bg-card h-full flex flex-col" data-accent={accent}>
