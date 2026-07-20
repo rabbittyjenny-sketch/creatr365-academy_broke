@@ -8,7 +8,7 @@ import { Plus, Pencil, Trash2, ArrowLeft, Save, X, ArrowUp, ArrowDown, Ticket, E
 /* ─── Types ────────────────────────────────────────────── */
 interface CourseRow {
   id:string; slug:string; tag:string; title:string; subtitle:string; description:string;
-  duration:string; price:string; features:string[]; color:string; sort_order:number;
+  duration:string; price:string; promo_price:string|null; features:string[]; color:string; sort_order:number;
   is_active:boolean; learning_type:string; max_slots:number|null; stripe_price_id:string|null;
   status:string; level:string|null; target_audience:string|null; format_label:string|null;
   intro_video_url:string|null; cover_image_url:string|null; gallery_image_urls:string[];
@@ -38,6 +38,7 @@ const LEARNING_TYPES = [
 const STATUS_OPTIONS = [
   { value:'now_open',    label:'Now Open ●' },
   { value:'coming_soon', label:'Coming Soon' },
+  { value:'fully_booked',label:'Fully Booked' },
   { value:'draft',       label:'Draft (Hidden)' },
   { value:'archived',    label:'Archived' },
 ];
@@ -45,7 +46,7 @@ const LEVEL_OPTIONS = ['STARTER','DEVELOPING','COMPETENT','PROFICIENT','MASTER']
 
 const emptyCourse = (sort:number): CourseRow => ({
   id:'', slug:'', tag:'', title:'', subtitle:'', description:'',
-  duration:'', price:'', features:[], color:'red',
+  duration:'', price:'', promo_price:null, features:[], color:'red',
   sort_order:sort, is_active:true, learning_type:'online', max_slots:null,
   stripe_price_id:null, status:'now_open', level:null, target_audience:null,
   format_label:null, intro_video_url:null, cover_image_url:null,
@@ -122,7 +123,7 @@ const AdminCourses = () => {
     const payload = {
       slug:editingCourse.slug, tag:editingCourse.tag, title:editingCourse.title,
       subtitle:editingCourse.subtitle, description:editingCourse.description,
-      duration:editingCourse.duration, price:editingCourse.price,
+      duration:editingCourse.duration, price:editingCourse.price, promo_price:editingCourse.promo_price||null,
       features:featuresText.split('\n').map(f=>f.trim()).filter(Boolean),
       color:editingCourse.color, sort_order:editingCourse.sort_order,
       is_active:editingCourse.is_active, learning_type:editingCourse.learning_type,
@@ -634,6 +635,9 @@ const AdminCourses = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <Field label="ราคาปกติ">
                       <input className={inp} value={ec.price} onChange={e=>setEditingCourse({...ec,price:e.target.value})} placeholder="3,990.-" />
+                    </Field>
+                    <Field label="ราคาโปรโมชั่น (ถ้ามี)">
+                      <input className={inp} value={ec.promo_price||''} onChange={e=>setEditingCourse({...ec,promo_price:e.target.value||null})} placeholder="2,990.- (เว้นว่างถ้าไม่มีโปร)" />
                     </Field>
                     <Field label="Stripe Price ID">
                       <input className={`${inp} font-mono text-xs`} value={ec.stripe_price_id||''} onChange={e=>setEditingCourse({...ec,stripe_price_id:e.target.value||null})} placeholder="price_xxx" />
