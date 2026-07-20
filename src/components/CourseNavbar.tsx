@@ -6,8 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 const MAIN_NAV = [
   { to: '/', label: 'หน้าแรก', accent: 'red' },
   { to: '/courses', label: 'หลักสูตร', accent: 'red' },
-  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'green' },
-  { to: '/articles', label: 'บทความ', accent: 'yellow' },
+  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'red' },
+  { to: '/articles', label: 'บทความ', accent: 'red' },
   { to: '/contact', label: 'ติดต่อ', accent: 'red' },
 ] as const;
 
@@ -59,11 +59,11 @@ export const CourseNavbar: React.FC = () => {
           ))}
           {user ? (
             <>
-              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
+              <Link to="/dashboard" data-accent="red" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
               <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">ออกจากระบบ</button>
             </>
           ) : (
-            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
+            <Link to="/auth" data-accent="red" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
               เข้าสู่ระบบ
             </Link>
           )}
@@ -97,11 +97,11 @@ export const CourseNavbar: React.FC = () => {
             ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
+                <Link to="/dashboard" onClick={close} data-accent="red" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
                 <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">ออกจากระบบ</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
+              <Link to="/auth" onClick={close} data-accent="red" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
                 เข้าสู่ระบบ
               </Link>
             )}
