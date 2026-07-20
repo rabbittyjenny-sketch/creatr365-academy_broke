@@ -47,8 +47,6 @@ const LEARNING_LABELS: Record<string, string> = {
   offline: 'Offline', online: 'Online', hybrid: 'Hybrid',
 };
 
-const ACCENT_CYCLE = ['blue', 'green', 'yellow', 'red'] as const;
-
 const youTubeEmbed = (url: string): string | null => {
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/);
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
@@ -97,7 +95,7 @@ const CourseDetail: React.FC = () => {
     );
   }
 
-  const accent = ACCENT_CYCLE[Math.abs(course.title.length) % 4];
+  const accent = 'red' as const;
 
   const handleEnroll = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -164,7 +162,7 @@ const CourseDetail: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold mb-4">สิ่งที่จะได้เรียนรู้</h3>
+              <h3 className="text-2xl font-bold mb-4">สิ่งที่จะได้เรียนรู้</h3>
               <ul className="space-y-3">
                 {course.features.map((f, i) => (
                   <li key={i} className="flex items-start gap-3 group">
@@ -179,7 +177,7 @@ const CourseDetail: React.FC = () => {
 
             {modules.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4">โครงสร้างบทเรียน</h3>
+                <h3 className="text-2xl font-bold mb-4">โครงสร้างบทเรียน</h3>
                 <ol className="space-y-2">
                   {modules.map((m) => (
                     <li key={m.id} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-card">
@@ -197,7 +195,7 @@ const CourseDetail: React.FC = () => {
 
             {course.gallery_image_urls?.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4">รูปจากคอร์ส</h3>
+                <h3 className="text-2xl font-bold mb-4">รูปจากคอร์ส</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {course.gallery_image_urls.map((src, i) => (
                     <img key={i} src={src} alt={`gallery-${i}`} className="rounded-xl border border-border w-full aspect-video object-cover" />
@@ -208,7 +206,7 @@ const CourseDetail: React.FC = () => {
 
             {course.deliverables?.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4">สิ่งที่ผู้เรียนจะได้รับ</h3>
+                <h3 className="text-2xl font-bold mb-4">สิ่งที่ผู้เรียนจะได้รับ</h3>
                 <ul className="space-y-2">
                   {course.deliverables.map((d, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-foreground">
@@ -259,7 +257,7 @@ const CourseDetail: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {course.kpi_notes.map((k, i) => (
                 <div key={i} className="rounded-lg border border-border p-3 bg-card">
-                  <p className="text-xs font-semibold text-foreground hover-shift" data-accent={ACCENT_CYCLE[i % 4]}>{k.value}</p>
+                  <p className="text-xs font-semibold text-foreground hover-shift" data-accent={accent}>{k.value}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{k.label}</p>
                   {k.note && <p className="text-[10px] text-muted-foreground/70 mt-0.5">{k.note}</p>}
                 </div>
