@@ -7,7 +7,7 @@
  *     → สร้าง Supabase account + profiles row อัตโนมัติ
  *     → คืน token_hash (magic link)
  *  3. supabase.auth.verifyOtp(token_hash) → session สร้างทันที (login แล้ว)
- *  4. User กรอก email (optional) + Master Key (optional)
+ *  4. User กรอก email (บังคับ — คือกุญแจรวม Master Key) + Master Key เดิม (ถ้ามี, ไม่บังคับ)
  *  5. Link identity ผ่าน RPC กลาง เพื่อไม่ให้ LINE/web แตก Key
  *  6. Redirect → /dashboard
  *
@@ -43,6 +43,7 @@ const Register = () => {
 
   const [email, setEmail]         = useState("");
   const [studentId, setStudentId] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // ── Init LIFF → liff-auth → Supabase session ────────────────────────────────
   useEffect(() => {
@@ -97,12 +98,20 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!lineProfile) return;
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+    if (!isValidEmail) {
+      setEmailError("กรุณากรอกอีเมลให้ถูกต้อง — ใช้สำหรับรวม Master Key ให้เป็นคนเดียวกันทั้งเว็บและ LINE");
+      return;
+    }
+    setEmailError(null);
     setStep("saving");
 
     try {
       const { data: masterKey, error } = await supabase.rpc("link_line_master_student_account", {
         _line_user_id: lineProfile.userId,
-        _email: email.trim().toLowerCase() || null,
+        _email: trimmedEmail,
         _student_id: studentId.trim().toUpperCase() || null,
       });
 
@@ -187,15 +196,22 @@ const Register = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="text-xs font-bold block mb-1.5">
-                    อีเมล <span className="font-normal text-muted-foreground">(ไม่บังคับ — ใช้สำหรับรับข่าวสาร)</span>
+                    อีเมล <span className="font-normal text-destructive">(บังคับกรอก)</span>
                   </label>
                   <Input
                     type="email"
                     placeholder="your@email.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => { setEmail(e.target.value); setEmailError(null); }}
+                    required
                     className="h-12 rounded-xl"
                   />
+                  <p className="text-xs text-muted-foreground mt-1 ml-1">
+                    อีเมลนี้คือกุญแจรวมบัญชี — ถ้าเคยสมัครหน้าเว็บด้วยอีเมลนี้แล้ว ระบบจะรวมเป็น Master Key เดียวกันอัตโนมัติ
+                  </p>
+                  {emailError && (
+                    <p className="text-xs text-destructive mt-1 ml-1">{emailError}</p>
+                  )}
                 </div>
 
                 <div>
