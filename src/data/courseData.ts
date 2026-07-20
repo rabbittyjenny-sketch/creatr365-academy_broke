@@ -149,42 +149,29 @@ export const courses: Course[] = [
   },
 ];
 
+/* Every course renders in the single brand accent (red), whatever legacy
+   'color' value is stored on the row in the database. 'black' stays as the
+   neutral option for the free starter course. No more per-course rainbow. */
+const RED = {
+  bg: 'bg-google-red',
+  text: 'text-google-red',
+  border: 'border-google-red',
+  bgLight: 'bg-google-red/10',
+  hex: '#CC0033',
+};
+const BLACK = {
+  bg: 'bg-foreground',
+  text: 'text-foreground',
+  border: 'border-foreground',
+  bgLight: 'bg-foreground/10',
+  hex: '#1A1A1A',
+};
 export const colorMap = {
-  blue: {
-    bg: 'bg-google-blue',
-    text: 'text-google-blue',
-    border: 'border-google-blue',
-    bgLight: 'bg-google-blue/10',
-    hex: '#4285F4',
-  },
-  red: {
-    bg: 'bg-google-red',
-    text: 'text-google-red',
-    border: 'border-google-red',
-    bgLight: 'bg-google-red/10',
-    hex: '#CC0033',
-  },
-  yellow: {
-    bg: 'bg-google-yellow',
-    text: 'text-google-yellow',
-    border: 'border-google-yellow',
-    bgLight: 'bg-google-yellow/10',
-    hex: '#FFD700',
-  },
-  green: {
-    bg: 'bg-google-green',
-    text: 'text-google-green',
-    border: 'border-google-green',
-    bgLight: 'bg-google-green/10',
-    hex: '#34A853',
-  },
-  black: {
-    bg: 'bg-foreground',
-    text: 'text-foreground',
-    border: 'border-foreground',
-    bgLight: 'bg-foreground/10',
-    hex: '#1A1A1A',
-  },
+  blue: RED,
+  red: RED,
+  yellow: RED,
+  green: RED,
+  black: BLACK,
 };
 
 export const marketStats = [
