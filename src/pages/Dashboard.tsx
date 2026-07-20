@@ -18,7 +18,6 @@ interface ModuleRow {
 }
 interface ProgressRow { module_id: string; status: string; score: number | null }
 
-const COLOR_CYCLE = ['blue', 'green', 'yellow', 'red'] as const;
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
 
 async function ensureStudentId(userId: string, email: string): Promise<string> {
@@ -126,7 +125,7 @@ const Dashboard: React.FC = () => {
 
   const enrolledCourses = useMemo(() => courses
     .filter(c => enrolledIds.has(c.id))
-    .map((c, idx) => ({ course: c, accent: COLOR_CYCLE[idx % 4] })),
+    .map((c) => ({ course: c, accent: 'red' as const })),
     [courses, enrolledIds],
   );
 
@@ -142,10 +141,10 @@ const Dashboard: React.FC = () => {
       : 0;
 
     return [
-      { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'blue' },
-      { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'green' },
+      { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'red' },
+      { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'red' },
       { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
-      { label: 'ใบประกาศ', value: completedCourses, accent: 'yellow' },
+      { label: 'ใบประกาศ', value: completedCourses, accent: 'red' },
     ];
   }, [enrollments, enrolledCourses.length, modulesByCourse, completedModuleIds, progress]);
 
@@ -164,7 +163,7 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div>
           <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
-          <h1 className="text-2xl font-bold" data-accent="green">{displayName}</h1>
+          <h1 className="text-2xl font-bold" data-accent="red">{displayName}</h1>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-xs font-mono bg-muted border border-border px-2 py-0.5 rounded-md">{keyId}</span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -191,7 +190,7 @@ const Dashboard: React.FC = () => {
           {enrolledCourses.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
               ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
-              <Link to="/courses" className="underline hover-shift" data-accent="blue">เลือกคอร์ส</Link>
+              <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
             </div>
           ) : (
             <div className="space-y-3">
