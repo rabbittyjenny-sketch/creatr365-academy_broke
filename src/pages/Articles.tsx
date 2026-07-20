@@ -21,8 +21,10 @@ const KIND_META: Record<string,{ label:string; Icon:React.FC<{className?:string}
   update:    { label:'UPDATE',     Icon:Newspaper },
 };
 
+/* Single brand accent for every category — icon shape (see KIND_META)
+   differentiates the tags, not color, so the page reads as one brand. */
 const KIND_COLORS: Record<string,string> = {
-  news:'#CC0033', tool:'#4285F4', community:'#34A853', quiz:'#9B59B6', blog:'#D4A843', update:'#888',
+  news:'#CC0033', tool:'#CC0033', community:'#CC0033', quiz:'#CC0033', blog:'#CC0033', update:'#CC0033',
 };
 
 const Articles: React.FC = () => {
