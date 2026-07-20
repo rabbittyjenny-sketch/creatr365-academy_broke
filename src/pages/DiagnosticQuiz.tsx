@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { Footer } from '@/components/Footer';
 
 const DIAGNOSTIC_URL = 'https://test-diagnostic-creatr365.vercel.app';
 
@@ -53,12 +55,15 @@ const DiagnosticQuiz: React.FC = () => {
       <SEOHead title="Diagnostic Quiz - Creatr365" description="แบบทดสอบวัดทักษะ Live Commerce 10 ข้อ รู้ว่าคุณควรเริ่มจากตรงไหน" />
       <CourseNavbar />
       <main className="max-w-3xl mx-auto px-4 pt-28 pb-20">
+        <Link to="/" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> กลับหน้าแรก
+        </Link>
 
         {stage === 'intro' && (
           <section className="space-y-8">
-            <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase" data-accent="green">Diagnostic</p>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight" data-accent="green">รู้ก่อนว่าคุณ<br/>ควรเริ่มจากตรงไหน</h1>
-            <p className="text-lg text-muted-foreground max-w-xl" data-accent="green">
+            <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase" data-accent="red">Diagnostic</p>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight" data-accent="red">รู้ก่อนว่าคุณ<br/>ควรเริ่มจากตรงไหน</h1>
+            <p className="text-lg text-muted-foreground max-w-xl" data-accent="red">
               10 สถานการณ์จริง วัดทักษะ 5 มิติ — ไม่มีถูกหรือผิดตายตัว มีแค่ผลสรุปที่บอกว่าคุณอยู่จุดไหน
             </p>
             <ul className="text-sm text-muted-foreground space-y-1 list-none">
@@ -66,7 +71,7 @@ const DiagnosticQuiz: React.FC = () => {
               <li>📊 วัด 5 มิติ: AC · TB · EI · DO · ST</li>
               <li>🎯 แนะนำคอร์สที่เหมาะกับระดับของคุณ</li>
             </ul>
-            <button onClick={() => setStage('survey')} data-accent="green" className="btn-brand px-8 py-4 rounded-lg font-semibold">
+            <button onClick={() => setStage('survey')} data-accent="red" className="btn-brand px-8 py-4 rounded-lg font-semibold">
               <span>เริ่มต้นทำแบบทดสอบ</span><ArrowRight className="w-4 h-4"/>
             </button>
           </section>
@@ -74,7 +79,7 @@ const DiagnosticQuiz: React.FC = () => {
 
         {stage === 'survey' && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-bold" data-accent="green">ระบุข้อมูลส่วนตัว</h2>
+            <h2 className="text-2xl font-bold" data-accent="red">ระบุข้อมูลส่วนตัว</h2>
             <p className="text-sm text-muted-foreground">ข้อมูลนี้ใช้เพื่อวิเคราะห์ผลให้ตรงกับบริบทของคุณมากที่สุด ไม่ได้นำไปเปิดเผยสู่สาธารณะ</p>
             <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
               {[
@@ -109,7 +114,7 @@ const DiagnosticQuiz: React.FC = () => {
                 <input required value={profile.occupation} onChange={(e)=>setProfile(p=>({...p,occupation:e.target.value}))}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm"/>
               </div>
-              <button type="submit" data-accent="green" className="btn-brand px-6 py-3 rounded-lg font-semibold">
+              <button type="submit" data-accent="red" className="btn-brand px-6 py-3 rounded-lg font-semibold">
                 เริ่มทำแบบทดสอบ <ArrowRight className="w-4 h-4"/>
               </button>
             </form>
@@ -125,6 +130,7 @@ const DiagnosticQuiz: React.FC = () => {
         )}
 
       </main>
+      <Footer />
     </>
   );
 };
