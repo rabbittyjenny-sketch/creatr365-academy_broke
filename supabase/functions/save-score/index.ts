@@ -6,6 +6,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+async function resolveLinkedUserIds(supabase: ReturnType<typeof createClient>, studentId: string) {
+  const { data: accounts, error: acctErr } = await supabase
+    .from("user_accounts")
+    .select("line_user_id")
+    .eq("student_id", studentId)
+    .eq("is_active", true);
+
+  if (acctErr) throw new Error("user_accounts lookup failed: " + acctErr.message);
+
+  const userIds = new Set<string>();
+  const lineUserIds: string[] = [];
+
+  (accounts ?? []).forEach((account: { line_user_id: string }) => {
+    if (account.line_user_id.startsWith("web:")) {
+      userIds.add(account.line_user_id.replace("web:", ""));
+    } else {
+      lineUserIds.push(account.line_user_id);
+    }
+  });
+
+  if (lineUserIds.length > 0) {
+    const { data: profiles, error: profErr } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .in("line_user_id", lineUserIds);
+    if (profErr) throw new Error("profiles lookup failed: " + profErr.message);
+    (profiles ?? []).forEach((profile: { user_id: string }) => userIds.add(profile.user_id));
+  }
+
+  return [...userIds];
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -18,29 +50,9 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // หา line_user_id จาก student_id
-    const { data: acct, error: acctErr } = await supabase
-      .from("user_accounts")
-      .select("line_user_id")
-      .eq("student_id", student_id.trim().toUpperCase())
-      .maybeSingle();
-    if (acctErr) throw new Error("user_accounts lookup failed: " + acctErr.message);
-    if (!acct) throw new Error("student_id not found: " + student_id);
-
-    // แปลง line_user_id → auth.users.id
-    let authUserId: string;
-    if (acct.line_user_id.startsWith("web:")) {
-      authUserId = acct.line_user_id.replace("web:", "");
-    } else {
-      const { data: profile, error: profErr } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("line_user_id", acct.line_user_id)
-        .maybeSingle();
-      if (profErr) throw new Error("profiles lookup failed: " + profErr.message);
-      if (!profile) throw new Error("profile not found for LINE user");
-      authUserId = profile.user_id;
-    }
+    const sid = student_id.trim().toUpperCase();
+    const authUserIds = await resolveLinkedUserIds(supabase, sid);
+    if (authUserIds.length === 0) throw new Error("student_id not found: " + student_id);
 
     // หา module: ลอง course_slug + module_code ก่อน, fallback ด้วย module_code เดียว
     let mod: { id: string } | null = null;
@@ -82,29 +94,32 @@ serve(async (req) => {
       });
     }
 
-    // บันทึก progress พร้อม score
-    const { error: upsertErr } = await supabase.from("module_progress").upsert(
-      {
-        user_id: authUserId,
-        module_id: mod.id,
-        score: typeof score === "number" ? score : null,
-        status: passed ? "completed" : "in_progress",
-        completed_at: passed ? new Date().toISOString() : null,
-      },
-      { onConflict: "user_id,module_id" }
-    );
-    if (upsertErr) throw new Error("module_progress upsert failed: " + upsertErr.message);
+    const completedAt = passed ? new Date().toISOString() : null;
 
-    // ถ้าผ่าน → ปลดล็อคบทถัดไป
-    if (passed) {
-      const { error: unlockErr } = await supabase.rpc("unlock_next_module", {
-        _module_id: mod.id,
-        _user_id: authUserId,
-      });
-      if (unlockErr) console.error("unlock_next_module failed:", unlockErr.message);
+    for (const authUserId of authUserIds) {
+      const { error: upsertErr } = await supabase.from("module_progress").upsert(
+        {
+          user_id: authUserId,
+          module_id: mod.id,
+          score: typeof score === "number" ? score : null,
+          status: passed ? "completed" : "in_progress",
+          completed_at: completedAt,
+        },
+        { onConflict: "user_id,module_id" }
+      );
+      if (upsertErr) throw new Error("module_progress upsert failed: " + upsertErr.message);
+
+      // ถ้าผ่าน → ปลดล็อคบทถัดไปให้ทุก identity ที่ผูกกับ Master Key
+      if (passed) {
+        const { error: unlockErr } = await supabase.rpc("unlock_next_module", {
+          _module_id: mod.id,
+          _user_id: authUserId,
+        });
+        if (unlockErr) console.error("unlock_next_module failed:", unlockErr.message);
+      }
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, linked_users_updated: authUserIds.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
