@@ -24,7 +24,7 @@ export const Section: React.FC<SectionProps> = ({
   children,
   className = '',
   dark = false,
-  accent = 'blue',
+  accent = 'red',
 }) => {
   return (
     <section
