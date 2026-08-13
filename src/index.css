@@ -1,0 +1,527 @@
+/* Fonts loaded via index.html: Google Sans + Noto Sans Thai Looped */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 10%;
+
+    --destructive: 348 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 53% 46%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 20%;
+
+    --radius: 0.75rem;
+
+    /* Brand color palette — refined */
+    --google-blue: 217 89% 61%;
+    --google-red: 348 100% 40%;   /* #CC0033 */
+    --google-yellow: 51 100% 50%; /* #FFD700 Gold */
+    --google-green: 142 53% 46%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 89% 61%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 217 89% 61%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 98% 50%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 348 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 53% 46%;
+    --success-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 217 89% 61%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Reveal/Slide hover effect utilities */
+@layer utilities {
+  .reveal-slide {
+    @apply relative overflow-hidden;
+  }
+  
+  .reveal-slide .reveal-content {
+    @apply absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-500 ease-out;
+  }
+  
+  .reveal-slide:hover .reveal-content {
+    @apply translate-y-0;
+  }
+
+  .reveal-slide .reveal-overlay {
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500 ease-out;
+  }
+
+  .reveal-slide:hover .reveal-overlay {
+    @apply opacity-100;
+  }
+
+  .slide-up-text {
+    @apply transform translate-y-4 opacity-0 transition-all duration-500 ease-out;
+  }
+
+  .reveal-slide:hover .slide-up-text {
+    @apply translate-y-0 opacity-100;
+  }
+}
+
+/* === Creative Hover Effects === */
+
+/* Passing underline: line sweeps left-to-right under text */
+.passing-underline {
+  position: relative;
+  display: inline-block;
+}
+.passing-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--hover-accent, currentColor);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.86, 0, 0.07, 1);
+}
+.passing-underline:hover::after,
+.passing-underline-wrapper:hover .passing-underline::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Bracket hover: [ ] brackets appear on hover */
+.bracket-hover {
+  position: relative;
+  display: inline-block;
+  transition: padding 0.3s ease;
+}
+.bracket-hover::before,
+.bracket-hover::after {
+  position: absolute;
+  color: var(--hover-accent, currentColor);
+  opacity: 0;
+  transition: all 0.3s ease;
+  font-weight: 700;
+}
+.bracket-hover::before {
+  content: '[';
+  left: -8px;
+  transform: translateX(6px);
+}
+.bracket-hover::after {
+  content: ']';
+  right: -8px;
+  transform: translateX(-6px);
+}
+.bracket-hover:hover {
+  padding: 0 6px;
+}
+.bracket-hover:hover::before,
+.bracket-hover:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Sweep hover: background sweeps from left */
+.sweep-hover {
+  position: relative;
+  z-index: 1;
+}
+.sweep-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hover-accent, currentColor);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  border-radius: inherit;
+  z-index: -1;
+}
+.sweep-hover:hover::before {
+  transform: scaleX(1);
+  opacity: 0.08;
+}
+
+/* Feature item: left border slides in */
+.feature-item {
+  position: relative;
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+.feature-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--hover-accent, currentColor);
+  opacity: 0;
+  transform: scaleY(0);
+  transition: all 0.3s ease;
+}
+.feature-item:hover {
+  padding-left: 12px;
+}
+.feature-item:hover::before {
+  opacity: 0.5;
+  transform: scaleY(1);
+}
+
+.accent-hover-text {
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.group:hover .accent-hover-text,
+.accent-hover-text:hover {
+  color: var(--hover-accent, currentColor);
+  transform: translateX(4px);
+}
+
+/* Button slide arrow */
+.btn-slide .lucide-arrow-right {
+  transition: transform 0.3s ease;
+}
+.btn-slide:hover .lucide-arrow-right {
+  transform: translateX(4px);
+}
+
+/* === Unified hover effect: text color + slight shift === */
+/* Apply to any element. Cycles through 4 brand accents based on data attribute. */
+.hover-shift {
+  display: inline-block;
+  transition: color 0.28s ease, transform 0.28s ease;
+  cursor: pointer;
+}
+.hover-shift:hover,
+.group\/shift:hover .hover-shift,
+.group:hover .hover-shift {
+  transform: translateY(-1px);
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
+}
+.hover-shift[data-accent="blue"]:hover,
+.group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
+.hover-shift[data-accent="red"]:hover,
+.group:hover .hover-shift[data-accent="red"]    { color: hsl(var(--google-red)); }
+.hover-shift[data-accent="yellow"]:hover,
+.group:hover .hover-shift[data-accent="yellow"] { color: hsl(var(--google-yellow)); }
+.hover-shift[data-accent="green"]:hover,
+.group:hover .hover-shift[data-accent="green"]  { color: hsl(var(--google-green)); }
+
+/* === Card Water Hover (smooth accent wash + lift) === */
+.card-water {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 0.32s ease,
+              box-shadow 0.32s ease,
+              border-color 0.32s ease,
+              background-color 0.32s ease;
+  will-change: transform;
+}
+.card-water::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--hover-accent, hsl(var(--foreground)));
+  opacity: 0;
+  transform: none;
+  transform-origin: left center;
+  transition: opacity 0.32s ease;
+  z-index: -1;
+  border-radius: inherit;
+}
+.card-water:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -24px hsl(var(--foreground) / 0.2);
+  border-color: var(--hover-accent, hsl(var(--border)));
+}
+.card-water:hover::before {
+  opacity: 0.055;
+}
+.card-water[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.card-water[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.card-water[data-accent="yellow"] { --hover-accent: hsl(var(--google-yellow)); }
+.card-water[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+.card-water:hover .card-water-title {
+  color: var(--hover-accent, hsl(var(--foreground)));
+  transition: color 0.45s ease;
+}
+
+/* === Per-letter Hover Effect ===
+   Wraps each character in a span; when cursor passes a letter,
+   that single letter changes color/underline/highlight independently.
+*/
+.hover-letters {
+  display: inline-block;
+  --hover-accent: hsl(var(--foreground));
+}
+.hover-letters[data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.hover-letters[data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.hover-letters[data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); } /* darker for contrast on white */
+.hover-letters[data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.hover-letters .hl-char {
+  display: inline-block;
+  position: relative;
+  transition: color 220ms ease, transform 220ms ease;
+  will-change: color, transform;
+}
+.hover-letters .hl-char:hover {
+  color: var(--hover-accent);
+  transform: translateY(-2px);
+}
+
+/* Underline variant: each letter gets its own underline that fills on hover */
+.hover-letters--underline .hl-char::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: var(--hover-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms ease;
+}
+.hover-letters--underline .hl-char:hover::after { transform: scaleX(1); }
+
+/* Highlight variant: background bar appears behind each letter on hover */
+.hover-letters--highlight .hl-char {
+  padding: 0 1px;
+  border-radius: 2px;
+}
+.hover-letters--highlight .hl-char:hover {
+  background: var(--hover-accent);
+  color: hsl(var(--background));
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* === Global Heading + Text Hover Effect ===
+   ONE consistent style across the whole site.
+   Color is driven by --section-accent set on the parent <section data-accent="...">.
+   Each section uses ONE color — never mixed inside the same section.
+*/
+.section-accent[data-accent="blue"]   { --section-accent: hsl(var(--google-blue)); }
+.section-accent[data-accent="red"]    { --section-accent: hsl(var(--google-red)); }
+.section-accent[data-accent="yellow"] { --section-accent: hsl(45 95% 42%); }
+.section-accent[data-accent="green"]  { --section-accent: hsl(var(--google-green)); }
+
+/* Inherit section accent for hover-shift / card-water when no override */
+.section-accent .hover-shift:not([data-accent]),
+.section-accent .card-water:not([data-accent]) {
+  --hover-accent: var(--section-accent, hsl(var(--foreground)));
+}
+
+h1, h2, h3, h4, h5, h6, .heading-hover {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  transition: color 500ms ease;
+  --heading-accent: hsl(var(--google-blue));
+}
+.section-accent h1,
+.section-accent h2,
+.section-accent h3,
+.section-accent h4,
+.section-accent h5,
+.section-accent h6,
+.section-accent .heading-hover {
+  --heading-accent: var(--section-accent);
+}
+h1::after, h2::after, h3::after, h4::after, h5::after, h6::after, .heading-hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  width: 0;
+  background-color: var(--heading-accent);
+  transition: width 500ms ease;
+}
+h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
+  color: var(--heading-accent);
+}
+h1:hover::after, h2:hover::after, h3:hover::after,
+h4:hover::after, h5:hover::after, h6:hover::after,
+.heading-hover:hover::after {
+  width: 100%;
+}
+
+/* === App-wide professional hover language ===
+   Simple, consistent state changes: color for text, subtle lift for cards,
+   and soft accent wash for buttons. Driven only by the brand accents.
+*/
+.site-hover-scope,
+.site-hover-scope [data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
+.site-hover-scope [data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
+.site-hover-scope [data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); }
+.site-hover-scope [data-accent="green"]  { --hover-accent: hsl(var(--google-green)); }
+
+.site-hover-scope p,
+.site-hover-scope li,
+.site-hover-scope label,
+.site-hover-scope small,
+.site-hover-scope span:not(.sr-only):not(.hl-char),
+.site-hover-scope a:not(.btn-brand),
+.site-hover-scope button:not(.btn-brand) {
+  transition: color 0.28s ease, border-color 0.28s ease, background-color 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
+}
+
+.site-hover-scope p:hover,
+.site-hover-scope li:hover,
+.site-hover-scope label:hover,
+.site-hover-scope small:hover,
+.site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+.site-hover-scope a:not(.btn-brand):hover,
+.site-hover-scope button:not(.btn-brand):hover {
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: hsl(var(--foreground));
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--hover-accent, hsl(var(--google-blue)));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s ease;
+}
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--hover-accent, hsl(var(--google-blue)));
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.btn-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border: 1px solid hsl(var(--foreground));
+  transition: color 0.28s ease, border-color 0.28s ease, transform 0.28s ease, background-color 0.28s ease;
+}
+.btn-brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--hover-accent, hsl(var(--google-blue)));
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.btn-brand:hover {
+  transform: translateY(-1px);
+  border-color: var(--hover-accent, hsl(var(--foreground)));
+}
+.btn-brand:hover::before {
+  opacity: 1;
+}
+.btn-brand span,
+.btn-brand svg {
+  color: inherit;
+}
+.btn-brand--outline {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+}
+.btn-brand--outline:hover {
+  color: hsl(var(--background));
+}
+
+@media (hover: none) {
+  .site-hover-scope p:hover,
+  .site-hover-scope li:hover,
+  .site-hover-scope label:hover,
+  .site-hover-scope small:hover,
+  .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
+  .site-hover-scope a:not(.btn-brand):hover,
+  .site-hover-scope button:not(.btn-brand):hover,
+  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
+    color: inherit;
+  }
+}
+
