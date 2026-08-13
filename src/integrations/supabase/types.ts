@@ -747,18 +747,6 @@ export type Database = {
         Returns: boolean
       }
       increment_promo_used: { Args: { promo_id: string }; Returns: undefined }
-      ensure_master_student_account: {
-        Args: { _email?: string | null }
-        Returns: string
-      }
-      link_line_master_student_account: {
-        Args: {
-          _line_user_id: string
-          _email?: string | null
-          _student_id?: string | null
-        }
-        Returns: string
-      }
       unlock_next_module: {
         Args: { _module_id: string; _user_id: string }
         Returns: undefined

@@ -10,9 +10,8 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,        // FIX: sessionStorage ทำให้ back-button / new tab เสีย session
+    storage: sessionStorage,
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,     // FIX: จำเป็นสำหรับ magic link / OAuth redirect
   }
 });
