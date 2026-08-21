@@ -42,7 +42,7 @@ const Register = () => {
   const [errorMsg, setErrorMsg]       = useState<string | null>(null);
 
   const [email, setEmail]         = useState("");
-  const [studentId, setStudentId] = useState("");
+  const [studentId, setStudentId] = useState(() => new URLSearchParams(window.location.search).get("master_key")?.trim().toUpperCase() || "");
   const [emailError, setEmailError] = useState<string | null>(null);
 
   // ── Init LIFF → liff-auth → Supabase session ────────────────────────────────
@@ -220,7 +220,7 @@ const Register = () => {
                   </label>
                   <Input
                     type="text"
-                    placeholder="STU-XXXX"
+                    placeholder="Master Key"
                     value={studentId}
                     onChange={(e) => setStudentId(e.target.value.toUpperCase())}
                     className="h-12 rounded-xl font-mono"

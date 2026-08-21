@@ -49,6 +49,8 @@ const STATUS_META: Record<string, { label: string; className: string } | null> =
   none: null,
 };
 
+const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
+
 const Courses: React.FC = () => {
   const [courses, setCourses] = useState<CourseRow[]>([]);
 
@@ -58,7 +60,7 @@ const Courses: React.FC = () => {
       .select('*')
       .eq('is_active', true)
       .order('sort_order')
-      .then(({ data }) => setCourses((data as unknown as CourseRow[]) || []));
+      .then(({ data }) => setCourses((((data as unknown as CourseRow[]) || []).filter(c => CURRENT_COURSE_SLUGS.has(c.slug))));
   }, []);
 
   return (

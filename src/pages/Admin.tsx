@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { SEOHead } from '@/components/SEOHead';
 import { ArrowLeft } from 'lucide-react';
+import { isCurrentUserAdmin } from '@/lib/admin';
 
 // Input validation schema
 const eventSchema = z.object({
@@ -73,7 +74,8 @@ const Admin = () => {
       navigate('/auth?redirect=/admin');
       return;
     }
-    // ✅ เอา user_roles check ออก — ใช้แค่ session ธรรมดา
+    const allowed = await isCurrentUserAdmin(session.user.id);
+    if (!allowed) { navigate('/'); return; }
     setIsAdmin(true);
     setLoading(false);
     fetchEvents();

@@ -19,19 +19,12 @@ interface ModuleRow {
 interface ProgressRow { module_id: string; status: string; score: number | null }
 
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
+const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
 
-async function ensureStudentId(userId: string, email: string): Promise<string> {
-  const fallback = 'STU-' + userId.slice(0, 6).toUpperCase();
-  try {
-    const { data, error } = await supabase.rpc('ensure_master_student_account', {
-      _email: email,
-    });
-    if (error) throw error;
-    if (typeof data === 'string' && data) return data;
-  } catch (e) {
-    console.warn('ensureStudentId failed', e);
-  }
-  return fallback;
+async function ensureStudentId(email: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc('ensure_master_student_account', { _email: email });
+  if (error) { console.error('ensure_master_student_account failed', error); return null; }
+  return typeof data === 'string' && data.trim() ? data.trim() : null;
 }
 
 const Dashboard: React.FC = () => {
@@ -58,23 +51,21 @@ const Dashboard: React.FC = () => {
     ]);
 
     setProfile(prof || null);
-    setCourses((cs as any) || []);
+    setCourses(((cs as any) || []).filter((c: CourseRow) => CURRENT_COURSE_SLUGS.has(c.slug)));
     const enRows: EnrollmentRow[] = (en as any) || [];
     setEnrollments(enRows);
 
-    // Resolve student_id
+    // Resolve the one shared Master Key. Never synthesize a second key in the browser.
     let sid: string | null = null;
     if ((prof as any)?.line_user_id) {
-      const { data: acct } = await supabase
-        .from('user_accounts')
-        .select('student_id')
-        .eq('line_user_id', (prof as any).line_user_id)
-        .maybeSingle();
+      const { data: acct } = await supabase.from('user_accounts').select('student_id').eq('line_user_id', (prof as any).line_user_id).maybeSingle();
       sid = (acct as any)?.student_id ?? null;
     }
-    if (!sid) {
-      sid = await ensureStudentId(u.id, u.email ?? `web_${u.id}@creatr365.com`);
+    if (!sid && u.email) {
+      const { data: acct } = await supabase.from('user_accounts').select('student_id').eq('email', u.email.toLowerCase()).maybeSingle();
+      sid = (acct as any)?.student_id ?? null;
     }
+    if (!sid && u.email) sid = await ensureStudentId(u.email);
     setStudentId(sid);
 
     // Fetch modules and progress for enrolled courses
@@ -148,9 +139,10 @@ const Dashboard: React.FC = () => {
     ];
   }, [enrollments, enrolledCourses.length, modulesByCourse, completedModuleIds, progress]);
 
-  if (!user || studentId === null) return null;
+  if (!user) return null;
+  if (!studentId) return (<><CourseNavbar /><main className="max-w-2xl mx-auto px-4 py-24"><h1 className="text-xl font-bold">ยังไม่พบ Master Key ของบัญชีนี้</h1><p className="text-sm text-muted-foreground mt-2">กรุณาสมัคร/เชื่อมบัญชีให้เรียบร้อยก่อนเริ่มเรียน</p><Link to="/register" className="inline-block mt-5 underline">ไปหน้าสมัครสมาชิก</Link></main></>);
 
-  const keyId = studentId || `STU-${user.id.slice(0, 6).toUpperCase()}`;
+  const keyId = studentId;
   const displayName = profile?.display_name || user.email?.split('@')[0] || 'นักเรียน';
   const currentLevel = enrolledCourses.length === 0 ? 'GUEST' : LEVEL_NAMES[0];
 
@@ -200,7 +192,8 @@ const Dashboard: React.FC = () => {
                 const done = courseMods.filter(m => completedModuleIds.has(m.id)).length;
                 const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                 const isOpen = openCourse === c.id;
-                const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}`;
+                const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(keyId)}`;
+                const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}&returnTo=${encodeURIComponent(returnTo)}`;
 
                 return (
                   <div key={c.id} className="card-water border border-border bg-card overflow-hidden" data-accent={accent}>
