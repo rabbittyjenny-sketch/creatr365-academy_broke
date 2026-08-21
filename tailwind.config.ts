@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Google Sans', 'Noto Sans Thai Looped', 'system-ui', 'sans-serif'],
+        sans: ['Google Sans Flex', 'IBM Plex Sans Thai', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
