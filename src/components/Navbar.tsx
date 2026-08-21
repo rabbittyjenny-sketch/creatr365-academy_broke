@@ -11,7 +11,6 @@ const MAIN_NAV = [
   { to: '/contact', label: 'ติดต่อ' },
 ] as const;
 
-const FONT = "'Google Sans Flex', 'Mitr', sans-serif";
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
