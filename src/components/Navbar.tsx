@@ -13,7 +13,7 @@ const MAIN_NAV = [
 
 const FONT = "'Google Sans Flex', 'Mitr', sans-serif";
 
-export const CourseNavbar: React.FC = () => {
+export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser]       = useState<any>(null);
