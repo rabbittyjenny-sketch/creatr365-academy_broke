@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { fullSignOut } from '@/lib/fullSignOut';
 
 const MAIN_NAV = [
-  { to: '/', label: 'หน้าแรก', accent: 'red' },
+  { to: '/', label: 'หน้าแรก', accent: 'blue' },
   { to: '/courses', label: 'หลักสูตร', accent: 'red' },
-  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'red' },
-  { to: '/articles', label: 'บทความ', accent: 'red' },
-  { to: '/contact', label: 'ติดต่อ', accent: 'red' },
+  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'green' },
+  { to: '/articles', label: 'บทความ', accent: 'yellow' },
+  { to: '/contact', label: 'ติดต่อ', accent: 'blue' },
 ] as const;
 
 export const CourseNavbar: React.FC = () => {
@@ -25,7 +24,7 @@ export const CourseNavbar: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await fullSignOut();
+    await supabase.auth.signOut();
     setOpen(false);
     navigate('/');
   };
@@ -42,7 +41,7 @@ export const CourseNavbar: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
-          <img src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png" alt="Creatr365" className="h-7 w-auto" />
+          <img src="/favicon.png" alt="Creatr365" className="h-7 w-auto" />
         </Link>
 
         {/* Desktop links */}
@@ -60,11 +59,11 @@ export const CourseNavbar: React.FC = () => {
           ))}
           {user ? (
             <>
-              <Link to="/dashboard" data-accent="red" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
+              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
               <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">ออกจากระบบ</button>
             </>
           ) : (
-            <Link to="/auth" data-accent="red" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
+            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
               เข้าสู่ระบบ
             </Link>
           )}
@@ -98,11 +97,11 @@ export const CourseNavbar: React.FC = () => {
             ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} data-accent="red" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
+                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
                 <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">ออกจากระบบ</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} data-accent="red" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
+              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
                 เข้าสู่ระบบ
               </Link>
             )}
