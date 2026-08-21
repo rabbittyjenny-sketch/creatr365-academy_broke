@@ -55,13 +55,16 @@ const Courses: React.FC = () => {
   const [courses, setCourses] = useState<CourseRow[]>([]);
 
   useEffect(() => {
-    supabase
-      .from('courses')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order')
-      .then(({ data }) => setCourses((((data as unknown as CourseRow[]) || []).filter(c => CURRENT_COURSE_SLUGS.has(c.slug))));
-  }, []);
+  supabase
+    .from('courses')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order')
+    .then(({ data }) => {
+      const rows = (data as unknown as CourseRow[]) || [];
+      setCourses(rows.filter(c => CURRENT_COURSE_SLUGS.has(c.slug)));
+    });
+}, []);
 
   return (
     <>
