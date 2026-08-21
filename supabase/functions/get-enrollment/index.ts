@@ -92,9 +92,8 @@ serve(async (req) => {
     const { userIds, displayName } = await resolveLinkedUsers(supabase, sid);
 
     if (userIds.length === 0) {
-      // student_id not found — return only the free course so login still works
       return new Response(
-        JSON.stringify({ display_name: null, courses: [SLUG_TO_LMS[FREE_COURSE_SLUG]] }),
+        JSON.stringify({ registered: false, display_name: null, courses: [] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -120,6 +119,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({
+        registered: true,
         display_name: displayName ?? null,
         courses: [...enrolledLmsIds],
       }),
