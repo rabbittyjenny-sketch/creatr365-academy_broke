@@ -112,28 +112,24 @@ export default function Home() {
           <img
             src="/images/blog_new.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center right'}}
           />
         </div>
 
         {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(16px,2vw,24px)' }}>
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
               <Link to="/courses" data-aos="fade-up"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth" data-aos="fade-up" data-aos-delay="90"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}>
                 FREE ACCOUNT
               </Link>
             </div>
-            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'left' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
@@ -153,7 +149,7 @@ export default function Home() {
         <img
           src="/images/graph-section2.png"
           alt="Live-Streaming E-Commerce Market Data"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+          style={{ width: '100%', height: '100vh', objectFit: 'contain', display: 'block' }}
         />
       </section>
 
@@ -187,15 +183,11 @@ export default function Home() {
           {/* ปุ่มกึ่งกลางล่าง */}
           <div data-aos="fade-up" data-aos-delay="360" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}>
               ดูหลักสูตร <ArrowRight size={15} />
             </Link>
             <Link to="/articles/diagnostic-quiz"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.62)'; }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}>
               ▷ Find Your Path
             </Link>
           </div>
@@ -215,7 +207,7 @@ export default function Home() {
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             objectPosition: 'left center'
           }}
         />
@@ -316,7 +308,7 @@ export default function Home() {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               objectPosition: 'center'
             }}
           />
@@ -386,7 +378,7 @@ export default function Home() {
                 lineHeight: 1.2
               }}
             >
-              เพราะเราเคยเจอปัญหามาก่อน
+              <span style={{ whiteSpace: 'nowrap' }}>เพราะเราเคยเจอปัญหามาก่อน</span>
             </h2>
           </div>
         </div>
@@ -429,7 +421,7 @@ export default function Home() {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               objectPosition: 'left center'
             }}
           />
@@ -449,10 +441,10 @@ export default function Home() {
         >
           {/* HEADER */}
           <div data-aos="fade-up" style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
               Welcome to Creatr365's Family
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
+            <p style={{ color: '#4a4a4a', marginTop: '6px' }}>
               หลักสูตรที่เลือกได้ตามสไตล์คุณ
             </p>
           </div>
@@ -562,7 +554,7 @@ export default function Home() {
           <img
             src="/images/i-can-live2.png"
             alt="ไลฟ์ให้เป็น"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 <div
@@ -613,7 +605,7 @@ export default function Home() {
           <img
             src="/images/i-can-sale2.png"
             alt="ไลฟ์ให้ขายได้"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 <div
@@ -664,7 +656,7 @@ export default function Home() {
           <img
             src="/images/i-can-reply1.png"
             alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 
@@ -768,7 +760,7 @@ export default function Home() {
         <img
           src="/images/Team-behind1.png"
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
         />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -789,7 +781,7 @@ export default function Home() {
           <img
             src="/images/journey-stairs2.jpg"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
           />
         </div>
 
@@ -806,15 +798,11 @@ export default function Home() {
         {/* bottom-right buttons */}
         <div style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <Link to="/courses" data-aos="fade-up" data-aos-delay="260"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}>
             เริ่มเส้นทางของคุณ <ArrowRight size={15} />
           </Link>
           <Link to="/auth" data-aos="fade-up" data-aos-delay="340"
-            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.52)'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.26)'; e.currentTarget.style.color = 'rgba(255,255,255,0.68)'; }}>
+            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}>
             Free Account
           </Link>
         </div>
@@ -848,9 +836,7 @@ export default function Home() {
               <div key={i}
                 data-aos="fade-up"
                 data-aos-delay={String(i * 60)}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < WHY.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', transition: 'background .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.012)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < WHY.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', transition: 'background .2s' }}>
                 <div style={{ padding: '18px 22px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(255,255,255,0.01)' }}>
                   <X size={13} style={{ color: 'rgba(255,255,255,0.22)', flexShrink: 0, marginTop: '3px' }} />
                   <p style={{ fontSize: 'clamp(12px,1.3vw,14px)', lineHeight: 1.58, color: 'rgba(255,255,255,0.35)' }}>{row.them}</p>
@@ -865,9 +851,7 @@ export default function Home() {
 
           <div data-aos="fade-up" data-aos-delay={String(WHY.length * 60 + 150)} style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}>
               เลือกคอร์ส <ArrowRight size={15} />
             </Link>
           </div>
@@ -903,15 +887,11 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
               <Link to="/courses" data-aos="fade-up" data-aos-delay="280"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth" data-aos="fade-up" data-aos-delay="360"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}>
                 FREE ACCOUNT
               </Link>
             </div>
