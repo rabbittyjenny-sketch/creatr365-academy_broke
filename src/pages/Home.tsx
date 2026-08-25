@@ -112,7 +112,7 @@ export default function Home() {
           <img
             src="/images/blog_new.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right'}}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', display: 'block' }}
           />
         </div>
 
@@ -578,8 +578,8 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'MAGNET', sub: 'FREE COURSE', slug: 'magnet' },
-            { name: 'FOUNDATION', sub: 'THE HOST FOUNDATION', slug: 'foundation' }
+            { name: 'LIVE COMMERCE STARTER KIT', sub: 'FREE',          slug: 'live-commerce-starter-kit' },
+            { name: 'HOOK & HOLD',               sub: 'LOW TICKET 1', slug: 'hook-and-hold' }
           ].map((course, i) => (
             <Link
               key={course.name}
@@ -629,8 +629,8 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE', slug: 'signal' },
-            { name: 'STAGE', sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
+            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               slug:  'live-sales-system' },
+            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'live-commerce-business-global' }
           ].map((course, i) => (
             <Link
               key={course.name}
@@ -693,20 +693,20 @@ export default function Home() {
           }}>
             DON'T MISS!
           </div>
-          <Link to="/course/brand-host-architect" style={{ display: 'flex', gap: '14px', alignItems: 'stretch', textDecoration: 'none' }}>
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'stretch' }}>
             <div style={{ width: '4px', background: RED, flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2 }}>
-                BRAND HOST ARCHITECT
+                The BRAND ARCHITECT
               </p>
               <p style={{ fontSize: 'clamp(13px,1.1vw,15px)', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>
-                IDENTITY · PRODUCTION · GLOBAL SCALING
+                ONSITE 2 DAYS
               </p>
-              <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.7)', textDecoration: 'underline', textUnderlineOffset: '3px', marginTop: '8px' }}>
-                เพิ่มเติม
+              <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.45)', marginTop: '8px' }}>
+                (coming soon)
               </p>
             </div>
-          </Link>
+          </div>
         </div>
         {/* กลาง–ขวาล่าง — also list */}
         <div
@@ -724,9 +724,9 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'FOUNDATION', sub: 'THE HOST FOUNDATION', slug: 'foundation' },
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE', slug: 'signal' },
-            { name: 'STAGE', sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'live-psychology-conversion' },
+            { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'live-tech-setup' },
+            { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'ai-for-live-commerce'}
           ].map((course, i) => (
             <Link
               key={course.name}
