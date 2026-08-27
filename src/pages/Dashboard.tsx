@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle } from 'lucide-react';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2 } from 'lucide-react';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
 
@@ -17,9 +17,23 @@ interface ModuleRow {
   duration_label: string | null; has_quiz: boolean; sort_order: number;
 }
 interface ProgressRow { module_id: string; status: string; score: number | null }
+interface ResourceRow {
+  id: string; course_id: string; resource_type: string; title: string;
+  file_path: string; file_name: string | null;
+}
 
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
 const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
+
+// Label shown per resource_type. Anything not listed here (a new type an
+// admin adds later, e.g. "worksheet" already covered, or "cheatsheet")
+// still renders — it just falls back to a generic "เอกสารประกอบการเรียน"
+// label with the type name, so new kinds show up with zero code changes.
+const RESOURCE_TYPE_LABELS: Record<string, string> = {
+  manual: 'คู่มือการเรียน',
+  worksheet: 'Worksheet',
+};
+const resourceLabel = (type: string) => RESOURCE_TYPE_LABELS[type] || `เอกสารประกอบการเรียน (${type})`;
 
 async function ensureStudentId(email: string): Promise<string | null> {
   const { data, error } = await supabase.rpc('ensure_master_student_account', { _email: email });
@@ -36,6 +50,8 @@ const Dashboard: React.FC = () => {
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [progress, setProgress] = useState<ProgressRow[]>([]);
+  const [resources, setResources] = useState<ResourceRow[]>([]);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
 
   const load = async () => {
@@ -74,15 +90,40 @@ const Dashboard: React.FC = () => {
       .map(e => e.course_id);
 
     if (activeIds.length > 0) {
-      const [{ data: mods }, { data: prog }] = await Promise.all([
+      const [{ data: mods }, { data: prog }, { data: res }] = await Promise.all([
         supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
           .in('course_id', activeIds).order('sort_order'),
         supabase.from('module_progress')
               .select('module_id, status, score, completed_at')
-              .eq('user_id', session.user.id)
+              .eq('user_id', session.user.id),
+        // RLS already limits this to active resources for courses this user
+        // is actually enrolled in — no extra filtering needed client-side.
+        supabase.from('course_resources')
+              .select('id,course_id,resource_type,title,file_path,file_name')
+              .in('course_id', activeIds).order('sort_order'),
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
+      setResources((res as any) || []);
+    }
+  };
+
+  // Study materials (คู่มือ/worksheet) live in a private bucket — download
+  // via a short-lived signed URL requested on click, not a stored public URL.
+  const handleDownloadResource = async (r: ResourceRow) => {
+    setDownloadingId(r.id);
+    try {
+      const { data, error } = await supabase.storage
+        .from('course-resources')
+        .createSignedUrl(r.file_path, 60);
+      if (error || !data?.signedUrl) {
+        console.error('createSignedUrl failed', error);
+        alert('ดาวน์โหลดไม่สำเร็จ ลองใหม่อีกครั้ง');
+        return;
+      }
+      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -113,6 +154,15 @@ const Dashboard: React.FC = () => {
     }
     return map;
   }, [modules]);
+
+  const resourcesByCourse = useMemo(() => {
+    const map = new Map<string, ResourceRow[]>();
+    for (const r of resources) {
+      if (!map.has(r.course_id)) map.set(r.course_id, []);
+      map.get(r.course_id)!.push(r);
+    }
+    return map;
+  }, [resources]);
 
   const enrolledCourses = useMemo(() => courses
     .filter(c => enrolledIds.has(c.id))
@@ -249,6 +299,26 @@ const Dashboard: React.FC = () => {
                           </button>
                         )}
                       </div>
+
+                      {/* เอกสารประกอบการเรียน — mapped to this course, extensible to worksheets etc. */}
+                      {(resourcesByCourse.get(c.id) || []).length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {(resourcesByCourse.get(c.id) || []).map(r => (
+                            <button
+                              key={r.id}
+                              onClick={() => handleDownloadResource(r)}
+                              disabled={downloadingId === r.id}
+                              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                            >
+                              {downloadingId === r.id
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <Download className="w-3 h-3" />}
+                              <FileText className="w-3 h-3" />
+                              {r.title || resourceLabel(r.resource_type)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Lesson list (collapsible) */}

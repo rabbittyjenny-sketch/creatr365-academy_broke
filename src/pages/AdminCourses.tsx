@@ -23,6 +23,10 @@ interface PromoCode {
   id:string; course_id:string; code:string; discount_type:string;
   discount_value:number; max_uses:number; used_count:number; is_active:boolean;
 }
+interface ResourceRow {
+  id:string; course_id:string; resource_type:string; title:string;
+  file_path:string; file_name:string|null; sort_order:number; is_active:boolean;
+}
 
 /* ─── Constants ────────────────────────────────────────── */
 const COLOR_OPTIONS = [
@@ -43,6 +47,13 @@ const STATUS_OPTIONS = [
   { value:'archived',    label:'Archived' },
 ];
 const LEVEL_OPTIONS = ['STARTER','DEVELOPING','COMPETENT','PROFICIENT','MASTER'];
+// resource_type is free text in the DB — these are just quick-pick presets.
+// Type any other value (e.g. "cheatsheet", "template") to add a new kind
+// without touching code; it'll show up on the Dashboard automatically.
+const RESOURCE_TYPE_PRESETS = [
+  { value:'manual',    label:'📘 คู่มือการเรียน (Manual)' },
+  { value:'worksheet', label:'📝 Worksheet' },
+];
 
 const emptyCourse = (sort:number): CourseRow => ({
   id:'', slug:'', tag:'', title:'', subtitle:'', description:'',
@@ -73,8 +84,9 @@ const AdminCourses = () => {
   const [featuresText,  setFeaturesText]  = useState('');
   const [deliverablesText, setDeliverablesText] = useState('');
   const [kpiText,       setKpiText]       = useState('');
-  const [subTab,        setSubTab]        = useState<'info'|'media'|'modules'|'pricing'>('info');
+  const [subTab,        setSubTab]        = useState<'info'|'media'|'modules'|'resources'|'pricing'>('info');
   const [modules,       setModules]       = useState<ModuleRow[]>([]);
+  const [resources,     setResources]     = useState<ResourceRow[]>([]);
   const [tab,           setTab]           = useState<'courses'|'promos'>('courses');
   const [promos,        setPromos]        = useState<PromoCode[]>([]);
   const [editingPromo,  setEditingPromo]  = useState<Partial<PromoCode>|null>(null);
@@ -98,6 +110,7 @@ const AdminCourses = () => {
   const fetchCourses  = async () => { const { data } = await supabase.from('courses').select('*').order('sort_order'); setCourses((data as unknown as CourseRow[])||[]); };
   const fetchPromos   = async () => { const { data } = await supabase.from('promo_codes').select('*').order('created_at',{ ascending:false }); setPromos((data as unknown as PromoCode[])||[]); };
   const fetchModules  = async (cid:string) => { if (!cid) { setModules([]); return; } const { data } = await supabase.from('course_modules').select('*').eq('course_id',cid).order('sort_order'); setModules((data as unknown as ModuleRow[])||[]); };
+  const fetchResources = async (cid:string) => { if (!cid) { setResources([]); return; } const { data } = await supabase.from('course_resources').select('*').eq('course_id',cid).order('sort_order'); setResources((data as unknown as ResourceRow[])||[]); };
 
   const startEdit = (c:CourseRow) => {
     const course = { ...c, gallery_image_urls:c.gallery_image_urls||[], kpi_notes:c.kpi_notes||[], deliverables:c.deliverables||[], features:c.features||[] };
@@ -105,13 +118,13 @@ const AdminCourses = () => {
     setFeaturesText(course.features.join('\n'));
     setDeliverablesText(course.deliverables.join('\n'));
     setKpiText(course.kpi_notes.map(k=>`${k.label}|${k.value}${k.note?'|'+k.note:''}`).join('\n'));
-    setIsNew(false); setSubTab('info'); fetchModules(c.id);
+    setIsNew(false); setSubTab('info'); fetchModules(c.id); fetchResources(c.id);
   };
 
   const startNew = () => {
     setEditingCourse(emptyCourse(courses.length+1));
     setFeaturesText(''); setDeliverablesText(''); setKpiText('');
-    setModules([]); setIsNew(true); setSubTab('info');
+    setModules([]); setResources([]); setIsNew(true); setSubTab('info');
   };
 
   const parseKpi = (text:string) => text.split('\n').map(l=>l.trim()).filter(Boolean).map(line => {
@@ -197,6 +210,66 @@ const AdminCourses = () => {
     await supabase.from('course_modules').update({ sort_order:sw.sort_order } as any).eq('id',m.id);
     await supabase.from('course_modules').update({ sort_order:m.sort_order } as any).eq('id',sw.id);
     if (editingCourse) fetchModules(editingCourse.id);
+  };
+
+  /* Resource (คู่มือ/worksheet) handlers */
+  const uploadResourceFile = async (file:File, courseId:string):Promise<{ path:string; name:string }|null> => {
+    setUploading(true);
+    try {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const path = `${courseId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safeName}`;
+      // Private bucket — students only ever reach the file via a short-lived
+      // signed URL that the Dashboard requests after their enrollment passes RLS.
+      const { error } = await supabase.storage.from('course-resources').upload(path,file,{ upsert:false });
+      if (error) { toast({ title:'Upload error', description:error.message, variant:'destructive' }); return null; }
+      return { path, name:file.name };
+    } finally { setUploading(false); }
+  };
+  const onUploadResource = async (e:React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; e.target.value = '';
+    if (!f || !editingCourse?.id) { if(!editingCourse?.id) toast({ title:'บันทึกหลักสูตรก่อนแนบเอกสาร', variant:'destructive' }); return; }
+    const uploaded = await uploadResourceFile(f, editingCourse.id);
+    if (!uploaded) return;
+    const next = resources.length+1;
+    const { error } = await supabase.from('course_resources').insert({
+      course_id:editingCourse.id, resource_type:'manual',
+      title:f.name.replace(/\.[^.]+$/,''), file_path:uploaded.path, file_name:uploaded.name,
+      sort_order:next,
+    } as any);
+    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    else fetchResources(editingCourse.id);
+  };
+  const updateResource = (r:ResourceRow, patch:Partial<ResourceRow>) => setResources(resources.map(x=>x.id===r.id?{...x,...patch}:x));
+  const saveResource = async (r:ResourceRow) => {
+    const { error } = await supabase.from('course_resources').update({
+      title:r.title, resource_type:r.resource_type, sort_order:r.sort_order, is_active:r.is_active,
+    } as any).eq('id',r.id);
+    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    else toast({ title:'บันทึกเอกสาร ✓' });
+  };
+  const replaceResourceFile = async (r:ResourceRow, e:React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; e.target.value = '';
+    if (!f || !editingCourse?.id) return;
+    const uploaded = await uploadResourceFile(f, editingCourse.id);
+    if (!uploaded) return;
+    await supabase.storage.from('course-resources').remove([r.file_path]); // best-effort cleanup of old file
+    const { error } = await supabase.from('course_resources').update({ file_path:uploaded.path, file_name:uploaded.name } as any).eq('id',r.id);
+    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    else { toast({ title:'อัปเดตไฟล์ ✓' }); fetchResources(editingCourse.id); }
+  };
+  const deleteResource = async (r:ResourceRow) => {
+    if (!confirm(`ลบเอกสาร "${r.title}"?`)) return;
+    await supabase.storage.from('course-resources').remove([r.file_path]); // best-effort; ignore failure
+    const { error } = await supabase.from('course_resources').delete().eq('id',r.id);
+    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    else if (editingCourse) fetchResources(editingCourse.id);
+  };
+  const moveResource = async (r:ResourceRow, dir:-1|1) => {
+    const sorted = [...resources].sort((a,b)=>a.sort_order-b.sort_order);
+    const idx = sorted.findIndex(x=>x.id===r.id); const sw = sorted[idx+dir]; if(!sw)return;
+    await supabase.from('course_resources').update({ sort_order:sw.sort_order } as any).eq('id',r.id);
+    await supabase.from('course_resources').update({ sort_order:r.sort_order } as any).eq('id',sw.id);
+    if (editingCourse) fetchResources(editingCourse.id);
   };
 
   /* Promo handlers */
@@ -419,7 +492,7 @@ const AdminCourses = () => {
 
             {/* Sub-tabs — Teachable/Kajabi style */}
             <div className="flex border-b border-white/8 flex-shrink-0 px-6">
-              {[['info','ข้อมูล'],['media','สื่อ'],['modules','โมดูล'],['pricing','ราคา & Stripe']].map(([k,l])=>(
+              {[['info','ข้อมูล'],['media','สื่อ'],['modules','โมดูล'],['resources','เอกสาร'],['pricing','ราคา & Stripe']].map(([k,l])=>(
                 <button key={k} onClick={()=>setSubTab(k as any)}
                   className={`py-3 px-4 text-xs font-semibold border-b-2 -mb-px transition-all ${subTab===k?'border-[#CC0033] text-white':'border-transparent text-white/30 hover:text-white/55'}`}>
                   {l}
@@ -626,6 +699,67 @@ const AdminCourses = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* ── RESOURCES TAB (คู่มือ / worksheet ต่อคอร์ส) ── */}
+              {subTab === 'resources' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-white font-semibold text-sm">เอกสารประกอบการเรียน</p>
+                      <p className="text-white/25 text-xs mt-0.5">คู่มือ/worksheet ที่ผูกกับคอร์สนี้ — จะไปโผล่เป็นปุ่มดาวน์โหลดในหน้าแดชบอร์ดของผู้เรียนที่ลงทะเบียนแล้ว</p>
+                    </div>
+                    <label className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-white/15 text-white/60 hover:text-white hover:border-white/30 transition-all cursor-pointer ${uploading?'opacity-40 pointer-events-none':''}`}>
+                      <Plus className="w-3.5 h-3.5" /> {uploading ? 'กำลังอัปโหลด...' : 'แนบเอกสาร'}
+                      <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" className="hidden" onChange={onUploadResource} disabled={!editingCourse?.id} />
+                    </label>
+                  </div>
+
+                  {!editingCourse?.id ? (
+                    <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl text-white/20 text-sm">
+                      บันทึกหลักสูตรก่อน แล้วค่อยกลับมาแนบเอกสาร
+                    </div>
+                  ) : resources.length === 0 ? (
+                    <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl text-white/20 text-sm">
+                      ยังไม่มีเอกสาร — กด "แนบเอกสาร" เพื่ออัปโหลดคู่มือ (PDF ฯลฯ)
+                    </div>
+                  ) : resources.sort((a,b)=>a.sort_order-b.sort_order).map((r, idx) => (
+                    <div key={r.id} className="border border-white/8 rounded-xl bg-[#111] overflow-hidden">
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="flex flex-col gap-0.5">
+                          <button onClick={()=>moveResource(r,-1)} disabled={idx===0} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowUp className="w-3 h-3" /></button>
+                          <button onClick={()=>moveResource(r,1)} disabled={idx===resources.length-1} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowDown className="w-3 h-3" /></button>
+                        </div>
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <input className="bg-transparent text-white text-sm font-semibold focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors"
+                            value={r.title} onChange={e=>updateResource(r,{title:e.target.value})} placeholder="ชื่อเอกสาร เช่น คู่มือ Course 0" />
+                          <input className="bg-transparent text-white/70 text-sm focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors font-mono"
+                            list="resource-type-presets" value={r.resource_type} onChange={e=>updateResource(r,{resource_type:e.target.value})} placeholder="manual" />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer text-xs text-white/40 flex-shrink-0" title="เปิด/ปิดการมองเห็น">
+                          <div onClick={()=>updateResource(r,{is_active:!r.is_active})}
+                            className={`w-8 h-4 rounded-full transition-colors ${r.is_active?'bg-[#34A853]':'bg-white/10'} relative`}>
+                            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${r.is_active?'translate-x-4':'translate-x-0.5'}`} />
+                          </div>
+                        </label>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={()=>saveResource(r)} className="p-1.5 text-white/30 hover:text-[#34A853] transition-colors" title="บันทึก"><Save className="w-3.5 h-3.5" /></button>
+                          <button onClick={()=>deleteResource(r)} className="p-1.5 text-white/30 hover:text-[#CC0033] transition-colors" title="ลบ"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
+                      </div>
+                      <div className="px-4 pb-3 flex items-center justify-between text-[11px] text-white/25">
+                        <span className="truncate">📎 {r.file_name || r.file_path.split('/').pop()}</span>
+                        <label className="text-white/40 hover:text-white cursor-pointer underline flex-shrink-0 ml-3">
+                          เปลี่ยนไฟล์
+                          <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" className="hidden" onChange={e=>replaceResourceFile(r,e)} />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                  <datalist id="resource-type-presets">
+                    {RESOURCE_TYPE_PRESETS.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
+                  </datalist>
                 </div>
               )}
 
