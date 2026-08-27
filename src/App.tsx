@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
+import AdminArticles from "./pages/AdminArticles";
 import Admin from "./pages/Admin";
 import Articles from "./pages/Articles";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
@@ -43,6 +44,7 @@ const App = () => (
         <Route path="/admin/courses" element={<AdminCourses />} />
         <Route path="/admin/assignments" element={<AdminAssignments />} />
         <Route path="/admin/payments" element={<AdminPayments />} />
+        <Route path="/admin/articles" element={<AdminArticles />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
         <Route path="/events" element={<Discover />} />
