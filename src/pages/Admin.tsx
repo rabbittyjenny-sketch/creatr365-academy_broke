@@ -256,6 +256,7 @@ const Admin = () => {
         {/* Admin navigation */}
         <div className="flex gap-1 flex-wrap mb-8 border-b pb-4">
           <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
+          <Link to="/admin/articles"><Button variant="outline" size="sm">บทความ</Button></Link>
           <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
           <Link to="/admin/payments"><Button variant="outline" size="sm">การชำระเงิน</Button></Link>
           <Button variant="default" size="sm">Event CMS (นี่คือ)</Button>

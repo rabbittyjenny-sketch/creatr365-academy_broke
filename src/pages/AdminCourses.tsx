@@ -313,6 +313,7 @@ const AdminCourses = () => {
           <Link to="/admin/articles" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">บทความ</Link>
           <Link to="/admin/payments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">การชำระเงิน</Link>
           <Link to="/admin/assignments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">งานที่ส่ง</Link>
+          <Link to="/admin" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">Event CMS</Link>
           <button onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}
             className="text-xs px-3 py-1.5 rounded-lg border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
             ออกจากระบบ

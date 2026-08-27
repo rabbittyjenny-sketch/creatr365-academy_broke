@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { supabase } from '@/integrations/supabase/client';
+import { isCurrentUserAdmin } from '@/lib/admin';
 import { Plus, Edit2, Trash2, Eye, EyeOff, ArrowLeft, Save, X, ExternalLink } from 'lucide-react';
 
 interface Article {
@@ -228,9 +229,11 @@ const ArticleEditor: React.FC<{
 
 /* ─── Main page ─────────────────────────────────────────── */
 const AdminArticles: React.FC = () => {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
   const [editing, setEditing] = useState<Partial<Article> | null | false>(false);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
@@ -239,19 +242,42 @@ const AdminArticles: React.FC = () => {
     setLoading(false);
   }, []);
 
+  // Same checkAuth pattern already proven working on the Event CMS page
+  // (isCurrentUserAdmin → has_role RPC), so this page has zero chance of
+  // colliding with — or regressing — the auth behaviour any other admin
+  // page already relies on today.
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    load();
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { navigate('/auth?redirect=/admin/articles'); return; }
+      const allowed = await isCurrentUserAdmin(session.user.id);
+      if (!allowed) { navigate('/'); return; }
+      setIsAdmin(true);
+      load();
+    })();
     return () => document.documentElement.classList.remove('dark');
-  }, [load]);
+  }, [load, navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
+  if (!isAdmin) {
+    return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
+  }
 
   const handleSave = async (form: Partial<Article>) => {
+    // Save button is disabled until title+slug are filled (see ArticleEditor),
+    // so both are guaranteed present here — this just satisfies the compiler.
+    if (!form.title || !form.slug) return;
     if (form.id) {
       const { id, created_at, ...rest } = form as Article;
       await supabase.from('articles').update(rest).eq('id', id);
       setMsg('อัปเดตบทความเรียบร้อย');
     } else {
-      await supabase.from('articles').insert([{ ...form, target_url: form.target_url || '/' }]);
+      await supabase.from('articles').insert([{ ...form, title: form.title, slug: form.slug, target_url: form.target_url || '/' }]);
       setMsg('สร้างบทความใหม่เรียบร้อย');
     }
     setEditing(false);
@@ -286,12 +312,18 @@ const AdminArticles: React.FC = () => {
                 <h1 className="text-2xl font-bold text-white">จัดการบทความ</h1>
               </div>
             </div>
-            <button
-              onClick={() => setEditing(EMPTY)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
-            >
-              <Plus className="w-4 h-4" /> บทความใหม่
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setEditing(EMPTY)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" /> บทความใหม่
+              </button>
+              <button onClick={handleSignOut}
+                className="text-xs px-3 py-2.5 rounded-xl border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
+                ออกจากระบบ
+              </button>
+            </div>
           </div>
 
           {msg && (
@@ -360,6 +392,7 @@ const AdminArticles: React.FC = () => {
             <Link to="/admin/courses" className="hover:text-white/50 transition-colors">จัดการคอร์ส</Link>
             <Link to="/admin/payments" className="hover:text-white/50 transition-colors">การชำระเงิน</Link>
             <Link to="/admin/assignments" className="hover:text-white/50 transition-colors">งานที่ส่งมา</Link>
+            <Link to="/admin" className="hover:text-white/50 transition-colors">Event CMS</Link>
           </div>
         </div>
       </main>

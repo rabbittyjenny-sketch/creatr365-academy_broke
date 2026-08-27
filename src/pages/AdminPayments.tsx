@@ -38,12 +38,14 @@ const AdminPayments = () => {
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4 mr-1"/>หน้าหลัก
           </Button>
-          <h1 className="text-2xl font-bold">รายการการชำระเงิน</h1>
+          <h1 className="text-2xl font-bold flex-1">รายการการชำระเงิน</h1>
+          <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}>ออกจากระบบ</Button>
         </div>
 
         {/* Admin navigation */}
         <div className="flex gap-1 flex-wrap mb-6 border-b pb-4">
           <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
+          <Link to="/admin/articles"><Button variant="outline" size="sm">บทความ</Button></Link>
           <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
           <Button variant="default" size="sm">การชำระเงิน (นี่คือ)</Button>
           <Link to="/admin"><Button variant="outline" size="sm">Event CMS</Button></Link>
