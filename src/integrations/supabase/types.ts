@@ -16,40 +16,52 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          author: string | null
+          body: string | null
           cover_image_url: string | null
           created_at: string
           id: string
           is_active: boolean
           kind: string
+          meta_description: string | null
           slug: string
           sort_order: number
           summary: string
+          tags: string[]
           target_url: string
           title: string
           updated_at: string
         }
         Insert: {
+          author?: string | null
+          body?: string | null
           cover_image_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           kind?: string
+          meta_description?: string | null
           slug: string
           sort_order?: number
           summary?: string
+          tags?: string[]
           target_url: string
           title: string
           updated_at?: string
         }
         Update: {
+          author?: string | null
+          body?: string | null
           cover_image_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           kind?: string
+          meta_description?: string | null
           slug?: string
           sort_order?: number
           summary?: string
+          tags?: string[]
           target_url?: string
           title?: string
           updated_at?: string
