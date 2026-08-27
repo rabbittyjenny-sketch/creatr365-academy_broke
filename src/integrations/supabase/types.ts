@@ -277,6 +277,53 @@ export type Database = {
           },
         ]
       }
+      course_resources: {
+        Row: {
+          course_id: string
+          created_at: string
+          file_name: string | null
+          file_path: string
+          id: string
+          is_active: boolean
+          resource_type: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          file_name?: string | null
+          file_path: string
+          id?: string
+          is_active?: boolean
+          resource_type?: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          file_name?: string | null
+          file_path?: string
+          id?: string
+          is_active?: boolean
+          resource_type?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_resources_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           bloom_level: string | null
