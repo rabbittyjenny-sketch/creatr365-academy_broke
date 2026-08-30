@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { isCurrentUserAdmin } from '@/lib/admin';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 interface Row {
   id: string; user_id: string; course_id: string; status: string;
@@ -12,78 +11,113 @@ interface Row {
   courses?: { title: string } | null;
 }
 
+const FILTERS = [
+  { value: 'all', label: 'ทั้งหมด' },
+  { value: 'pending', label: 'รอชำระ' },
+  { value: 'paid', label: 'ชำระแล้ว' },
+  { value: 'free', label: 'ฟรี' },
+] as const;
+
 const AdminPayments = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [rows, setRows] = useState<Row[]>([]);
-  const [filter, setFilter] = useState<'all'|'pending'|'paid'|'free'>('all');
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]['value']>('all');
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
-    let q = supabase.from('course_enrollments').select('*, courses(title)').order('created_at',{ascending:false});
+    let q = supabase.from('course_enrollments').select('*, courses(title)').order('created_at', { ascending: false });
     if (filter !== 'all') q = q.eq('status', filter);
     const { data } = await q;
     setRows((data as any) || []);
     setLoading(false);
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  // Same proven checkAuth pattern as Admin.tsx / AdminArticles.tsx
+  // (isCurrentUserAdmin → has_role RPC). Previously this page relied on a
+  // comment claiming a <RequireAdmin> wrapper in App.tsx enforced this —
+  // that component doesn't exist anywhere in the codebase, so the page had
+  // no client-side admin check at all (RLS on course_enrollments still
+  // blocked non-admin reads/writes at the database level, but the page
+  // shell itself was reachable by anyone).
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { navigate('/auth?redirect=/admin/payments'); return; }
+      const allowed = await isCurrentUserAdmin(session.user.id);
+      if (!allowed) { navigate('/'); return; }
+      setIsAdmin(true);
+    })();
+    return () => document.documentElement.classList.remove('dark');
+  }, [navigate]);
+
+  useEffect(() => { if (isAdmin) load(); /* eslint-disable-next-line */ }, [filter, isAdmin]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
+  if (!isAdmin) {
+    return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
+  }
 
   return (
-    <div className="min-h-screen bg-muted/30 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeft className="w-4 h-4 mr-1"/>หน้าหลัก
-          </Button>
-          <h1 className="text-2xl font-bold flex-1">รายการการชำระเงิน</h1>
-          <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}>ออกจากระบบ</Button>
-        </div>
+    <AdminLayout title="การชำระเงิน" onSignOut={handleSignOut}>
+      <div className="flex items-center gap-1.5 bg-[#111] border border-white/10 rounded-xl p-1 mb-5 w-fit">
+        {FILTERS.map(f => (
+          <button
+            key={f.value}
+            onClick={() => setFilter(f.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              filter === f.value ? 'bg-[#D4A843] text-black' : 'text-white/40 hover:text-white'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Admin navigation */}
-        <div className="flex gap-1 flex-wrap mb-6 border-b pb-4">
-          <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
-          <Link to="/admin/articles"><Button variant="outline" size="sm">บทความ</Button></Link>
-          <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
-          <Button variant="default" size="sm">การชำระเงิน (นี่คือ)</Button>
-          <Link to="/admin"><Button variant="outline" size="sm">Event CMS</Button></Link>
+      {loading ? (
+        <div className="text-white/30 text-sm py-16 text-center flex flex-col items-center gap-3">
+          <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+          กำลังโหลด...
         </div>
-        <div className="flex gap-2 mb-4">
-          {(['all','pending','paid','free'] as const).map(f=>(
-            <Button key={f} size="sm" variant={filter===f?'default':'outline'} onClick={()=>setFilter(f)}>{f}</Button>
-          ))}
-        </div>
-        <div className="overflow-auto rounded-xl border border-border bg-card">
+      ) : (
+        <div className="rounded-2xl border border-white/8 overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs">
-              <tr>
-                <th className="text-left p-3">วันที่</th>
-                <th className="text-left p-3">หลักสูตร</th>
-                <th className="text-left p-3">ผู้สมัคร</th>
-                <th className="text-left p-3">ยอด</th>
-                <th className="text-left p-3">สถานะ</th>
-                <th className="text-left p-3">Stripe</th>
+            <thead>
+              <tr className="bg-[#111] border-b border-white/8">
+                <th className="text-left px-5 py-3 text-white/30 text-xs font-semibold tracking-widest uppercase">วันที่</th>
+                <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase">หลักสูตร</th>
+                <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase">ผู้สมัคร</th>
+                <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase">ยอด</th>
+                <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase">สถานะ</th>
+                <th className="text-left px-5 py-3 text-white/30 text-xs font-semibold uppercase">Stripe</th>
               </tr>
             </thead>
-            <tbody>
-              {rows.map(r=>(
-                <tr key={r.id} className="border-t border-border">
-                  <td className="p-3 text-xs">{new Date(r.created_at).toLocaleString('th-TH')}</td>
-                  <td className="p-3">{r.courses?.title}</td>
-                  <td className="p-3 text-xs">{r.full_name||'-'}<br/><span className="text-muted-foreground">{r.phone||''}</span></td>
-                  <td className="p-3">{r.amount_paid ? `${r.amount_paid} ฿` : 'ฟรี'}</td>
-                  <td className="p-3"><span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-muted border border-border">{r.status}</span></td>
-                  <td className="p-3 text-xs text-muted-foreground">{r.stripe_session_id ? r.stripe_session_id.slice(0,16)+'...' : '—'}</td>
+            <tbody className="divide-y divide-white/5">
+              {rows.map(r => (
+                <tr key={r.id} className="bg-[#0D0D0D] hover:bg-[#131313] transition-colors">
+                  <td className="px-5 py-4 text-xs text-white/50">{new Date(r.created_at).toLocaleString('th-TH')}</td>
+                  <td className="px-4 py-4 text-white/80">{r.courses?.title}</td>
+                  <td className="px-4 py-4 text-xs text-white/50">{r.full_name || '-'}<br /><span className="text-white/25">{r.phone || ''}</span></td>
+                  <td className="px-4 py-4 text-white/80">{r.amount_paid ? `${r.amount_paid} ฿` : 'ฟรี'}</td>
+                  <td className="px-4 py-4">
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/8 text-white/50 font-bold">{r.status}</span>
+                  </td>
+                  <td className="px-5 py-4 text-xs text-white/30 font-mono">{r.stripe_session_id ? r.stripe_session_id.slice(0, 16) + '...' : '—'}</td>
                 </tr>
               ))}
-              {rows.length===0 && <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">ไม่มีรายการ</td></tr>}
+              {rows.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-12 text-white/20">ไม่มีรายการ</td></tr>
+              )}
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+      )}
+    </AdminLayout>
   );
 };
 
