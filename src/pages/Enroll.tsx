@@ -15,6 +15,7 @@ interface CourseRow {
   subtitle: string;
   duration: string;
   price: string;
+  status: string;
   color: string;
   learning_type: string;
   max_slots: number | null;
@@ -113,6 +114,7 @@ const Enroll: React.FC = () => {
   }
 
   const colors = colorMap[course.color as keyof typeof colorMap] || colorMap.blue;
+  const isFreeCourse = course.status === 'free' || !course.price?.trim() || course.price.trim() === '0';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +171,7 @@ const Enroll: React.FC = () => {
             <h1 className="text-2xl font-bold mt-1 mb-1" data-accent="green">{course.title}</h1>
             <p className="text-muted-foreground text-sm mb-2" data-accent="green">{course.subtitle} · {course.duration}</p>
             <p className="text-xs text-muted-foreground mb-4">{LEARNING_LABELS[course.learning_type] || course.learning_type}</p>
-            {course.price?.trim() && <p className={`text-2xl font-bold ${colors.text} mb-6`}>{course.price}</p>}
+            <p className={`text-2xl font-bold ${colors.text} mb-6`}>{isFreeCourse ? 'ฟรี' : course.price}</p>
 
             {isFull ? (
               <div className="text-center py-8">
@@ -206,11 +208,13 @@ const Enroll: React.FC = () => {
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> กำลังดำเนินการ...</> : 'ยืนยันสมัครเรียน'}
                 </button>
 
-                <div className="text-xs text-muted-foreground text-center space-y-1 mt-4">
-                  <p>การชำระเงินผ่านระบบ Stripe ที่ปลอดภัยตามมาตรฐาน PCI DSS</p>
-                  <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ hello@creatr365.com</p>
-                  <p>สามารถขอคืนเงินได้ภายใน 7 วัน ตาม พ.ร.บ.คุ้มครองผู้บริโภค</p>
-                </div>
+                {!isFreeCourse && (
+                  <div className="text-xs text-muted-foreground text-center space-y-1 mt-4">
+                    <p>การชำระเงินผ่านระบบ Stripe ที่ปลอดภัยตามมาตรฐาน PCI DSS</p>
+                    <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ hello@creatr365.com</p>
+                    <p>สามารถขอคืนเงินได้ภายใน 7 วัน ตาม พ.ร.บ.คุ้มครองผู้บริโภค</p>
+                  </div>
+                )}
               </form>
             )}
           </div>

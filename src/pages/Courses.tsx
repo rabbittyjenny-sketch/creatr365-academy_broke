@@ -41,6 +41,7 @@ const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor }> = {
 // anything not listed (e.g. draft/archived) simply renders no badge.
 const STATUS_META: Record<string, { label: string; className: string } | null> = {
   now_open:     { label: 'NOW OPEN',     className: 'bg-success/10 text-success' },
+  free:         { label: 'FREE',         className: 'bg-success/10 text-success' },
   new_update:   { label: 'NEW UPDATE',   className: 'bg-foreground/5 text-foreground/70' },
   coming_soon:  { label: 'COMING SOON',  className: 'bg-foreground/5 text-foreground/70' },
   fully_booked: { label: 'FULLY BOOKED', className: 'bg-destructive/10 text-destructive' },

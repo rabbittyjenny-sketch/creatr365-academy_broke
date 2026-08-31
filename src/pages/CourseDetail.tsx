@@ -18,6 +18,7 @@ interface CourseRow {
   description: string;
   duration: string;
   price: string;
+  status: string;
   features: string[];
   color: string;
   learning_type: string;
@@ -96,6 +97,7 @@ const CourseDetail: React.FC = () => {
   }
 
   const accent = 'red' as const;
+  const isFreeCourse = course.status === 'free' || !course.price?.trim() || course.price.trim() === '0';
 
   const handleEnroll = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -131,7 +133,7 @@ const CourseDetail: React.FC = () => {
           <p className="text-lg md:text-xl text-muted-foreground mb-4">{course.subtitle}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 items-center text-sm text-muted-foreground">
             <span>{course.format_label || course.duration}</span>
-            {course.price?.trim() && <span className="text-foreground font-bold text-lg">{course.price}</span>}
+            <span className="text-foreground font-bold text-lg">{isFreeCourse ? 'ฟรี' : course.price}</span>
           </div>
         </div>
       </section>
@@ -222,7 +224,7 @@ const CourseDetail: React.FC = () => {
           <aside className="md:col-span-1">
             <div className="sticky top-24 space-y-6">
               <div className="card-water border border-border p-6 bg-card" data-accent={accent}>
-                {course.price?.trim() && <p className="text-3xl font-bold mb-2">{course.price}</p>}
+                <p className="text-3xl font-bold mb-2">{isFreeCourse ? 'ฟรี' : course.price}</p>
                 <p className="text-sm text-muted-foreground mb-6">{course.format_label || course.duration}</p>
                 <button
                   onClick={handleEnroll}

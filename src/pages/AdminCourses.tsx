@@ -41,6 +41,7 @@ const LEARNING_TYPES = [
 ];
 const STATUS_OPTIONS = [
   { value:'now_open',    label:'Now Open ●' },
+  { value:'free',        label:'Free (เรียนฟรี) ●' },
   { value:'coming_soon', label:'Coming Soon' },
   { value:'fully_booked',label:'Fully Booked' },
   { value:'draft',       label:'Draft (Hidden)' },

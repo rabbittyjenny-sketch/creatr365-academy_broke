@@ -466,3 +466,55 @@ join auth.users u on u.id = ur.user_id;
 | `src/pages/Dashboard.tsx` | เพิ่มปุ่ม "Admin Console" เมื่อ user เป็น admin |
 | `src/integrations/supabase/types.ts` | regenerate จาก live schema จริง |
 | ไฟล์ตายที่ลบ (ดูรายชื่อด้านบน) | ลบเพราะไม่มีการ import จริงในระบบ build เลย |
+
+---
+
+## 🆕 PHASE 3.1 — แก้คอร์สฟรี "Course price not configured" (ยืนยันจริง, 31 ส.ค. 2026)
+
+### สาเหตุ (ยืนยันจาก production code จริงใน edge function `create-checkout`)
+
+`supabase/functions/create-checkout/index.ts` parse ราคาจาก `course.price` (string) เป็นตัวเลขก่อนเสมอ แล้ว throw `"Course price not configured"` ทันทีถ้า parse ได้ `0` หรือ parse ไม่ได้ — โดยเช็คนี้เกิด**ก่อน**จะเช็คว่าคอร์สนี้ควรฟรีหรือไม่ ตรวจ DB จริงพบว่าคอร์ส `magnet` (MAGNET — LIVE COMMERCE BLUEPRINT) มี `price: "0"` และไม่มีสถานะ "free" ให้เลือกเลยใน dropdown ของ Admin (มีแค่ `now_open / coming_soon / fully_booked / draft / archived`) — เป็นบั๊กเดียวกับที่ผู้ใช้เจอตอนกดซื้อ
+
+โค้ดใน `src/pages/Courses.tsx` (หน้ารวมคอร์ส) เขียน comment ไว้ล่วงหน้าอยู่แล้วว่า **"a future 'free' vs paid split lives in price/status, not here"** — แปลว่าคนออกแบบระบบเดิมตั้งใจให้ `status` เป็นจุดขยายสำหรับสถานะ free อยู่แล้ว เพียงแต่ยังไม่มีใครเพิ่มค่า `free` เข้าไปจริง
+
+### แก้แล้ว
+
+1. **`src/pages/AdminCourses.tsx`** — เพิ่ม `{ value:'free', label:'Free (เรียนฟรี)' }` ใน `STATUS_OPTIONS` (คอลัมน์ `courses.status` เป็น free-text ไม่มี CHECK constraint ในฐานข้อมูลจริง — ยืนยันแล้ว จึงไม่ต้องแก้ schema)
+2. **`src/pages/Courses.tsx`** — เพิ่ม badge `FREE` ใน `STATUS_META` ให้ตรงกับสถานะใหม่
+3. **`supabase/functions/create-checkout/index.ts`** — ย้ายการเช็ค `course.status === "free"` ไปไว้**ก่อน**การ parse ราคา ถ้าเป็น free ให้ข้ามไป insert `course_enrollments` สถานะ `free` ทันที (path เดิมที่มีอยู่แล้วสำหรับโปรโมโค้ด `discount_type='free'`) — ไม่ต้องผ่าน Stripe เลย ตรงกับที่ผู้ใช้ขอ: "ถ้าสถานะ free เมื่อกดซื้อ ควรดึงบทเรียนเข้าแดชบอร์ดทันที ไม่ต้องรอ payment success" — **deploy ขึ้น production แล้ว** (version 6 ของ edge function)
+4. **`src/pages/CourseDetail.tsx`, `src/pages/Enroll.tsx`** — แก้การแสดงราคาจากการโชว์เลข `"0"` ตรงๆ (ตามภาพหน้าจอที่แนบ) ให้แสดง "ฟรี" แทน เมื่อ `status==='free'` หรือราคาว่าง/เป็น "0"; ซ่อนข้อความ "ชำระผ่าน Stripe / PCI DSS" ในหน้า Enroll เมื่อคอร์สฟรี (ไม่เกี่ยวกับ Stripe จริงๆ ในเคสนี้)
+5. **แก้ข้อมูลจริงที่พังอยู่**: อัปเดต `courses.status = 'free'` ให้คอร์ส `magnet` (id `0c4a7138-...`) ใน production แล้ว ตอนนี้กดซื้อได้จริงไม่ error
+
+### หมายเหตุ
+
+- `stripe_price_id` ของ `magnet` ยังเป็นค่าเก่า `"free_magnet01"` ที่ admin เคยพิมพ์ไว้เป็น workaround ก่อนหน้านี้ — ตรวจแล้วว่าไม่มีจุดไหนในโค้ดอ่านค่านี้จริง (ไม่ถูกใช้ในการคำนวณ Stripe เลย) จึงปล่อยไว้ได้ ไม่กระทบอะไร
+- ตรวจแล้ว: `npm run build`, `npx tsc --noEmit` ผ่านหมดหลังแก้
+
+---
+
+## 🆕 PHASE 2 — ข้อมูลจริงจาก Google Sheets (ต้นทางเดิมของระบบเรียน) — ค้นคว้าแล้ว 31 ส.ค. 2026
+
+> ผู้ใช้ถามว่าคำเตือนเรื่อง "production ไม่มี migration history ที่ track จริง" เกี่ยวกับ `6course-quiz` repo หรือ Google Sheets ไหม
+> **คำตอบ: ไม่เกี่ยวกันโดยตรง** คำเตือนนั้นพูดถึง Postgres schema ของเว็บหลัก (`courses`, `articles` ฯลฯ) ส่วน Google Sheets ที่กล่าวถึงด้านล่างคือฐานข้อมูลเดิมของฝั่ง **LMS** (`6course-quiz`) ที่เชื่อมผ่าน Google Apps Script — เป็นคนละระบบ คนละฐานข้อมูลตามที่ README ข้อ 2 ระบุไว้อยู่แล้ว (LMS แยกจาก Main Web) — แต่เป็นแหล่งข้อมูลจริงที่ควรใช้อ้างอิงตอนสร้างระบบสอบ/rubric ใน Supabase ในเฟส 2
+> **หมายเหตุ**: session นี้ยังไม่ได้ attach repo `6course-quiz` (อยู่นอก scope ที่ได้รับอนุญาตตอนนี้) — ยังไม่ได้เปรียบเทียบกับโค้ดจริงของ LMS ถ้าต้องการให้ตรวจ ให้แจ้งเพื่อ add repo เพิ่ม
+
+ค้นและอ่านไฟล์จริงใน Google Drive (บัญชี hello.livestreamers@gmail.com) ครบทั้ง 3 ไฟล์ที่ผู้ใช้ระบุ (ไม่รวมไฟล์ export .csv ปลีกย่อยที่เป็นแค่ snapshot ของแท็บเดียวกัน):
+
+| ไฟล์ | สถานะ | สรุปเนื้อหาจริงที่อ่านแล้ว |
+|---|---|---|
+| `Creatr365_Master_Database` (Google Sheet) | อ่านครบ (413 บรรทัด) | แท็บ Quiz_Bank: **110 คำถามจริง**, แบ่งเป็น 7 กลุ่ม `QG-01`ถึง`QG-07`, 3 phase (`Pre`/`During`/`Post`), **2 ชุดข้อสอบ (`Set A`, `Set B`) มีอยู่แล้วจริง** — ตรงกับที่ผู้ใช้คาดว่า "น่าจะมีอย่างน้อย 2 ชุด" คอลัมน์ครบ: Q_ID, QG, Bloom_Level, Choice A-D, Answer, Answer_Explain, Skill_Tag, Is_Diagnostic, Recommended_Course, Pass_Criteria, Progression_Level |
+| `rubric_master` (Google Sheet) | อ่านครบ | **16 rubric** (RUB-01 ถึง RUB-16) แต่ละอันมีเกณฑ์ 4 ระดับ (Professional/Competent/Developing/Rookie) ต่อมิติ, ตาราง Pass Criteria ครบทั้ง 6 คอร์ส, ตาราง KPI Master Reference (Conversion Rate, Watch Time ตามระดับ, Live Health Score ฯลฯ), ตาราง Progression Model 5 ระดับ (STARTER→MASTER) |
+| `Creatr365_Learning_Flow_v3 (1).xlsx` | อ่านครบ | Flow ปฏิบัติการแบบละเอียดทีละขั้นของทั้ง 6 คอร์ส (ใครทำ/เกณฑ์ผ่าน/error path ถ้าไม่ผ่าน) รวมตารางเวลา Onsite จริงเป็นนาทีสำหรับ STAGE/BLUEPRINT/FRONTIER, จุดที่ต้องมีคนตรวจ (Human Gate) vs ระบบตรวจเอง (Auto), จุดเชื่อม LINE OA/Telegram/Make.com |
+
+### ข้อสรุปสำคัญสำหรับเฟส 2
+
+1. **ข้อมูลใน Google Sheets สมบูรณ์กว่า Supabase มาก** ตามที่ผู้ใช้บอกจริง — ตาราง `course_quizzes`/`quiz_questions` ใน Supabase มีอยู่แล้วแต่ว่างเปล่า 100%
+2. **Schema ของ `course_quizzes` ถูกออกแบบไว้ล่วงหน้าให้รองรับโครงสร้างนี้อยู่แล้ว** (ยืนยันจาก live schema): มีคอลัมน์ `qg_code`, `phase`, `pass_threshold`, `source_ref` ตรงกับคอลัมน์ `QG`, `Phase`, `Pass_Criteria` ใน Quiz_Bank เป๊ะ — แปลว่าเวลาจะ import ไม่ต้องออกแบบตารางใหม่ ใช้ของเดิมได้เลย แต่ **`quiz_questions` ยังไม่มีคอลัมน์ `Set` (A/B)** ต้องเพิ่มก่อนถ้าจะรองรับการสุ่มสลับชุดข้อสอบ
+3. **ระบบรหัสคลาส Onsite**: ยืนยันจาก Learning_Flow_v3 ว่า STAGE/BLUEPRINT/FRONTIER onsite ใช้ trainer ประเมินสด (Rubric) + TikTok API ดึง KPI จริง ไม่ได้ใช้ "รหัสกรอกในคลาส" แบบที่เข้าใจไว้ก่อนหน้า — สิ่งที่ตารางนี้เรียกว่า "Human Gate" คือทีมกรอกผลใน Sheets เอง ไม่ใช่นักเรียนกรอกรหัส **ต้องคุยกับผู้ใช้เพิ่มก่อนออกแบบ** ว่า "รหัสคลาสเรียนวันจริง" ที่ต้องการคือกลไกใหม่ที่ไม่เคยมีในระบบเดิมเลย หรือหมายถึงการแปลง flow ของ Trainer ในนี้ให้เป็นฟอร์มใน Admin
+4. **ยังไม่ implement อะไรในรอบนี้ตามที่ผู้ใช้ขอ** — ส่วนการเรียน/สอบให้ใช้ของเดิม (Google Sheets + Apps Script) ไปก่อน รอ Phase 2 ค่อยออกแบบการ import เข้า Supabase อย่างเป็นระบบ พร้อม mapping ตาราง `quiz_questions`/`course_quizzes`/`assignments` ให้ตรงกับ 4 ไฟล์นี้
+
+### สิ่งที่ต้องทำในเฟส 2 (เพิ่มจากที่ระบุไว้ก่อนหน้า)
+
+- [ ] คุยรายละเอียดกับผู้ใช้ก่อนสร้าง schema: ระบบสุ่มสลับข้อสอบ (ใช้ `Set A`/`Set B` ที่มีอยู่แล้วสลับกันทุกครั้งที่เข้าสอบ), กลไก "รหัสคลาสเรียนวันจริง" ที่ต้องการจริงๆ คืออะไร (ไม่มีอยู่ในระบบเดิมเลย เป็นฟีเจอร์ใหม่ทั้งหมด)
+- [ ] ออกแบบ migration นำเข้าข้อมูลจาก Quiz_Bank (110 ข้อ) + rubric_master (16 rubric) เข้า `course_quizzes`/`quiz_questions` — ต้องเพิ่มคอลัมน์ `set_label` ใน `quiz_questions` ก่อน
+- [ ] ถ้าต้องการเทียบกับโค้ด LMS จริง (`6course-quiz` repo) ต้องขอให้ attach repo เพิ่มในเซสชันก่อน (ตอนนี้ไม่อยู่ใน scope)
