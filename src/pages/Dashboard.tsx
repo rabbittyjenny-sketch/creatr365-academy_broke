@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2 } from 'lucide-react';
+import { isCurrentUserAdmin } from '@/lib/admin';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck } from 'lucide-react';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
 
@@ -53,12 +54,17 @@ const Dashboard: React.FC = () => {
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
+  // Separate from the student dashboard below — an admin gets a link out to
+  // the dedicated Admin Console (its own layout/routes), never a second
+  // copy of admin controls rendered here.
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { navigate('/auth'); return; }
     const u = { id: session.user.id, email: session.user.email };
     setUser(u);
+    isCurrentUserAdmin(session.user.id).then(setIsAdmin);
 
     const [{ data: prof }, { data: cs }, { data: en }] = await Promise.all([
       supabase.from('profiles').select('display_name,line_user_id').eq('user_id', session.user.id).maybeSingle(),
@@ -204,8 +210,22 @@ const Dashboard: React.FC = () => {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 pt-24 pb-24">
         {/* Header */}
         <div>
-          <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
-          <h1 className="text-2xl font-bold" data-accent="red">{displayName}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
+              <h1 className="text-2xl font-bold" data-accent="red">{displayName}</h1>
+            </div>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="shrink-0 flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border bg-muted hover-shift"
+                title="บัญชีนี้มีสิทธิ์ Admin — ไปที่ Admin Console"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Admin Console
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-xs font-mono bg-muted border border-border px-2 py-0.5 rounded-md">{keyId}</span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">

@@ -27,7 +27,7 @@ export type Database = {
           slug: string
           sort_order: number
           summary: string
-          tags: string[]
+          tags: string[] | null
           target_url: string
           title: string
           updated_at: string
@@ -44,8 +44,8 @@ export type Database = {
           slug: string
           sort_order?: number
           summary?: string
-          tags?: string[]
-          target_url: string
+          tags?: string[] | null
+          target_url?: string
           title: string
           updated_at?: string
         }
@@ -61,7 +61,7 @@ export type Database = {
           slug?: string
           sort_order?: number
           summary?: string
-          tags?: string[]
+          tags?: string[] | null
           target_url?: string
           title?: string
           updated_at?: string
@@ -357,6 +357,7 @@ export type Database = {
           max_slots: number | null
           outcome_goal: string | null
           price: string
+          promo_price: string | null
           slug: string
           sort_order: number
           status: string
@@ -387,6 +388,7 @@ export type Database = {
           max_slots?: number | null
           outcome_goal?: string | null
           price?: string
+          promo_price?: string | null
           slug: string
           sort_order?: number
           status?: string
@@ -417,6 +419,7 @@ export type Database = {
           max_slots?: number | null
           outcome_goal?: string | null
           price?: string
+          promo_price?: string | null
           slug?: string
           sort_order?: number
           status?: string
@@ -558,15 +561,15 @@ export type Database = {
           title: string
         }
         Insert: {
-          address: string
-          background_image_url: string
+          address?: string
+          background_image_url?: string
           created_by?: string
-          creator: string
+          creator?: string
           date: string
-          description: string
+          description?: string
           id?: string
-          target_date: string
-          time: string
+          target_date?: string
+          time?: string
           title: string
         }
         Update: {
@@ -589,6 +592,7 @@ export type Database = {
           created_at: string
           id: string
           module_id: string
+          score: number | null
           status: string
           user_id: string
         }
@@ -597,6 +601,7 @@ export type Database = {
           created_at?: string
           id?: string
           module_id: string
+          score?: number | null
           status?: string
           user_id: string
         }
@@ -605,6 +610,7 @@ export type Database = {
           created_at?: string
           id?: string
           module_id?: string
+          score?: number | null
           status?: string
           user_id?: string
         }
@@ -738,36 +744,36 @@ export type Database = {
       }
       user_accounts: {
         Row: {
-          id: string
-          line_user_id: string
           email: string | null
-          student_id: string | null
-          password_hash: string | null
           hash_algorithm: string
+          id: string
           is_active: boolean
+          line_user_id: string
+          password_hash: string | null
           registered_at: string
+          student_id: string | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          line_user_id: string
           email?: string | null
-          student_id?: string | null
-          password_hash?: string | null
           hash_algorithm?: string
+          id?: string
           is_active?: boolean
+          line_user_id: string
+          password_hash?: string | null
           registered_at?: string
+          student_id?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          line_user_id?: string
           email?: string | null
-          student_id?: string | null
-          password_hash?: string | null
           hash_algorithm?: string
+          id?: string
           is_active?: boolean
+          line_user_id?: string
+          password_hash?: string | null
           registered_at?: string
+          student_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -798,6 +804,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ensure_master_student_account: {
+        Args: { _email?: string }
+        Returns: string
+      }
+      ensure_master_student_account_for_identity: {
+        Args: { _email?: string; _line_user_id: string; _student_id?: string }
+        Returns: string
+      }
+      generate_master_student_id: { Args: { _seed: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -806,6 +821,14 @@ export type Database = {
         Returns: boolean
       }
       increment_promo_used: { Args: { promo_id: string }; Returns: undefined }
+      link_line_master_student_account: {
+        Args: { _email?: string; _line_user_id: string; _student_id?: string }
+        Returns: string
+      }
+      normalize_master_student_id: {
+        Args: { _student_id: string }
+        Returns: string
+      }
       unlock_next_module: {
         Args: { _module_id: string; _user_id: string }
         Returns: undefined
