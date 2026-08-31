@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/SEOHead';
-import { Plus, Pencil, Trash2, ArrowLeft, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 /* ─── Types ────────────────────────────────────────────── */
 interface CourseRow {
@@ -298,31 +299,12 @@ const AdminCourses = () => {
 
   /* ─── RENDER ───────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-[#080808] text-white">
+    <>
       <SEOHead title="Admin — จัดการหลักสูตร · CREATR365" description="Course management admin" />
-
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-[#080808]/95 backdrop-blur border-b border-white/8 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-white/30 hover:text-white/60 transition-colors"><ArrowLeft className="w-5 h-5" /></Link>
-          <div>
-            <p className="text-[10px] text-white/25 uppercase tracking-widest">Admin Panel</p>
-            <h1 className="text-base font-black text-white tracking-tight">CREATR365</h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/admin/articles" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">บทความ</Link>
-          <Link to="/admin/payments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">การชำระเงิน</Link>
-          <Link to="/admin/assignments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">งานที่ส่ง</Link>
-          <Link to="/admin" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">Event CMS</Link>
-          <button onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}
-            className="text-xs px-3 py-1.5 rounded-lg border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
-            ออกจากระบบ
-          </button>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <AdminLayout
+        title="จัดการหลักสูตร"
+        onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}
+      >
 
         {/* Tabs */}
         <div className="flex gap-1 bg-white/3 p-1 rounded-xl w-fit mb-8">
@@ -467,7 +449,7 @@ const AdminCourses = () => {
             </div>
           </div>
         )}
-      </div>
+      </AdminLayout>
 
       {/* ══ COURSE EDITOR OVERLAY ════════════════════════ */}
       {ec && (
@@ -808,7 +790,7 @@ const AdminCourses = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

@@ -11,6 +11,10 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import RefundPolicy from "./pages/RefundPolicy";
+import FAQ from "./pages/FAQ";
 import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
@@ -41,6 +45,10 @@ const App = () => (
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
         <Route path="/admin/courses" element={<RequireAdmin><AdminCourses /></RequireAdmin>} />
         <Route path="/admin/assignments" element={<RequireAdmin><AdminAssignments /></RequireAdmin>} />
