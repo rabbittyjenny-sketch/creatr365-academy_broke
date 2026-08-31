@@ -102,10 +102,20 @@ serve(async (req) => {
       }
     }
 
+    // A course marked "free" in Admin enrolls directly, with no price to
+    // parse and no Stripe session — skip straight to the free-enrollment
+    // path below instead of failing on an unparseable/zero price.
+    if (course.status === "free") {
+      isFree = true;
+    }
+
     // Parse price (e.g. "25,000 - 45,000 ฿" → take first number)
-    const priceMatch = (course.price || "").replace(/,/g, "").match(/(\d+)/);
-    let priceAmount = priceMatch ? parseInt(priceMatch[1]) : 0;
-    if (!priceAmount) throw new Error("Course price not configured");
+    let priceAmount = 0;
+    if (!isFree) {
+      const priceMatch = (course.price || "").replace(/,/g, "").match(/(\d+)/);
+      priceAmount = priceMatch ? parseInt(priceMatch[1]) : 0;
+      if (!priceAmount) throw new Error("Course price not configured");
+    }
 
     if (isFree) {
       // Free enrollment

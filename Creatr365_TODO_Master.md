@@ -466,3 +466,88 @@ join auth.users u on u.id = ur.user_id;
 | `src/pages/Dashboard.tsx` | เพิ่มปุ่ม "Admin Console" เมื่อ user เป็น admin |
 | `src/integrations/supabase/types.ts` | regenerate จาก live schema จริง |
 | ไฟล์ตายที่ลบ (ดูรายชื่อด้านบน) | ลบเพราะไม่มีการ import จริงในระบบ build เลย |
+
+---
+
+## 🆕 PHASE 3.1 — แก้คอร์สฟรี "Course price not configured" (ยืนยันจริง, 31 ส.ค. 2026)
+
+### สาเหตุ (ยืนยันจาก production code จริงใน edge function `create-checkout`)
+
+`supabase/functions/create-checkout/index.ts` parse ราคาจาก `course.price` (string) เป็นตัวเลขก่อนเสมอ แล้ว throw `"Course price not configured"` ทันทีถ้า parse ได้ `0` หรือ parse ไม่ได้ — โดยเช็คนี้เกิด**ก่อน**จะเช็คว่าคอร์สนี้ควรฟรีหรือไม่ ตรวจ DB จริงพบว่าคอร์ส `magnet` (MAGNET — LIVE COMMERCE BLUEPRINT) มี `price: "0"` และไม่มีสถานะ "free" ให้เลือกเลยใน dropdown ของ Admin (มีแค่ `now_open / coming_soon / fully_booked / draft / archived`) — เป็นบั๊กเดียวกับที่ผู้ใช้เจอตอนกดซื้อ
+
+โค้ดใน `src/pages/Courses.tsx` (หน้ารวมคอร์ส) เขียน comment ไว้ล่วงหน้าอยู่แล้วว่า **"a future 'free' vs paid split lives in price/status, not here"** — แปลว่าคนออกแบบระบบเดิมตั้งใจให้ `status` เป็นจุดขยายสำหรับสถานะ free อยู่แล้ว เพียงแต่ยังไม่มีใครเพิ่มค่า `free` เข้าไปจริง
+
+### แก้แล้ว
+
+1. **`src/pages/AdminCourses.tsx`** — เพิ่ม `{ value:'free', label:'Free (เรียนฟรี)' }` ใน `STATUS_OPTIONS` (คอลัมน์ `courses.status` เป็น free-text ไม่มี CHECK constraint ในฐานข้อมูลจริง — ยืนยันแล้ว จึงไม่ต้องแก้ schema)
+2. **`src/pages/Courses.tsx`** — เพิ่ม badge `FREE` ใน `STATUS_META` ให้ตรงกับสถานะใหม่
+3. **`supabase/functions/create-checkout/index.ts`** — ย้ายการเช็ค `course.status === "free"` ไปไว้**ก่อน**การ parse ราคา ถ้าเป็น free ให้ข้ามไป insert `course_enrollments` สถานะ `free` ทันที (path เดิมที่มีอยู่แล้วสำหรับโปรโมโค้ด `discount_type='free'`) — ไม่ต้องผ่าน Stripe เลย ตรงกับที่ผู้ใช้ขอ: "ถ้าสถานะ free เมื่อกดซื้อ ควรดึงบทเรียนเข้าแดชบอร์ดทันที ไม่ต้องรอ payment success" — **deploy ขึ้น production แล้ว** (version 6 ของ edge function)
+4. **`src/pages/CourseDetail.tsx`, `src/pages/Enroll.tsx`** — แก้การแสดงราคาจากการโชว์เลข `"0"` ตรงๆ (ตามภาพหน้าจอที่แนบ) ให้แสดง "ฟรี" แทน เมื่อ `status==='free'` หรือราคาว่าง/เป็น "0"; ซ่อนข้อความ "ชำระผ่าน Stripe / PCI DSS" ในหน้า Enroll เมื่อคอร์สฟรี (ไม่เกี่ยวกับ Stripe จริงๆ ในเคสนี้)
+5. **แก้ข้อมูลจริงที่พังอยู่**: อัปเดต `courses.status = 'free'` ให้คอร์ส `magnet` (id `0c4a7138-...`) ใน production แล้ว ตอนนี้กดซื้อได้จริงไม่ error
+
+### หมายเหตุ
+
+- `stripe_price_id` ของ `magnet` ยังเป็นค่าเก่า `"free_magnet01"` ที่ admin เคยพิมพ์ไว้เป็น workaround ก่อนหน้านี้ — ตรวจแล้วว่าไม่มีจุดไหนในโค้ดอ่านค่านี้จริง (ไม่ถูกใช้ในการคำนวณ Stripe เลย) จึงปล่อยไว้ได้ ไม่กระทบอะไร
+- ตรวจแล้ว: `npm run build`, `npx tsc --noEmit` ผ่านหมดหลังแก้
+
+---
+
+## 🆕 PHASE 2 — ข้อมูลจริงจาก Google Sheets (ต้นทางเดิมของระบบเรียน) — ค้นคว้าแล้ว 31 ส.ค. 2026
+
+> ผู้ใช้ถามว่าคำเตือนเรื่อง "production ไม่มี migration history ที่ track จริง" เกี่ยวกับ `6course-quiz` repo หรือ Google Sheets ไหม
+> **คำตอบ: ไม่เกี่ยวกันโดยตรง** คำเตือนนั้นพูดถึง Postgres schema ของเว็บหลัก (`courses`, `articles` ฯลฯ) ส่วน Google Sheets ที่กล่าวถึงด้านล่างคือฐานข้อมูลเดิมของฝั่ง **LMS** (`6course-quiz`) ที่เชื่อมผ่าน Google Apps Script — เป็นคนละระบบ คนละฐานข้อมูลตามที่ README ข้อ 2 ระบุไว้อยู่แล้ว (LMS แยกจาก Main Web) — แต่เป็นแหล่งข้อมูลจริงที่ควรใช้อ้างอิงตอนสร้างระบบสอบ/rubric ใน Supabase ในเฟส 2
+> **หมายเหตุ**: session นี้ยังไม่ได้ attach repo `6course-quiz` (อยู่นอก scope ที่ได้รับอนุญาตตอนนี้) — ยังไม่ได้เปรียบเทียบกับโค้ดจริงของ LMS ถ้าต้องการให้ตรวจ ให้แจ้งเพื่อ add repo เพิ่ม
+
+ค้นและอ่านไฟล์จริงใน Google Drive (บัญชี hello.livestreamers@gmail.com) ครบทั้ง 3 ไฟล์ที่ผู้ใช้ระบุ (ไม่รวมไฟล์ export .csv ปลีกย่อยที่เป็นแค่ snapshot ของแท็บเดียวกัน):
+
+| ไฟล์ | สถานะ | สรุปเนื้อหาจริงที่อ่านแล้ว |
+|---|---|---|
+| `Creatr365_Master_Database` (Google Sheet) | อ่านครบ (413 บรรทัด) | แท็บ Quiz_Bank: **110 คำถามจริง**, แบ่งเป็น 7 กลุ่ม `QG-01`ถึง`QG-07`, 3 phase (`Pre`/`During`/`Post`), **2 ชุดข้อสอบ (`Set A`, `Set B`) มีอยู่แล้วจริง** — ตรงกับที่ผู้ใช้คาดว่า "น่าจะมีอย่างน้อย 2 ชุด" คอลัมน์ครบ: Q_ID, QG, Bloom_Level, Choice A-D, Answer, Answer_Explain, Skill_Tag, Is_Diagnostic, Recommended_Course, Pass_Criteria, Progression_Level |
+| `rubric_master` (Google Sheet) | อ่านครบ | **16 rubric** (RUB-01 ถึง RUB-16) แต่ละอันมีเกณฑ์ 4 ระดับ (Professional/Competent/Developing/Rookie) ต่อมิติ, ตาราง Pass Criteria ครบทั้ง 6 คอร์ส, ตาราง KPI Master Reference (Conversion Rate, Watch Time ตามระดับ, Live Health Score ฯลฯ), ตาราง Progression Model 5 ระดับ (STARTER→MASTER) |
+| `Creatr365_Learning_Flow_v3 (1).xlsx` | อ่านครบ | Flow ปฏิบัติการแบบละเอียดทีละขั้นของทั้ง 6 คอร์ส (ใครทำ/เกณฑ์ผ่าน/error path ถ้าไม่ผ่าน) รวมตารางเวลา Onsite จริงเป็นนาทีสำหรับ STAGE/BLUEPRINT/FRONTIER, จุดที่ต้องมีคนตรวจ (Human Gate) vs ระบบตรวจเอง (Auto), จุดเชื่อม LINE OA/Telegram/Make.com |
+
+### ข้อสรุปสำคัญสำหรับเฟส 2
+
+1. **ข้อมูลใน Google Sheets สมบูรณ์กว่า Supabase มาก** ตามที่ผู้ใช้บอกจริง — ตาราง `course_quizzes`/`quiz_questions` ใน Supabase มีอยู่แล้วแต่ว่างเปล่า 100%
+2. **Schema ของ `course_quizzes` ถูกออกแบบไว้ล่วงหน้าให้รองรับโครงสร้างนี้อยู่แล้ว** (ยืนยันจาก live schema): มีคอลัมน์ `qg_code`, `phase`, `pass_threshold`, `source_ref` ตรงกับคอลัมน์ `QG`, `Phase`, `Pass_Criteria` ใน Quiz_Bank เป๊ะ — แปลว่าเวลาจะ import ไม่ต้องออกแบบตารางใหม่ ใช้ของเดิมได้เลย แต่ **`quiz_questions` ยังไม่มีคอลัมน์ `Set` (A/B)** ต้องเพิ่มก่อนถ้าจะรองรับการสุ่มสลับชุดข้อสอบ
+3. **ระบบรหัสคลาส Onsite**: ยืนยันจาก Learning_Flow_v3 ว่า STAGE/BLUEPRINT/FRONTIER onsite ใช้ trainer ประเมินสด (Rubric) + TikTok API ดึง KPI จริง ไม่ได้ใช้ "รหัสกรอกในคลาส" แบบที่เข้าใจไว้ก่อนหน้า — สิ่งที่ตารางนี้เรียกว่า "Human Gate" คือทีมกรอกผลใน Sheets เอง ไม่ใช่นักเรียนกรอกรหัส **ต้องคุยกับผู้ใช้เพิ่มก่อนออกแบบ** ว่า "รหัสคลาสเรียนวันจริง" ที่ต้องการคือกลไกใหม่ที่ไม่เคยมีในระบบเดิมเลย หรือหมายถึงการแปลง flow ของ Trainer ในนี้ให้เป็นฟอร์มใน Admin
+4. **ยังไม่ implement อะไรในรอบนี้ตามที่ผู้ใช้ขอ** — ส่วนการเรียน/สอบให้ใช้ของเดิม (Google Sheets + Apps Script) ไปก่อน รอ Phase 2 ค่อยออกแบบการ import เข้า Supabase อย่างเป็นระบบ พร้อม mapping ตาราง `quiz_questions`/`course_quizzes`/`assignments` ให้ตรงกับ 4 ไฟล์นี้
+
+### สิ่งที่ต้องทำในเฟส 2 (เพิ่มจากที่ระบุไว้ก่อนหน้า)
+
+- [ ] คุยรายละเอียดกับผู้ใช้ก่อนสร้าง schema: ระบบสุ่มสลับข้อสอบ (ใช้ `Set A`/`Set B` ที่มีอยู่แล้วสลับกันทุกครั้งที่เข้าสอบ), กลไก "รหัสคลาสเรียนวันจริง" ที่ต้องการจริงๆ คืออะไร (ไม่มีอยู่ในระบบเดิมเลย เป็นฟีเจอร์ใหม่ทั้งหมด)
+- [ ] ออกแบบ migration นำเข้าข้อมูลจาก Quiz_Bank (110 ข้อ) + rubric_master (16 rubric) เข้า `course_quizzes`/`quiz_questions` — ต้องเพิ่มคอลัมน์ `set_label` ใน `quiz_questions` ก่อน
+- [ ] ถ้าต้องการเทียบกับโค้ด LMS จริง (`6course-quiz` repo) ต้องขอให้ attach repo เพิ่มในเซสชันก่อน (ตอนนี้ไม่อยู่ใน scope)
+
+---
+
+## 🆕 PHASE 3.2 — แก้ Admin แยกจาก Dashboard, Footer, Hover (31 ส.ค. 2026)
+
+### แก้แล้ว + ยืนยันจริงด้วย headless browser (ไม่ใช่แค่ build ผ่าน)
+
+**1. บั๊กลิงก์บทความใน Admin เด้งออกไป Dashboard ปกติ** — สาเหตุจริง: `AdminArticles.tsx` เป็นหน้าเดียวใน Admin ที่ยัง render `<CourseNavbar/>` (นาวบาร์สาธารณะของเว็บหลัก) ซึ่งมีลิงก์ "ห้องเรียน" ชี้ตรงไป `/dashboard` — ส่วนอีก 4 หน้า Admin ต่างก็มี header ของตัวเองคนละแบบ ไม่มี shell กลางเลย ทั้งที่มี `src/components/admin/AdminLayout.tsx` (sidebar shell) สร้างไว้แล้วแต่ไม่มีหน้าไหนเรียกใช้เลยสักหน้า
+   - ✅ ย้ายทั้ง 5 หน้า Admin (`Admin.tsx`, `AdminCourses.tsx`, `AdminArticles.tsx`, `AdminAssignments.tsx`, `AdminPayments.tsx`) มาใช้ `AdminLayout` เดียวกันหมด ลบ header/nav-link ที่ซ้ำกันคนละแบบในแต่ละไฟล์ออก
+   - ✅ ยืนยันจริงด้วย headless browser (Playwright): ทุกหน้า `/admin/*` ตอนนี้ redirect ไป `/auth?redirect=...` สะอาด ไม่มี error, ไม่มี `CourseNavbar`/ลิงก์ dashboard หลงเหลือใน Admin เลยสักจุด
+   - เรื่อง "ข้อมูลที่แก้ใน Admin อัปเดตหน้าเว็บจริงไหม": ยืนยันแล้วว่าใช่ — ทุกหน้า Admin เขียนตรงเข้าตาราง Supabase เดียวกับที่ `/courses`, `/course/:slug`, `/articles`, `Dashboard` อ่าน ไม่มี data store แยกซ้อนที่ไหนเลย (ตรวจตั้งแต่ PHASE 3 แล้ว)
+
+**2. Footer ลิงก์ไม่ทำงาน (นโยบาย/FAQ/ข้อกำหนด)** — สาเหตุจริง: `Footer.tsx` มีลิงก์ไป `/privacy`, `/terms`, `/refund-policy`, `/faq` มาตั้งแต่แรก และไฟล์หน้าเพจ (`Privacy.tsx`, `Terms.tsx`, `RefundPolicy.tsx`, `FAQ.tsx`) ก็มีอยู่แล้วในโค้ด แต่ **ไม่เคยถูกลงทะเบียน route ใน `App.tsx` เลยสักเส้นทาง** — กดแล้วเจอ 404 (NotFound) มาตลอด
+   - ✅ เพิ่ม route ทั้ง 4 เส้นทางใน `App.tsx` แล้ว ยืนยันจริงว่าโหลดได้ถูกต้องพร้อม title ที่ถูกต้องทั้ง 4 หน้า
+
+**3. Hover effect ไม่ตรงกับ visual system ที่แนบมา (แก้แบบขอบเขตจำกัดตามที่อนุมัติ)** — เจอบั๊กจริงใน `src/index.css` บรรทัด 419: มี selector `.site-hover-scope,` (ไม่มีเงื่อนไข) ไปรวมอยู่ใน comma-list เดียวกับ `.site-hover-scope [data-accent="blue"]` — ทำให้ **ทั้งเว็บไซต์** (เพราะ `.site-hover-scope` ครอบทั้งแอปใน `App.tsx`) ได้ค่าเริ่มต้น `--hover-accent` เป็นสีน้ำเงินแบบไม่มีเงื่อนไข ทั้งที่ไฟล์ `reference_visual_system.md` ที่แนบมาระบุชัดว่า System A (เว็บ/การตลาด) ต้องเป็นดำ-ขาว-แดงเข้มเท่านั้น (แดง ≤5% ใช้เน้นเท่านั้น ไม่มีน้ำเงิน/เหลือง/เขียวในระบบเลย) — บรรทัด 421-423 (red/yellow/green) ไม่มี catch-all แบบนี้ ยืนยันว่าเป็น typo ไม่ใช่ของตั้งใจ
+   - ✅ ลบ `.site-hover-scope,` ที่หลงออกไป เหลือแค่ `.site-hover-scope [data-accent="blue"]` (ต้องมี `data-accent="blue"` จริงๆ ถึงจะได้สีน้ำเงิน ตรงกับแพทเทิร์นของสีอื่น)
+   - ✅ เปลี่ยนค่า fallback สีเริ่มต้น (ตอนไม่มี `--hover-accent`/`--section-accent` มาจากที่ไหนเลย) จาก `--google-blue` เป็น `--google-red` ใน 6 จุด (`.hover-shift`, heading hover, `.site-hover-scope` generic text hover, `.nav-link` x2, `.btn-brand`) — เป็น fallback ตัวสุดท้ายเท่านั้น
+   - **ไม่ได้แตะ**: ทุกจุดที่ตั้งใจใส่ `data-accent="blue|yellow|green"` ไว้อย่างชัดเจน (เช่น "หน้าแรก" ในนาวบาร์) ยังเป็นสีเดิมทุกจุด — ตามที่อนุมัติไว้ว่า "แก้เฉพาะจุดที่ผิดชัดเจนก่อน" ไม่ใช่ recolor ทั้งเว็บ
+   - ✅ ยืนยันจริงด้วย Playwright: hover element ที่ไม่มี accent ใดๆ เลยตอนนี้ได้สี `rgb(195,1,40)` (แดงตามแบรนด์) แทนที่จะเป็นน้ำเงิน, ส่วน "หน้าแรก" (data-accent="blue" ตั้งใจ) ยังเป็นน้ำเงินเหมือนเดิมไม่เปลี่ยน — ไม่มี regression
+   - พบไฟล์ `src/index-no-motioneffect.css` ที่มีบั๊กเดียวกัน (`.site-hover-scope,` เดียวกัน) แต่ไฟล์นี้**ไม่ได้ถูก import ที่ไหนเลยในระบบ** (เป็นไฟล์ตายเหมือนไฟล์ `_before` อื่นๆที่เคยลบไปแล้ว) — ยังไม่ได้ลบในรอบนี้ ทิ้งไว้ให้ตัดสินใจว่าจะลบทีหลัง
+
+### ยืนยันแล้ว (ยังไม่ implement — รอ go-ahead ให้เริ่มสร้างจริง)
+
+**ระบบรหัสปลดล็อคคอร์ส Onsite** — ผู้ใช้ยืนยันโจทย์แล้ว: คอร์ส onsite (STAGE, BRAND HOST ARCHITECT) ซื้อแล้วเนื้อหายังไม่เปิด ต้องรอรหัสจากผู้สอนในวันเรียนจริงก่อนถึงจะปลดล็อคได้ และยืนยัน**ทิศทางออกแบบแล้ว**: ให้ออกรหัส **ต่อวันเรียน/รอบ ไม่ใช่รหัสเดียวทั้งคอร์ส** (เพราะ BRAND HOST ARCHITECT เรียน 2 วัน ถ้าให้รหัสเดียวทั้งคอร์สนักเรียนจะเห็นเนื้อหาวันที่ 2 ได้ตั้งแต่วันแรก)
+
+สิ่งที่ต้องออกแบบต่อก่อนเริ่มสร้างจริง (ยังไม่ได้ทำ — เป็น net-new feature ต้องแก้ schema, admin UI, student UI):
+- [ ] ตาราง/คอลัมน์ใหม่สำหรับเก็บรหัสต่อวัน/รอบ ผูกกับ `course_modules` หรือสร้างตารางใหม่ (เช่น `session_codes`: course_id, session_label, code, valid_date, created_by) — ยังไม่ตัดสินใจ schema แน่นอน
+- [ ] Admin UI: หน้าจอให้ผู้สอนออกรหัสต่อวัน/รอบ (ออกก่อนวันเรียน หรือออกสดในวันเรียน?)
+- [ ] Student UI: จุดกรอกรหัสใน Dashboard/หน้าเรียน เพื่อปลดล็อคเนื้อหาของวันนั้น
+- [ ] นโยบายหมดอายุของรหัส (ใช้ได้แค่วันนั้น? ใช้ซ้ำได้ในรอบถัดไปของคอร์สเดียวกันไหม เพราะมีหลายรอบ/หลาย batch)
+- [ ] ความปลอดภัย: ป้องกันเดารหัส/แชร์รหัสข้ามคน (rate limit, ผูกกับ enrollment ของคนนั้น)
+- **ยังไม่เริ่มสร้าง** ตามที่ผู้ใช้ระบุว่าเป็นส่วนที่ต้องเจาะลึกและยังไม่เร่งด่วนเท่า Admin flow — รอ confirm รายละเอียดข้างต้นก่อนเขียน migration/โค้ดจริง

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CourseNavbar } from '@/components/CourseNavbar';
+import { useNavigate } from 'react-router-dom';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit2, Trash2, Eye, EyeOff, ArrowLeft, Save, X, ExternalLink } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink } from 'lucide-react';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
@@ -283,34 +283,18 @@ const AdminArticles: React.FC = () => {
 
   return (
     <>
-      <CourseNavbar />
-      <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <Link to="/admin/courses" className="text-white/30 hover:text-white/60 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div>
-                <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Admin</span>
-                <h1 className="text-2xl font-bold text-white">จัดการบทความ</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setEditing(EMPTY)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
-              >
-                <Plus className="w-4 h-4" /> บทความใหม่
-              </button>
-              <button onClick={handleSignOut}
-                className="text-xs px-3 py-2.5 rounded-xl border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
-                ออกจากระบบ
-              </button>
-            </div>
-          </div>
-
+      <AdminLayout
+        title="จัดการบทความ"
+        onSignOut={handleSignOut}
+        actions={
+          <button
+            onClick={() => setEditing(EMPTY)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" /> บทความใหม่
+          </button>
+        }
+      >
           {msg && (
             <div className="mb-4 p-3 rounded-xl bg-[#34A853]/15 border border-[#34A853]/25 text-[#34A853] text-sm">{msg}</div>
           )}
@@ -372,15 +356,7 @@ const AdminArticles: React.FC = () => {
               </table>
             </div>
           )}
-          {/* Admin nav */}
-          <div className="mt-8 flex gap-4 text-xs text-white/25">
-            <Link to="/admin/courses" className="hover:text-white/50 transition-colors">จัดการคอร์ส</Link>
-            <Link to="/admin/payments" className="hover:text-white/50 transition-colors">การชำระเงิน</Link>
-            <Link to="/admin/assignments" className="hover:text-white/50 transition-colors">งานที่ส่งมา</Link>
-            <Link to="/admin" className="hover:text-white/50 transition-colors">Event CMS</Link>
-          </div>
-        </div>
-      </main>
+      </AdminLayout>
 
       {editing !== false && (
         <ArticleEditor

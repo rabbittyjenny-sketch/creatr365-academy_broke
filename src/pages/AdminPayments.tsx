@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
 
 interface Row {
   id: string; user_id: string; course_id: string; status: string;
@@ -36,24 +36,7 @@ const AdminPayments = () => {
   if (loading) return <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeft className="w-4 h-4 mr-1"/>หน้าหลัก
-          </Button>
-          <h1 className="text-2xl font-bold flex-1">รายการการชำระเงิน</h1>
-          <Button variant="outline" size="sm" onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}>ออกจากระบบ</Button>
-        </div>
-
-        {/* Admin navigation */}
-        <div className="flex gap-1 flex-wrap mb-6 border-b pb-4">
-          <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
-          <Link to="/admin/articles"><Button variant="outline" size="sm">บทความ</Button></Link>
-          <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
-          <Button variant="default" size="sm">การชำระเงิน (นี่คือ)</Button>
-          <Link to="/admin"><Button variant="outline" size="sm">Event CMS</Button></Link>
-        </div>
+    <AdminLayout title="รายการการชำระเงิน" onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}>
         <div className="flex gap-2 mb-4">
           {(['all','pending','paid','free'] as const).map(f=>(
             <Button key={f} size="sm" variant={filter===f?'default':'outline'} onClick={()=>setFilter(f)}>{f}</Button>
@@ -86,8 +69,7 @@ const AdminPayments = () => {
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
+    </AdminLayout>
   );
 };
 
