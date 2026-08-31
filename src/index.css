@@ -257,7 +257,7 @@
 .group\/shift:hover .hover-shift,
 .group:hover .hover-shift {
   transform: translateY(-1px);
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
 }
 .hover-shift[data-accent="blue"]:hover,
 .group:hover .hover-shift[data-accent="blue"]   { color: hsl(var(--google-blue)); }
@@ -382,7 +382,7 @@ h1, h2, h3, h4, h5, h6, .heading-hover {
   display: inline-block;
   cursor: default;
   transition: color 500ms ease;
-  --heading-accent: hsl(var(--google-blue));
+  --heading-accent: hsl(var(--google-red));
 }
 .section-accent h1,
 .section-accent h2,
@@ -416,7 +416,6 @@ h4:hover::after, h5:hover::after, h6:hover::after,
    Simple, consistent state changes: color for text, subtle lift for cards,
    and soft accent wash for buttons. Driven only by the brand accents.
 */
-.site-hover-scope,
 .site-hover-scope [data-accent="blue"]   { --hover-accent: hsl(var(--google-blue)); }
 .site-hover-scope [data-accent="red"]    { --hover-accent: hsl(var(--google-red)); }
 .site-hover-scope [data-accent="yellow"] { --hover-accent: hsl(45 95% 42%); }
@@ -439,7 +438,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 .site-hover-scope span:not(.sr-only):not(.hl-char):hover,
 .site-hover-scope a:not(.btn-brand):hover,
 .site-hover-scope button:not(.btn-brand):hover {
-  color: var(--hover-accent, var(--section-accent, hsl(var(--google-blue))));
+  color: var(--hover-accent, var(--section-accent, hsl(var(--google-red))));
 }
 
 .nav-link {
@@ -456,14 +455,14 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   right: 0;
   bottom: -4px;
   height: 1px;
-  background: var(--hover-accent, hsl(var(--google-blue)));
+  background: var(--hover-accent, hsl(var(--google-red)));
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s ease;
 }
 .nav-link:hover,
 .nav-link[aria-current="page"] {
-  color: var(--hover-accent, hsl(var(--google-blue)));
+  color: var(--hover-accent, hsl(var(--google-red)));
 }
 .nav-link:hover::after,
 .nav-link[aria-current="page"]::after {
@@ -488,7 +487,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--hover-accent, hsl(var(--google-blue)));
+  background: var(--hover-accent, hsl(var(--google-red)));
   opacity: 0;
   transition: opacity 0.28s ease;
 }
