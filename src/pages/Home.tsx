@@ -1,4 +1,4 @@
-
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
