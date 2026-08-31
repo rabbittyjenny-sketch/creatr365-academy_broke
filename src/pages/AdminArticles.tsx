@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { CourseNavbar } from '@/components/CourseNavbar';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, ArrowLeft, Save, X, ExternalLink } from 'lucide-react';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
@@ -228,12 +228,6 @@ const ArticleEditor: React.FC<{
 };
 
 /* ─── Main page ─────────────────────────────────────────── */
-const STATUS_FILTERS = [
-  { value: 'all', label: 'ทั้งหมด' },
-  { value: 'published', label: 'เผยแพร่แล้ว' },
-  { value: 'draft', label: 'ฉบับร่าง' },
-] as const;
-
 const AdminArticles: React.FC = () => {
   const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -241,9 +235,6 @@ const AdminArticles: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [msg, setMsg] = useState('');
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]['value']>('all');
-  const [kindFilter, setKindFilter] = useState<string>('all');
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('articles').select('*').order('sort_order');
@@ -272,20 +263,6 @@ const AdminArticles: React.FC = () => {
     await supabase.auth.signOut();
     navigate('/auth');
   };
-
-  // Must run before the `!isAdmin` early return below — Hooks can't be
-  // called conditionally, so this can't sit next to the plain helper
-  // functions further down without breaking on the first admin-check render.
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return articles.filter(a => {
-      if (statusFilter === 'published' && !a.is_active) return false;
-      if (statusFilter === 'draft' && a.is_active) return false;
-      if (kindFilter !== 'all' && a.kind !== kindFilter) return false;
-      if (q && !a.title.toLowerCase().includes(q) && !a.slug.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [articles, search, statusFilter, kindFilter]);
 
   if (!isAdmin) {
     return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
@@ -321,124 +298,104 @@ const AdminArticles: React.FC = () => {
 
   return (
     <>
-      <AdminLayout
-        title="จัดการบทความ"
-        onSignOut={handleSignOut}
-        actions={
-          <button
-            onClick={() => setEditing(EMPTY)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
-          >
-            <Plus className="w-4 h-4" /> บทความใหม่
-          </button>
-        }
-      >
-        {msg && (
-          <div className="mb-4 p-3 rounded-xl bg-[#34A853]/15 border border-[#34A853]/25 text-[#34A853] text-sm">{msg}</div>
-        )}
-
-        {/* Toolbar: search + filters — standard admin-table conventions
-            (search left, segmented status filter, secondary dropdown) */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-          <div className="relative flex-1 min-w-0">
-            <Search className="w-4 h-4 text-white/25 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="ค้นหาชื่อบทความ หรือ slug..."
-              className="w-full bg-[#111] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#D4A843]/50"
-            />
-          </div>
-          <div className="flex items-center gap-1.5 bg-[#111] border border-white/10 rounded-xl p-1 shrink-0">
-            {STATUS_FILTERS.map(f => (
+      <CourseNavbar />
+      <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Link to="/admin/courses" className="text-white/30 hover:text-white/60 transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div>
+                <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Admin</span>
+                <h1 className="text-2xl font-bold text-white">จัดการบทความ</h1>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
               <button
-                key={f.value}
-                onClick={() => setStatusFilter(f.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  statusFilter === f.value ? 'bg-[#D4A843] text-black' : 'text-white/40 hover:text-white'
-                }`}
+                onClick={() => setEditing(EMPTY)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
               >
-                {f.label}
+                <Plus className="w-4 h-4" /> บทความใหม่
               </button>
-            ))}
+              <button onClick={handleSignOut}
+                className="text-xs px-3 py-2.5 rounded-xl border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
+                ออกจากระบบ
+              </button>
+            </div>
           </div>
-          <select
-            value={kindFilter}
-            onChange={e => setKindFilter(e.target.value)}
-            className="bg-[#111] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white/70 focus:outline-none focus:border-[#D4A843]/50 shrink-0"
-          >
-            <option value="all">ทุกประเภท</option>
-            {KINDS.map(k => <option key={k} value={k}>{k.toUpperCase()}</option>)}
-          </select>
-        </div>
 
-        {/* Table */}
-        {loading ? (
-          <div className="text-white/30 text-sm py-16 text-center flex flex-col items-center gap-3">
-            <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
-            กำลังโหลด...
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-white/8 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#111] border-b border-white/8">
-                  <th className="text-left px-5 py-3 text-white/30 text-xs font-semibold tracking-widest uppercase">ชื่อบทความ</th>
-                  <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden md:table-cell">ประเภท</th>
-                  <th className="text-center px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden sm:table-cell">สถานะ</th>
-                  <th className="text-right px-5 py-3 text-white/30 text-xs font-semibold uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {filtered.map(a => (
-                  <tr key={a.id} className="bg-[#0D0D0D] hover:bg-[#131313] transition-colors">
-                    <td className="px-5 py-4">
-                      <p className="text-white font-medium text-sm line-clamp-1">{a.title}</p>
-                      <p className="text-white/30 text-xs mt-0.5 font-mono">/articles/{a.slug}</p>
-                    </td>
-                    <td className="px-4 py-4 hidden md:table-cell">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/8 text-white/50 uppercase">{a.kind}</span>
-                    </td>
-                    <td className="px-4 py-4 text-center hidden sm:table-cell">
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${a.is_active ? 'text-[#34A853]' : 'text-white/30'}`}>
-                        {a.is_active ? '● เผยแพร่' : '○ ฉบับร่าง'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {a.body && (
-                          <a href={`/articles/${a.slug}`} target="_blank" rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
-                        )}
-                        <button onClick={() => toggleActive(a)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
-                          {a.is_active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        </button>
-                        <button onClick={() => setEditing(a)} className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg text-white/30 hover:text-[#CC0033] hover:bg-[#CC0033]/10 transition-all">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+          {msg && (
+            <div className="mb-4 p-3 rounded-xl bg-[#34A853]/15 border border-[#34A853]/25 text-[#34A853] text-sm">{msg}</div>
+          )}
+
+          {/* Table */}
+          {loading ? (
+            <div className="text-white/30 text-sm py-12 text-center">กำลังโหลด...</div>
+          ) : (
+            <div className="rounded-2xl border border-white/8 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#111] border-b border-white/8">
+                    <th className="text-left px-5 py-3 text-white/30 text-xs font-semibold tracking-widest uppercase">ชื่อบทความ</th>
+                    <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden md:table-cell">ประเภท</th>
+                    <th className="text-center px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden sm:table-cell">สถานะ</th>
+                    <th className="text-right px-5 py-3 text-white/30 text-xs font-semibold uppercase">Actions</th>
                   </tr>
-                ))}
-                {filtered.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-12 text-white/20">
-                    {articles.length === 0 ? 'ยังไม่มีบทความ — กด "+ บทความใหม่" เพื่อเริ่ม' : 'ไม่พบบทความที่ตรงกับตัวกรอง'}
-                  </td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {articles.map(a => (
+                    <tr key={a.id} className="bg-[#0D0D0D] hover:bg-[#131313] transition-colors">
+                      <td className="px-5 py-4">
+                        <p className="text-white font-medium text-sm line-clamp-1">{a.title}</p>
+                        <p className="text-white/30 text-xs mt-0.5 font-mono">/articles/{a.slug}</p>
+                      </td>
+                      <td className="px-4 py-4 hidden md:table-cell">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/8 text-white/50 uppercase">{a.kind}</span>
+                      </td>
+                      <td className="px-4 py-4 text-center hidden sm:table-cell">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${a.is_active ? 'text-[#34A853]' : 'text-white/30'}`}>
+                          {a.is_active ? '● เผยแพร่' : '○ ฉบับร่าง'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          {a.body && (
+                            <a href={`/articles/${a.slug}`} target="_blank" rel="noopener noreferrer"
+                              className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                          <button onClick={() => toggleActive(a)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
+                            {a.is_active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          </button>
+                          <button onClick={() => setEditing(a)} className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg text-white/30 hover:text-[#CC0033] hover:bg-[#CC0033]/10 transition-all">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {articles.length === 0 && (
+                    <tr><td colSpan={4} className="text-center py-12 text-white/20">ยังไม่มีบทความ — กด "+ บทความใหม่" เพื่อเริ่ม</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {/* Admin nav */}
+          <div className="mt-8 flex gap-4 text-xs text-white/25">
+            <Link to="/admin/courses" className="hover:text-white/50 transition-colors">จัดการคอร์ส</Link>
+            <Link to="/admin/payments" className="hover:text-white/50 transition-colors">การชำระเงิน</Link>
+            <Link to="/admin/assignments" className="hover:text-white/50 transition-colors">งานที่ส่งมา</Link>
+            <Link to="/admin" className="hover:text-white/50 transition-colors">Event CMS</Link>
           </div>
-        )}
-
-        {!loading && articles.length > 0 && (
-          <p className="mt-3 text-xs text-white/25">แสดง {filtered.length} จาก {articles.length} บทความ</p>
-        )}
-      </AdminLayout>
+        </div>
+      </main>
 
       {editing !== false && (
         <ArticleEditor

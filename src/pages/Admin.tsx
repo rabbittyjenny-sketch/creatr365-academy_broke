@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { SEOHead } from '@/components/SEOHead';
+import { ArrowLeft } from 'lucide-react';
 import { isCurrentUserAdmin } from '@/lib/admin';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 
 // Input validation schema
 const eventSchema = z.object({
@@ -231,7 +231,7 @@ const Admin = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
+    return <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">Loading...</div>;
   }
 
   if (!isAdmin) {
@@ -239,127 +239,155 @@ const Admin = () => {
   }
 
   return (
-    <AdminLayout title="Event CMS" onSignOut={handleSignOut}>
-      <SEOHead
+    <div className="min-h-screen bg-[#080808] text-white p-8">
+      <SEOHead 
         title="Admin Dashboard"
         description="Manage events and content for your event platform"
       />
-      {selectedEvent && (
-        <form onSubmit={handleSave} className="space-y-6 max-w-2xl">
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Event Title
-            </label>
-            <Input
-              value={selectedEvent.title}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, title: e.target.value })
-              }
-            />
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <ArrowLeft className="w-4 h-4 mr-1"/>หน้าหลัก
+            </Button>
+            <h1 className="text-2xl font-bold">Event CMS</h1>
           </div>
+          <Button onClick={handleSignOut} variant="outline" size="sm">ออกจากระบบ</Button>
+        </div>
 
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Creator
-            </label>
-            <Input
-              value={selectedEvent.creator}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, creator: e.target.value })
-              }
-            />
-          </div>
+        {/* Admin navigation */}
+        <div className="flex gap-1 flex-wrap mb-8 border-b pb-4">
+          <Link to="/admin/courses"><Button variant="outline" size="sm">หลักสูตร</Button></Link>
+          <Link to="/admin/articles"><Button variant="outline" size="sm">บทความ</Button></Link>
+          <Link to="/admin/assignments"><Button variant="outline" size="sm">งานส่ง</Button></Link>
+          <Link to="/admin/payments"><Button variant="outline" size="sm">การชำระเงิน</Button></Link>
+          <Button variant="default" size="sm">Event CMS (นี่คือ)</Button>
+        </div>
 
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Description
-            </label>
-            <Textarea
-              value={selectedEvent.description}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, description: e.target.value })
-              }
-              className="min-h-[120px]"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        {selectedEvent && (
+          <form onSubmit={handleSave} className="space-y-6">
             <div>
-              <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-                Date
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Event Title
               </label>
               <Input
-                value={selectedEvent.date}
+                value={selectedEvent.title}
                 onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, date: e.target.value })
+                  setSelectedEvent({ ...selectedEvent, title: e.target.value })
                 }
+                className="border-[#1A1A1A]"
               />
             </div>
 
             <div>
-              <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-                Time
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Creator
               </label>
               <Input
-                value={selectedEvent.time}
+                value={selectedEvent.creator}
                 onChange={(e) =>
-                  setSelectedEvent({ ...selectedEvent, time: e.target.value })
+                  setSelectedEvent({ ...selectedEvent, creator: e.target.value })
                 }
+                className="border-[#1A1A1A]"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Address
-            </label>
-            <Input
-              value={selectedEvent.address}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, address: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Background Image
-            </label>
-            {selectedEvent.background_image_url && (
-              <img
-                src={selectedEvent.background_image_url}
-                alt="Current background"
-                className="w-full h-32 object-cover mb-2 rounded-lg border border-white/10"
+            <div>
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Description
+              </label>
+              <Textarea
+                value={selectedEvent.description}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, description: e.target.value })
+                }
+                className="border-[#1A1A1A] min-h-[120px]"
               />
-            )}
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-            />
-            {uploading && <p className="text-sm text-white/40 mt-1">Uploading...</p>}
-          </div>
+            </div>
 
-          <div>
-            <label className="text-xs text-white/40 font-medium block mb-1.5 uppercase tracking-wider">
-              Target Date (YYYY-MM-DD HH:MM:SS)
-            </label>
-            <Input
-              type="datetime-local"
-              value={selectedEvent.target_date.slice(0, 16)}
-              onChange={(e) =>
-                setSelectedEvent({ ...selectedEvent, target_date: e.target.value })
-              }
-            />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                  Date
+                </label>
+                <Input
+                  value={selectedEvent.date}
+                  onChange={(e) =>
+                    setSelectedEvent({ ...selectedEvent, date: e.target.value })
+                  }
+                  className="border-[#1A1A1A]"
+                />
+              </div>
 
-          <Button type="submit" className="w-full bg-[#D4A843] text-black hover:opacity-90">
-            Save Changes
-          </Button>
-        </form>
-      )}
-    </AdminLayout>
+              <div>
+                <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                  Time
+                </label>
+                <Input
+                  value={selectedEvent.time}
+                  onChange={(e) =>
+                    setSelectedEvent({ ...selectedEvent, time: e.target.value })
+                  }
+                  className="border-[#1A1A1A]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Address
+              </label>
+              <Input
+                value={selectedEvent.address}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, address: e.target.value })
+                }
+                className="border-[#1A1A1A]"
+              />
+            </div>
+
+            <div>
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Background Image
+              </label>
+              {selectedEvent.background_image_url && (
+                <img 
+                  src={selectedEvent.background_image_url} 
+                  alt="Current background" 
+                  className="w-full h-32 object-cover mb-2 rounded"
+                />
+              )}
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="border-[#1A1A1A]"
+              />
+              {uploading && <p className="text-sm text-[#1A1A1A] mt-1">Uploading...</p>}
+            </div>
+
+            <div>
+              <label className="text-[#1A1A1A] text-sm font-normal uppercase mb-2 block">
+                Target Date (YYYY-MM-DD HH:MM:SS)
+              </label>
+              <Input
+                type="datetime-local"
+                value={selectedEvent.target_date.slice(0, 16)}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, target_date: e.target.value })
+                }
+                className="border-[#1A1A1A]"
+              />
+            </div>
+
+            <Button type="submit" className="w-full bg-[#1A1A1A] text-white hover:bg-opacity-90">
+              Save Changes
+            </Button>
+          </form>
+        )}
+      </div>
+    </div>
   );
 };
 

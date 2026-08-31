@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/SEOHead';
-import { isCurrentUserAdmin } from '@/lib/admin';
-import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Plus, Pencil, Trash2, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
 
 /* ─── Types ────────────────────────────────────────────── */
 interface CourseRow {
@@ -94,37 +92,17 @@ const AdminCourses = () => {
   const [editingPromo,  setEditingPromo]  = useState<Partial<PromoCode>|null>(null);
   const [isNewPromo,    setIsNewPromo]    = useState(false);
   const [uploading,     setUploading]     = useState(false);
-  const [isAdmin,       setIsAdmin]       = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    checkAuth();
+    loadData();
     return () => document.documentElement.classList.remove('dark');
   }, []);
 
-  // Same proven checkAuth pattern as Admin.tsx / AdminArticles.tsx
-  // (isCurrentUserAdmin → has_role RPC). Previously this page relied on a
-  // comment claiming a <RequireAdmin> wrapper in App.tsx enforced this —
-  // that component doesn't exist anywhere in the codebase, so the page had
-  // no client-side admin check at all (RLS on courses/promo_codes still
-  // blocked non-admin writes at the database level, but the full editable
-  // admin shell itself was reachable by anyone).
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { navigate('/auth?redirect=/admin/courses'); return; }
-    const allowed = await isCurrentUserAdmin(session.user.id);
-    if (!allowed) { navigate('/'); return; }
-    setIsAdmin(true);
-    loadData();
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
-  };
-
+  // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
+  // This page only loads data — no redundant per-page guard (avoids double-guard redirects).
   const loadData = async () => {
     setLoading(false); fetchCourses(); fetchPromos();
   };
@@ -312,17 +290,38 @@ const AdminCourses = () => {
     else { toast({ title:'ลบสำเร็จ' }); fetchPromos(); }
   };
 
-  if (!isAdmin || loading) return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
 
   const ec = editingCourse;
   const colorHex = COLOR_OPTIONS.find(c=>c.value===ec?.color)?.hex || '#888';
 
   /* ─── RENDER ───────────────────────────────────────── */
   return (
-    <AdminLayout title="จัดการหลักสูตร" onSignOut={handleSignOut}>
+    <div className="min-h-screen bg-[#080808] text-white">
       <SEOHead title="Admin — จัดการหลักสูตร · CREATR365" description="Course management admin" />
 
-      <div>
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 bg-[#080808]/95 backdrop-blur border-b border-white/8 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-white/30 hover:text-white/60 transition-colors"><ArrowLeft className="w-5 h-5" /></Link>
+          <div>
+            <p className="text-[10px] text-white/25 uppercase tracking-widest">Admin Panel</p>
+            <h1 className="text-base font-black text-white tracking-tight">CREATR365</h1>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/admin/articles" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">บทความ</Link>
+          <Link to="/admin/payments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">การชำระเงิน</Link>
+          <Link to="/admin/assignments" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">งานที่ส่ง</Link>
+          <Link to="/admin" className="text-xs text-white/30 hover:text-white/60 transition-colors hidden sm:block">Event CMS</Link>
+          <button onClick={() => supabase.auth.signOut().then(() => navigate('/auth'))}
+            className="text-xs px-3 py-1.5 rounded-lg border border-white/12 text-white/30 hover:text-white/60 hover:border-white/25 transition-all">
+            ออกจากระบบ
+          </button>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-6 py-8">
 
         {/* Tabs */}
         <div className="flex gap-1 bg-white/3 p-1 rounded-xl w-fit mb-8">
@@ -808,7 +807,7 @@ const AdminCourses = () => {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </div>
   );
 };
 
