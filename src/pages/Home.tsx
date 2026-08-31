@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
@@ -71,6 +71,29 @@ function useAOS() {
 }
 
 /* ─── WHY data ──────────────────────────── */
+/* ════════════════════════════════════════════
+   SCENE REVEAL
+   Viewport-triggered artwork reveal, independent of parallax.
+════════════════════════════════════════════ */
+function useSceneReveal() {
+  useEffect(() => {
+    const scenes = Array.from(document.querySelectorAll<HTMLElement>('[data-scene]'));
+    if (!scenes.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const scene = entry.target as HTMLElement;
+        if (entry.isIntersecting) scene.classList.add('is-visible');
+        else if (scene.getAttribute('data-scene-once') !== 'true') scene.classList.remove('is-visible');
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    scenes.forEach((scene) => observer.observe(scene));
+    return () => observer.disconnect();
+  }, []);
+}
+
+
 const WHY = [
   { them: 'สูตรสำเร็จที่หาดูได้ฟรีบน YouTube',         us: 'PPACT Framework 5 มิติ ฝังในทุกคอร์ส' },
   { them: 'เน้นเทคนิคตะโกนขายหรือสร้าง Hype',          us: 'Host Archetype + Soul Blueprint เพื่อตัวตนที่ชัด' },
@@ -81,6 +104,33 @@ const WHY = [
 
 
 const MOTION_CSS = `
+  /* Real black base + scene reveal. */
+  .c365-scene {
+    position: relative;
+    background: #000;
+    overflow: hidden;
+  }
+  .c365-scene-bg-reveal {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.025);
+    transform-origin: 50% 50%;
+    transition: opacity 1.35s cubic-bezier(.22,1,.36,1), transform 1.6s cubic-bezier(.22,1,.36,1);
+    will-change: opacity, transform;
+    width: 100%;
+    height: 100%;
+  }
+  [data-scene].is-visible .c365-scene-bg-reveal {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Existing content/AOS is preserved; only its entrance timing changes by scene. */
+  [data-scene].is-visible [data-aos] {
+    transition-delay: calc(var(--aos-delay, 0ms) + var(--scene-content-delay, 0ms));
+  }
+
   .c365-motion-bg {
     animation: c365BgFloat 18s ease-in-out infinite alternate;
     transform-origin: 50% 50%;
@@ -91,64 +141,45 @@ const MOTION_CSS = `
     transform-origin: 50% 50%;
     will-change: transform;
   }
-  .c365-motion-float {
-    animation: c365Float 8s ease-in-out infinite alternate;
-    will-change: translate;
-  }
-  .c365-motion-float-slow {
-    animation: c365FloatSlow 12s ease-in-out infinite alternate;
-    will-change: translate;
-  }
-  .c365-motion-drift {
-    animation: c365Drift 10s ease-in-out infinite alternate;
-    will-change: translate;
-  }
-  .c365-motion-pulse {
-    animation: c365Pulse 4.5s ease-in-out infinite;
-    will-change: opacity, scale;
-  }
-  .c365-motion-card {
-    animation: c365Card 9s ease-in-out infinite alternate;
-    will-change: translate;
-  }
-  @keyframes c365BgFloat {
-    from { transform: scale(1); }
-    to   { transform: scale(1.025) translate3d(-0.35%, -0.25%, 0); }
-  }
-  @keyframes c365BgFloatSlow {
-    from { transform: scale(1); }
-    to   { transform: scale(1.018) translate3d(0.25%, -0.2%, 0); }
-  }
-  @keyframes c365Float {
-    from { translate: 0 0; }
-    to   { translate: 0 -7px; }
-  }
-  @keyframes c365FloatSlow {
-    from { translate: 0 0; }
-    to   { translate: 0 -4px; }
-  }
-  @keyframes c365Drift {
-    from { translate: 0 0; }
-    to   { translate: 5px -3px; }
-  }
-  @keyframes c365Pulse {
-    0%, 100% { opacity: 0.84; scale: 1; }
-    50% { opacity: 1; scale: 1.015; }
-  }
-  @keyframes c365Card {
-    from { translate: 0 0; }
-    to   { translate: 0 -5px; }
-  }
+  .c365-motion-float { animation: c365Float 8s ease-in-out infinite alternate; will-change: translate; }
+  .c365-motion-float-slow { animation: c365FloatSlow 12s ease-in-out infinite alternate; will-change: translate; }
+  .c365-motion-drift { animation: c365Drift 10s ease-in-out infinite alternate; will-change: translate; }
+  .c365-motion-pulse { animation: c365Pulse 4.5s ease-in-out infinite; will-change: opacity, scale; }
+  .c365-motion-card { animation: c365Card 9s ease-in-out infinite alternate; will-change: translate; }
+
+  /* Motion vocabulary: different cadence per scene, not one formula for all 13. */
+  [data-scene="1"] { --scene-content-delay: 360ms; }
+  [data-scene="2"] { --scene-content-delay: 0ms; }
+  [data-scene="4"] { --scene-content-delay: 420ms; }
+  [data-scene="5"] { --scene-content-delay: 880ms; }
+  [data-scene="6"] { --scene-content-delay: 420ms; }
+  [data-scene="7"], [data-scene="8"] { --scene-content-delay: 420ms; }
+  [data-scene="9"] { --scene-content-delay: 520ms; }
+  [data-scene="10"] { --scene-content-delay: 0ms; }
+  [data-scene="11"] { --scene-content-delay: 520ms; }
+
+  [data-scene="1"] .c365-scene-bg-reveal,
+  [data-scene="11"] .c365-scene-bg-reveal { transition-duration: 1.65s, 1.8s; }
+  [data-scene="2"] .c365-scene-bg-reveal { transition-duration: 1.25s, 1.35s; }
+  [data-scene="4"] .c365-scene-bg-reveal { transition-duration: 1.45s, 1.65s; }
+  [data-scene="5"] .c365-scene-bg-reveal { transition-delay: 200ms; transition-duration: 1.3s, 1.55s; }
+  [data-scene="6"] .c365-scene-bg-reveal { transition-duration: 1.15s, 1.35s; }
+  [data-scene="7"] .c365-scene-bg-reveal,
+  [data-scene="8"] .c365-scene-bg-reveal,
+  [data-scene="9"] .c365-scene-bg-reveal { transition-duration: 1.2s, 1.45s; }
+  [data-scene="10"] .c365-scene-bg-reveal { transition-duration: 2.1s, 2.2s; }
+
+  @keyframes c365BgFloat { from { transform: scale(1); } to { transform: scale(1.025) translate3d(-0.35%, -0.25%, 0); } }
+  @keyframes c365BgFloatSlow { from { transform: scale(1); } to { transform: scale(1.018) translate3d(0.25%, -0.2%, 0); } }
+  @keyframes c365Float { from { translate: 0 0; } to { translate: 0 -7px; } }
+  @keyframes c365FloatSlow { from { translate: 0 0; } to { translate: 0 -4px; } }
+  @keyframes c365Drift { from { translate: 0 0; } to { translate: 5px -3px; } }
+  @keyframes c365Pulse { 0%,100% { opacity: .84; scale: 1; } 50% { opacity: 1; scale: 1.015; } }
+  @keyframes c365Card { from { translate: 0 0; } to { translate: 0 -5px; } }
+
   @media (prefers-reduced-motion: reduce) {
-    .c365-motion-bg,
-    .c365-motion-bg-slow,
-    .c365-motion-float,
-    .c365-motion-float-slow,
-    .c365-motion-drift,
-    .c365-motion-pulse,
-    .c365-motion-card {
-      animation: none !important;
-      will-change: auto;
+    .c365-scene-bg-reveal, .c365-motion-bg, .c365-motion-bg-slow, .c365-motion-float, .c365-motion-float-slow, .c365-motion-drift, .c365-motion-pulse, .c365-motion-card {
+      animation: none !important; transition: none !important; will-change: auto; opacity: 1 !important; transform: none !important;
     }
   }
 `;
@@ -160,6 +191,7 @@ const MOTION_CSS = `
 ════════════════════════════════════════════ */
 export default function Home() {
   useAOS();
+  useSceneReveal();
 
   const heroBgRef    = useParallax(0.2);
   const problemBgRef = useParallax(0.13);
@@ -181,14 +213,16 @@ export default function Home() {
           ไม่มี overlay gradient ทั้ง 2 อัน (ลบตามสเปก)
           layout: ซ้ายทั้งหมด
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="1" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG parallax layer — brightness filter only, no overlays */}
         <div ref={heroBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/blog_new.png"
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center right'}}
           />
+</div>
         </div>
 
         {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
@@ -220,12 +254,14 @@ export default function Home() {
           ไม่มีอะไรทับ ไม่ filter ไม่ overlay เลย
           รูปมีข้อมูลครบในตัวเอง
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-        <img
+      <section className="c365-scene" data-scene="2" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+        <div className="c365-scene-bg-reveal">
+<img
           className="c365-motion-bg-slow" src="/images/graph-section2.png"
           alt="Live-Streaming E-Commerce Market Data"
           style={{ width: '100%', height: '100vh', objectFit: 'contain', display: 'block' }}
         />
+</div>
       </section>
 
       {/* ══════════════════════════════════════
@@ -272,9 +308,10 @@ export default function Home() {
       {/* ═════════════════════════════════════
           §4  เป็นเหมือนกันไหม ?
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="4" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG */}
-        <img
+        <div className="c365-scene-bg-reveal">
+<img
           className="c365-motion-bg-slow" src="/images/ringlight-back1.png"
           alt=""
           style={{
@@ -286,6 +323,7 @@ export default function Home() {
             objectPosition: 'left center'
           }}
         />
+</div>
 
         <div
           style={{
@@ -367,7 +405,7 @@ export default function Home() {
       {/* ═════════════════════════════════════
           §5  เพราะเราเจอปัญหามาก่อน
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="5" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG Parallax */}
         <div
           ref={problemBgRef}
@@ -378,7 +416,8 @@ export default function Home() {
             willChange: 'transform'
           }}
         >
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/problem-up.png"
             alt=""
             style={{
@@ -388,6 +427,7 @@ export default function Home() {
               objectPosition: 'center'
             }}
           />
+</div>
         </div>
 
         <div
@@ -490,10 +530,11 @@ export default function Home() {
      {/* ═════════════════════════════════════
           §6  BRAND PROMISE
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="6" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG */}
         <div ref={familyBgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg-slow" src="/images/Team-work1.jpg"
             alt=""
             style={{
@@ -503,6 +544,7 @@ export default function Home() {
               objectPosition: 'left center'
             }}
           />
+</div>
         </div>
 
         <div
@@ -628,13 +670,15 @@ export default function Home() {
       {/* ═════════════════════════════════════
           §7  ไลฟ์ให้เป็น
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="7" style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec7BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/i-can-live2.png"
             alt="ไลฟ์ให้เป็น"
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
+</div>
         </div>
 <div
           style={{
@@ -680,13 +724,15 @@ export default function Home() {
       {/* ═════════════════════════════════════
           §8  ไลฟ์ให้ขายได้
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="8" style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec8BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/i-can-sale2.png"
             alt="ไลฟ์ให้ขายได้"
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
+</div>
         </div>
 <div
           style={{
@@ -732,13 +778,15 @@ export default function Home() {
       {/* ═════════════════════════════════════
           §9  ไลฟ์ให้วัดผลและทำซ้ำได้
       ═════════════════════════════════════ */}
-      <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="9" style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec9BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/i-can-reply1.png"
             alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
+</div>
         </div>
 
         {/* ซ้ายล่าง — main course */}
@@ -838,13 +886,15 @@ export default function Home() {
           §10  Brand Concept
           BG: Team-behind1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="10" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG เต็มหน้า ไม่มี overlay */}
-        <img
+        <div className="c365-scene-bg-reveal">
+<img
           className="c365-motion-bg-slow" src="/images/Team-behind1.png"
           alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
         />
+</div>
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           {/* §10 content area — รูป Team-behind1.png คือตัวเนื้อหาเอง ตาม spec page 10 */}
@@ -858,14 +908,16 @@ export default function Home() {
           บนซ้าย: CONSUMER→CREATOR / YOUR JOURNEY / STARTS HERE.
           ล่างขวา: ปุ่ม
       ══════════════════════════════════════ */}
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      <section className="c365-scene" data-scene="11" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG parallax — ไม่มี overlay gradient */}
         <div ref={journeyBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
-          <img
+          <div className="c365-scene-bg-reveal">
+<img
             className="c365-motion-bg" src="/images/journey-stairs2.jpg"
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
           />
+</div>
         </div>
 
         {/* top-left */}
