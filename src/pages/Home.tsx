@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
-import { SEOHead } from '@/components/SEOHead';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
@@ -81,6 +80,80 @@ const WHY = [
 ];
 
 
+const MOTION_CSS = `
+  .c365-motion-bg {
+    animation: c365BgFloat 18s ease-in-out infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .c365-motion-bg-slow {
+    animation: c365BgFloatSlow 24s ease-in-out infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .c365-motion-float {
+    animation: c365Float 8s ease-in-out infinite alternate;
+    will-change: translate;
+  }
+  .c365-motion-float-slow {
+    animation: c365FloatSlow 12s ease-in-out infinite alternate;
+    will-change: translate;
+  }
+  .c365-motion-drift {
+    animation: c365Drift 10s ease-in-out infinite alternate;
+    will-change: translate;
+  }
+  .c365-motion-pulse {
+    animation: c365Pulse 4.5s ease-in-out infinite;
+    will-change: opacity, scale;
+  }
+  .c365-motion-card {
+    animation: c365Card 9s ease-in-out infinite alternate;
+    will-change: translate;
+  }
+  @keyframes c365BgFloat {
+    from { transform: scale(1); }
+    to   { transform: scale(1.025) translate3d(-0.35%, -0.25%, 0); }
+  }
+  @keyframes c365BgFloatSlow {
+    from { transform: scale(1); }
+    to   { transform: scale(1.018) translate3d(0.25%, -0.2%, 0); }
+  }
+  @keyframes c365Float {
+    from { translate: 0 0; }
+    to   { translate: 0 -7px; }
+  }
+  @keyframes c365FloatSlow {
+    from { translate: 0 0; }
+    to   { translate: 0 -4px; }
+  }
+  @keyframes c365Drift {
+    from { translate: 0 0; }
+    to   { translate: 5px -3px; }
+  }
+  @keyframes c365Pulse {
+    0%, 100% { opacity: 0.84; scale: 1; }
+    50% { opacity: 1; scale: 1.015; }
+  }
+  @keyframes c365Card {
+    from { translate: 0 0; }
+    to   { translate: 0 -5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .c365-motion-bg,
+    .c365-motion-bg-slow,
+    .c365-motion-float,
+    .c365-motion-float-slow,
+    .c365-motion-drift,
+    .c365-motion-pulse,
+    .c365-motion-card {
+      animation: none !important;
+      will-change: auto;
+    }
+  }
+`;
+
+
 
 /* ════════════════════════════════════════════
    HOME
@@ -100,7 +173,7 @@ export default function Home() {
 
   return (
     <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden', fontSize: '18px' }}>
-<SEOHead title="Creatr365 - Live Streamer Academy" description="สถาบันสอนไลฟ์คอมเมิร์ซและ Live Commerce ครบวงจร โดย Creatr365" />
+      <style>{MOTION_CSS}</style>
 <CourseNavbar />
       {/* ══════════════════════════════════════
           §1  HERO
@@ -112,30 +185,26 @@ export default function Home() {
         {/* BG parallax layer — brightness filter only, no overlays */}
         <div ref={heroBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
-            src="/images/blog_new.png"
+            className="c365-motion-bg" src="/images/blog_new.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center right'}}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center right'}}
           />
         </div>
 
         {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(16px,2vw,24px)' }}>
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(16px,2vw,24px)' }}>
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
               <Link to="/courses" data-aos="fade-up"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth" data-aos="fade-up" data-aos-delay="90"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
                 FREE ACCOUNT
               </Link>
             </div>
-            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'center' }}>
+            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'left' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
@@ -153,9 +222,9 @@ export default function Home() {
       ══════════════════════════════════════ */}
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         <img
-          src="/images/graph-section2.png"
+          className="c365-motion-bg-slow" src="/images/graph-section2.png"
           alt="Live-Streaming E-Commerce Market Data"
-          style={{ width: '100%', height: '100vh', objectFit: 'cover', display: 'block' }}
+          style={{ width: '100%', height: '100vh', objectFit: 'contain', display: 'block' }}
         />
       </section>
 
@@ -168,7 +237,7 @@ export default function Home() {
       <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)', width: '100%' }}>
           <div style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
-            <h2 data-aos="fade-up" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
+            <h2 data-aos="fade-up" className="c365-motion-drift" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
               อยากร่วมงานกับแบรนด์ใหญ่ ?
             </h2>
             <p data-aos="fade-up" data-aos-delay="80" style={{ fontSize: 'clamp(15px,2vw,20px)', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>
@@ -178,26 +247,22 @@ export default function Home() {
 
           {/* แถวบน: brand1.png — slide in from left */}
           <div data-aos="fade-right" data-aos-delay="180" style={{ marginBottom: '16px', lineHeight: 0 }}>
-            <img src="/images/brand1.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            <img className="c365-motion-card" src="/images/brand1.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* แถวล่าง: brand2.png — slide in from right */}
           <div data-aos="fade-left" data-aos-delay="260" style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}>
-            <img src="/images/brand2.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            <img className="c365-motion-card" src="/images/brand2.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           </div>
 
           {/* ปุ่มกึ่งกลางล่าง */}
           <div data-aos="fade-up" data-aos-delay="360" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
               ดูหลักสูตร <ArrowRight size={15} />
             </Link>
             <Link to="/articles/diagnostic-quiz"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.62)'; }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
               ▷ Find Your Path
             </Link>
           </div>
@@ -210,14 +275,14 @@ export default function Home() {
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG */}
         <img
-          src="/images/ringlight-back1.png"
+          className="c365-motion-bg-slow" src="/images/ringlight-back1.png"
           alt=""
           style={{
             position: 'absolute',
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             objectPosition: 'left center'
           }}
         />
@@ -243,6 +308,7 @@ export default function Home() {
           <div style={{ maxWidth: '560px', marginLeft: 'auto' }}>
             <h2
               data-aos="fade-up"
+              className="c365-motion-drift"
               style={{
                 fontSize: 'clamp(2.4rem,5vw,4rem)',
                 fontWeight: 900,
@@ -313,12 +379,12 @@ export default function Home() {
           }}
         >
           <img
-            src="/images/problem-up.png"
+            className="c365-motion-bg" src="/images/problem-up.png"
             alt=""
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               objectPosition: 'center'
             }}
           />
@@ -341,6 +407,7 @@ export default function Home() {
           {/* LEFT */}
           <div data-aos="fade-up">
             <h2
+              className="c365-motion-drift"
               style={{
                 fontSize: 'clamp(1.8rem,3.8vw,3rem)',
                 fontWeight: 900,
@@ -380,6 +447,7 @@ export default function Home() {
           >
             <h2
               data-aos="fade-left"
+              className="c365-motion-float-slow"
               data-aos-delay="150"
               style={{
                 fontSize: 'clamp(1.8rem,3.8vw,3rem)',
@@ -388,7 +456,7 @@ export default function Home() {
                 lineHeight: 1.2
               }}
             >
-              เพราะเราเคยเจอปัญหามาก่อน
+              <span style={{ whiteSpace: 'nowrap' }}>เพราะเราเคยเจอปัญหามาก่อน</span>
             </h2>
           </div>
         </div>
@@ -426,12 +494,12 @@ export default function Home() {
         {/* BG */}
         <div ref={familyBgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
           <img
-            src="/images/Team-work1.jpg"
+            className="c365-motion-bg-slow" src="/images/Team-work1.jpg"
             alt=""
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               objectPosition: 'left center'
             }}
           />
@@ -450,11 +518,11 @@ export default function Home() {
           }}
         >
           {/* HEADER */}
-          <div data-aos="fade-up" style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#fff' }}>
+          <div data-aos="fade-up" className="c365-motion-drift" style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
               Welcome to Creatr365's Family
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.65)', marginTop: '6px' }}>
+            <p style={{ color: '#4a4a4a', marginTop: '6px' }}>
               หลักสูตรที่เลือกได้ตามสไตล์คุณ
             </p>
           </div>
@@ -486,6 +554,7 @@ export default function Home() {
                   src={src}
                   alt=""
                   data-aos="zoom-in"
+                  className="c365-motion-card"
                   data-aos-delay={String(i * 80 + 120)}
                   style={{
                     width: '100%',
@@ -562,9 +631,9 @@ export default function Home() {
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec7BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
           <img
-            src="/images/i-can-live2.png"
+            className="c365-motion-bg" src="/images/i-can-live2.png"
             alt="ไลฟ์ให้เป็น"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 <div
@@ -580,12 +649,13 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'MAGNET', sub: 'FREE COURSE', slug: 'magnet' },
-            { name: 'FOUNDATION', sub: 'THE HOST FOUNDATION', slug: 'foundation' }
+            { name: 'LIVE COMMERCE STARTER KIT', sub: 'FREE',          slug: 'live-commerce-starter-kit' },
+            { name: 'HOOK & HOLD',               sub: 'LOW TICKET 1', slug: 'hook-and-hold' }
           ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              className="c365-motion-card"
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
               style={{ display: 'flex', gap: '14px', alignItems: 'stretch', textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
@@ -613,9 +683,9 @@ export default function Home() {
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec8BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
           <img
-            src="/images/i-can-sale2.png"
+            className="c365-motion-bg" src="/images/i-can-sale2.png"
             alt="ไลฟ์ให้ขายได้"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 <div
@@ -631,12 +701,13 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE', slug: 'signal' },
-            { name: 'STAGE', sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
+            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               slug:  'live-sales-system' },
+            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'live-commerce-business-global' }
           ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              className="c365-motion-card"
               data-aos="fade-up"
               data-aos-delay={String(i * 100)}
               style={{ display: 'flex', gap: '14px', alignItems: 'stretch', textDecoration: 'none', WebkitTapHighlightColor: 'transparent' }}
@@ -664,15 +735,16 @@ export default function Home() {
       <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
         <div ref={sec9BgRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
           <img
-            src="/images/i-can-reply1.png"
+            className="c365-motion-bg" src="/images/i-can-reply1.png"
             alt="ไลฟ์ให้วัดผลและทำซ้ำได้"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
           />
         </div>
 
         {/* ซ้ายล่าง — main course */}
         <div
           data-aos="fade-up"
+          className="c365-motion-float"
           style={{
             position: 'absolute',
             left: 'clamp(28px,5vw,72px)',
@@ -699,13 +771,13 @@ export default function Home() {
             <div style={{ width: '4px', background: RED, flexShrink: 0 }} />
             <div>
               <p style={{ fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800, color: '#1a1a1a', lineHeight: 1.2 }}>
-                BRAND HOST ARCHITECT
+                The BRAND ARCHITECT
               </p>
               <p style={{ fontSize: 'clamp(13px,1.1vw,15px)', color: 'rgba(0,0,0,0.6)', marginTop: '4px' }}>
-                IDENTITY · PRODUCTION · GLOBAL SCALING
+                ONSITE 2 DAYS
               </p>
               <p style={{ fontSize: 'clamp(12px,1vw,14px)', color: 'rgba(0,0,0,0.7)', textDecoration: 'underline', textUnderlineOffset: '3px', marginTop: '8px' }}>
-                เพิ่มเติม
+                ดูรายละเอียด
               </p>
             </div>
           </Link>
@@ -726,13 +798,14 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'FOUNDATION', sub: 'THE HOST FOUNDATION', slug: 'foundation' },
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE', slug: 'signal' },
-            { name: 'STAGE', sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'stage' }
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'live-psychology-conversion' },
+            { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'live-tech-setup' },
+            { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'ai-for-live-commerce'}
           ].map((course, i) => (
             <Link
               key={course.name}
               to={`/course/${course.slug}`}
+              className="c365-motion-card"
               data-aos="fade-up"
               data-aos-delay={String(i * 80 + 120)}
               style={{ textDecoration: 'none' }}
@@ -768,9 +841,9 @@ export default function Home() {
       <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
         {/* BG เต็มหน้า ไม่มี overlay */}
         <img
-          src="/images/Team-behind1.png"
+          className="c365-motion-bg-slow" src="/images/Team-behind1.png"
           alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
         />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -789,9 +862,9 @@ export default function Home() {
         {/* BG parallax — ไม่มี overlay gradient */}
         <div ref={journeyBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
           <img
-            src="/images/journey-stairs2.jpg"
+            className="c365-motion-bg" src="/images/journey-stairs2.jpg"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
           />
         </div>
 
@@ -800,23 +873,19 @@ export default function Home() {
           <p data-aos="fade-in" style={{ fontSize: '11px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.52)', marginBottom: '10px' }}>
             CONSUMER → CREATOR
           </p>
-          <h2 data-aos="fade-up" data-aos-delay="120" style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
+          <h2 data-aos="fade-up" data-aos-delay="120" className="c365-motion-drift" style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
             YOUR JOURNEY<br /><span style={{ color: RED }}>STARTS HERE.</span>
           </h2>
         </div>
 
         {/* bottom-right buttons */}
-        <div style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <div className="c365-motion-float-slow" style={{ position: 'absolute', bottom: 'clamp(36px,5vw,60px)', right: 'clamp(20px,6vw,80px)', zIndex: 1, display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <Link to="/courses" data-aos="fade-up" data-aos-delay="260"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
             เริ่มเส้นทางของคุณ <ArrowRight size={15} />
           </Link>
           <Link to="/auth" data-aos="fade-up" data-aos-delay="340"
-            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.52)'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.26)'; e.currentTarget.style.color = 'rgba(255,255,255,0.68)'; }}>
+            style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.26)', color: 'rgba(255,255,255,0.68)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
             Free Account
           </Link>
         </div>
@@ -829,7 +898,7 @@ export default function Home() {
       ══════════════════════════════════════ */}
       <section style={{ background: '#0a0a0a', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', width: '100%' }}>
-          <div data-aos="fade-up" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
+          <div data-aos="fade-up" className="c365-motion-drift" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>WHY</h2>
             <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(26px,3vw,40px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>DIFFERENCE?</h2>
@@ -850,9 +919,7 @@ export default function Home() {
               <div key={i}
                 data-aos="fade-up"
                 data-aos-delay={String(i * 60)}
-                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < WHY.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', transition: 'background .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.012)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < WHY.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', transition: 'background .2s' }}>
                 <div style={{ padding: '18px 22px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(255,255,255,0.01)' }}>
                   <X size={13} style={{ color: 'rgba(255,255,255,0.22)', flexShrink: 0, marginTop: '3px' }} />
                   <p style={{ fontSize: 'clamp(12px,1.3vw,14px)', lineHeight: 1.58, color: 'rgba(255,255,255,0.35)' }}>{row.them}</p>
@@ -867,9 +934,7 @@ export default function Home() {
 
           <div data-aos="fade-up" data-aos-delay={String(WHY.length * 60 + 150)} style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
             <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
               เลือกคอร์ส <ArrowRight size={15} />
             </Link>
           </div>
@@ -883,7 +948,7 @@ export default function Home() {
       ══════════════════════════════════════ */}
       <section style={{ background: '#080808', padding: 'clamp(80px,10vw,140px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto', width: '100%' }}>
-          <div data-aos="fade-up">
+          <div data-aos="fade-up" className="c365-motion-drift">
             {/* Quote */}
             <p style={{ fontSize: 'clamp(1.4rem,3vw,2.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.35, marginBottom: 'clamp(24px,3vw,40px)' }}>
               "เพราะเป้าหมายสูงสุดไม่ใช่การไลฟ์เก่ง
@@ -895,7 +960,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div data-aos="fade-up" data-aos-delay="150">
+          <div data-aos="fade-up" data-aos-delay="150" className="c365-motion-float-slow">
             {/* Be a creatr mark */}
             <div style={{ marginBottom: 'clamp(16px,2vw,24px)' }}>
               <p style={{ fontSize: 'clamp(1.1rem,2.2vw,1.6rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff', lineHeight: 1.1 }}>Be a creatr.</p>
@@ -905,15 +970,11 @@ export default function Home() {
 
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
               <Link to="/courses" data-aos="fade-up" data-aos-delay="280"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', transition: 'opacity .2s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
               <Link to="/auth" data-aos="fade-up" data-aos-delay="360"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', transition: 'all .2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.48)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
+                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
                 FREE ACCOUNT
               </Link>
             </div>
@@ -921,7 +982,7 @@ export default function Home() {
 
           {/* bottom-right logo — ปั๊มตราปิดท้าย แล้วลอยเบาๆต่อเนื่อง */}
           <div data-aos="fade-in" data-aos-delay="480" data-aos-once="true" style={{ marginTop: 'clamp(40px,6vw,80px)', display: 'flex', justifyContent: 'flex-end' }}>
-            <img src={LOGO} alt="Creatr365" className="float-y" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
+            <img src={LOGO} alt="Creatr365" className="float-y c365-motion-float-slow" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
           </div>
         </div>
       </section>
