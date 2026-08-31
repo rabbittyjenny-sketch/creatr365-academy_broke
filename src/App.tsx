@@ -11,13 +11,10 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Register from "./pages/Register";
 import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import RefundPolicy from "./pages/RefundPolicy";
-import FAQ from "./pages/FAQ";
 import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
+import AdminArticles from "./pages/AdminArticles";
 import Admin from "./pages/Admin";
 import Articles from "./pages/Articles";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
@@ -43,14 +40,11 @@ const App = () => (
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
-        <Route path="/faq" element={<FAQ />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/courses" element={<AdminCourses />} />
         <Route path="/admin/assignments" element={<AdminAssignments />} />
         <Route path="/admin/payments" element={<AdminPayments />} />
+        <Route path="/admin/articles" element={<AdminArticles />} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
         <Route path="/events" element={<Discover />} />
