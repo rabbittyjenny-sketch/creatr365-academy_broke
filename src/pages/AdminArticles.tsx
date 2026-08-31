@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { supabase } from '@/integrations/supabase/client';
-import { isCurrentUserAdmin } from '@/lib/admin';
 import { Plus, Edit2, Trash2, Eye, EyeOff, ArrowLeft, Save, X, ExternalLink } from 'lucide-react';
 
 interface Article {
@@ -233,7 +232,6 @@ const AdminArticles: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [editing, setEditing] = useState<Partial<Article> | null | false>(false);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
@@ -242,29 +240,16 @@ const AdminArticles: React.FC = () => {
     setLoading(false);
   }, []);
 
-  // Same checkAuth pattern already proven working on the Event CMS page
-  // (isCurrentUserAdmin → has_role RPC), so this page has zero chance of
-  // colliding with — or regressing — the auth behaviour any other admin
-  // page already relies on today.
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate('/auth?redirect=/admin/articles'); return; }
-      const allowed = await isCurrentUserAdmin(session.user.id);
-      if (!allowed) { navigate('/'); return; }
-      setIsAdmin(true);
-      load();
-    })();
-    return () => document.documentElement.classList.remove('dark');
-  }, [load, navigate]);
+  // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx —
+  // this page only loads data once it's already known to be allowed here.
+  useEffect(() => { load(); }, [load]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
   };
 
-  if (!isAdmin) {
+  if (loading) {
     return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
   }
 

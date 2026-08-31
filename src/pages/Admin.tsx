@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { SEOHead } from '@/components/SEOHead';
 import { ArrowLeft } from 'lucide-react';
-import { isCurrentUserAdmin } from '@/lib/admin';
 
 // Input validation schema
 const eventSchema = z.object({
@@ -60,28 +59,15 @@ const Admin = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx —
+  // this page only loads data once it's already known to be allowed here.
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-    checkAuth();
-    return () => document.documentElement.classList.remove('dark');
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/auth?redirect=/admin');
-      return;
-    }
-    const allowed = await isCurrentUserAdmin(session.user.id);
-    if (!allowed) { navigate('/'); return; }
-    setIsAdmin(true);
     setLoading(false);
     fetchEvents();
-  };
+  }, []);
 
   const fetchEvents = async () => {
     const { data, error } = await supabase
@@ -232,10 +218,6 @@ const Admin = () => {
 
   if (loading) {
     return <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">Loading...</div>;
-  }
-
-  if (!isAdmin) {
-    return null;
   }
 
   return (

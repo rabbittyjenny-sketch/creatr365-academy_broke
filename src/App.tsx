@@ -16,6 +16,7 @@ import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
 import AdminArticles from "./pages/AdminArticles";
 import Admin from "./pages/Admin";
+import { RequireAdmin } from "./components/admin/RequireAdmin";
 import Articles from "./pages/Articles";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
 import Discover from "./pages/Discover";
@@ -40,11 +41,11 @@ const App = () => (
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/courses" element={<AdminCourses />} />
-        <Route path="/admin/assignments" element={<AdminAssignments />} />
-        <Route path="/admin/payments" element={<AdminPayments />} />
-        <Route path="/admin/articles" element={<AdminArticles />} />
+        <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+        <Route path="/admin/courses" element={<RequireAdmin><AdminCourses /></RequireAdmin>} />
+        <Route path="/admin/assignments" element={<RequireAdmin><AdminAssignments /></RequireAdmin>} />
+        <Route path="/admin/payments" element={<RequireAdmin><AdminPayments /></RequireAdmin>} />
+        <Route path="/admin/articles" element={<RequireAdmin><AdminArticles /></RequireAdmin>} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
         <Route path="/events" element={<Discover />} />
