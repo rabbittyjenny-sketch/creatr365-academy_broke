@@ -551,3 +551,23 @@ join auth.users u on u.id = ur.user_id;
 - [ ] นโยบายหมดอายุของรหัส (ใช้ได้แค่วันนั้น? ใช้ซ้ำได้ในรอบถัดไปของคอร์สเดียวกันไหม เพราะมีหลายรอบ/หลาย batch)
 - [ ] ความปลอดภัย: ป้องกันเดารหัส/แชร์รหัสข้ามคน (rate limit, ผูกกับ enrollment ของคนนั้น)
 - **ยังไม่เริ่มสร้าง** ตามที่ผู้ใช้ระบุว่าเป็นส่วนที่ต้องเจาะลึกและยังไม่เร่งด่วนเท่า Admin flow — รอ confirm รายละเอียดข้างต้นก่อนเขียน migration/โค้ดจริง
+
+---
+
+## 🆕 PHASE 3.3 — บทความ 404, Navbar/Logo, WHY section (31 ส.ค. 2026)
+
+> ผู้ใช้แก้ `Home.tsx` เองโดยตรงบน GitHub (5 commit) เพิ่มระบบ motion (`useSceneReveal`, `data-scene`, `MOTION_CSS`) และอัปเดตข้อความ WHY ก่อนรอบนี้ — ดึงมาทำงานต่อจาก `origin/main` แล้ว ไม่ได้ทับของที่แก้เอง
+
+### แก้แล้ว + ยืนยันด้วย headless browser จริง
+
+1. **บทความ 404 ทั้งที่ Admin ตั้งเผยแพร่แล้ว** — สาเหตุจริง: `ArticleDetail.tsx` เขียนไว้ถูกต้องสมบูรณ์ (query, RLS, render) แต่ **ไม่เคยถูก import หรือลงทะเบียน route `/articles/:slug` ใน `App.tsx` เลย** — บั๊กคลาสเดียวกับ footer routes ที่เจอรอบก่อน (component พร้อมใช้แต่ไม่มีใครต่อสาย) เพิ่ม route แล้ว ตรวจ query ที่ยิงจริง (`?slug=eq.amazon-live&is_active=eq.true`) ตรงกับข้อมูลจริงในตาราง (`is_active:true`) ทุกประการ — ยืนยันไม่ได้ว่าเนื้อหาแสดงจริงในรอบนี้เพราะ sandbox บล็อก network ขาออกไป Supabase จาก headless browser (`ERR_TUNNEL_CONNECTION_FAILED`) แต่ route/query ถูกต้อง 100% ตามข้อมูลจริงที่ตรวจแล้ว
+2. **Navbar สีขาวค้างอยู่ในหน้า Home** — สาเหตุจริง: `CourseNavbar` ใช้ CSS variable `--background` ที่สลับดำ/ขาวผ่านการ toggle class `.dark` บน `<html>` (หน้าอื่นเช่น Contact, Articles ทำ toggle นี้อยู่แล้วในหน้าตัวเอง) แต่ `Home.tsx` ไม่เคย toggle เลย — เพิ่ม `classList.add('dark')` ให้ Home ตามแพทเทิร์นเดียวกับหน้าอื่น ยืนยันจริงว่า navbar เป็นสีดำแล้ว (`rgba(13,13,13,.85)`) โดยไม่กระทบหน้า Courses/DiagnosticQuiz ที่ยังขาวตามเดิม (`rgba(255,255,255,.85)`)
+3. **โลโก้ navbar 2 แบบตามธีม** — เพิ่มโลโก้ 2 ตัวใน `CourseNavbar.tsx` (`w-logo-side.png` สำหรับหน้าดำ, `C365-Logo1_1 (2).png` ขนาดใหญ่ขึ้น `h-12` สำหรับหน้าขาว) สลับด้วย CSS ล้วน (`.navbar-logo-dark`/`.navbar-logo-light` + `.dark` selector) ไม่ใช้ JS เช็คธีม เพื่อไม่ให้ชนกับ timing ของ effect ที่ toggle dark class ในแต่ละหน้า — ยืนยันด้วย computed style ว่าเลือกโลโก้ถูกฝั่งในทั้งสองกรณี **ไม่สามารถยืนยันภาพจริงได้ในรอบนี้เพราะ sandbox บล็อกโดเมน `ik.imagekit.io`** (`ERR_TUNNEL_CONNECTION_FAILED`) — URL ที่ใช้ตรงกับที่ผู้ใช้ระบุทุกตัวอักษร รบกวนช่วยดูภาพจริงบน preview อีกทีค่ะ
+4. **ตาราง WHY section** — ลบไอคอน ✓/✗ ออกแล้ว, เพิ่มขนาดฟอนต์จาก `clamp(12px,1.3vw,14px)` เป็น `clamp(14px,1.6vw,17px)`, เพิ่มปุ่มเป็น 2 ปุ่มด้านล่างให้สมมาตร (ปุ่มซ้าย outline / ปุ่มขวา fill แดง ตามภาพตัวอย่างที่แนบมา)
+5. **Motion sequence section WHY** — ปรับลำดับ `data-aos-delay` ให้เป็น: กรอบตาราง+หัวตาราง (delay 0) → heading "WHY [โลโก้] DIFFERENCE?" (delay 200) → แต่ละแถวข้อความ 2 ฝั่งพร้อมกัน (delay 320 เพิ่มทีละ 110ms ต่อแถว) โดยไม่ย้าย DOM/เปลี่ยน layout เลย ใช้ประโยชน์จากที่ AOS แต่ละ element trigger อิสระจากกัน — ทำเฉพาะ section WHY ตามที่ผู้ใช้ระบุ (ไม่ได้ทำ pattern นี้กับอีก 12 section)
+
+### ยังไม่ได้ทำ / ต้องดูภาพจริงก่อนสรุป
+
+- **ฟอนต์หัวข้อ "Welcome to Creatr365's Family"**: ตรวจ computed style แล้วพบว่า font-family เดียวกับหัวข้ออื่นทุกจุดอยู่แล้ว (`Google Sans Flex, IBM Plex Sans Thai, ...`) ไม่มี override ที่ผิดที่ไหนในโค้ด — ใส่ fontFamily ให้ตรงชัดเจนเพิ่มเพื่อความชัวร์ แต่ **ไม่พบสาเหตุ CSS ที่ทำให้ต่างจากหัวข้ออื่นจริงๆ** เป็นไปได้ว่าเป็นเรื่อง "Google Sans Flex" โหลดไม่ติด (ไม่ใช่ฟอนต์ที่เปิดสาธารณะใน Google Fonts จริง ต้องตรวจสอบ) แล้ว fallback ไป IBM Plex Sans Thai ซึ่ง glyph ภาษาอังกฤษหน้าตาต่างจากฟอนต์ปกติ — ถ้ายังเห็นว่าแปลกอยู่หลัง deploy รบกวนแนบภาพชัดๆ มาเทียบจะตามได้ตรงจุดกว่านี้
+- **ตรวจสอบขนาดฟอนต์ normal text ทุก section**: ยังไม่ได้ไล่ตรวจทั้ง 13 section อย่างละเอียด (แก้เฉพาะจุดที่ระบุชัดคือตาราง WHY) — ต้องขอภาพจริงหรือให้ระบุ section ที่เล็กเกินไปเพิ่มเติม
+- **Motion pattern (bg→image→object→text) กับ section อื่น**: ผู้ใช้ระบุเจาะจงแค่ section WHY ในรอบนี้ ยังไม่ได้ทำกับ section อื่น

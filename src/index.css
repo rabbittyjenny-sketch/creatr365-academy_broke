@@ -752,6 +752,15 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   to   { opacity: 1; transform: translateX(0); }
 }
 
+/* CourseNavbar logo: dark-bg pages show the light wordmark, light-bg pages
+   show the full logo — swapped by the .dark class already used site-wide
+   to flip the shared --background variable, so this never fights whichever
+   page's own dark-mode effect toggles it. */
+.navbar-logo-dark { display: none; }
+.dark .navbar-logo-dark { display: block; }
+.navbar-logo-light { display: block; }
+.dark .navbar-logo-light { display: none; }
+
 /* Scrollbar */
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }

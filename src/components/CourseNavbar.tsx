@@ -41,7 +41,18 @@ export const CourseNavbar: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Creatr365" className="h-7 w-auto" />
+          {/* Two logo variants, one per theme — swapped by pure CSS (.dark ancestor)
+              so it never races with the page's own dark-mode toggle effect. */}
+          <img
+            src="https://ik.imagekit.io/ideas365logo/w-logo-side.png?updatedAt=1781551068906"
+            alt="Creatr365"
+            className="navbar-logo-dark h-7 w-auto"
+          />
+          <img
+            src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png?updatedAt=1781349328070"
+            alt="Creatr365"
+            className="navbar-logo-light h-12 w-auto"
+          />
         </Link>
 
         {/* Desktop links */}

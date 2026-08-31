@@ -22,6 +22,7 @@ import AdminArticles from "./pages/AdminArticles";
 import Admin from "./pages/Admin";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import Articles from "./pages/Articles";
+import ArticleDetail from "./pages/ArticleDetail";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
 import Discover from "./pages/Discover";
 import MyEvents from "./pages/MyEvents";
@@ -56,6 +57,7 @@ const App = () => (
         <Route path="/admin/articles" element={<RequireAdmin><AdminArticles /></RequireAdmin>} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
+        <Route path="/articles/:slug" element={<ArticleDetail />} />
         <Route path="/events" element={<Discover />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/my-events" element={<MyEvents />} />

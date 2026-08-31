@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, X } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
 
@@ -192,6 +192,14 @@ const MOTION_CSS = `
 export default function Home() {
   useAOS();
   useSceneReveal();
+
+  // Home is a black-background page throughout — match the shared CourseNavbar
+  // to it the same way every other dark page does (Contact, Articles, ...),
+  // instead of leaving it on the default light theme's white bar.
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    return () => document.documentElement.classList.remove('dark');
+  }, []);
 
   const heroBgRef    = useParallax(0.2);
   const problemBgRef = useParallax(0.13);
@@ -561,7 +569,7 @@ export default function Home() {
         >
           {/* HEADER */}
           <div data-aos="fade-up" className="c365-motion-drift" style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333', fontFamily: "'Google Sans Flex', 'IBM Plex Sans Thai', system-ui, sans-serif" }}>
               Welcome to Creatr365's Family
             </h2>
             <p style={{ color: '#4a4a4a', marginTop: '6px' }}>
@@ -948,15 +956,22 @@ export default function Home() {
           BG: #0a0a0a สีพื้น
           ตาราง 2 col: คอร์สทั่วไป / CREATR365
       ══════════════════════════════════════ */}
-      <section style={{ background: '#0a0a0a', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <section className="c365-scene" data-scene="12" style={{ background: '#0a0a0a', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', width: '100%' }}>
-          <div data-aos="fade-up" className="c365-motion-drift" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
+          {/* Reveal order: (1) black section bg is already static → (2) the
+              empty table shell (border + header labels) fades in first →
+              (3) heading + logo "object" fades in next → (4) each row's text
+              fades in on both sides together, one row at a time. Nested
+              [data-aos] elements animate on their own trigger regardless of
+              the parent's, so the row delays below simply start later than
+              the heading's — no layout restructuring needed. */}
+          <div data-aos="fade-up" data-aos-delay="200" className="c365-motion-drift" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>WHY</h2>
             <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(26px,3vw,40px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
             <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>DIFFERENCE?</h2>
           </div>
 
-          <div data-aos="fade-up" data-aos-delay="120" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+          <div data-aos="fade-up" data-aos-delay="0" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
             {/* header row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ padding: '14px 22px', textAlign: 'center', background: 'rgba(255,255,255,0.025)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
@@ -970,25 +985,31 @@ export default function Home() {
             {WHY.map((row, i) => (
               <div key={i}
                 data-aos="fade-up"
-                data-aos-delay={String(i * 60)}
+                data-aos-delay={String(320 + i * 110)}
                 style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < WHY.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', transition: 'background .2s' }}>
-                <div style={{ padding: '18px 22px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', gap: '10px', background: 'rgba(255,255,255,0.01)' }}>
-                  <X size={13} style={{ color: 'rgba(255,255,255,0.22)', flexShrink: 0, marginTop: '3px' }} />
-                  <p style={{ fontSize: 'clamp(12px,1.3vw,14px)', lineHeight: 1.58, color: 'rgba(255,255,255,0.35)' }}>{row.them}</p>
+                <div style={{ padding: '18px 22px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'flex-start', background: 'rgba(255,255,255,0.01)' }}>
+                  <p style={{ fontSize: 'clamp(14px,1.6vw,17px)', lineHeight: 1.62, color: 'rgba(255,255,255,0.4)' }}>{row.them}</p>
                 </div>
-                <div style={{ padding: '18px 22px', display: 'flex', alignItems: 'flex-start', gap: '10px', background: `${RED}05` }}>
-                  <Check size={13} style={{ color: '#34A853', flexShrink: 0, marginTop: '3px' }} />
-                  <p style={{ fontSize: 'clamp(12px,1.3vw,14px)', lineHeight: 1.58, color: 'rgba(255,255,255,0.78)' }}>{row.us}</p>
+                <div style={{ padding: '18px 22px', display: 'flex', alignItems: 'flex-start', background: `${RED}05` }}>
+                  <p style={{ fontSize: 'clamp(14px,1.6vw,17px)', lineHeight: 1.62, color: 'rgba(255,255,255,0.85)' }}>{row.us}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div data-aos="fade-up" data-aos-delay={String(WHY.length * 60 + 150)} style={{ textAlign: 'center', marginTop: 'clamp(32px,4vw,48px)' }}>
-            <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(32px,4vw,56px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
-              เลือกคอร์ส <ArrowRight size={15} />
-            </Link>
+          <div data-aos="fade-up" data-aos-delay={String(320 + WHY.length * 110 + 100)} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(12px,2vw,20px)', marginTop: 'clamp(32px,4vw,48px)' }}>
+            <div style={{ textAlign: 'center' }}>
+              <Link to="/courses"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: 'transparent', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', }}>
+                เลือกคอร์ส <ArrowRight size={15} />
+              </Link>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <Link to="/courses"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
+                เลือกคอร์ส <ArrowRight size={15} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
