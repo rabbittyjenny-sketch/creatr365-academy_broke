@@ -609,3 +609,27 @@ join auth.users u on u.id = ur.user_id;
 ### สิ่งที่ไม่ได้แตะ (นอก scope ของคำขอนี้)
 
 พบคำไทยเดิม ("บทความ", "ติดต่อ", "ห้องเรียน" ฯลฯ) หลงเหลืออยู่ในหน้าอื่นๆ อีกหลายจุด (เช่น label ใน `Footer.tsx`, ปุ่มกลับหน้าหลักใน breadcrumb ต่างๆ, ปุ่ม sign-out ในหน้า Admin/Dashboard เอง) — **ไม่ได้แก้** เพราะเป็นข้อความคนละบริบทกับ "เมนูบาร์ด้านบนสุด" ที่ขอมา (เช่น footer เป็นสารบัญเว็บ ไม่ใช่ nav bar) ถ้าต้องการให้ทั้งเว็บเป็นอังกฤษทั้งหมดต้องแจ้งเพิ่มเป็นงานแยก เพราะกระทบวงกว้างกว่านี้มาก
+
+---
+
+## 🆕 PHASE 3.5 — เปลี่ยนฟอนต์อังกฤษเป็น Overpass + Navbar สีแดงล้วน (1 ก.ย. 2026)
+
+### สิ่งที่แก้
+
+1. **ฟอนต์อังกฤษทั้งเว็บ → Overpass** — จุดที่แก้ (3 จุดเท่านั้น เพราะ font stack มาจากที่เดียว):
+   - `index.html`: เปลี่ยน Google Fonts link จาก `Google+Sans+Flex` เป็น `Overpass:wght@400;500;600;700;800`
+   - `tailwind.config.ts`: `fontFamily.sans` เปลี่ยนจาก `['Google Sans Flex', 'IBM Plex Sans Thai', ...]` เป็น `['Overpass', 'IBM Plex Sans Thai', ...]` — Thai ยังคง fallback ไป IBM Plex Sans Thai เหมือนเดิมทุกจุด (ไม่ได้แตะฟอนต์ไทย)
+   - ลบ `fontFamily` inline ที่เคยใส่ไว้ในหัวข้อ "Welcome to Creatr365's Family" (`Home.tsx`) ออก เพราะตอนนี้ inherit ค่า default ของ `body` ที่ถูกต้องอยู่แล้ว
+   - **น่าจะแก้ปัญหาฟอนต์ "Welcome to Creatr365's Family" ที่เคยรายงานไว้ก่อนหน้านี้โดยอัตโนมัติ** — ตอนตรวจครั้งก่อนสงสัยไว้ว่า `Google Sans Flex` อาจไม่ใช่ฟอนต์ที่เปิดให้ใช้จริงบน Google Fonts (เพราะ Google Sans เป็นฟอนต์ภายในของ Google ปกติไม่เปิด public) ทำให้ทุกจุดที่ตั้งใจใช้มัน fallback ไป IBM Plex Sans Thai แทนแบบเงียบๆ — Overpass เป็นฟอนต์ Google Fonts จริงที่โหลดได้แน่นอน ควรจะสม่ำเสมอทุกจุดแล้ว รบกวนดู preview อีกทีว่าหัวข้อนั้นดูปกติแล้วหรือยัง
+   - `body { font-weight: 500 }` (Medium) เป็นค่าเริ่มต้นทั่วทั้งเว็บใน `index.css` แล้ว จุดไหนตั้งใจให้หนา (`font-bold` / `fontWeight: 700+`) ยัง override ได้ตามปกติไม่กระทบ
+
+2. **Navbar: hover/active = ตัวหนา + ขีดเส้นใต้, ปกติ = Medium** — แก้ที่ `.nav-link` CSS class เดียวใน `index.css` (ใช้ร่วมกันทั้ง `CourseNavbar.tsx` และ `Navbar.tsx`): ปกติ `font-weight: 500`, hover/active (`aria-current="page"`) เปลี่ยนเป็น `font-weight: 700` พร้อมเส้นใต้ที่มีอยู่แล้วเดิม (ไม่ได้สร้างกลไก underline ใหม่ ของเดิมมีอยู่แล้วแค่ไม่เคยเปลี่ยนความหนาตัวอักษรร่วมด้วย)
+
+3. **Navbar สีแดงล้วน** — ลบ `data-accent="blue"/"green"/"yellow"` ออกจากทุกจุดใน `CourseNavbar.tsx` (MAIN_NAV 5 item, ปุ่ม MY STUDIO, LOGIN) เหลือแค่สีแดงซึ่งเป็นค่า fallback เริ่มต้นของระบบอยู่แล้ว (ตั้งไว้ตั้งแต่ PHASE 3.2) — **ขอบเขตแค่ Navbar เท่านั้น** ไม่ได้ไปแตะระบบสี 4 สี (blue/red/yellow/green) ที่ใช้ในหน้าอื่น (เช่น section การ์ดใน Home, Courses) เพราะคำขอพูดถึงเฉพาะ "ส่วน Navbar" — ถ้าต้องการให้ทั้งเว็บเหลือแค่สีแดงต้องแจ้งเพิ่มเป็นงานแยก เพราะกระทบวงกว้างกว่านี้มาก (`Navbar.tsx` ไม่เคยมี `data-accent` อยู่แล้วตั้งแต่แรกจึงไม่มีอะไรต้องลบในไฟล์นั้น)
+
+### ยืนยันจริงด้วย headless browser (ไม่ใช่แค่โค้ด)
+
+- `getComputedStyle(document.body).fontFamily` → `Overpass, "IBM Plex Sans Thai", system-ui, sans-serif` ✅
+- ปุ่ม/ลิงก์ navbar ก่อน hover → `font-weight: 500`, สีปกติ (ไม่มีสี accent)
+- hover/active → `font-weight: 700` + สี `rgb(195,1,40)`/`rgb(204,0,41)` (แดงทั้งคู่ ไม่มีน้ำเงิน/เขียว/เหลืองอีกแล้ว)
+- **ไม่สามารถยืนยันว่าไฟล์ฟอนต์ Overpass โหลดจริงจาก Google Fonts ได้ในรอบนี้** เพราะ sandbox บล็อก `fonts.googleapis.com` — โค้ด/config ถูกต้อง 100% แต่การโหลดฟอนต์จริงต้องรอดู preview จริง

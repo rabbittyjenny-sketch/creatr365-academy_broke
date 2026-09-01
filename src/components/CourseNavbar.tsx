@@ -10,12 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 // carries the same five labels for the same five routes — keep both in sync
 // if either changes, rather than letting them drift back into Thai/English
 // mismatch.
+//
+// No per-item `accent` anymore — the navbar uses red only (no blue/green/
+// yellow), which is already the default hover/active color from
+// .site-hover-scope's fallback chain once no data-accent is set.
 const MAIN_NAV = [
-  { to: '/', label: 'HOME', accent: 'blue' },
-  { to: '/courses', label: 'EXPLORE', accent: 'red' },
-  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF', accent: 'green' },
-  { to: '/articles', label: 'COMMUNITY', accent: 'yellow' },
-  { to: '/contact', label: 'C365', accent: 'blue' },
+  { to: '/', label: 'HOME' },
+  { to: '/courses', label: 'EXPLORE' },
+  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF' },
+  { to: '/articles', label: 'COMMUNITY' },
+  { to: '/contact', label: 'C365' },
 ] as const;
 
 export const CourseNavbar: React.FC = () => {
@@ -62,13 +66,13 @@ export const CourseNavbar: React.FC = () => {
           />
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-[13px] font-bold tracking-[0.06em]">
+        {/* Desktop links — base weight is Medium, .nav-link CSS bumps it to
+            Bold (plus the underline) on hover/active; see index.css. */}
+        <div className="hidden md:flex items-center gap-6 text-[13px] font-medium tracking-[0.06em]">
           {MAIN_NAV.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              data-accent={item.accent}
               aria-current={isActive(item.to) ? 'page' : undefined}
               className="nav-link text-foreground"
             >
@@ -77,12 +81,12 @@ export const CourseNavbar: React.FC = () => {
           ))}
           {user ? (
             <>
-              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">MY STUDIO</Link>
+              <Link to="/dashboard" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">MY STUDIO</Link>
               {/* Auth-state-dependent label: SIGN OUT here, LOGIN in the else branch below. */}
-              <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">SIGN OUT</button>
+              <button onClick={handleLogout} className="nav-link text-foreground">SIGN OUT</button>
             </>
           ) : (
-            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-[13px] font-bold tracking-[0.06em]">
+            <Link to="/auth" className="btn-brand px-4 py-2 rounded-md text-[13px] font-bold tracking-[0.06em]">
               LOGIN
             </Link>
           )}
@@ -101,13 +105,12 @@ export const CourseNavbar: React.FC = () => {
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-bold tracking-[0.04em]">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 onClick={close}
-                data-accent={item.accent}
                 aria-current={isActive(item.to) ? 'page' : undefined}
                 className="nav-link py-3 text-foreground"
               >
@@ -116,11 +119,11 @@ export const CourseNavbar: React.FC = () => {
             ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">MY STUDIO</Link>
-                <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">SIGN OUT</button>
+                <Link to="/dashboard" onClick={close} className="nav-link py-3 text-foreground">MY STUDIO</Link>
+                <button onClick={handleLogout} className="nav-link py-3 text-left text-foreground">SIGN OUT</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-[13px] font-bold tracking-[0.06em] text-center">
+              <Link to="/auth" onClick={close} className="btn-brand mt-2 px-4 py-3 rounded-md text-[13px] font-bold tracking-[0.06em] text-center">
                 LOGIN
               </Link>
             )}

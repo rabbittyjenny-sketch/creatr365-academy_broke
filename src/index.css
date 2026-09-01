@@ -86,6 +86,10 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Overpass Medium (500) is the default weight for normal text site-wide;
+       anything explicitly bold (font-bold / fontWeight 700+) still overrides
+       this as usual. */
+    font-weight: 500;
   }
 }
 
@@ -447,6 +451,8 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   align-items: center;
   width: fit-content;
   color: hsl(var(--foreground));
+  font-weight: 500; /* Medium at rest */
+  transition: font-weight 0.15s ease, color 0.15s ease;
 }
 .nav-link::after {
   content: "";
@@ -463,6 +469,7 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 .nav-link:hover,
 .nav-link[aria-current="page"] {
   color: var(--hover-accent, hsl(var(--google-red)));
+  font-weight: 700; /* Bold once hovered/active, alongside the underline */
 }
 .nav-link:hover::after,
 .nav-link[aria-current="page"]::after {

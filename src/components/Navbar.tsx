@@ -79,8 +79,9 @@ export const Navbar: React.FC = () => {
           />
         </Link>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-[13px] font-bold tracking-[0.06em]">
+        {/* Desktop links — base weight is Medium, .nav-link CSS bumps it to
+            Bold (plus the underline) on hover/active; see index.css. */}
+        <div className="hidden md:flex items-center gap-6 text-[13px] font-medium tracking-[0.06em]">
           {MAIN_NAV.map((item) => (
             <Link
               key={item.to}
@@ -138,7 +139,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile drawer — always white background for readability */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-bold tracking-[0.04em]">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}
