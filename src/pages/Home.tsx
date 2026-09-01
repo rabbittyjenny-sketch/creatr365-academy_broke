@@ -569,7 +569,7 @@ export default function Home() {
         >
           {/* HEADER */}
           <div data-aos="fade-up" className="c365-motion-drift" style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333', fontFamily: "'Google Sans Flex', 'IBM Plex Sans Thai', system-ui, sans-serif" }}>
+            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
               Welcome to Creatr365's Family
             </h2>
             <p style={{ color: '#4a4a4a', marginTop: '6px' }}>

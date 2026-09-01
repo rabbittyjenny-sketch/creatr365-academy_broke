@@ -14,7 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Google Sans Flex', 'IBM Plex Sans Thai', 'system-ui', 'sans-serif'],
+        // All English text site-wide uses Overpass (Medium 500 for normal
+        // weight, Bold 700 for emphasis) — Thai text still falls through to
+        // IBM Plex Sans Thai since Overpass has no Thai glyphs.
+        sans: ['Overpass', 'IBM Plex Sans Thai', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
