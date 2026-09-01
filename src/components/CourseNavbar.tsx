@@ -3,12 +3,19 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+// English nav copy (replaces the old Thai labels): Home/Courses/Quiz/Articles/
+// Contact map to HOME/EXPLORE/TEST YOURSELF/COMMUNITY/C365 respectively — the
+// `to` paths are unchanged, only the displayed label changed. `Navbar.tsx`
+// (used only on the Events pages, with its own scroll-transparency style)
+// carries the same five labels for the same five routes — keep both in sync
+// if either changes, rather than letting them drift back into Thai/English
+// mismatch.
 const MAIN_NAV = [
-  { to: '/', label: 'หน้าแรก', accent: 'blue' },
-  { to: '/courses', label: 'หลักสูตร', accent: 'red' },
-  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ', accent: 'green' },
-  { to: '/articles', label: 'บทความ', accent: 'yellow' },
-  { to: '/contact', label: 'ติดต่อ', accent: 'blue' },
+  { to: '/', label: 'HOME', accent: 'blue' },
+  { to: '/courses', label: 'EXPLORE', accent: 'red' },
+  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF', accent: 'green' },
+  { to: '/articles', label: 'COMMUNITY', accent: 'yellow' },
+  { to: '/contact', label: 'C365', accent: 'blue' },
 ] as const;
 
 export const CourseNavbar: React.FC = () => {
@@ -56,7 +63,7 @@ export const CourseNavbar: React.FC = () => {
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+        <div className="hidden md:flex items-center gap-6 text-[13px] font-bold tracking-[0.06em]">
           {MAIN_NAV.map((item) => (
             <Link
               key={item.to}
@@ -70,12 +77,13 @@ export const CourseNavbar: React.FC = () => {
           ))}
           {user ? (
             <>
-              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">ห้องเรียน</Link>
-              <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">ออกจากระบบ</button>
+              <Link to="/dashboard" data-accent="green" aria-current={isActive('/dashboard') ? 'page' : undefined} className="nav-link text-foreground">MY STUDIO</Link>
+              {/* Auth-state-dependent label: SIGN OUT here, LOGIN in the else branch below. */}
+              <button onClick={handleLogout} data-accent="red" className="nav-link text-foreground">SIGN OUT</button>
             </>
           ) : (
-            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-sm font-medium">
-              เข้าสู่ระบบ
+            <Link to="/auth" data-accent="green" className="btn-brand px-4 py-2 rounded-md text-[13px] font-bold tracking-[0.06em]">
+              LOGIN
             </Link>
           )}
         </div>
@@ -93,7 +101,7 @@ export const CourseNavbar: React.FC = () => {
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-base font-medium">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-bold tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}
@@ -108,12 +116,12 @@ export const CourseNavbar: React.FC = () => {
             ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">ห้องเรียน</Link>
-                <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">ออกจากระบบ</button>
+                <Link to="/dashboard" onClick={close} data-accent="green" className="nav-link py-3 text-foreground">MY STUDIO</Link>
+                <button onClick={handleLogout} data-accent="red" className="nav-link py-3 text-left text-foreground">SIGN OUT</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
-                เข้าสู่ระบบ
+              <Link to="/auth" onClick={close} data-accent="green" className="btn-brand mt-2 px-4 py-3 rounded-md text-[13px] font-bold tracking-[0.06em] text-center">
+                LOGIN
               </Link>
             )}
           </div>

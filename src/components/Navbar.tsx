@@ -3,12 +3,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Kept in sync with CourseNavbar.tsx's MAIN_NAV labels (same 5 routes, same
+// English copy) — this component exists separately only for the scroll
+// transparency→glass behavior the Events pages need, not for different nav
+// content. If these ever need to diverge in wording, that's the signal to
+// stop copy-pasting and share one nav-items source instead.
 const MAIN_NAV = [
-  { to: '/', label: 'หน้าแรก' },
-  { to: '/courses', label: 'หลักสูตร' },
-  { to: '/articles/diagnostic-quiz', label: 'แบบทดสอบ' },
-  { to: '/articles', label: 'บทความ' },
-  { to: '/contact', label: 'ติดต่อ' },
+  { to: '/', label: 'HOME' },
+  { to: '/courses', label: 'EXPLORE' },
+  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF' },
+  { to: '/articles', label: 'COMMUNITY' },
+  { to: '/contact', label: 'C365' },
 ] as const;
 
 
@@ -75,7 +80,7 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+        <div className="hidden md:flex items-center gap-6 text-[13px] font-bold tracking-[0.06em]">
           {MAIN_NAV.map((item) => (
             <Link
               key={item.to}
@@ -95,22 +100,23 @@ export const Navbar: React.FC = () => {
                 className="nav-link"
                 style={{ color: linkColor }}
               >
-                ห้องเรียน
+                MY STUDIO
               </Link>
+              {/* Auth-state-dependent label: SIGN OUT here, LOGIN in the else branch below. */}
               <button
                 onClick={handleLogout}
                 className="nav-link"
                 style={{ color: buttonColor }}
               >
-                ออกจากระบบ
+                SIGN OUT
               </button>
             </>
           ) : (
             <Link
               to="/auth"
-              className="btn-brand px-4 py-2 rounded-md text-sm font-medium"
+              className="btn-brand px-4 py-2 rounded-md text-[13px] font-bold tracking-[0.06em]"
             >
-              เข้าสู่ระบบ
+              LOGIN
             </Link>
           )}
         </div>
@@ -132,7 +138,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile drawer — always white background for readability */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-base font-medium">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-bold tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}
@@ -146,12 +152,12 @@ export const Navbar: React.FC = () => {
             ))}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={close} className="nav-link py-3">ห้องเรียน</Link>
-                <button onClick={handleLogout} className="nav-link py-3 text-left">ออกจากระบบ</button>
+                <Link to="/dashboard" onClick={close} className="nav-link py-3">MY STUDIO</Link>
+                <button onClick={handleLogout} className="nav-link py-3 text-left">SIGN OUT</button>
               </>
             ) : (
-              <Link to="/auth" onClick={close} className="btn-brand mt-2 px-4 py-3 rounded-md text-sm font-medium text-center">
-                เข้าสู่ระบบ
+              <Link to="/auth" onClick={close} className="btn-brand mt-2 px-4 py-3 rounded-md text-[13px] font-bold tracking-[0.06em] text-center">
+                LOGIN
               </Link>
             )}
           </div>
