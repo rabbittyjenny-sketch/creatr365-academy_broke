@@ -1085,7 +1085,136 @@ CREATR365 เป็นระบบที่มีของเดิมทำง�
 ไม่ใช่:
 
 `GUESS -> REWRITE -> BREAK`
-"""
+
+---
+
+# 30. EXPLORE / TOOLBOX ECOSYSTEM (เพิ่ม 2 ก.ย. 2569)
+
+Explore เป็น **ecosystem landing page ใหม่** ไม่ใช่ course catalog และไม่ได้แทนที่ course catalog เดิม
+
+Route:
+
+`/explore`
+
+```text
+EXPLORE (nav)
+   |
+   v
+/explore
+   |
+   +--> Courses tile        --> /courses          (ของเดิม ไม่เปลี่ยน ไม่ได้ย้าย)
+   +--> Toolbox tile        --> /toolbox           (ใหม่)
+   +--> AI Lab tile         --> /ai-lab            (Coming soon, ใหม่)
+   +--> Creator Tools tile  --> /creator-tools     (Coming soon, ใหม่)
+```
+
+## กฎสำคัญ
+
+`/courses` **ไม่ได้ถูกลบหรือย้าย** — route เดิม, ข้อมูลเดิม, ไม่เปลี่ยน เพียงแต่ `EXPLORE` ใน navbar (`Navbar.tsx`, `CourseNavbar.tsx`) ไม่ได้ชี้ตรงไป `/courses` อีกต่อไป แต่ชี้ไป `/explore` ก่อน (ผู้ใช้กด tile "Courses" เพื่อไป `/courses`)
+
+ห้าม:
+* ลบ route `/courses` คิดว่าถูกแทนที่แล้ว
+* คิดว่า Toolbox / AI Lab / Creator Tools ใช้ตาราง `courses`
+
+---
+
+## 30.1 Toolbox — บังคับ login ก่อนโหลด (เป็นการตัดสินใจเชิงธุรกิจ ไม่ใช่บั๊ก)
+
+Toolbox = คลังไฟล์ฟรี (เทมเพลต/เอกสาร/รูปภาพ) route `/toolbox`, จัดการที่ `/admin/toolbox`
+
+เหตุผลที่บังคับ login: เพื่อรู้ **Master Key** ของผู้โหลด + เก็บข้อมูล demographic (เพศ/อายุ/อาชีพ — ถามครั้งเดียว เก็บที่ `profiles`) สำหรับวางแผนธุรกิจ ตามที่ตกลงกันไว้ — **ห้ามเปลี่ยนให้โหลดได้โดยไม่ login คิดว่าเป็นการแก้ friction**
+
+```text
+/toolbox
+   |
+   v
+กด "ดาวน์โหลด"
+   |
+   +-- ยังไม่ login --------> redirect /auth?redirect=/toolbox
+   |
+   +-- login แล้ว แต่ profile ไม่มี gender/age_range/occupation
+   |         --> เปิด modal ถามครั้งเดียว --> บันทึกที่ profiles
+   |
+   v
+createSignedUrl (bucket: toolbox-files, ttl 60s)
+   |
+   v
+insert toolbox_downloads (insert-only log)
+   |
+   v
+rpc increment_toolbox_download
+```
+
+### Storage buckets — ห้ามสลับ
+
+| Bucket | Public? | เก็บอะไร |
+| --- | --- | --- |
+| `toolbox-covers` | Public | รูปปกที่โชว์บนการ์ด (ต้องเห็นได้แม้ยังไม่ login เพื่อจูงใจให้ login) |
+| `toolbox-files` | **Private** | ไฟล์จริงที่โหลด — เข้าถึงได้เฉพาะ `authenticated` ผ่าน signed URL เท่านั้น |
+
+ห้ามเปลี่ยน `toolbox-files` เป็น public — จะข้ามการบังคับ login ได้ทันทีถ้ามีคนรู้ direct URL
+
+---
+
+## 30.2 Migration ยังไม่ได้ apply กับ production — ตรวจก่อนเชื่อว่ามีข้อมูลจริง
+
+Migration file: `supabase/migrations/20260902120000_toolbox_explore.sql`
+
+สร้าง: `toolbox_assets`, `toolbox_downloads`, เพิ่ม column `gender`/`age_range`/`occupation` ใน `profiles`, สร้าง bucket `toolbox-covers`/`toolbox-files`
+
+**Session ที่สร้าง migration นี้ไม่มีสิทธิ์เข้าถึง Supabase project จริง จึงยังไม่เคย apply กับที่ไหนเลย** — เจ้าของระบบต้องรันเองก่อนใช้งานจริง
+
+`src/integrations/supabase/types.ts` ส่วนของ `toolbox_assets` / `toolbox_downloads` / `profiles` (field ใหม่) ถูก**เขียนมือ**ให้ตรงกับ migration — ไม่ได้มาจาก `supabase gen types` จริง
+
+### UNKNOWN / VERIFY
+
+* ตาราง `toolbox_assets` / `toolbox_downloads` มีอยู่ใน production Supabase แล้วหรือยัง
+* `types.ts` ตรงกับ schema จริง 100% หรือยัง (ควรรัน `supabase gen types` ใหม่หลัง apply migration แล้ว diff เทียบ)
+
+ห้าม: สันนิษฐานว่า `/toolbox` หรือ `/admin/toolbox` ใช้งานได้จริงโดยไม่ตรวจว่า migration รันแล้ว
+
+---
+
+## 30.3 สีทองสองเฉดคนละที่ — ตั้งใจ ไม่ใช่ inconsistency
+
+| ใช้ที่ | สี | เหตุผล |
+| --- | --- | --- |
+| `/admin/*` ทั้งหมด (`AdminLayout`, `AdminCourses`, `AdminArticles`, `AdminToolbox` ฯลฯ) | `#D4A843` | ธีมเดิมของ Admin Console ที่มีมาก่อนแล้ว ใช้ร่วมกันทุกหน้า admin |
+| `/explore`, `/toolbox`, `/ai-lab`, `/creator-tools` | `#C0A060` | สีทองแบรนด์จริงตาม **System B** (`creatr365-content-system` skill, `references/visual_system.md`) |
+
+ห้าม: แก้ให้สองค่านี้เท่ากันเพราะคิดว่าเป็นบั๊ก — เป็นคนละ design system กันโดยตั้งใจ (Admin console เดิม vs. brand-facing pages ใหม่)
+
+---
+
+## 30.4 Dark mode pattern สำหรับหน้าใหม่กลุ่มนี้
+
+หน้า `/explore`, `/toolbox`, `/ai-lab`, `/creator-tools` ใช้ hook `useDarkPage()` (`src/hooks/useDarkPage.ts`) toggle class `.dark` บน `<html>` ตอน mount/unmount — กลไกเดียวกับที่ `RequireAdmin.tsx` ใช้กับ `/admin/*` อยู่แล้ว
+
+ห้าม:
+* เพิ่มหน้าใหม่ในกลุ่มนี้แล้ว hardcode สีเข้มเอง — ให้เรียก `useDarkPage()` แล้วใช้ token เดิม (`bg-background`, `text-foreground`, `bg-card`, `border-border`) ที่จะพลิกสีให้อัตโนมัติ
+* แก้ token กลาง (`--background`, `--foreground` ฯลฯ ใน `index.css`) เพื่อให้หน้ากลุ่มนี้เข้ม — จะทำให้ Home และหน้าทั่วไปเปลี่ยนสีตามไปด้วยทันที
+
+---
+
+## 30.5 Class `.sharp-card` / `.sharp-btn` / `.sharp-tile` — opt-in ต่อหน้าเท่านั้น
+
+นิยามอยู่ท้าย `src/index.css` (มุมเหลี่ยม + hard shadow + press motion) — ใช้เฉพาะ Explore / Toolbox / AI Lab / Creator Tools / Admin Toolbox และบางส่วนของ Dashboard
+
+ห้าม: ใส่ class เหล่านี้ใน Home หรือ shared component (`button.tsx`, `card.tsx`) — จะเปลี่ยนหน้าตาทุกหน้าที่ใช้ component นั้นทันที เจตนาคือ opt-in ต่อหน้า ไม่ใช่ design token กลาง
+
+---
+
+## 30.6 ไม่มี audit trail ของระบบจ่ายเงิน — ช่องโหว่ที่รู้แล้วแต่ยังไม่ได้แก้ (สำคัญ)
+
+ตรวจสอบแล้ว (2 ก.ย. 2569): `course_enrollments` ไม่มี `updated_at`, ไม่มี history table แยก, ฟังก์ชัน `stripe-webhook` เขียนทับ `status` ตรง ๆ ไม่มี log เหตุการณ์ดิบจาก Stripe เก็บไว้ที่ไหนเลย
+
+**ถ้า user แจ้งว่าจ่ายเงินแล้วคอร์สหาย ตอนนี้ตรวจสอบย้อนหลังจากในระบบเองไม่ได้** ต้องพึ่ง Stripe dashboard ภายนอกเท่านั้น
+
+ข้อเสนอแก้ (ยังไม่ได้ทำ ตกลงกันว่าจะแยกเป็นงานคนละก้อน): ตาราง `stripe_webhook_events` (log ดิบแบบ insert-only), ตาราง `enrollment_audit_log` (insert-only ทุกครั้งที่ status เปลี่ยน), เพิ่ม `updated_at` ให้ `course_enrollments`
+
+**ห้ามสันนิษฐานว่ามี audit trail อยู่แล้ว** จนกว่าจะมีการ apply งานส่วนนี้จริง
+
+---
 
 flow = """# CREATR365 SYSTEM FLOW
 
