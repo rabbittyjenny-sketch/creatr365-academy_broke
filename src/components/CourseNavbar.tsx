@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 // .site-hover-scope's fallback chain once no data-accent is set.
 const MAIN_NAV = [
   { to: '/', label: 'HOME' },
-  { to: '/courses', label: 'EXPLORE' },
+  { to: '/explore', label: 'EXPLORE' },
   { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF' },
   { to: '/articles', label: 'COMMUNITY' },
   { to: '/contact', label: 'C365' },

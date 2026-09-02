@@ -774,3 +774,47 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 ::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #CC0033; }
 ::selection { background: rgba(204,0,51,.34); color: #fff; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   "Sharp Studio" — opt-in design layer for Explore/Toolbox/AI Lab/
+   Creator Tools/Admin Toolbox/Dashboard (per Explore redesign brief).
+   Deliberately NOT applied to :root/--radius or any existing selector —
+   Home, Navbar, Footer and every other page stay pixel-identical unless
+   a component explicitly opts in with these classes.
+   ───────────────────────────────────────────────────────────────────── */
+.sharp-card {
+  border-radius: 0;
+  transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
+}
+.sharp-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 hsl(var(--foreground));
+}
+.sharp-card:active { transform: scale(.97); }
+
+.sharp-btn {
+  border-radius: 0;
+  transition: transform .16s cubic-bezier(0.23,1,0.32,1), background-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.sharp-btn:hover { transform: translateY(-2px); }
+.sharp-btn:active { transform: scale(.97); }
+
+.sharp-tile { border-radius: 0 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sharp-card, .sharp-btn { transition: none !important; }
+  .sharp-card:hover, .sharp-btn:hover, .sharp-card:active, .sharp-btn:active { transform: none !important; }
+}
+
+.pulse-dot { position: relative; }
+.pulse-dot::after {
+  content: ''; position: absolute; inset: 0; border-radius: 9999px;
+  box-shadow: 0 0 0 0 rgba(255,255,255,.65);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pulse-dot::after { animation: sharpStatusPulse 2.8s ease-in-out infinite; }
+}
+@keyframes sharpStatusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.55); }
+  50%      { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+}
