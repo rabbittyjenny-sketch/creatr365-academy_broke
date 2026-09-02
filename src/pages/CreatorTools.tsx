@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
+import { useDarkPage } from '@/hooks/useDarkPage';
 import { Wrench } from 'lucide-react';
 
 /**
  * /creator-tools — honest "coming soon" placeholder, same reasoning as
- * AiLab.tsx: a real destination, no fabricated utilities.
+ * AiLab.tsx: a real destination, no fabricated utilities. Copper (#B87333)
+ * matches this tile's slot in Explore.tsx's System B wayfinding rotation.
  */
 const CreatorTools: React.FC = () => {
+  useDarkPage();
   return (
     <>
       <SEOHead title="Creator Tools - Creatr365" description="Creator Tools กำลังจัดเตรียม — utility สำหรับสมาชิก Creatr365" />
@@ -25,8 +28,8 @@ const CreatorTools: React.FC = () => {
             <span className="text-foreground" aria-current="page">Creator Tools</span>
           </nav>
 
-          <div className="sharp-tile p-8 md:p-12 bg-muted border border-border">
-            <span className="text-[10px] font-bold tracking-widest text-muted-foreground block">CREATOR TOOLS</span>
+          <div className="sharp-tile p-8 md:p-12 bg-card border border-border border-t-4 border-t-[#B87333]">
+            <span className="text-[10px] font-bold tracking-widest text-[#B87333] block">CREATOR TOOLS</span>
             <h1 className="text-3xl md:text-5xl font-bold leading-[0.95] mt-3 mb-4">Coming soon</h1>
             <p className="text-sm md:text-base text-muted-foreground max-w-lg">
               กำลังจัดเตรียม utility ของ Creatr365 สำหรับสมาชิก — จะเปิดใช้งานทีละชิ้นเมื่อพร้อมจริง
