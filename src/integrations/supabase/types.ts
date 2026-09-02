@@ -626,33 +626,131 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_range: string | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          gender: string | null
           id: string
           line_user_id: string | null
+          occupation: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          age_range?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
           line_user_id?: string | null
+          occupation?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          age_range?: string | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
           line_user_id?: string | null
+          occupation?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      toolbox_assets: {
+        Row: {
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          download_count: number
+          file_name: string | null
+          file_path: string
+          file_type: string | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          download_count?: number
+          file_name?: string | null
+          file_path: string
+          file_type?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          download_count?: number
+          file_name?: string | null
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      toolbox_downloads: {
+        Row: {
+          age_range: string | null
+          asset_id: string
+          downloaded_at: string
+          gender: string | null
+          id: string
+          occupation: string | null
+          student_id: string | null
+          user_id: string
+        }
+        Insert: {
+          age_range?: string | null
+          asset_id: string
+          downloaded_at?: string
+          gender?: string | null
+          id?: string
+          occupation?: string | null
+          student_id?: string | null
+          user_id: string
+        }
+        Update: {
+          age_range?: string | null
+          asset_id?: string
+          downloaded_at?: string
+          gender?: string | null
+          id?: string
+          occupation?: string | null
+          student_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toolbox_downloads_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "toolbox_assets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_codes: {
         Row: {
@@ -821,6 +919,10 @@ export type Database = {
         Returns: boolean
       }
       increment_promo_used: { Args: { promo_id: string }; Returns: undefined }
+      increment_toolbox_download: {
+        Args: { _asset_id: string }
+        Returns: undefined
+      }
       link_line_master_student_account: {
         Args: { _email?: string; _line_user_id: string; _student_id?: string }
         Returns: string

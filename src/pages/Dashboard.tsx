@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
           {statsData.map(stat => (
-            <div key={stat.label} className="card-water border border-border bg-card p-4" data-accent={stat.accent}>
+            <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
               <p className="text-xl font-bold">{stat.value}</p>
               <p className="text-[10px] text-muted-foreground">{stat.label}</p>
             </div>
@@ -250,7 +250,7 @@ const Dashboard: React.FC = () => {
           <h2 className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-3">คอร์สของฉัน</h2>
 
           {enrolledCourses.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
               ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
               <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
             </div>
@@ -266,11 +266,11 @@ const Dashboard: React.FC = () => {
                 const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}&returnTo=${encodeURIComponent(returnTo)}`;
 
                 return (
-                  <div key={c.id} className="card-water border border-border bg-card overflow-hidden" data-accent={accent}>
+                  <div key={c.id} className="sharp-card border border-border bg-card overflow-hidden" data-accent={accent}>
                     {/* Course header */}
                     <div className="p-5">
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0 text-sm">
+                        <div className="w-10 h-10 bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0 text-sm">
                           {c.title.slice(0, 2)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -306,14 +306,14 @@ const Dashboard: React.FC = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           data-accent={accent}
-                          className="btn-brand text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 flex-shrink-0"
+                          className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5 flex-shrink-0"
                         >
                           เข้าเรียน <ExternalLink className="w-3 h-3" />
                         </a>
                         {total > 0 && (
                           <button
                             onClick={() => setOpenCourse(isOpen ? null : c.id)}
-                            className="btn-brand btn-brand--outline text-xs px-3 py-2 rounded-lg border-border"
+                            className="btn-brand btn-brand--outline text-xs px-3 py-2 border-border"
                           >
                             {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
                           </button>
@@ -328,7 +328,7 @@ const Dashboard: React.FC = () => {
                               key={r.id}
                               onClick={() => handleDownloadResource(r)}
                               disabled={downloadingId === r.id}
-                              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                              className="sharp-btn flex items-center gap-1.5 text-[11px] px-3 py-1.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
                             >
                               {downloadingId === r.id
                                 ? <Loader2 className="w-3 h-3 animate-spin" />

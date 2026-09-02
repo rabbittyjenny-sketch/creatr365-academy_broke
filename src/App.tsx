@@ -3,6 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Explore from "./pages/Explore";
+import Toolbox from "./pages/Toolbox";
+import AiLab from "./pages/AiLab";
+import CreatorTools from "./pages/CreatorTools";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import Enroll from "./pages/Enroll";
@@ -19,6 +23,7 @@ import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
 import AdminArticles from "./pages/AdminArticles";
+import AdminToolbox from "./pages/AdminToolbox";
 import Admin from "./pages/Admin";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import Articles from "./pages/Articles";
@@ -38,6 +43,10 @@ const App = () => (
     <div className="site-hover-scope">
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/toolbox" element={<Toolbox />} />
+        <Route path="/ai-lab" element={<AiLab />} />
+        <Route path="/creator-tools" element={<CreatorTools />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/course/:id" element={<CourseDetail />} />
         <Route path="/enroll/:id" element={<Enroll />} />
@@ -55,6 +64,7 @@ const App = () => (
         <Route path="/admin/assignments" element={<RequireAdmin><AdminAssignments /></RequireAdmin>} />
         <Route path="/admin/payments" element={<RequireAdmin><AdminPayments /></RequireAdmin>} />
         <Route path="/admin/articles" element={<RequireAdmin><AdminArticles /></RequireAdmin>} />
+        <Route path="/admin/toolbox" element={<RequireAdmin><AdminToolbox /></RequireAdmin>} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />
         <Route path="/articles/:slug" element={<ArticleDetail />} />
