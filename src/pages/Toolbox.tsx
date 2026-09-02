@@ -4,6 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
+import { useDarkPage } from '@/hooks/useDarkPage';
 import { Download, FileText, Loader2, X } from 'lucide-react';
 
 interface ToolboxAsset {
@@ -38,6 +39,7 @@ async function ensureStudentId(email: string): Promise<string | null> {
 }
 
 const Toolbox: React.FC = () => {
+  useDarkPage();
   const navigate = useNavigate();
   const [assets, setAssets] = useState<ToolboxAsset[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -229,7 +231,7 @@ const Toolbox: React.FC = () => {
                     <button
                       onClick={() => handleDownloadClick(asset)}
                       disabled={downloadingId === asset.id}
-                      className="sharp-btn mt-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold tracking-wide px-4 py-2.5 bg-foreground text-background disabled:opacity-50"
+                      className="sharp-btn mt-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold tracking-wide px-4 py-2.5 bg-[#C0A060] text-[#0D0D0D] disabled:opacity-50"
                     >
                       {downloadingId === asset.id
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
@@ -308,7 +310,7 @@ const Toolbox: React.FC = () => {
             <button
               onClick={submitProfileAndDownload}
               disabled={saving || !form.gender || !form.age_range || !form.occupation.trim()}
-              className="sharp-btn w-full mt-5 inline-flex items-center justify-center gap-1.5 text-sm font-bold tracking-wide px-4 py-3 bg-foreground text-background disabled:opacity-50"
+              className="sharp-btn w-full mt-5 inline-flex items-center justify-center gap-1.5 text-sm font-bold tracking-wide px-4 py-3 bg-[#C0A060] text-[#0D0D0D] disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               บันทึกและดาวน์โหลด
