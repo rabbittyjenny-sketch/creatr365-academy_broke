@@ -40,3 +40,21 @@ SET features = array_replace(features,
 WHERE slug = 'magnet';
 
 COMMIT;
+
+-- -----------------------------------------------------------------------------
+-- Follow-up (same day): user confirmed removal of the two flagged
+-- brand-host-architect items that don't appear anywhere in its handbook.
+-- -----------------------------------------------------------------------------
+
+BEGIN;
+
+UPDATE public.courses
+SET features = array_remove(features, 'Agency Starter Kit — สัญญา Rate Card ทีม Scaling Framework'),
+    deliverables = array_remove(
+      array_remove(deliverables, 'Agency Starter Kit — สัญญาจ้างโฮสต์ + Client Onboarding + Rate Card'),
+      'Certified Brand Host Architect — Certificate + Digital Badge'
+    ),
+    updated_at = now()
+WHERE slug = 'brand-host-architect';
+
+COMMIT;
