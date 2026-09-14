@@ -12,27 +12,30 @@ const RefundPolicy: React.FC = () => {
   }, []);
   return (
     <>
-      <SEOHead title="นโยบายการคืนเงิน — CREATR365" description="นโยบายการคืนเงิน เปลี่ยนคอร์ส และโอนสิทธิ์ของ CREATR365" />
+      <SEOHead title="นโยบายการคืนเงิน — CREATR365" description="นโยบายการคืนเงิน การเปลี่ยนคอร์ส และการยกเลิกของ CREATR365" />
       <CourseNavbar />
       <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
           <Link to="/" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> กลับหน้าแรก
           </Link>
-          <div className="mb-12">
+          <div className="mb-6">
             <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Legal</span>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">นโยบายการคืนเงิน</h1>
-            <p className="text-white/40 text-sm">Refund, Exchange & Transfer Policy — อัปเดตล่าสุด มิถุนายน 2568</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">นโยบายการคืนเงิน และการยกเลิก</h1>
+            <p className="text-white/40 text-sm">Refund, Exchange & Cancellation Policy — อัปเดตล่าสุด กันยายน 2569</p>
           </div>
+          <p className="text-white/45 text-sm leading-relaxed mb-10">
+            นโยบายนี้ใช้กับการซื้อคอร์สเรียนทุกประเภทบนแพลตฟอร์ม CREATR365 ทั้งรูปแบบออนไลน์ (Online) และรูปแบบเรียนในสถานที่ (Offline / Onsite) เงื่อนไขเกี่ยวกับบัญชีผู้ใช้ การใช้งานเนื้อหา และการโอนสิทธิ์ เป็นไปตาม<Link to="/terms" className="text-[#D4A843] hover:opacity-80">ข้อกำหนดการใช้บริการ</Link>
+          </p>
 
           {/* Quick Summary */}
           <div className="rounded-2xl border border-[#D4A843]/25 bg-[#D4A843]/05 p-6 mb-8">
             <p className="text-[#D4A843] font-semibold text-sm mb-3">สรุปหลักสำคัญ</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { label: 'คืนเงินได้ภายใน', value: '7 วัน', sub: 'หลังจากซื้อ' },
-                { label: 'เรียนไปแล้วไม่เกิน', value: '20%', sub: 'ของเนื้อหาคอร์ส' },
-                { label: 'คืนเงินภายใน', value: '14 วัน', sub: 'ทำการ' },
+                { label: 'แจ้งขอคืนเงินได้ภายใน', value: '7 วัน', sub: 'นับจากวันชำระเงิน' },
+                { label: 'ขอเปลี่ยนคอร์สได้ภายใน', value: '3 วัน', sub: 'เรียนไปแล้วไม่เกิน 20%' },
+                { label: 'ดำเนินการคืนเงินภายใน', value: '7–15 วัน', sub: 'ทำการ' },
               ].map(s => (
                 <div key={s.label} className="text-center">
                   <p className="text-3xl font-black text-[#D4A843]">{s.value}</p>
@@ -44,16 +47,16 @@ const RefundPolicy: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Refund */}
+            {/* 01 Eligibility - Online */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">01</span> การขอคืนเงิน (Refund)
+                <span className="text-xs font-mono text-[#D4A843]/60">01</span> เงื่อนไขการคืนเงิน — คอร์สเรียนออนไลน์
               </h2>
               <div className="space-y-2 mb-5">
                 {[
-                  'ขอคืนเงินได้ภายใน 7 วัน นับจากวันที่ซื้อ',
-                  'ต้องเรียนไปแล้วไม่เกิน 20% ของเนื้อหาทั้งหมด (นับจากจำนวนบทเรียนที่เปิดดู)',
-                  'เงินจะคืนเข้าช่องทางเดิมภายใน 14 วันทำการ',
+                  'คืนเงินหรือเปลี่ยนคอร์สได้เฉพาะกรณีสั่งซื้อผิดคอร์ส หรือมีเหตุจำเป็นที่ไม่สามารถเรียนได้เท่านั้น',
+                  'ต้องแจ้งภายใน 7 วัน นับจากวันที่ชำระเงิน และยังไม่ได้ดาวน์โหลดเอกสารประกอบการเรียน',
+                  'ปัญหาที่เกิดขึ้นจากระบบ ไม่ถือเป็นความผิดพลาดของผู้เรียน และไม่นับรวมในเงื่อนไขการปฏิเสธคืนเงิน',
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#34A853] flex-shrink-0 mt-0.5" />
@@ -63,12 +66,12 @@ const RefundPolicy: React.FC = () => {
               </div>
               <div className="border-t border-white/8 pt-4">
                 <p className="text-white/40 text-xs font-semibold mb-2 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" /> ไม่สามารถขอคืนเงินได้ในกรณีต่อไปนี้
+                  <AlertTriangle className="w-3 h-3" /> ไม่สามารถขอคืนเงินหรือเปลี่ยนคอร์สได้ในกรณีต่อไปนี้
                 </p>
                 {[
-                  'คอร์สที่ซื้อในช่วงโปรโมชัน "Flash Sale" หรือที่ระบุว่า "ไม่รับคืนเงิน"',
-                  'การซื้อแบบเหมาจ่าย (Bundle) หากเปิดเรียนแล้วมากกว่า 10% ของทั้งชุด',
-                  'คอร์สที่มอบเป็นของขวัญ (Gift) หลังจากผู้รับเปิดใช้งานแล้ว',
+                  'เกินกำหนด 7 วัน นับจากวันที่ชำระเงิน',
+                  'ได้ทำการดาวน์โหลดเอกสารประกอบการเรียนไปแล้ว',
+                  'คอร์สที่ซื้อในช่วงร่วมโปรโมชัน และทำรายการสั่งซื้อสำเร็จแล้ว (สงวนสิทธิ์ทุกกรณี)',
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3 mt-2">
                     <X className="w-4 h-4 text-[#CC0033] flex-shrink-0 mt-0.5" />
@@ -76,19 +79,20 @@ const RefundPolicy: React.FC = () => {
                   </div>
                 ))}
               </div>
+              <p className="text-white/25 text-xs italic mt-4">* กรณีนอกเหนือจากนี้ สถาบันจะพิจารณาเป็นรายกรณีไป ตามดุลยพินิจของสถาบัน</p>
             </div>
 
-            {/* Course Swap */}
+            {/* 02 Course Swap - Online */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">02</span> การเปลี่ยนคอร์ส (Course Swap)
+                <span className="text-xs font-mono text-[#D4A843]/60">02</span> การเปลี่ยนคอร์สเรียน — คอร์สเรียนออนไลน์
               </h2>
               <div className="space-y-2">
                 {[
-                  'สามารถเปลี่ยนเป็นคอร์สอื่นที่มีมูลค่าเท่ากันหรือน้อยกว่าได้ 1 ครั้งต่อการซื้อ',
-                  'ต้องดำเนินการภายใน 3 วัน หลังซื้อ และเรียนไปแล้วไม่เกิน 15%',
-                  'หากคอร์สใหม่ราคาถูกกว่า ส่วนต่างจะเก็บเป็นเครดิตในบัญชี (ไม่คืนเป็นเงินสด)',
-                  'หากคอร์สใหม่ราคาสูงกว่า ผู้เรียนต้องชำระส่วนต่าง',
+                  'ขอเปลี่ยนคอร์สเรียนได้ หากพบว่าสั่งซื้อคอร์สไม่ตรงตามที่ต้องการ และคอร์สนั้นยังไม่ได้ดาวน์โหลดเอกสารประกอบการเรียน',
+                  'ต้องดำเนินการภายใน 3 วัน นับแต่วันเริ่มเรียนครั้งแรก และเรียนไปแล้วไม่เกิน 20% ของคอร์สทั้งหมด',
+                  'เปลี่ยนคอร์สเรียนได้เพียง 1 ครั้ง ต่อการสั่งซื้อ',
+                  'หากคอร์สใหม่มีมูลค่าสูงกว่าคอร์สเดิม ผู้เรียนต้องชำระส่วนต่างให้ครบถ้วนก่อนเริ่มเรียน',
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <Check className="w-4 h-4 text-[#34A853] flex-shrink-0 mt-0.5" />
@@ -98,29 +102,93 @@ const RefundPolicy: React.FC = () => {
               </div>
             </div>
 
-            {/* Transfer */}
+            {/* 03 Offline / Onsite cancellation table */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">03</span> การโอนสิทธิ์ (Transfer)
+                <span className="text-xs font-mono text-[#D4A843]/60">03</span> การยกเลิก — คอร์สเรียนออฟไลน์ (Onsite)
               </h2>
-              <div className="flex items-start gap-3">
-                <X className="w-4 h-4 text-[#CC0033] flex-shrink-0 mt-0.5" />
-                <p className="text-white/60 text-sm">
-                  ไม่อนุญาตให้โอนสิทธิ์เข้าถึงคอร์สให้บุคคลอื่น การแชร์บัญชีหรือขายต่อสิทธิ์จะนำไปสู่การระงับบัญชีโดยไม่คืนเงิน
+              <div className="overflow-hidden rounded-xl border border-white/8">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-white/5 text-white/50 text-xs uppercase tracking-wider">
+                      <th className="text-left font-semibold px-4 py-3">แจ้งยกเลิกล่วงหน้า</th>
+                      <th className="text-right font-semibold px-4 py-3">เงินคืน</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { window: 'ตั้งแต่ 30 วันขึ้นไป ก่อนวันอบรม', amount: '100%', ok: true },
+                      { window: '14–29 วัน ก่อนวันอบรม', amount: '50%', ok: true },
+                      { window: 'น้อยกว่า 14 วัน ก่อนวันอบรม', amount: 'ไม่คืนเงิน', ok: false },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-t border-white/8">
+                        <td className="px-4 py-3 text-white/60">{row.window}</td>
+                        <td className={`px-4 py-3 text-right font-semibold ${row.ok ? 'text-[#34A853]' : 'text-[#CC0033]'}`}>{row.amount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 04 How to request */}
+            <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
+              <h2 className="text-white font-semibold text-base mb-5 flex items-center gap-2">
+                <span className="text-xs font-mono text-[#D4A843]/60">04</span> ขั้นตอนการขอคืนเงิน / เปลี่ยนคอร์ส
+              </h2>
+              <div className="space-y-5">
+                {[
+                  { title: 'ติดต่อทีมงานพร้อม Order ID', desc: 'ส่งอีเมลแจ้งความประสงค์ พร้อมแนบ Order ID และหลักฐานการชำระเงิน (ใบเสร็จ หรืออีเมลยืนยัน)' },
+                  { title: 'ทีมงานตรวจสอบเงื่อนไข', desc: 'ตรวจสอบวันที่ชำระเงิน สถานะการดาวน์โหลดเอกสาร และเงื่อนไขตามหมวด 01–03 ข้างต้น' },
+                  { title: 'ดำเนินการคืนเงิน', desc: 'หากเข้าเงื่อนไข เงินจะถูกคืนผ่านช่องทางเดียวกับที่ชำระ ภายใน 7–15 วันทำการ' },
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <span className="w-6 h-6 rounded-full bg-[#D4A843]/15 text-[#D4A843] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium mb-0.5">{step.title}</p>
+                      <p className="text-white/45 text-sm leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 05 Refund method & timeline */}
+            <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
+              <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
+                <span className="text-xs font-mono text-[#D4A843]/60">05</span> วิธีการและระยะเวลาคืนเงิน
+              </h2>
+              <div className="space-y-2 mb-5">
+                {[
+                  'การคืนเงินจะดำเนินการผ่านช่องทางเดียวกับที่ชำระเงิน เช่น บัตรเครดิต หรือ QR Payment',
+                  'ระยะเวลาดำเนินการ 7–15 วันทำการ นับจากวันที่ได้รับหลักฐานครบถ้วน',
+                  'ขอสงวนสิทธิ์ในการหักค่าธรรมเนียมการชำระเงินหรือค่าธนาคาร (ถ้ามี)',
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-[#34A853] flex-shrink-0 mt-0.5" />
+                    <p className="text-white/60 text-sm">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-xl border border-[#34A853]/20 bg-[#34A853]/05 p-4">
+                <p className="text-white/60 text-sm leading-relaxed">
+                  หากสถาบันไม่สามารถจัดการเรียนการสอนได้ หรือมีเหตุจำเป็นต้องยกเลิกคอร์สเรียน ผู้เรียนจะได้รับ<span className="text-[#34A853] font-medium">เงินคืนเต็มจำนวน</span>ตามที่ชำระไว้
                 </p>
               </div>
             </div>
 
-            {/* Abuse Prevention */}
+            {/* 06 Abuse Prevention */}
             <div className="rounded-2xl border border-[#CC0033]/20 bg-[#CC0033]/05 p-6">
               <h2 className="text-white/80 font-semibold text-base mb-3 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#CC0033]/60">04</span> การป้องกันการใช้งานในทางที่ผิด
+                <span className="text-xs font-mono text-[#CC0033]/60">06</span> การป้องกันการใช้งานในทางที่ผิด
               </h2>
               <p className="text-white/50 text-sm leading-relaxed">
                 CREATR365 ขอสงวนสิทธิ์ในการปฏิเสธการคืนเงินหรือเปลี่ยนคอร์ส หากตรวจพบพฤติกรรมการใช้งานในทางที่ผิด เช่น การดาวน์โหลดเนื้อหาจำนวนมากแล้วขอคืนเงิน หรือการขอคืนเงินซ้ำซากโดยมีเจตนาทุจริต
               </p>
             </div>
           </div>
+
+          <p className="text-white/25 text-xs italic mt-6">บริษัทฯ ขอสงวนสิทธิ์ในการเปลี่ยนแปลงเงื่อนไขใดๆ ข้างต้น โดยไม่จำต้องแจ้งให้ทราบล่วงหน้า</p>
 
           <div className="mt-8 p-5 rounded-2xl bg-[#111] border border-white/8">
             <p className="text-white/60 text-sm mb-1 font-medium">ต้องการขอคืนเงินหรือเปลี่ยนคอร์ส?</p>
