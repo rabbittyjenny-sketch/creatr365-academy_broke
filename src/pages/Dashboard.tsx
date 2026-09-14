@@ -6,8 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award } from 'lucide-react';
 import { tierLabel } from '@/lib/courseTag';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
@@ -40,6 +39,8 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
 };
 const resourceLabel = (type: string) => RESOURCE_TYPE_LABELS[type] || `เอกสารประกอบการเรียน (${type})`;
 
+type SectionKey = 'overview' | 'courses' | 'resources' | 'certificates';
+
 async function ensureStudentId(email: string): Promise<string | null> {
   const { data, error } = await supabase.rpc('ensure_master_student_account', { _email: email });
   if (error) { console.error('ensure_master_student_account failed', error); return null; }
@@ -59,6 +60,7 @@ const Dashboard: React.FC = () => {
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
+  const [section, setSection] = useState<SectionKey>('overview');
   // Separate from the student dashboard below — an admin gets a link out to
   // the dedicated Admin Console (its own layout/routes), never a second
   // copy of admin controls rendered here.
@@ -189,12 +191,19 @@ const Dashboard: React.FC = () => {
 
   const totalResourceCount = resources.length;
 
-  const statsData = useMemo(() => {
-    const completedCourses = enrollments.filter(e => {
-      const mods = modulesByCourse.get(e.course_id) || [];
+  // Courses where every module is completed — backs both the "ใบประกาศ" stat
+  // tile and the Certificates section's list (see 34.5 in README for why
+  // that section shows "เร็วๆ นี้" instead of a download button: there's no
+  // real certificate file/generation behind this yet).
+  const completedCoursesList = useMemo(() =>
+    enrolledCourses.filter(({ course: c }) => {
+      const mods = modulesByCourse.get(c.id) || [];
       return mods.length > 0 && mods.every(m => completedModuleIds.has(m.id));
-    }).length;
+    }),
+    [enrolledCourses, modulesByCourse, completedModuleIds],
+  );
 
+  const statsData = useMemo(() => {
     const quizScores = progress.filter(p => p.score != null).map(p => p.score!);
     const avgScore = quizScores.length
       ? Math.round(quizScores.reduce((a, b) => a + b, 0) / quizScores.length)
@@ -204,9 +213,16 @@ const Dashboard: React.FC = () => {
       { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'red' },
       { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'red' },
       { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
-      { label: 'ใบประกาศ', value: completedCourses, accent: 'red' },
+      { label: 'ใบประกาศ', value: completedCoursesList.length, accent: 'red' },
     ];
-  }, [enrollments, enrolledCourses.length, modulesByCourse, completedModuleIds, progress]);
+  }, [enrolledCourses.length, progress, completedCoursesList.length]);
+
+  const NAV_ITEMS: { key: SectionKey; label: string; Icon: typeof LayoutGrid; count?: number; comingSoon?: boolean }[] = [
+    { key: 'overview', label: 'ภาพรวม', Icon: LayoutGrid },
+    { key: 'courses', label: 'คอร์สของฉัน', Icon: GraduationCap, count: enrolledCourses.length },
+    { key: 'resources', label: 'เอกสาร', Icon: FolderOpen, count: totalResourceCount },
+    { key: 'certificates', label: 'ใบประกาศ', Icon: Award, comingSoon: true },
+  ];
 
   if (loading || !user) {
     return (
@@ -229,9 +245,9 @@ const Dashboard: React.FC = () => {
       <SEOHead title="Student Portal - Creatr365" description="หน้านักเรียน Creatr365" />
       <CourseNavbar />
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 pt-24 pb-24">
-        {/* Header */}
-        <div>
+      <main className="max-w-5xl mx-auto px-4 py-6 pt-24 pb-24">
+        {/* Identity header — always visible, not part of the switchable sections below */}
+        <div className="mb-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
@@ -257,218 +273,268 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Sections — tabbed instead of one continuous scroll, so "ภาพรวม"
-            (stats + how-to-use-LMS), "คอร์สของฉัน" (enrolled courses +
-            progress + lessons) and "เอกสาร" (every downloadable file across
-            every enrolled course, in one place) each get their own view
-            instead of stacking indefinitely on one page. This mirrors how
-            established LMS student portals (Teachable, Coursera, Thinkific)
-            separate course progress from a dedicated resources/materials
-            area rather than burying downloads inside each course card. */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full h-auto p-1 bg-muted border border-border">
-            <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2 text-xs font-semibold">
-              <LayoutGrid className="w-3.5 h-3.5" /> ภาพรวม
-            </TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-1.5 py-2 text-xs font-semibold">
-              <GraduationCap className="w-3.5 h-3.5" />
-              คอร์สของฉัน{enrolledCourses.length > 0 && ` (${enrolledCourses.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="resources" className="flex items-center gap-1.5 py-2 text-xs font-semibold">
-              <FolderOpen className="w-3.5 h-3.5" />
-              เอกสาร{totalResourceCount > 0 && ` (${totalResourceCount})`}
-            </TabsTrigger>
-          </TabsList>
+        {/* Left nav / right content — same click-left-see-right pattern as the
+            Admin console (AdminLayout), rebuilt for this page's own narrower,
+            non-fixed layout (Admin's Sidebar component is viewport-fixed and
+            assumes it owns the whole page; this page already has its own
+            CourseNavbar/Footer in normal flow, so a plain sticky flex column
+            fits here without overlapping them). Stacks as a horizontal strip
+            above the content on mobile instead of a sidebar. */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible md:w-52 md:flex-shrink-0 md:sticky md:top-24 md:self-start border-b md:border-b-0 border-border pb-2 md:pb-0">
+            {NAV_ITEMS.map(({ key, label, Icon, count, comingSoon }) => {
+              const active = section === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSection(key)}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-left whitespace-nowrap transition-colors border-l-2 flex-shrink-0 ${
+                    active
+                      ? 'border-l-foreground bg-muted text-foreground'
+                      : 'border-l-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {label}
+                  {typeof count === 'number' && count > 0 && (
+                    <span className="text-[10px] text-muted-foreground">({count})</span>
+                  )}
+                  {comingSoon && (
+                    <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 bg-muted text-muted-foreground/70">
+                      เร็วๆ นี้
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-          <TabsContent value="overview" className="space-y-6 mt-5">
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              {statsData.map(stat => (
-                <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
-                  <p className="text-xl font-bold">{stat.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+          <div className="flex-1 min-w-0">
+            {section === 'overview' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {statsData.map(stat => (
+                    <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
+                      <p className="text-xl font-bold">{stat.value}</p>
+                      <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* LMS info */}
-            <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
-              <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
-              <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Master Key ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
-              <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="courses" className="mt-5">
-          {enrolledCourses.length === 0 ? (
-            <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
-              <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {enrolledCourses.map(({ course: c, accent }) => {
-                const courseMods = modulesByCourse.get(c.id) || [];
-                const total = courseMods.length;
-                const done = courseMods.filter(m => completedModuleIds.has(m.id)).length;
-                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                const isOpen = openCourse === c.id;
-                const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(keyId)}`;
-                const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}&returnTo=${encodeURIComponent(returnTo)}`;
-
-                return (
-                  <div key={c.id} className="sharp-card border border-border bg-card overflow-hidden" data-accent={accent}>
-                    {/* Course header */}
-                    <div className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0 text-sm">
-                          {c.title.slice(0, 2)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                            <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{tierLabel(c.tag)}</span>
-                            {c.level && <span className="text-[10px] text-muted-foreground">· {c.level}</span>}
-                          </div>
-                          <p className="text-sm font-semibold hover-shift" data-accent={accent}>{c.title}</p>
-                          <p className="text-xs text-muted-foreground">{c.subtitle}</p>
-                          {total > 0 && (
-                            <p className="text-[10px] text-muted-foreground mt-1">{done}/{total} บทเรียน</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      {total > 0 && (
-                        <div className="mt-3">
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-500"
-                              style={{ width: `${pct}%`, background: 'var(--color-foreground)' }}
-                            />
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-1">{pct}% สำเร็จ</p>
-                        </div>
-                      )}
-
-                      {/* Action buttons */}
-                      <div className="mt-4 flex items-center gap-2">
-                        <a
-                          href={lmsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-accent={accent}
-                          className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5 flex-shrink-0"
-                        >
-                          เข้าเรียน <ExternalLink className="w-3 h-3" />
-                        </a>
-                        {total > 0 && (
-                          <button
-                            onClick={() => setOpenCourse(isOpen ? null : c.id)}
-                            className="btn-brand btn-brand--outline text-xs px-3 py-2 border-border"
-                          >
-                            {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Resource files for this course now live in the dedicated
-                          "เอกสาร" tab (one place for every enrolled course's
-                          files, instead of duplicated buttons on every card) —
-                          this is just a discoverability hint, not a duplicate. */}
-                      {(resourcesByCourse.get(c.id) || []).length > 0 && (
-                        <p className="mt-3 text-[10px] text-muted-foreground inline-flex items-center gap-1">
-                          <FolderOpen className="w-3 h-3" />
-                          มีเอกสาร {resourcesByCourse.get(c.id)!.length} ไฟล์ — ดูที่แท็บ "เอกสาร"
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Lesson list (collapsible) */}
-                    {isOpen && total > 0 && (
-                      <div className="border-t border-border px-3 py-2 space-y-0.5">
-                        {courseMods.map((mod, i) => {
-                          const isDone = completedModuleIds.has(mod.id);
-                          const moduleProgress = progress.find(p => p.module_id === mod.id);
-                          return (
-                            <div key={mod.id} className="flex items-center gap-3 p-3 rounded-lg">
-                              <div className="flex-shrink-0">
-                                {isDone
-                                  ? <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                  : <Circle className="w-5 h-5 text-muted-foreground/40" />
-                                }
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{i + 1}. {mod.name}</p>
-                                <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
-                                  {mod.duration_label && <span>{mod.duration_label}</span>}
-                                  {mod.has_quiz && <span>· Quiz</span>}
-                                  {mod.has_quiz && moduleProgress?.score != null && (
-                                    <span className={`font-bold ${moduleProgress.score >= 70 ? 'text-green-600' : 'text-red-500'}`}>
-                                      {moduleProgress.score}% {moduleProgress.score >= 70 ? 'ผ่าน' : 'ยังไม่ผ่าน'}
-                                    </span>
-                                  )}
-                                  {mod.has_quiz && moduleProgress?.score == null && moduleProgress?.status === 'unlocked' && (
-                                    <span>ยังไม่ได้ทำ</span>
-                                  )}
-                                  {(!moduleProgress || moduleProgress.status === 'not_started') && (
-                                    <span>ล็อก</span>
-                                  )}
-                                </div>
-                              </div>
-                              <BookOpen className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          </TabsContent>
-
-          <TabsContent value="resources" className="mt-5">
-            {enrolledCourses.length === 0 ? (
-              <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
-                <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
-              </div>
-            ) : totalResourceCount === 0 ? (
-              <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                ยังไม่มีเอกสารสำหรับคอร์สที่ลงทะเบียนอยู่
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {enrolledCourses.map(({ course: c }) => {
-                  const courseResources = resourcesByCourse.get(c.id) || [];
-                  if (courseResources.length === 0) return null;
-                  return (
-                    <div key={c.id} className="sharp-card border border-border bg-card p-4">
-                      <p className="text-xs font-semibold text-foreground mb-3">{c.title}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {courseResources.map(r => (
-                          <button
-                            key={r.id}
-                            onClick={() => handleDownloadResource(r)}
-                            disabled={downloadingId === r.id}
-                            className="sharp-btn flex items-center gap-1.5 text-[11px] px-3 py-1.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
-                          >
-                            {downloadingId === r.id
-                              ? <Loader2 className="w-3 h-3 animate-spin" />
-                              : <Download className="w-3 h-3" />}
-                            <FileText className="w-3 h-3" />
-                            {r.title || resourceLabel(r.resource_type)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+                  <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
+                  <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Master Key ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
+                  <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
+                </div>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+
+            {section === 'courses' && (
+              enrolledCourses.length === 0 ? (
+                <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
+                  <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {enrolledCourses.map(({ course: c, accent }) => {
+                    const courseMods = modulesByCourse.get(c.id) || [];
+                    const total = courseMods.length;
+                    const done = courseMods.filter(m => completedModuleIds.has(m.id)).length;
+                    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                    const isOpen = openCourse === c.id;
+                    const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(keyId)}`;
+                    const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}&returnTo=${encodeURIComponent(returnTo)}`;
+
+                    return (
+                      <div key={c.id} className="sharp-card border border-border bg-card overflow-hidden" data-accent={accent}>
+                        {/* Course header */}
+                        <div className="p-5">
+                          <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-foreground text-background flex items-center justify-center font-bold flex-shrink-0 text-sm">
+                              {c.title.slice(0, 2)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{tierLabel(c.tag)}</span>
+                                {c.level && <span className="text-[10px] text-muted-foreground">· {c.level}</span>}
+                              </div>
+                              <p className="text-sm font-semibold hover-shift" data-accent={accent}>{c.title}</p>
+                              <p className="text-xs text-muted-foreground">{c.subtitle}</p>
+                              {total > 0 && (
+                                <p className="text-[10px] text-muted-foreground mt-1">{done}/{total} บทเรียน</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Progress bar */}
+                          {total > 0 && (
+                            <div className="mt-3">
+                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${pct}%`, background: 'var(--color-foreground)' }}
+                                />
+                              </div>
+                              <p className="text-[10px] text-muted-foreground mt-1">{pct}% สำเร็จ</p>
+                            </div>
+                          )}
+
+                          {/* Action buttons */}
+                          <div className="mt-4 flex items-center gap-2">
+                            <a
+                              href={lmsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              data-accent={accent}
+                              className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5 flex-shrink-0"
+                            >
+                              เข้าเรียน <ExternalLink className="w-3 h-3" />
+                            </a>
+                            {total > 0 && (
+                              <button
+                                onClick={() => setOpenCourse(isOpen ? null : c.id)}
+                                className="btn-brand btn-brand--outline text-xs px-3 py-2 border-border"
+                              >
+                                {isOpen ? 'ซ่อนบทเรียน' : 'ดูบทเรียน'}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Resource files for this course live in the dedicated
+                              "เอกสาร" section (one place for every enrolled course's
+                              files, instead of duplicated buttons on every card) —
+                              this is just a discoverability hint, not a duplicate. */}
+                          {(resourcesByCourse.get(c.id) || []).length > 0 && (
+                            <button
+                              onClick={() => setSection('resources')}
+                              className="mt-3 text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1 transition-colors"
+                            >
+                              <FolderOpen className="w-3 h-3" />
+                              มีเอกสาร {resourcesByCourse.get(c.id)!.length} ไฟล์ — ดูที่ "เอกสาร"
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Lesson list (collapsible) */}
+                        {isOpen && total > 0 && (
+                          <div className="border-t border-border px-3 py-2 space-y-0.5">
+                            {courseMods.map((mod, i) => {
+                              const isDone = completedModuleIds.has(mod.id);
+                              const moduleProgress = progress.find(p => p.module_id === mod.id);
+                              return (
+                                <div key={mod.id} className="flex items-center gap-3 p-3 rounded-lg">
+                                  <div className="flex-shrink-0">
+                                    {isDone
+                                      ? <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                      : <Circle className="w-5 h-5 text-muted-foreground/40" />
+                                    }
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{i + 1}. {mod.name}</p>
+                                    <div className="flex gap-2 mt-0.5 text-[10px] text-muted-foreground">
+                                      {mod.duration_label && <span>{mod.duration_label}</span>}
+                                      {mod.has_quiz && <span>· Quiz</span>}
+                                      {mod.has_quiz && moduleProgress?.score != null && (
+                                        <span className={`font-bold ${moduleProgress.score >= 70 ? 'text-green-600' : 'text-red-500'}`}>
+                                          {moduleProgress.score}% {moduleProgress.score >= 70 ? 'ผ่าน' : 'ยังไม่ผ่าน'}
+                                        </span>
+                                      )}
+                                      {mod.has_quiz && moduleProgress?.score == null && moduleProgress?.status === 'unlocked' && (
+                                        <span>ยังไม่ได้ทำ</span>
+                                      )}
+                                      {(!moduleProgress || moduleProgress.status === 'not_started') && (
+                                        <span>ล็อก</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <BookOpen className="w-3.5 h-3.5 text-muted-foreground/40 flex-shrink-0" />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {section === 'resources' && (
+              enrolledCourses.length === 0 ? (
+                <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
+                  <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
+                </div>
+              ) : totalResourceCount === 0 ? (
+                <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  ยังไม่มีเอกสารสำหรับคอร์สที่ลงทะเบียนอยู่
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {enrolledCourses.map(({ course: c }) => {
+                    const courseResources = resourcesByCourse.get(c.id) || [];
+                    if (courseResources.length === 0) return null;
+                    return (
+                      <div key={c.id} className="sharp-card border border-border bg-card p-4">
+                        <p className="text-xs font-semibold text-foreground mb-3">{c.title}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {courseResources.map(r => (
+                            <button
+                              key={r.id}
+                              onClick={() => handleDownloadResource(r)}
+                              disabled={downloadingId === r.id}
+                              className="sharp-btn flex items-center gap-1.5 text-[11px] px-3 py-1.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                            >
+                              {downloadingId === r.id
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <Download className="w-3 h-3" />}
+                              <FileText className="w-3 h-3" />
+                              {r.title || resourceLabel(r.resource_type)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {section === 'certificates' && (
+              <div>
+                {enrolledCourses.length === 0 ? (
+                  <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                    ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
+                    <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
+                  </div>
+                ) : completedCoursesList.length === 0 ? (
+                  <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                    ยังไม่มีคอร์สที่เรียนจบครบทุกบทเรียน — เรียนให้ครบเพื่อปลดล็อกใบประกาศ
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {completedCoursesList.map(({ course: c }) => (
+                      <div key={c.id} className="sharp-card border border-border bg-card p-4 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold tracking-widest text-muted-foreground">{tierLabel(c.tag)}</p>
+                          <p className="text-sm font-semibold truncate">{c.title}</p>
+                        </div>
+                        <span className="flex-shrink-0 text-[10px] font-bold tracking-wider px-2.5 py-1 bg-muted text-muted-foreground">
+                          เร็วๆ นี้
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-4">
+                  ระบบออกใบประกาศอัตโนมัติยังไม่เปิดใช้งาน — โครงสร้างส่วนนี้เตรียมไว้แล้ว จะแจ้งเตือนเมื่อพร้อมให้ดาวน์โหลดจริง
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
       <Footer />
     </>
