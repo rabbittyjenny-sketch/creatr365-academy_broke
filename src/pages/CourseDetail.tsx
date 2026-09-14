@@ -4,8 +4,13 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { AuthSheet } from '@/components/AuthSheet';
 import { supabase } from '@/integrations/supabase/client';
+import { useDarkPage } from '@/hooks/useDarkPage';
 import { ArrowLeft, Check, ArrowRight, Play } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+
+// Same as Courses.tsx — admin free-text tag like "ชุดที่ 1 – ไลฟ์ให้เป็น"
+// trimmed down to just the tier name.
+const tierLabel = (tag: string) => tag.replace(/^ชุดที่\s*\d+\s*[-–—]\s*/, '').trim();
 
 interface KpiNote { label: string; value: string; note?: string }
 
@@ -54,6 +59,7 @@ const youTubeEmbed = (url: string): string | null => {
 };
 
 const CourseDetail: React.FC = () => {
+  useDarkPage();
   const { id } = useParams();
   const navigate = useNavigate();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -119,13 +125,8 @@ const CourseDetail: React.FC = () => {
             <ArrowLeft className="w-4 h-4" /> หลักสูตรทั้งหมด
           </Link>
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">{course.tag}</span>
-            {course.level && (
-              <span className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border border-border text-foreground/80">
-                LEVEL · {course.level}
-              </span>
-            )}
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+            <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">{tierLabel(course.tag)}</span>
+            <span className="text-[10px] px-2 py-0.5 bg-muted text-muted-foreground">
               {LEARNING_LABELS[course.learning_type] || course.learning_type}
             </span>
           </div>
@@ -133,7 +134,7 @@ const CourseDetail: React.FC = () => {
           <p className="text-lg md:text-xl text-muted-foreground mb-4">{course.subtitle}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 items-center text-sm text-muted-foreground">
             <span>{course.format_label || course.duration}</span>
-            <span className="text-foreground font-bold text-lg">{isFreeCourse ? 'ฟรี' : course.price}</span>
+            <span className="text-foreground font-bold text-lg">{isFreeCourse ? 'FREE' : course.price}</span>
           </div>
         </div>
       </section>
@@ -182,7 +183,7 @@ const CourseDetail: React.FC = () => {
                 <h3 className="text-2xl font-bold mb-4">โครงสร้างบทเรียน</h3>
                 <ol className="space-y-2">
                   {modules.map((m) => (
-                    <li key={m.id} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-card">
+                    <li key={m.id} className="flex items-start gap-3 p-3 border border-border bg-card">
                       <span className="text-[10px] font-bold tracking-widest text-muted-foreground mt-0.5 w-12 flex-shrink-0">{m.code}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold hover-shift" data-accent={accent}>{m.name}</p>
@@ -200,7 +201,7 @@ const CourseDetail: React.FC = () => {
                 <h3 className="text-2xl font-bold mb-4">รูปจากคอร์ส</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {course.gallery_image_urls.map((src, i) => (
-                    <img key={i} src={src} alt={`gallery-${i}`} className="rounded-xl border border-border w-full aspect-video object-cover" />
+                    <img key={i} src={src} alt={`gallery-${i}`} className="border border-border w-full aspect-video object-cover" />
                   ))}
                 </div>
               </div>
@@ -223,13 +224,13 @@ const CourseDetail: React.FC = () => {
 
           <aside className="md:col-span-1">
             <div className="sticky top-24 space-y-6">
-              <div className="card-water border border-border p-6 bg-card" data-accent={accent}>
-                <p className="text-3xl font-bold mb-2">{isFreeCourse ? 'ฟรี' : course.price}</p>
+              <div className="sharp-card border border-border p-6 bg-card" data-accent={accent}>
+                <p className="text-3xl font-bold mb-2">{isFreeCourse ? 'FREE' : course.price}</p>
                 <p className="text-sm text-muted-foreground mb-6">{course.format_label || course.duration}</p>
                 <button
                   onClick={handleEnroll}
                   data-accent={accent}
-                  className="btn-brand w-full py-3 rounded-lg font-medium"
+                  className="btn-brand w-full py-3 font-medium"
                 >
                   <span>สมัครเรียน</span>
                   <ArrowRight className="w-4 h-4" />
@@ -237,14 +238,14 @@ const CourseDetail: React.FC = () => {
               </div>
 
               {course.target_audience && (
-                <div className="card-water border border-border p-5 bg-card" data-accent={accent}>
+                <div className="sharp-card border border-border p-5 bg-card" data-accent={accent}>
                   <h4 className="font-bold mb-2 text-sm">เหมาะสำหรับใคร</h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">{course.target_audience}</p>
                 </div>
               )}
 
               {course.bloom_level && (
-                <div className="card-water border border-border p-5 bg-card" data-accent={accent}>
+                <div className="sharp-card border border-border p-5 bg-card" data-accent={accent}>
                   <h4 className="font-bold mb-1 text-sm">ระดับการเรียนรู้</h4>
                   <p className="text-xs text-muted-foreground">{course.bloom_level}</p>
                 </div>
@@ -258,7 +259,7 @@ const CourseDetail: React.FC = () => {
             <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-3">ตัวชี้วัด & เกณฑ์ผ่าน</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {course.kpi_notes.map((k, i) => (
-                <div key={i} className="rounded-lg border border-border p-3 bg-card">
+                <div key={i} className="border border-border p-3 bg-card">
                   <p className="text-xs font-semibold text-foreground hover-shift" data-accent={accent}>{k.value}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{k.label}</p>
                   {k.note && <p className="text-[10px] text-muted-foreground/70 mt-0.5">{k.note}</p>}
