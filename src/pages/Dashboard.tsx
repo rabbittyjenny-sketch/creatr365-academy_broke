@@ -27,7 +27,6 @@ interface ResourceRow {
 }
 
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
-const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
 
 // Label shown per resource_type. Anything not listed here (a new type an
 // admin adds later, e.g. "worksheet" already covered, or "cheatsheet")
@@ -85,7 +84,7 @@ const Dashboard: React.FC = () => {
     ]);
 
     setProfile(prof || null);
-    setCourses(((cs as any) || []).filter((c: CourseRow) => CURRENT_COURSE_SLUGS.has(c.slug)));
+    setCourses((cs as any) || []);
     const enRows: EnrollmentRow[] = (en as any) || [];
     setEnrollments(enRows);
 

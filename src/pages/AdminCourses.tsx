@@ -67,13 +67,24 @@ const emptyCourse = (sort:number): CourseRow => ({
 });
 
 /* ─── Shared input styles ──────────────────────────────── */
+// Text-color scale reduced to 4 clear tiers (was ~9 distinct opacity values
+// scattered ad hoc — white/70,/60,/55,/50,/40,/35,/30,/25,/20 — which is
+// exactly the kind of "ลายตา" clutter that makes hierarchy hard to read at
+// a glance): text-white (headings/primary), /60 (body/secondary), /30
+// (muted meta — labels, counts, hints), /20 (placeholder/disabled/empty).
+// Same reduction for accent colors: brand red (#CC0033) for primary actions
+// and danger, green (#34A853) for on/active state — that's it. The gold
+// (#D4A843) that used to show up as a third, unrelated hover color on edit
+// icons and promo codes is gone; those now use the same 4-tier scale.
 const inp = "w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-white/30 placeholder-white/15 transition-colors";
-const lbl = "text-[11px] font-semibold text-white/35 uppercase tracking-wider block mb-1.5";
+const lbl = "text-[11px] font-semibold text-white/30 uppercase tracking-wider block mb-1.5";
+const reqLbl = "text-[11px] font-semibold text-white/30 uppercase tracking-wider block mb-1.5 after:content-['_*'] after:text-[#CC0033] after:font-bold";
 
-const Field:React.FC<{ label:string; children:React.ReactNode; half?:boolean }> = ({label,children,half}) => (
-  <div className={half ? '' : ''}>
-    <label className={lbl}>{label}</label>
+const Field:React.FC<{ label:string; children:React.ReactNode; required?:boolean; hint?:string }> = ({label,children,required,hint}) => (
+  <div>
+    <label className={required ? reqLbl : lbl}>{label}</label>
     {children}
+    {hint && <p className="text-white/30 text-[11px] mt-1">{hint}</p>}
   </div>
 );
 
@@ -310,7 +321,7 @@ const AdminCourses = () => {
         <div className="flex gap-1 bg-white/3 p-1 rounded-xl w-fit mb-8">
           {[['courses','📚 หลักสูตร'],['promos','🎟️ โปรโมชั่น']].map(([k,l])=>(
             <button key={k} onClick={()=>setTab(k as any)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${tab===k ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${tab===k ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'}`}>
               {l}
             </button>
           ))}
@@ -328,6 +339,14 @@ const AdminCourses = () => {
               </button>
             </div>
 
+            {/* What "Hidden" vs "เผยแพร่แล้ว" means, right above the list it
+                describes — this is the single switch that controls whether a
+                course shows up on /courses and /dashboard at all. */}
+            <p className="text-white/30 text-xs">
+              <span className="text-[#34A853] font-semibold">เผยแพร่แล้ว</span> = แสดงบนหน้ารวมหลักสูตรและลงทะเบียนได้ ·{' '}
+              <span className="text-white/50 font-semibold">Hidden</span> = บันทึกไว้แต่ยังไม่แสดงที่ไหนบนเว็บสาธารณะ
+            </p>
+
             {/* Course list */}
             <div className="rounded-2xl border border-white/8 overflow-hidden">
               {courses.length === 0 ? (
@@ -335,32 +354,32 @@ const AdminCourses = () => {
               ) : courses.map(c => {
                 const hex = COLOR_OPTIONS.find(x=>x.value===c.color)?.hex||'#888';
                 return (
-                  <div key={c.id} className="flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 bg-[#0D0D0D] hover:bg-[#131313] transition-colors group">
-                    {/* Color dot */}
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:hex }} />
+                  <div key={c.id} className="flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 bg-[#0D0D0D] hover:bg-[#131313] transition-colors group border-l-2" style={{ borderLeftColor: hex }}>
                     {/* Cover thumb */}
                     {c.cover_image_url ? (
                       <img src={c.cover_image_url} alt="" className="w-12 h-8 object-cover rounded-md opacity-70 flex-shrink-0" />
                     ) : (
-                      <div className="w-12 h-8 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-black" style={{ background:hex+'15', color:hex }}>{c.tag?.slice(0,2)||'?'}</div>
+                      <div className="w-12 h-8 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-black bg-white/5 text-white/30">{c.tag?.slice(0,2)||'?'}</div>
                     )}
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-white font-semibold text-sm truncate">{c.title}</p>
-                        {!c.is_active && <span className="text-[9px] px-1.5 py-0.5 bg-white/8 text-white/30 rounded">Hidden</span>}
+                        {c.is_active
+                          ? <span className="text-[9px] px-1.5 py-0.5 bg-[#34A853]/15 text-[#34A853] rounded font-bold">เผยแพร่แล้ว</span>
+                          : <span className="text-[9px] px-1.5 py-0.5 bg-white/8 text-white/50 rounded font-bold">Hidden</span>}
                         <span className="text-[9px] px-1.5 py-0.5 border border-white/10 text-white/30 rounded uppercase">{c.status}</span>
                       </div>
-                      <p className="text-white/25 text-xs mt-0.5 font-mono">/course/{c.slug}</p>
+                      <p className="text-white/30 text-xs mt-0.5 font-mono">/course/{c.slug}</p>
                     </div>
-                    <p className="text-white/50 text-sm font-semibold flex-shrink-0 hidden sm:block">{c.price}</p>
+                    <p className="text-white/60 text-sm font-semibold flex-shrink-0 hidden sm:block">{c.price || <span className="text-white/20 font-normal">ไม่มีราคา</span>}</p>
                     {/* Actions */}
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <a href={`/course/${c.slug}`} target="_blank" rel="noopener noreferrer"
-                        className="p-2 rounded-lg text-white/20 hover:text-white/50 transition-all">
+                        className="p-2 rounded-lg text-white/20 hover:text-white transition-all">
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
-                      <button onClick={()=>startEdit(c)} className="p-2 rounded-lg text-white/20 hover:text-[#D4A843] transition-all">
+                      <button onClick={()=>startEdit(c)} className="p-2 rounded-lg text-white/20 hover:text-white transition-all">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={()=>handleDelete(c.id)} className="p-2 rounded-lg text-white/20 hover:text-[#CC0033] transition-all">
@@ -393,10 +412,10 @@ const AdminCourses = () => {
                   <button onClick={()=>setEditingPromo(null)}><X className="w-4 h-4 text-white/30" /></button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="รหัสส่วนลด">
+                  <Field label="รหัสส่วนลด" required>
                     <input className={inp} value={editingPromo.code||''} onChange={e=>setEditingPromo({...editingPromo,code:e.target.value.toUpperCase()})} placeholder="EARLYBIRD50" />
                   </Field>
-                  <Field label="หลักสูตร">
+                  <Field label="หลักสูตร" required>
                     <select className={inp} value={editingPromo.course_id||''} onChange={e=>setEditingPromo({...editingPromo,course_id:e.target.value})}>
                       <option value="">— เลือกหลักสูตร —</option>
                       {courses.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
@@ -420,7 +439,7 @@ const AdminCourses = () => {
                     className={`relative w-10 h-5 rounded-full transition-colors ${editingPromo.is_active?'bg-[#34A853]':'bg-white/15'}`}>
                     <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${editingPromo.is_active?'translate-x-5':'translate-x-0.5'}`} />
                   </div>
-                  <span className="text-white/50 text-sm">เปิดใช้งาน</span>
+                  <span className="text-white/60 text-sm">เปิดใช้งาน</span>
                 </label>
                 <button onClick={handleSavePromo}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold text-white"
@@ -435,14 +454,14 @@ const AdminCourses = () => {
                 <div className="py-12 text-center text-white/20 text-sm">ยังไม่มีโปรโมชั่น</div>
               ) : promos.map(p => (
                 <div key={p.id} className="flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 bg-[#0D0D0D]">
-                  <code className="text-[#D4A843] font-black text-sm tracking-wider flex-shrink-0">{p.code}</code>
-                  <div className="flex-1 text-white/40 text-xs">{courses.find(c=>c.id===p.course_id)?.title||'—'}</div>
+                  <code className="bg-white/8 text-white font-bold text-xs tracking-wider flex-shrink-0 px-2 py-1 rounded-md">{p.code}</code>
+                  <div className="flex-1 text-white/60 text-xs truncate">{courses.find(c=>c.id===p.course_id)?.title||'—'}</div>
                   <span className="text-white/60 text-sm font-semibold">{p.discount_value}{p.discount_type==='percent'?'%':'฿'} off</span>
-                  <span className="text-white/25 text-xs">{p.used_count}/{p.max_uses} ใช้แล้ว</span>
-                  <span className={`text-[10px] font-bold ${p.is_active?'text-[#34A853]':'text-white/20'}`}>{p.is_active?'●':'○'}</span>
+                  <span className="text-white/30 text-xs">{p.used_count}/{p.max_uses} ใช้แล้ว</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${p.is_active?'bg-[#34A853]/15 text-[#34A853]':'bg-white/8 text-white/50'}`}>{p.is_active?'เปิดใช้งาน':'ปิด'}</span>
                   <div className="flex gap-1">
-                    <button onClick={()=>{setEditingPromo(p);setIsNewPromo(false);}} className="p-1.5 text-white/25 hover:text-[#D4A843] transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                    <button onClick={()=>handleDeletePromo(p.id)} className="p-1.5 text-white/25 hover:text-[#CC0033] transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={()=>{setEditingPromo(p);setIsNewPromo(false);}} className="p-1.5 text-white/30 hover:text-white transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                    <button onClick={()=>handleDeletePromo(p.id)} className="p-1.5 text-white/30 hover:text-[#CC0033] transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               ))}
@@ -478,10 +497,22 @@ const AdminCourses = () => {
             <div className="flex border-b border-white/8 flex-shrink-0 px-6">
               {[['info','ข้อมูล'],['media','สื่อ'],['modules','โมดูล'],['resources','เอกสาร'],['pricing','ราคา & Stripe']].map(([k,l])=>(
                 <button key={k} onClick={()=>setSubTab(k as any)}
-                  className={`py-3 px-4 text-xs font-semibold border-b-2 -mb-px transition-all ${subTab===k?'border-[#CC0033] text-white':'border-transparent text-white/30 hover:text-white/55'}`}>
+                  className={`py-3 px-4 text-xs font-semibold border-b-2 -mb-px transition-all ${subTab===k?'border-[#CC0033] text-white':'border-transparent text-white/30 hover:text-white/60'}`}>
                   {l}
                 </button>
               ))}
+            </div>
+
+            {/* What it takes for this course to actually appear on the public
+                site — the exact question "saved it, priced it, why doesn't
+                it show?" answers to. Always visible, not buried in a tab. */}
+            <div className="px-6 pt-4 flex-shrink-0">
+              <div className="border border-white/10 rounded-lg px-4 py-3 text-xs text-white/60 space-y-1">
+                <p className="text-white/30 font-semibold uppercase tracking-wider text-[10px] mb-1.5">ก่อนคอร์สนี้จะแสดงบนเว็บสาธารณะ ต้องมีครบ</p>
+                <p>1. <span className="text-white">Slug</span> และ <span className="text-white">ชื่อหลักสูตร</span> — บันทึกไม่ได้เลยถ้าขาด (ช่องที่มี <span className="text-[#CC0033] font-bold">*</span>)</p>
+                <p>2. เปิดสวิตช์ <span className="text-[#34A853] font-semibold">เผยแพร่แล้ว</span> ในแท็บ "ข้อมูล" — ปิดอยู่ = ไม่แสดงที่ไหนเลย ไม่ว่าจะกรอกอะไรไว้ก็ตาม</p>
+                <p>3. <span className="text-white">ราคา</span> (แท็บ "ราคา & Stripe") — เว้นว่างได้ถ้าเป็นคอร์สฟรี แต่ถ้าลืมกรอกการ์ดจะขึ้น "ไม่มีราคา" แทน</p>
+              </div>
             </div>
 
             {/* Editor body — scrollable */}
@@ -491,14 +522,13 @@ const AdminCourses = () => {
               {subTab === 'info' && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
-                    <Field label="Slug (URL) *">
+                    <Field label="Slug (URL)" required hint="ใช้เป็นลิงก์ /course/นี้ — ตัวพิมพ์เล็ก คั่นคำด้วยขีด (-) เท่านั้น">
                       <input className={inp} value={ec.slug} onChange={e=>setEditingCourse({...ec,slug:e.target.value})} placeholder="signal" />
                     </Field>
-                    <Field label="Tag / Code">
+                    <Field label="Tag / Code" hint='หน้าเว็บจะตัด "ชั้นที่ N —" (หรือ "ชุดที่ N —") ที่ขึ้นต้นออกให้อัตโนมัติตอนแสดงผล — พิมพ์เต็มในนี้ได้ตามปกติ'>
                       <input className={inp} value={ec.tag} onChange={e=>setEditingCourse({...ec,tag:e.target.value})} placeholder='ชั้นที่ 1 — ไลฟ์ให้เป็น (หรือ "FREE" / "LOW TICKET 1" ถ้าไม่มีลำดับชั้น)' />
-                      <p className="text-white/20 text-[11px] mt-1">หน้า /courses และ /course/:slug จะตัด "ชั้นที่ N —" (หรือ "ชุดที่ N —") ที่ขึ้นต้นออกให้อัตโนมัติ เหลือแค่ชื่อชั้นตอนแสดงผล — พิมพ์เต็มในนี้ได้ตามปกติ</p>
                     </Field>
-                    <Field label="ชื่อหลักสูตร *">
+                    <Field label="ชื่อหลักสูตร" required>
                       <input className={inp} value={ec.title} onChange={e=>setEditingCourse({...ec,title:e.target.value})} placeholder="The Conversion Host..." />
                     </Field>
                     <Field label="Subtitle">
@@ -568,14 +598,23 @@ const AdminCourses = () => {
                     <textarea className={`${inp} font-mono resize-y`} rows={3} value={kpiText} onChange={e=>setKpiText(e.target.value)} placeholder={"Watch Time|≥70%|ค่ามาตรฐาน\nNPS|≥8/10"} />
                   </Field>
 
-                  {/* Active toggle */}
-                  <label className="flex items-center gap-3 cursor-pointer py-2">
-                    <div onClick={()=>setEditingCourse({...ec,is_active:!ec.is_active})}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${ec.is_active?'bg-[#34A853]':'bg-white/15'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${ec.is_active?'translate-x-5':'translate-x-0.5'}`} />
-                    </div>
-                    <span className="text-white/50 text-sm">{ec.is_active?'เผยแพร่แล้ว (Active)':'ซ่อนอยู่ (Hidden)'}</span>
-                  </label>
+                  {/* Active toggle — the one switch that decides whether this
+                      course shows up on /courses and /dashboard at all,
+                      independent of every other field on this page. */}
+                  <div className="border border-white/10 rounded-lg p-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <div onClick={()=>setEditingCourse({...ec,is_active:!ec.is_active})}
+                        className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${ec.is_active?'bg-[#34A853]':'bg-white/15'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${ec.is_active?'translate-x-5':'translate-x-0.5'}`} />
+                      </div>
+                      <span className="text-white text-sm font-semibold">{ec.is_active?'เผยแพร่แล้ว (Active)':'ซ่อนอยู่ (Hidden)'}</span>
+                    </label>
+                    <p className="text-white/30 text-[11px] mt-2 ml-[52px]">
+                      {ec.is_active
+                        ? 'เปิดอยู่ — คอร์สนี้แสดงบนหน้ารวมหลักสูตรและลงทะเบียนได้ทันทีหลังบันทึก'
+                        : 'ปิดอยู่ — คอร์สนี้ถูกซ่อนจากทุกหน้าเว็บสาธารณะ ไม่ว่าฟิลด์อื่นจะกรอกครบแค่ไหน'}
+                    </p>
+                  </div>
                 </>
               )}
 
@@ -626,7 +665,7 @@ const AdminCourses = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-white font-semibold text-sm">Curriculum</p>
-                      <p className="text-white/25 text-xs mt-0.5">{modules.length} โมดูล · แก้ไขและบันทึกแต่ละโมดูลแยกกัน</p>
+                      <p className="text-white/30 text-xs mt-0.5">{modules.length} โมดูล · แก้ไขและบันทึกแต่ละโมดูลแยกกัน</p>
                     </div>
                     <button onClick={addModule}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-white/15 text-white/60 hover:text-white hover:border-white/30 transition-all">
@@ -643,16 +682,16 @@ const AdminCourses = () => {
                       {/* Module header */}
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
                         <div className="flex flex-col gap-0.5">
-                          <button onClick={()=>moveModule(m,-1)} disabled={idx===0} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowUp className="w-3 h-3" /></button>
-                          <button onClick={()=>moveModule(m,1)} disabled={idx===modules.length-1} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowDown className="w-3 h-3" /></button>
+                          <button onClick={()=>moveModule(m,-1)} disabled={idx===0} className="p-0.5 text-white/20 hover:text-white/60 disabled:opacity-0 transition-all"><ArrowUp className="w-3 h-3" /></button>
+                          <button onClick={()=>moveModule(m,1)} disabled={idx===modules.length-1} className="p-0.5 text-white/20 hover:text-white/60 disabled:opacity-0 transition-all"><ArrowDown className="w-3 h-3" /></button>
                         </div>
                         <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                          <span className="text-[10px] font-black text-white/40">{String(idx+1).padStart(2,'0')}</span>
+                          <span className="text-[10px] font-black text-white/30">{String(idx+1).padStart(2,'0')}</span>
                         </div>
                         <div className="flex-1 grid grid-cols-2 gap-2">
                           <input className="bg-transparent text-white text-sm font-semibold focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors"
                             value={m.code} onChange={e=>updateModule(m,{code:e.target.value})} placeholder="M01" />
-                          <input className="bg-transparent text-white/70 text-sm focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors"
+                          <input className="bg-transparent text-white/60 text-sm focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors"
                             value={m.name} onChange={e=>updateModule(m,{name:e.target.value})} placeholder="ชื่อโมดูล" />
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
@@ -672,7 +711,7 @@ const AdminCourses = () => {
                         </div>
                         <div className="flex gap-4">
                           {[['has_quiz','📝 มี Quiz'],['has_assignment','🎥 มีงานส่ง']].map(([k,l])=>(
-                            <label key={k} className="flex items-center gap-2 cursor-pointer text-xs text-white/40">
+                            <label key={k} className="flex items-center gap-2 cursor-pointer text-xs text-white/30">
                               <div onClick={()=>updateModule(m,{[k]:!m[k as keyof ModuleRow]} as any)}
                                 className={`w-8 h-4 rounded-full transition-colors ${(m as any)[k]?'bg-[#34A853]':'bg-white/10'} relative`}>
                                 <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${(m as any)[k]?'translate-x-4':'translate-x-0.5'}`} />
@@ -693,7 +732,7 @@ const AdminCourses = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-white font-semibold text-sm">เอกสารประกอบการเรียน</p>
-                      <p className="text-white/25 text-xs mt-0.5">คู่มือ/worksheet ที่ผูกกับคอร์สนี้ — จะไปโผล่เป็นปุ่มดาวน์โหลดในหน้าแดชบอร์ดของผู้เรียนที่ลงทะเบียนแล้ว</p>
+                      <p className="text-white/30 text-xs mt-0.5">คู่มือ/worksheet ที่ผูกกับคอร์สนี้ — จะไปโผล่เป็นปุ่มดาวน์โหลดในหน้าแดชบอร์ดของผู้เรียนที่ลงทะเบียนแล้ว</p>
                     </div>
                     <label className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-white/15 text-white/60 hover:text-white hover:border-white/30 transition-all cursor-pointer ${uploading?'opacity-40 pointer-events-none':''}`}>
                       <Plus className="w-3.5 h-3.5" /> {uploading ? 'กำลังอัปโหลด...' : 'แนบเอกสาร'}
@@ -713,16 +752,16 @@ const AdminCourses = () => {
                     <div key={r.id} className="border border-white/8 rounded-xl bg-[#111] overflow-hidden">
                       <div className="flex items-center gap-3 px-4 py-3">
                         <div className="flex flex-col gap-0.5">
-                          <button onClick={()=>moveResource(r,-1)} disabled={idx===0} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowUp className="w-3 h-3" /></button>
-                          <button onClick={()=>moveResource(r,1)} disabled={idx===resources.length-1} className="p-0.5 text-white/20 hover:text-white/50 disabled:opacity-0 transition-all"><ArrowDown className="w-3 h-3" /></button>
+                          <button onClick={()=>moveResource(r,-1)} disabled={idx===0} className="p-0.5 text-white/20 hover:text-white/60 disabled:opacity-0 transition-all"><ArrowUp className="w-3 h-3" /></button>
+                          <button onClick={()=>moveResource(r,1)} disabled={idx===resources.length-1} className="p-0.5 text-white/20 hover:text-white/60 disabled:opacity-0 transition-all"><ArrowDown className="w-3 h-3" /></button>
                         </div>
                         <div className="flex-1 grid grid-cols-2 gap-2">
                           <input className="bg-transparent text-white text-sm font-semibold focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors"
                             value={r.title} onChange={e=>updateResource(r,{title:e.target.value})} placeholder="ชื่อเอกสาร เช่น คู่มือ Course 0" />
-                          <input className="bg-transparent text-white/70 text-sm focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors font-mono"
+                          <input className="bg-transparent text-white/60 text-sm focus:outline-none placeholder-white/20 border-b border-transparent focus:border-white/20 pb-0.5 transition-colors font-mono"
                             list="resource-type-presets" value={r.resource_type} onChange={e=>updateResource(r,{resource_type:e.target.value})} placeholder="manual" />
                         </div>
-                        <label className="flex items-center gap-2 cursor-pointer text-xs text-white/40 flex-shrink-0" title="เปิด/ปิดการมองเห็น">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs text-white/30 flex-shrink-0" title="เปิด/ปิดการมองเห็น">
                           <div onClick={()=>updateResource(r,{is_active:!r.is_active})}
                             className={`w-8 h-4 rounded-full transition-colors ${r.is_active?'bg-[#34A853]':'bg-white/10'} relative`}>
                             <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${r.is_active?'translate-x-4':'translate-x-0.5'}`} />
@@ -733,9 +772,9 @@ const AdminCourses = () => {
                           <button onClick={()=>deleteResource(r)} className="p-1.5 text-white/30 hover:text-[#CC0033] transition-colors" title="ลบ"><Trash2 className="w-3.5 h-3.5" /></button>
                         </div>
                       </div>
-                      <div className="px-4 pb-3 flex items-center justify-between text-[11px] text-white/25">
+                      <div className="px-4 pb-3 flex items-center justify-between text-[11px] text-white/30">
                         <span className="truncate">📎 {r.file_name || r.file_path.split('/').pop()}</span>
-                        <label className="text-white/40 hover:text-white cursor-pointer underline flex-shrink-0 ml-3">
+                        <label className="text-white/30 hover:text-white cursor-pointer underline flex-shrink-0 ml-3">
                           เปลี่ยนไฟล์
                           <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" className="hidden" onChange={e=>replaceResourceFile(r,e)} />
                         </label>
@@ -769,8 +808,8 @@ const AdminCourses = () => {
                       <p className="text-white/20 text-xs">ยังไม่มีโปรโมชั่น — ไปที่แท็บ "โปรโมชั่น" เพื่อเพิ่ม</p>
                     ) : promos.filter(p=>p.course_id===ec.id).map(p=>(
                       <div key={p.id} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-                        <code className="text-[#D4A843] font-bold text-xs">{p.code}</code>
-                        <span className="text-white/40 text-xs">{p.discount_value}{p.discount_type==='percent'?'%':'฿'} off</span>
+                        <code className="bg-white/8 text-white font-bold text-xs px-1.5 py-0.5 rounded">{p.code}</code>
+                        <span className="text-white/30 text-xs">{p.discount_value}{p.discount_type==='percent'?'%':'฿'} off</span>
                         <span className="text-white/20 text-xs">{p.used_count}/{p.max_uses}</span>
                       </div>
                     ))}
