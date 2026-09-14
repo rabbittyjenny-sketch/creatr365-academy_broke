@@ -6,7 +6,8 @@ import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck } from 'lucide-react';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
 
@@ -253,20 +254,41 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          {statsData.map(stat => (
-            <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
-              <p className="text-xl font-bold">{stat.value}</p>
-              <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+        {/* Sections — tabbed instead of one continuous scroll, so "ภาพรวม"
+            (stats + how-to-use-LMS) and "คอร์สของฉัน" (the enrolled course
+            list, which grows with modules/resources per course) each get
+            their own view instead of stacking indefinitely on one page. */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid grid-cols-2 w-full h-auto p-1 bg-muted border border-border">
+            <TabsTrigger value="overview" className="flex items-center gap-1.5 py-2 text-xs font-semibold">
+              <LayoutGrid className="w-3.5 h-3.5" /> ภาพรวม
+            </TabsTrigger>
+            <TabsTrigger value="courses" className="flex items-center gap-1.5 py-2 text-xs font-semibold">
+              <GraduationCap className="w-3.5 h-3.5" />
+              คอร์สของฉัน{enrolledCourses.length > 0 && ` (${enrolledCourses.length})`}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6 mt-5">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              {statsData.map(stat => (
+                <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
+                  <p className="text-xl font-bold">{stat.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Courses */}
-        <div>
-          <h2 className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase mb-3">คอร์สของฉัน</h2>
+            {/* LMS info */}
+            <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
+              <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Master Key ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
+              <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
+            </div>
+          </TabsContent>
 
+          <TabsContent value="courses" className="mt-5">
           {enrolledCourses.length === 0 ? (
             <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
               ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
@@ -402,14 +424,8 @@ const Dashboard: React.FC = () => {
               })}
             </div>
           )}
-        </div>
-
-        {/* LMS info */}
-        <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
-          <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Master Key ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
-          <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
       <Footer />
     </>
