@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
+import { useDarkPage } from '@/hooks/useDarkPage';
 import { ArrowRight, Monitor, Users, Layers, Clock } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 
@@ -37,11 +38,15 @@ const LEARNING_META: Record<string, { label: string; Icon: typeof Monitor }> = {
   hybrid:  { label: 'Hybrid',  Icon: Layers },
 };
 
-// Status badges shown over the cover image. Add new status values here —
-// anything not listed (e.g. draft/archived) simply renders no badge.
+// Status badges shown over the cover image — availability only ("is this
+// course open for enrollment right now"), never pricing. "free" is a valid
+// admin status value (CourseDetail.tsx still reads it to compute
+// isFreeCourse) but deliberately has no badge here: whether a course is
+// free is already communicated by the price row below, and mixing the two
+// concepts in one badge is exactly what looked cluttered/inconsistent.
 const STATUS_META: Record<string, { label: string; className: string } | null> = {
   now_open:     { label: 'NOW OPEN',     className: 'bg-success/10 text-success' },
-  free:         { label: 'FREE',         className: 'bg-success/10 text-success' },
+  free:         null,
   new_update:   { label: 'NEW UPDATE',   className: 'bg-foreground/5 text-foreground/70' },
   coming_soon:  { label: 'COMING SOON',  className: 'bg-foreground/5 text-foreground/70' },
   fully_booked: { label: 'FULLY BOOKED', className: 'bg-destructive/10 text-destructive' },
@@ -52,7 +57,12 @@ const STATUS_META: Record<string, { label: string; className: string } | null> =
 
 const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
 
+// The tag field is admin free-text like "ชุดที่ 1 – ไลฟ์ให้เป็น" — the card
+// only needs the tier name itself (no "ชุดที่ N –" numbering prefix).
+const tierLabel = (tag: string) => tag.replace(/^ชุดที่\s*\d+\s*[-–—]\s*/, '').trim();
+
 const Courses: React.FC = () => {
+  useDarkPage();
   const [courses, setCourses] = useState<CourseRow[]>([]);
 
   useEffect(() => {
@@ -81,7 +91,12 @@ const Courses: React.FC = () => {
             ครอบคลุมทุกระดับ
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Fluid auto-fill grid (not fixed column-count breakpoints) so this
+              keeps working cleanly whether there are 5 courses or 50 — each
+              card claims at least 280px and the row just wraps more of them
+              as the viewport grows, the same pattern most catalog-style
+              sites (Coursera, Udemy) use for exactly this reason. */}
+          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
             {courses.map((course) => {
               const learning = LEARNING_META[course.learning_type] || LEARNING_META.offline;
               const status = STATUS_META[course.status as keyof typeof STATUS_META];
@@ -99,7 +114,7 @@ const Courses: React.FC = () => {
 
               return (
                 <Link key={course.id} to={`/course/${course.slug}`} className="group block h-full">
-                  <div className="card-water border border-border bg-card h-full flex flex-col overflow-hidden" data-accent={accent}>
+                  <div className="sharp-card border border-border bg-card h-full flex flex-col overflow-hidden" data-accent={accent}>
 
                     {/* Cover image — always rendered at a fixed ratio (even
                         without an image yet) so every card stays the same
@@ -116,27 +131,20 @@ const Courses: React.FC = () => {
                           {course.title}
                         </div>
                       )}
+                      {/* Availability status only — free/paid lives in the price row below, never here. */}
                       {status && (
-                        <span className={`absolute top-3 left-3 text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full backdrop-blur-sm ${status.className}`}>
+                        <span className={`absolute top-3 left-3 text-[10px] font-bold tracking-wider px-2.5 py-1 backdrop-blur-sm ${status.className}`}>
                           {status.label}
-                        </span>
-                      )}
-                      {course.level && (
-                        <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full bg-background/85 backdrop-blur-sm border border-border text-foreground/70">
-                          {course.level}
                         </span>
                       )}
                     </div>
 
                     <div className="p-5 flex-1 flex flex-col">
                       <span className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-1.5">
-                        {course.tag}
+                        {tierLabel(course.tag)}
                       </span>
 
-                      <h3
-                        className="card-water-title text-xl font-bold leading-snug mb-3 line-clamp-2 min-h-[3.5rem]"
-                        data-accent={accent}
-                      >
+                      <h3 className="text-xl font-bold leading-snug mb-3 line-clamp-2 min-h-[3.5rem]">
                         {course.title}
                       </h3>
 
@@ -150,7 +158,7 @@ const Courses: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Who it's for — shown as plain content, no heading */}
+                      {/* Who it's for — a short excerpt straight from the course's own content, no heading */}
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[2.5rem] mb-4 flex-1">
                         {course.target_audience || ''}
                       </p>
@@ -158,10 +166,10 @@ const Courses: React.FC = () => {
                       <div className="mt-auto pt-4 border-t border-border flex items-end justify-between gap-3">
                         <div className="flex flex-col leading-tight">
                           {isFree ? (
-                            <span className="text-sm font-bold text-success">ฟรี</span>
+                            <span className="text-sm font-bold text-foreground">FREE</span>
                           ) : hasPromo ? (
                             <>
-                              <span className="w-fit text-[9px] font-bold tracking-wider text-destructive bg-destructive/10 px-1.5 py-0.5 rounded mb-1">
+                              <span className="w-fit text-[9px] font-bold tracking-wider text-destructive bg-destructive/10 px-1.5 py-0.5 mb-1">
                                 โปรโมชั่น
                               </span>
                               <div className="flex items-baseline gap-2">
