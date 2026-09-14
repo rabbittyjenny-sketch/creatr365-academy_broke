@@ -52,7 +52,8 @@ const Explore: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[220px_220px_160px] gap-3">
             <Link
               to="/courses"
-              className="sharp-card sharp-tile md:col-start-1 md:row-start-1 md:row-span-2 relative flex flex-col justify-between p-6 md:p-8 bg-card text-foreground border border-border border-t-4 border-t-[#C0A060] overflow-hidden group"
+              className="sharp-card sharp-tile section-accent md:col-start-1 md:row-start-1 md:row-span-2 relative flex flex-col justify-between p-6 md:p-8 bg-card text-foreground border border-border border-t-4 border-t-[#C0A060] overflow-hidden group"
+              style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}
             >
               <div className="flex items-start justify-between relative z-10">
                 <span className="text-[10px] font-bold tracking-widest text-[#C0A060]">01 / COURSES</span>
@@ -69,14 +70,15 @@ const Explore: React.FC = () => {
 
             <Link
               to="/toolbox"
-              className="sharp-card sharp-tile md:col-start-2 md:row-start-1 relative flex flex-col justify-between p-6 bg-card border border-border border-t-4 border-t-[#4A7FB5] overflow-hidden group"
+              className="sharp-card sharp-tile section-accent md:col-start-2 md:row-start-1 relative flex flex-col justify-between p-6 bg-card border border-border border-t-4 border-t-[#4A7FB5] overflow-hidden group"
+              style={{ '--hover-accent': '#4A7FB5', '--section-accent': '#4A7FB5' } as React.CSSProperties}
             >
               <div className="flex items-start justify-between">
                 <span className="text-[10px] font-bold tracking-widest text-[#4A7FB5]">02 / TOOLBOX</span>
                 <Package className="w-5 h-5 text-[#4A7FB5]" aria-hidden="true" />
               </div>
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2" data-accent="red">Toolbox</h2>
+                <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">Toolbox</h2>
                 <p className="text-xs text-muted-foreground max-w-xs">เทมเพลต ไฟล์ และของฟรีให้โหลดไปใช้งานได้ทันที</p>
               </div>
               <span className="absolute right-4 bottom-4 w-8 h-8 grid place-items-center bg-[#4A7FB5] text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
@@ -86,11 +88,13 @@ const Explore: React.FC = () => {
 
             <Link
               to="/ai-lab"
-              className="sharp-card sharp-tile md:col-start-2 md:row-start-2 relative flex flex-col justify-between p-6 bg-card text-foreground border border-border border-t-4 border-t-[#6AAA7A] overflow-hidden group"
+              className="sharp-card sharp-tile section-accent md:col-start-2 md:row-start-2 relative flex flex-col justify-between p-6 bg-card text-foreground border border-border border-t-4 border-t-[#6AAA7A] overflow-hidden group"
               style={{
                 backgroundImage: 'radial-gradient(rgba(240,236,228,.07) 1px, transparent 1px)',
                 backgroundSize: '11px 11px',
-              }}
+                '--hover-accent': '#6AAA7A',
+                '--section-accent': '#6AAA7A',
+              } as React.CSSProperties}
             >
               <div className="flex items-start justify-between relative z-10">
                 <span className="text-[10px] font-bold tracking-widest text-[#6AAA7A] inline-flex items-center gap-1.5">
@@ -107,10 +111,11 @@ const Explore: React.FC = () => {
 
             <Link
               to="/creator-tools"
-              className="sharp-card sharp-tile md:col-span-2 md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#B87333] overflow-hidden group"
+              className="sharp-card sharp-tile section-accent md:col-span-2 md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#B87333] overflow-hidden group"
+              style={{ '--hover-accent': '#B87333', '--section-accent': '#B87333' } as React.CSSProperties}
             >
               <div>
-                <span className="text-[10px] font-bold tracking-widest text-[#B87333]">04 / CREATOR TOOLS</span>
+                <span className="text-[10px] font-bold tracking-widest text-[#B87333] block">04 / CREATOR TOOLS</span>
                 <h2 className="text-xl md:text-2xl font-bold leading-[0.95] mt-1">Creator Tools</h2>
                 <p className="text-xs text-muted-foreground mt-1">Coming soon — utility ที่ Creatr365 กำลังจัดเตรียมสำหรับสมาชิก</p>
               </div>
