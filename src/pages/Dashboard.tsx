@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
+import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
+import { useDarkPage } from '@/hooks/useDarkPage';
 import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck } from 'lucide-react';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
@@ -43,6 +45,7 @@ async function ensureStudentId(email: string): Promise<string | null> {
 }
 
 const Dashboard: React.FC = () => {
+  useDarkPage();
   const navigate = useNavigate();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [profile, setProfile] = useState<{ display_name?: string; line_user_id?: string } | null>(null);
@@ -58,6 +61,11 @@ const Dashboard: React.FC = () => {
   // the dedicated Admin Console (its own layout/routes), never a second
   // copy of admin controls rendered here.
   const [isAdmin, setIsAdmin] = useState(false);
+  // Distinct from "studentId is null" — without this, the "ยังไม่พบ Master
+  // Key" message flashed on every visit during the gap between session
+  // resolving (user set) and the Master Key lookup finishing (studentId
+  // still null), even for students who do have one.
+  const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -112,6 +120,7 @@ const Dashboard: React.FC = () => {
       setProgress((prog as any) || []);
       setResources((res as any) || []);
     }
+    setLoading(false);
   };
 
   // Study materials (คู่มือ/worksheet) live in a private bucket — download
@@ -195,7 +204,16 @@ const Dashboard: React.FC = () => {
     ];
   }, [enrollments, enrolledCourses.length, modulesByCourse, completedModuleIds, progress]);
 
-  if (!user) return null;
+  if (loading || !user) {
+    return (
+      <>
+        <CourseNavbar />
+        <main className="max-w-2xl mx-auto px-4 py-24 flex justify-center">
+          <div className="w-6 h-6 border-2 border-muted-foreground/30 border-t-foreground rounded-full animate-spin" />
+        </main>
+      </>
+    );
+  }
   if (!studentId) return (<><CourseNavbar /><main className="max-w-2xl mx-auto px-4 py-24"><h1 className="text-xl font-bold">ยังไม่พบ Master Key ของบัญชีนี้</h1><p className="text-sm text-muted-foreground mt-2">กรุณาสมัคร/เชื่อมบัญชีให้เรียบร้อยก่อนเริ่มเรียน</p><Link to="/register" className="inline-block mt-5 underline">ไปหน้าสมัครสมาชิก</Link></main></>);
 
   const keyId = studentId;
@@ -393,6 +411,7 @@ const Dashboard: React.FC = () => {
           <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
         </div>
       </main>
+      <Footer />
     </>
   );
 };

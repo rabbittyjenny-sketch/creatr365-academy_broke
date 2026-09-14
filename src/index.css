@@ -529,6 +529,23 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover, .heading-hover:hover {
     color: inherit;
   }
+  /* .nav-link was missing from this touch reset — tapping a nav item on a
+     touch device has no real "unhover" event, so without this it stayed
+     visually red+bold (stuck) until something else was tapped. */
+  .nav-link:hover {
+    color: hsl(var(--foreground));
+    font-weight: 500;
+  }
+  .nav-link:hover::after {
+    transform: scaleX(0);
+  }
+  .nav-link[aria-current="page"] {
+    color: var(--hover-accent, hsl(var(--google-red)));
+    font-weight: 700;
+  }
+  .nav-link[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
 }
 
 /* ─── Marquee animation for Home ticker strip ─── */

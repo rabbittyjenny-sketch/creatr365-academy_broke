@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthErrorMessage, isValidPassword, PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth';
 
@@ -70,8 +70,7 @@ const ResetPassword = () => {
           {canReset && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Input
-                  type="password"
+                <PasswordInput
                   placeholder="รหัสผ่านใหม่"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -82,8 +81,7 @@ const ResetPassword = () => {
                 <p className="text-xs text-muted-foreground ml-1">{PASSWORD_REQUIREMENTS_TEXT}</p>
               </div>
 
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="ยืนยันรหัสผ่านใหม่"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

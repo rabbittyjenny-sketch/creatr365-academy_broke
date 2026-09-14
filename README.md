@@ -1216,6 +1216,59 @@ Migration file: `supabase/migrations/20260902120000_toolbox_explore.sql`
 
 ---
 
+# 31. EXPLORE/DASHBOARD BUG-FIX ROUND (14 ก.ย. 2569)
+
+ผลจากการตรวจสอบด้วย screenshot จริงของผู้ใช้ พบและแก้บั๊กต่อไปนี้ — เก็บเหตุผลไว้กัน regression กลับไปเป็นแบบเดิม
+
+## 31.1 Dashboard flash "ยังไม่พบ Master Key" ทุกครั้งที่เข้า — แก้แล้ว
+
+สาเหตุ: `Dashboard.tsx` มี state `user`/`studentId` ที่เริ่มเป็น `null` ทั้งคู่ ระหว่างที่ `load()` async กำลัง resolve, `user` จะถูก set ก่อน (หลัง `getSession()`) แต่ `studentId` ยัง `null` อยู่อีกหลาย await — ในช่วงนั้น component เข้าเงื่อนไข `!studentId` แล้วโชว์ข้อความ "ยังไม่พบ Master Key" ทั้งที่จริง ๆ แค่ยังโหลดไม่เสร็จ
+
+แก้: เพิ่ม state `loading` แยกต่างหาก (เริ่ม `true`, set `false` ที่บรรทัดสุดท้ายของ `load()`) — โชว์ spinner ระหว่าง `loading`, โชว์ข้อความ "ไม่พบ" ก็ต่อเมื่อโหลดเสร็จแล้วจริง ๆ
+
+ห้าม: ย้าย `if (!studentId)` ไปไว้ก่อนเช็ค `loading` อีก — กลับไปเป็นบั๊กเดิมทันที
+
+## 31.2 Dashboard ตอนนี้ใช้ dark theme + Footer เหมือน Explore
+
+`Dashboard.tsx` เรียก `useDarkPage()` แล้ว (เดิมมีแค่ `.sharp-card` มุมเหลี่ยม แต่ยังพื้นหลังสว่างของ light theme) และมี `<Footer/>` ต่อท้ายแล้ว เพื่อให้กล่อง/พื้นหลังตรงกับ Explore/Toolbox — สีของ accent การ์ด (แดง `--google-red`) **ยังคงเดิม ไม่ได้เปลี่ยนเป็นทอง** เพราะที่ขอมาคือ "สีพื้นกล่อง" ไม่ใช่สี accent — ถ้าต้องการให้ accent เป็นทองด้วยต้องสั่งแยก
+
+**ขอบเขตที่ตีความ:** คำขอ "มุมเหลี่ยมของการ์ดเมนูให้เหมือนกันทั้งเว็บ" ตีความว่าหมายถึง Dashboard ให้ตรงกับ Explore (ทั้งสองหน้าเป็นกลุ่มเดียวกันที่ทำในรอบนี้) **ไม่ได้ไปแตะ Home** หรือ course card อื่น ๆ ของ Home — ถ้าจริง ๆ ต้องการให้ Home เปลี่ยนด้วย ต้องสั่งยืนยันแยก เพราะขัดกับกฎ "ห้ามแตะ Home" ที่ตกลงกันไว้ตอนแรก
+
+## 31.3 Hover สีผิดใน Explore tiles — แก้แล้ว (root cause สำคัญ อ่านก่อนแก้ hover ที่ไหนก็ตาม)
+
+เว็บนี้มีระบบ hover-color กลาง 2 ตัวที่ทำงาน**แยกกันคนละกลไก** และทั้งสองต้องถูกตั้งค่า ไม่งั้นจะเจอบั๊กแบบเดียวกันอีก:
+
+| กลไก | ใช้กับ | ตัวแปร | ค่า default |
+| --- | --- | --- | --- |
+| `.site-hover-scope ... :hover` | `p, li, span, a, button` (ไม่รวม h1-h6) | `--hover-accent` | แดง (`--google-red`) |
+| `h1:hover, h2:hover, ...` | เฉพาะ heading (h1-h6) | `--heading-accent` | แดง (`--google-red`) เพราะ **h2 เซ็ตค่านี้ทับตัวเองเสมอ** (บรรทัด `h1,h2,...{--heading-accent:red}`) แม้ ancestor จะตั้ง `--heading-accent` ไว้ก็ไม่มีผล เพราะ custom property ถูก "set" ใหม่ที่ตัว h2 เอง ไม่ใช่แค่ inherit |
+
+**วิธีตั้งสี accent ให้ tile/section หนึ่ง ๆ ที่ถูกต้อง:** ใส่ class `section-accent` บน wrapper แล้วตั้ง `style={{ '--hover-accent': hex, '--section-accent': hex }}` — ตัว `--section-accent` จะไหลผ่าน rule ที่มีอยู่แล้ว `.section-accent h2 { --heading-accent: var(--section-accent) }` ซึ่ง specificity สูงกว่า `h2{...}` เฉย ๆ จึงชนะได้จริง (ดูตัวอย่างจริงใน `Explore.tsx` ทั้ง 4 tile)
+
+ห้าม: ตั้งแค่ `--hover-accent` เฉย ๆ แล้วคิดว่า heading จะเปลี่ยนสีตามด้วย — จะได้สีถูกเฉพาะ text ทั่วไป (p/span/a) ส่วน h1-h6 จะยังเด้งเป็นแดงเหมือนเดิมเวลาเมาส์ชี้ตรงตัวหัวข้อพอดี (ตรวจสอบได้ด้วยการ hover ตำแหน่งต่าง ๆ ในการ์ด ไม่ใช่แค่ hover จุดกึ่งกลาง)
+
+## 31.4 Explore.tsx: "Creator Tools" tile ตัวหนังสือซ้อนทับ — แก้แล้ว
+
+เหมือนบั๊กเดิมที่เคยแก้ใน `AiLab.tsx`/`CreatorTools.tsx` (h1-h6 เป็น `display:inline-block` ทั้งเว็บ) — ใน `Explore.tsx` มีแค่ tile "Creator Tools" ที่วาง `<span>` eyebrow กับ `<h2>` เป็น sibling ตรง ๆ ในกันคนละ `<div>` (อีก 3 tile แยก div ถูกต้องอยู่แล้ว) ทำให้ eyebrow กับหัวข้อไปอยู่บรรทัดเดียวกัน แก้โดยเพิ่ม `block` ให้ span
+
+ห้าม: เพิ่ม tile ใหม่ใน Explore โดยวาง eyebrow span กับ h2 เป็น sibling ตรง ๆ โดยไม่ใส่ `block` หรือแยก div — จะเจอบั๊กเดิมซ้ำ
+
+## 31.5 Nav-link ค้างสีแดงบนมือถือ/แตะหน้าจอ — แก้แล้ว
+
+`@media (hover: none)` (สำหรับ touch device) มีการ reset สี hover ของ `p/span/a/button/heading` กลับเป็นปกติอยู่แล้ว แต่ **ลืม `.nav-link`** — แตะเมนู navbar บนมือถือแล้วจะค้างเป็นสีแดง+ตัวหนาเหมือน hover ค้างตลอดไปจนกว่าจะแตะที่อื่น เพิ่ม `.nav-link:hover` เข้า reset block แล้ว (คง `[aria-current="page"]` ไว้ตามเดิมเพราะเป็น state จริง ไม่ใช่ hover ค้าง)
+
+## 31.6 เพิ่มปุ่มแสดง/ซ่อนรหัสผ่าน
+
+Component ใหม่ `src/components/ui/password-input.tsx` (ครอบ `Input` เดิม + ปุ่มตา) ใช้แทน `<Input type="password">` ใน `Auth.tsx` และ `ResetPassword.tsx` แล้ว — `Register.tsx` ไม่มีช่องรหัสผ่าน (login ผ่าน LINE) จึงไม่ต้องแก้
+
+## 31.7 Footer — ตรวจแล้ว ไม่มี "คอร์สเรียน" ซ้ำซ้อนตามที่กังวล
+
+`Footer.tsx` มีคอลัมน์ "หลักสูตร" → "ดูทั้งหมด" + รายชื่อคอร์สอยู่แล้ว ไม่พบ heading "คอร์สเรียน" ซ้ำที่ไหนในโค้ด — สิ่งที่ทำเพิ่มคือเพิ่ม `<Footer/>` ให้ `Dashboard.tsx` (ตามข้อ 31.2)
+
+**ข้อสังเกต (ยังไม่ได้แก้ เพราะไม่ใช่สิ่งที่ขอตรง ๆ):** หน้า `FAQ.tsx`, `Privacy.tsx`, `Terms.tsx`, `Contact.tsx` มี mini footer แบบเขียนอินไลน์ของตัวเอง (แค่ 3 ลิงก์ policy) แทนที่จะใช้ `<Footer/>` shared component — ถ้าต้องการให้ทุกหน้าใช้ Footer เดียวกันจริง ๆ ต้องสั่งแยก เพราะเป็นการเปลี่ยน layout ของ 4-5 หน้าที่ไม่ได้อยู่ใน scope รอบนี้
+
+---
+
 flow = """# CREATR365 SYSTEM FLOW
 
 ```mermaid
