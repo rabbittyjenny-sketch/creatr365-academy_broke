@@ -57,12 +57,15 @@ const STATUS_META: Record<string, { label: string; className: string } | null> =
   none: null,
 };
 
-const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
-
 const Courses: React.FC = () => {
   useDarkPage();
   const [courses, setCourses] = useState<CourseRow[]>([]);
 
+  // Shows every course an admin has published (is_active = true) — that flag
+  // is the one and only publish switch. There used to also be a hardcoded
+  // 5-slug allowlist here that silently hid every other course regardless of
+  // is_active/price, with nothing in the Admin UI to explain why a saved,
+  // priced, "published" course still never showed up here. Removed.
   useEffect(() => {
   supabase
     .from('courses')
@@ -70,8 +73,7 @@ const Courses: React.FC = () => {
     .eq('is_active', true)
     .order('sort_order')
     .then(({ data }) => {
-      const rows = (data as unknown as CourseRow[]) || [];
-      setCourses(rows.filter(c => CURRENT_COURSE_SLUGS.has(c.slug)));
+      setCourses((data as unknown as CourseRow[]) || []);
     });
 }, []);
 
