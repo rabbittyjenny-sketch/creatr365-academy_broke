@@ -26,6 +26,7 @@ interface CourseRow {
   level: string | null;
   target_audience: string | null;
   format_label: string | null;
+  outcome_goal: string | null;
   cover_image_url: string | null;
 }
 
@@ -158,9 +159,11 @@ const Courses: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Who it's for — a short excerpt straight from the course's own content, no heading */}
+                      {/* Goal excerpt — same field/content as the "เป้าหมาย" text on the detail
+                          page (course.outcome_goal), just without that label, so every card uses
+                          one consistent source instead of target_audience (which was overflowing). */}
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[2.5rem] mb-4 flex-1">
-                        {course.target_audience || ''}
+                        {course.outcome_goal || ''}
                       </p>
 
                       <div className="mt-auto pt-4 border-t border-border flex items-end justify-between gap-3">

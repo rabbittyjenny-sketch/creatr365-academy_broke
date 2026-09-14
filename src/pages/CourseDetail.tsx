@@ -160,7 +160,7 @@ const CourseDetail: React.FC = () => {
           <div className="md:col-span-2 space-y-12">
             <div>
               <h2 className="text-2xl font-bold mb-3">รายละเอียดหลักสูตร</h2>
-              {course.outcome_goal && <p className="text-foreground font-medium mb-3">{course.outcome_goal}</p>}
+              {course.outcome_goal && <p className="text-foreground font-medium mb-3">เป้าหมาย: {course.outcome_goal}</p>}
               <p className="text-muted-foreground leading-relaxed">{course.description}</p>
             </div>
 
