@@ -7,10 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { ArrowLeft, Check, ArrowRight, Play } from 'lucide-react';
 import { Footer } from '@/components/Footer';
-
-// Same as Courses.tsx — admin free-text tag like "ชุดที่ 1 – ไลฟ์ให้เป็น"
-// trimmed down to just the tier name.
-const tierLabel = (tag: string) => tag.replace(/^ชุดที่\s*\d+\s*[-–—]\s*/, '').trim();
+import { tierLabel } from '@/lib/courseTag';
 
 interface KpiNote { label: string; value: string; note?: string }
 

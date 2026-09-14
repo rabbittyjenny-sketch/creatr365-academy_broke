@@ -4,8 +4,9 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { ArrowRight, Monitor, Users, Layers, Clock } from 'lucide-react';
+import { ArrowRight, Monitor, Users, Layers } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+import { tierLabel } from '@/lib/courseTag';
 
 interface CourseRow {
   id: string;
@@ -57,10 +58,6 @@ const STATUS_META: Record<string, { label: string; className: string } | null> =
 };
 
 const CURRENT_COURSE_SLUGS = new Set(['magnet','foundation','signal','stage','brand-host-architect']);
-
-// The tag field is admin free-text like "ชุดที่ 1 – ไลฟ์ให้เป็น" — the card
-// only needs the tier name itself (no "ชุดที่ N –" numbering prefix).
-const tierLabel = (tag: string) => tag.replace(/^ชุดที่\s*\d+\s*[-–—]\s*/, '').trim();
 
 const Courses: React.FC = () => {
   useDarkPage();
@@ -149,13 +146,11 @@ const Courses: React.FC = () => {
                         {course.title}
                       </h3>
 
-                      {/* Type + duration — balanced two-column meta row */}
-                      <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground pb-3 mb-3 border-b border-border">
+                      {/* Type only — no duration/VOD blurb on the right, just
+                          the learning-type label, left-aligned */}
+                      <div className="flex items-center text-xs text-muted-foreground pb-3 mb-3 border-b border-border">
                         <span className="inline-flex items-center gap-1.5">
                           <LearnIcon className="w-3.5 h-3.5 flex-shrink-0" /> {learning.label}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-right">
-                          <Clock className="w-3.5 h-3.5 flex-shrink-0" /> {course.format_label || course.duration}
                         </span>
                       </div>
 

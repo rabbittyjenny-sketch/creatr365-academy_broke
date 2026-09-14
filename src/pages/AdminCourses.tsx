@@ -495,7 +495,8 @@ const AdminCourses = () => {
                       <input className={inp} value={ec.slug} onChange={e=>setEditingCourse({...ec,slug:e.target.value})} placeholder="signal" />
                     </Field>
                     <Field label="Tag / Code">
-                      <input className={inp} value={ec.tag} onChange={e=>setEditingCourse({...ec,tag:e.target.value})} placeholder="SIGNAL" />
+                      <input className={inp} value={ec.tag} onChange={e=>setEditingCourse({...ec,tag:e.target.value})} placeholder='ชั้นที่ 1 — ไลฟ์ให้เป็น (หรือ "FREE" / "LOW TICKET 1" ถ้าไม่มีลำดับชั้น)' />
+                      <p className="text-white/20 text-[11px] mt-1">หน้า /courses และ /course/:slug จะตัด "ชั้นที่ N —" (หรือ "ชุดที่ N —") ที่ขึ้นต้นออกให้อัตโนมัติ เหลือแค่ชื่อชั้นตอนแสดงผล — พิมพ์เต็มในนี้ได้ตามปกติ</p>
                     </Field>
                     <Field label="ชื่อหลักสูตร *">
                       <input className={inp} value={ec.title} onChange={e=>setEditingCourse({...ec,title:e.target.value})} placeholder="The Conversion Host..." />
