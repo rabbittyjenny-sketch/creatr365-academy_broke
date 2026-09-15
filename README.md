@@ -1508,6 +1508,27 @@ Query ตาราง `courses` ทั้งหมด (14 คอร์ส) พ�
 
 ---
 
+# 37. DEPENDENCY VULNERABILITIES — 4 ยังไม่ได้แก้ ต้องอัปเกรด major version (15 ก.ย. 2569)
+
+ตรวจสอบแล้ว: รัน `npm audit fix` (ไม่ใช้ `--force`) แก้ไปแล้ว 19 จาก 23 รายการที่ `npm audit` เจอ (postcss/ws/yaml และ transitive deps — อยู่ใน semver range เดิม ไม่กระทบ `package.json`)
+
+**เหลือ 4 รายการที่ตั้งใจไม่แตะ เพราะการแก้ต้องอัปเกรด major version ที่กระทบวงกว้างทั้งระบบ:**
+
+| แพ็กเกจ | Severity | ต้องอัปเกรดเป็น | กระทบ |
+|---|---|---|---|
+| `esbuild` (ผ่าน `vite`) | moderate | Vite 5 → 8 | ทั้ง build pipeline/config/plugin ที่ใช้อยู่ |
+| `react-router` / `react-router-dom` | moderate | v6 → v7 | ทุก route/page ในเว็บ (API เปลี่ยนหลายจุดใน v7) |
+
+ความเสี่ยงจริงของทั้ง 2 ตัว ณ ตอนนี้:
+* **esbuild**: ช่องโหว่นี้กระทบเฉพาะตอนรัน dev server (`vite dev`) เท่านั้น ไม่กระทบ production build ที่ deploy จริงบน Vercel
+* **react-router**: เป็นเคส open-redirect ที่ต้องมีเงื่อนไขเฉพาะ ไม่ใช่ critical/RCE
+
+**ห้ามรัน `npm audit fix --force` แบบไม่ได้วางแผน** เพราะจะ bump ทั้ง Vite และ React Router ข้าม major version พร้อมกันในคำสั่งเดียว — เสี่ยง build/route พังทั้งเว็บโดยไม่รู้ตัว ถ้าจะแก้ 4 รายการนี้ ต้องแยกเป็นงานอัปเกรดของตัวเอง วางแผน breaking-change ของแต่ละตัว (โดยเฉพาะ React Router v7 API ที่เปลี่ยนจาก v6) แล้วทดสอบทุก route ก่อน merge
+
+ตรวจสอบสถานะปัจจุบันได้ด้วย `npm audit` — ถ้าตัวเลขมากกว่า 4 แปลว่ามี dependency ใหม่ที่ยังไม่ได้ patch เพิ่มเข้ามา ต้องรัน `npm audit fix` (แบบไม่ force) ซ้ำก่อน
+
+---
+
 flow = """# CREATR365 SYSTEM FLOW
 
 ```mermaid
