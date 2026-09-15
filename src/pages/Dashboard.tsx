@@ -8,6 +8,7 @@ import { isCurrentUserAdmin } from '@/lib/admin';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award } from 'lucide-react';
 import { tierLabel } from '@/lib/courseTag';
+import { DownloadConsentDialog } from '@/components/DownloadConsentDialog';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
 
@@ -58,6 +59,10 @@ const Dashboard: React.FC = () => {
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  // Resource IDs this user has already consented to before — lets repeat
+  // downloads of the same file skip the consent dialog (still logged every time).
+  const [consentedResourceIds, setConsentedResourceIds] = useState<Set<string>>(new Set());
+  const [pendingResource, setPendingResource] = useState<ResourceRow | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
   const [section, setSection] = useState<SectionKey>('overview');
   // Separate from the student dashboard below — an admin gets a link out to
@@ -107,7 +112,7 @@ const Dashboard: React.FC = () => {
       .map(e => e.course_id);
 
     if (activeIds.length > 0) {
-      const [{ data: mods }, { data: prog }, { data: res }] = await Promise.all([
+      const [{ data: mods }, { data: prog }, { data: res }, { data: logs }] = await Promise.all([
         supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
           .in('course_id', activeIds).order('sort_order'),
         supabase.from('module_progress')
@@ -118,17 +123,28 @@ const Dashboard: React.FC = () => {
         supabase.from('course_resources')
               .select('id,course_id,resource_type,title,file_path,file_name')
               .in('course_id', activeIds).order('sort_order'),
+        supabase.from('resource_download_logs')
+              .select('resource_id')
+              .eq('user_id', session.user.id)
+              .eq('consented', true),
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
       setResources((res as any) || []);
+      const logRows = (logs as { resource_id: string }[] | null) || [];
+      setConsentedResourceIds(new Set(logRows.map(l => l.resource_id)));
     }
     setLoading(false);
   };
 
   // Study materials (คู่มือ/worksheet) live in a private bucket — download
   // via a short-lived signed URL requested on click, not a stored public URL.
-  const handleDownloadResource = async (r: ResourceRow) => {
+  // Every download is logged to resource_download_logs (audit trail for
+  // refund/exchange disputes); first download of a given resource requires
+  // explicit consent via DownloadConsentDialog, later ones skip the dialog
+  // but are still logged.
+  const downloadResource = async (r: ResourceRow) => {
+    if (!user) return;
     setDownloadingId(r.id);
     try {
       const { data, error } = await supabase.storage
@@ -140,8 +156,25 @@ const Dashboard: React.FC = () => {
         return;
       }
       window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+
+      const { error: logError } = await supabase.from('resource_download_logs').insert({
+        user_id: user.id,
+        course_id: r.course_id,
+        resource_id: r.id,
+        consented: true,
+      });
+      if (logError) console.error('resource_download_logs insert failed', logError);
+      else setConsentedResourceIds(prev => new Set(prev).add(r.id));
     } finally {
       setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadResource = (r: ResourceRow) => {
+    if (consentedResourceIds.has(r.id)) {
+      downloadResource(r);
+    } else {
+      setPendingResource(r);
     }
   };
 
@@ -536,6 +569,17 @@ const Dashboard: React.FC = () => {
         </div>
       </main>
       <Footer />
+
+      <DownloadConsentDialog
+        open={pendingResource !== null}
+        resourceTitle={pendingResource ? (pendingResource.title || resourceLabel(pendingResource.resource_type)) : ''}
+        onConfirm={() => {
+          const r = pendingResource;
+          setPendingResource(null);
+          if (r) downloadResource(r);
+        }}
+        onCancel={() => setPendingResource(null)}
+      />
     </>
   );
 };

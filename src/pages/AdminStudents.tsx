@@ -1,0 +1,372 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, Loader2, UserRound, BadgeCheck, Wallet, Download, GraduationCap } from 'lucide-react';
+
+/**
+ * Per-student audit view — search by Master Key (student_id) or email, see
+ * when they registered, what they bought (price paid / discount applied),
+ * lesson-completion % per course, and every resource/toolbox download —
+ * all in one place so a refund/"I paid but got nothing" dispute can be
+ * checked without digging through 4-5 separate admin pages.
+ *
+ * What this page does NOT show, because the system does not track it:
+ * a per-lesson "number of times opened" count. module_progress only has a
+ * status (not_started/in_progress/completed) and a completion timestamp —
+ * no view/open counter exists anywhere in this codebase today.
+ */
+
+interface AccountMatch {
+  student_id: string;
+  email: string | null;
+  line_user_id: string;
+  registered_at: string;
+  is_active: boolean;
+}
+
+interface EnrollmentDetail {
+  id: string;
+  course_id: string;
+  course_title: string;
+  status: string;
+  amount_paid: number | null;
+  created_at: string;
+  promo_code: string | null;
+  discount_type: string | null;
+  discount_value: number | null;
+}
+
+interface CourseProgress {
+  course_id: string;
+  course_title: string;
+  total_modules: number;
+  completed_modules: number;
+}
+
+interface DownloadEvent {
+  id: string;
+  kind: 'resource' | 'toolbox';
+  title: string;
+  course_title: string | null;
+  at: string;
+}
+
+interface StudentDetail {
+  studentId: string;
+  registeredAt: string | null;
+  displayName: string | null;
+  userIds: string[];
+  enrollments: EnrollmentDetail[];
+  progress: CourseProgress[];
+  downloads: DownloadEvent[];
+}
+
+const money = (n: number | null) => (n == null ? '-' : `${n.toLocaleString('th-TH')} ฿`);
+const dateTh = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+const dayKey = (iso: string) => new Date(iso).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const STATUS_LABEL: Record<string, string> = { paid: 'ซื้อแล้ว', free: 'คอร์สฟรี', active: 'ใช้งานอยู่', pending: 'รอชำระเงิน' };
+
+const AdminStudents: React.FC = () => {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [matches, setMatches] = useState<AccountMatch[]>([]);
+  const [detail, setDetail] = useState<StudentDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const search = async () => {
+    const q = query.trim();
+    if (!q) return;
+    setSearching(true);
+    setError(null);
+    setDetail(null);
+    const { data, error: err } = await supabase
+      .from('user_accounts')
+      .select('student_id,email,line_user_id,registered_at,is_active')
+      .or(`student_id.ilike.%${q}%,email.ilike.%${q}%`)
+      .order('registered_at', { ascending: false })
+      .limit(25);
+    setSearching(false);
+    if (err) { setError('ค้นหาไม่สำเร็จ: ' + err.message); return; }
+    const rows = (data as AccountMatch[]) || [];
+    setMatches(rows);
+    // Exactly one distinct Master Key matched — load it straight away.
+    const distinctIds = new Set(rows.map(r => r.student_id));
+    if (rows.length > 0 && distinctIds.size === 1) {
+      loadStudent(rows[0].student_id);
+    }
+  };
+
+  const loadStudent = async (studentId: string) => {
+    setLoadingDetail(true);
+    setError(null);
+    try {
+      // 1. Every identity (web + LINE) linked under this Master Key.
+      const { data: accounts, error: acctErr } = await supabase
+        .from('user_accounts')
+        .select('line_user_id, registered_at')
+        .eq('student_id', studentId)
+        .eq('is_active', true);
+      if (acctErr) throw acctErr;
+
+      const userIds = new Set<string>();
+      const lineUserIds: string[] = [];
+      let earliestRegistered: string | null = null;
+      (accounts || []).forEach((a: { line_user_id: string; registered_at: string }) => {
+        if (!earliestRegistered || a.registered_at < earliestRegistered) earliestRegistered = a.registered_at;
+        if (a.line_user_id.startsWith('web:')) userIds.add(a.line_user_id.replace('web:', ''));
+        else lineUserIds.push(a.line_user_id);
+      });
+
+      let displayName: string | null = null;
+      if (lineUserIds.length > 0) {
+        const { data: profs } = await supabase.from('profiles').select('user_id, display_name').in('line_user_id', lineUserIds);
+        (profs || []).forEach((p: { user_id: string; display_name: string | null }) => {
+          userIds.add(p.user_id);
+          if (!displayName && p.display_name) displayName = p.display_name;
+        });
+      }
+      if (!displayName && userIds.size > 0) {
+        const { data: p } = await supabase.from('profiles').select('display_name').in('user_id', [...userIds]).not('display_name', 'is', null).limit(1).maybeSingle();
+        displayName = p?.display_name ?? null;
+      }
+
+      const ids = [...userIds];
+      if (ids.length === 0) {
+        setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: [], enrollments: [], progress: [], downloads: [] });
+        return;
+      }
+
+      // 2. Everything tied to those identities, in parallel.
+      const [{ data: enRows }, { data: resLogs }, { data: tbLogs }] = await Promise.all([
+        supabase.from('course_enrollments')
+          .select('id,course_id,status,amount_paid,created_at,promo_code_id,courses(title),promo_codes(code,discount_type,discount_value)')
+          .in('user_id', ids).order('created_at', { ascending: false }),
+        supabase.from('resource_download_logs')
+          .select('id,downloaded_at,course_resources(title),courses(title)')
+          .in('user_id', ids).order('downloaded_at', { ascending: false }),
+        supabase.from('toolbox_downloads')
+          .select('id,downloaded_at,toolbox_assets(title)')
+          .in('user_id', ids).order('downloaded_at', { ascending: false }),
+      ]);
+
+      type EnrollmentRow = {
+        id: string; course_id: string; status: string; amount_paid: number | null; created_at: string;
+        courses: { title: string } | null;
+        promo_codes: { code: string; discount_type: string; discount_value: number } | null;
+      };
+      const enrollments: EnrollmentDetail[] = ((enRows as EnrollmentRow[] | null) || []).map((e) => ({
+        id: e.id,
+        course_id: e.course_id,
+        course_title: e.courses?.title || '-',
+        status: e.status,
+        amount_paid: e.amount_paid,
+        created_at: e.created_at,
+        promo_code: e.promo_codes?.code ?? null,
+        discount_type: e.promo_codes?.discount_type ?? null,
+        discount_value: e.promo_codes?.discount_value ?? null,
+      }));
+
+      // 3. Lesson-completion % per enrolled course.
+      const courseIds = [...new Set(enrollments.map(e => e.course_id))];
+      let progress: CourseProgress[] = [];
+      if (courseIds.length > 0) {
+        const [{ data: mods }, { data: prog }] = await Promise.all([
+          supabase.from('course_modules').select('id,course_id').in('course_id', courseIds),
+          supabase.from('module_progress').select('module_id,status').in('user_id', ids),
+        ]);
+        const modsByCourse = new Map<string, string[]>();
+        (mods || []).forEach((m: { id: string; course_id: string }) => {
+          if (!modsByCourse.has(m.course_id)) modsByCourse.set(m.course_id, []);
+          modsByCourse.get(m.course_id)!.push(m.id);
+        });
+        const progRows = (prog as { module_id: string; status: string }[] | null) || [];
+        const completedModuleIds = new Set(progRows.filter(p => p.status === 'completed').map(p => p.module_id));
+        progress = enrollments
+          .filter((e, i) => enrollments.findIndex(x => x.course_id === e.course_id) === i)
+          .map(e => {
+            const moduleIds = modsByCourse.get(e.course_id) || [];
+            return {
+              course_id: e.course_id,
+              course_title: e.course_title,
+              total_modules: moduleIds.length,
+              completed_modules: moduleIds.filter(id => completedModuleIds.has(id)).length,
+            };
+          });
+      }
+
+      type ResourceLogRow = { id: string; downloaded_at: string; course_resources: { title: string } | null; courses: { title: string } | null };
+      type ToolboxLogRow = { id: string; downloaded_at: string; toolbox_assets: { title: string } | null };
+      const downloads: DownloadEvent[] = [
+        ...((resLogs as ResourceLogRow[] | null) || []).map((r) => ({
+          id: r.id, kind: 'resource' as const, title: r.course_resources?.title || 'เอกสาร',
+          course_title: r.courses?.title ?? null, at: r.downloaded_at,
+        })),
+        ...((tbLogs as ToolboxLogRow[] | null) || []).map((t) => ({
+          id: t.id, kind: 'toolbox' as const, title: t.toolbox_assets?.title || 'ไฟล์ Toolbox',
+          course_title: null, at: t.downloaded_at,
+        })),
+      ].sort((a, b) => b.at.localeCompare(a.at));
+
+      setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: ids, enrollments, progress, downloads });
+    } catch (e) {
+      setError('โหลดข้อมูลไม่สำเร็จ: ' + (e instanceof Error ? e.message : 'unknown'));
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  // Merge purchases + downloads into one chronological, date-grouped feed —
+  // easiest shape to audit "what did this person do, and when".
+  const timelineGroups = React.useMemo(() => {
+    if (!detail) return [];
+    type Item = { at: string; label: string; detail: string };
+    const items: Item[] = [];
+    detail.enrollments.forEach(e => {
+      const discount = e.promo_code
+        ? ` (ใช้โค้ด ${e.promo_code}${e.discount_value ? `, ส่วนลด ${e.discount_value}${e.discount_type === 'percent' ? '%' : ' ฿'}` : ''})`
+        : '';
+      items.push({ at: e.created_at, label: `ซื้อคอร์ส: ${e.course_title}`, detail: `${STATUS_LABEL[e.status] || e.status} · ${money(e.amount_paid)}${discount}` });
+    });
+    detail.downloads.forEach(d => {
+      items.push({
+        at: d.at,
+        label: d.kind === 'resource' ? `ดาวน์โหลดเอกสารคอร์ส: ${d.title}` : `ดาวน์โหลด Toolbox: ${d.title}`,
+        detail: d.course_title ? `คอร์ส ${d.course_title}` : 'เอกสารฟรี (Toolbox)',
+      });
+    });
+    items.sort((a, b) => b.at.localeCompare(a.at));
+    const groups = new Map<string, Item[]>();
+    items.forEach(it => {
+      const key = dayKey(it.at);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(it);
+    });
+    return [...groups.entries()];
+  }, [detail]);
+
+  const totalPaid = detail?.enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0) ?? 0;
+
+  return (
+    <AdminLayout title="ตรวจสอบกิจกรรมนักเรียน" eyebrow="Student Audit" onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}>
+      <div className="space-y-6">
+        <div className="flex gap-2">
+          <Input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') search(); }}
+            placeholder="ค้นหาด้วย Master Key (student_id) หรืออีเมล"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
+          />
+          <Button onClick={search} disabled={searching || !query.trim()}>
+            {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+          </Button>
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        {matches.length > 1 && (
+          <div className="rounded-xl border border-white/10 overflow-hidden">
+            {matches.map(m => (
+              <button
+                key={m.student_id + m.line_user_id}
+                onClick={() => loadStudent(m.student_id)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-sm border-b border-white/5 last:border-0 hover:bg-white/5"
+              >
+                <span className="font-mono text-[#D4A843]">{m.student_id}</span>
+                <span className="text-white/60">{m.email || '-'}</span>
+                <span className="text-white/40 text-xs">{dateTh(m.registered_at)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loadingDetail && (
+          <div className="flex items-center gap-2 text-white/50 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> กำลังโหลด...</div>
+        )}
+
+        {detail && !loadingDetail && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-white/10 p-4">
+                <UserRound className="w-4 h-4 text-[#D4A843] mb-2" />
+                <p className="text-[10px] uppercase tracking-wider text-white/40">Master Key</p>
+                <p className="font-mono text-sm">{detail.studentId}</p>
+                {detail.displayName && <p className="text-xs text-white/50 mt-0.5">{detail.displayName}</p>}
+              </div>
+              <div className="rounded-xl border border-white/10 p-4">
+                <BadgeCheck className="w-4 h-4 text-[#D4A843] mb-2" />
+                <p className="text-[10px] uppercase tracking-wider text-white/40">สมัครสมาชิกเมื่อ</p>
+                <p className="text-sm">{detail.registeredAt ? dateTh(detail.registeredAt) : 'UNKNOWN'}</p>
+              </div>
+              <div className="rounded-xl border border-white/10 p-4">
+                <GraduationCap className="w-4 h-4 text-[#D4A843] mb-2" />
+                <p className="text-[10px] uppercase tracking-wider text-white/40">คอร์สที่ได้รับสิทธิ์</p>
+                <p className="text-sm">{detail.enrollments.length} คอร์ส</p>
+              </div>
+              <div className="rounded-xl border border-white/10 p-4">
+                <Wallet className="w-4 h-4 text-[#D4A843] mb-2" />
+                <p className="text-[10px] uppercase tracking-wider text-white/40">ยอดชำระรวม</p>
+                <p className="text-sm">{money(totalPaid)}</p>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> คอร์สและความคืบหน้า</h2>
+              {detail.progress.length === 0 ? (
+                <p className="text-sm text-white/40">ยังไม่มีคอร์สที่ได้รับสิทธิ์</p>
+              ) : (
+                <div className="rounded-xl border border-white/10 divide-y divide-white/5">
+                  {detail.progress.map(p => {
+                    const pct = p.total_modules > 0 ? Math.round((p.completed_modules / p.total_modules) * 100) : 0;
+                    return (
+                      <div key={p.course_id} className="p-3 flex items-center justify-between gap-3 text-sm">
+                        <span>{p.course_title}</span>
+                        <span className="text-white/50 text-xs">
+                          {p.total_modules > 0 ? `เรียนจบ ${p.completed_modules}/${p.total_modules} บท (${pct}%)` : 'ยังไม่มีบทเรียนในคอร์สนี้'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <p className="text-[11px] text-white/30 mt-1.5">
+                * ระบบยังไม่มีการนับ "จำนวนครั้งที่เปิดดู" ต่อบทเรียน มีเฉพาะสถานะเรียนจบ/ยังไม่จบ ตามข้อมูลข้างต้น
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Download className="w-4 h-4" /> ไทม์ไลน์กิจกรรม (เรียงตามวันที่)</h2>
+              {timelineGroups.length === 0 ? (
+                <p className="text-sm text-white/40">ยังไม่มีกิจกรรม</p>
+              ) : (
+                <div className="space-y-4">
+                  {timelineGroups.map(([day, items]) => (
+                    <div key={day}>
+                      <p className="text-[11px] font-semibold text-[#D4A843] uppercase tracking-wider mb-1.5">{day}</p>
+                      <div className="rounded-xl border border-white/10 divide-y divide-white/5">
+                        {items.map((it, i) => (
+                          <div key={i} className="p-3 text-sm">
+                            <p>{it.label}</p>
+                            <p className="text-xs text-white/40 mt-0.5">{it.detail}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </AdminLayout>
+  );
+};
+
+export default AdminStudents;
