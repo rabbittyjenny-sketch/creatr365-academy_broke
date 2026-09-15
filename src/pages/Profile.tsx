@@ -8,37 +8,37 @@ import { useDarkPage } from '@/hooks/useDarkPage';
 import { Loader2, Check } from 'lucide-react';
 
 /**
- * Student-facing account page. Scope deliberately kept tight:
+ * Student-facing account page. Fields are deliberately limited to what
+ * real account/profile settings pages actually carry — checked against
+ * GitHub's own public docs (docs.github.com: "Personalizing your
+ * profile"), which list name, bio, pronouns and picture as the editable
+ * fields, nothing demographic. So this page is just:
  *
- * - Only fields this codebase already collects elsewhere stay here
- *   (display name, gender/age_range/occupation — same fields + same
- *   pill-button UI as the Toolbox download-gate form in Toolbox.tsx, so
- *   the two forms don't drift into different conventions for the same
- *   data) plus email, which every account already has.
- * - No new sensitive personal data (no phone, ID number, address,
- *   payment info) — none of that is collected anywhere else in this
- *   system, and this page isn't the place to start.
- * - Email is required and enforced: a LINE sign-up gets a synthetic
- *   placeholder address (`line_<id>@line.creatr365.com`, set in
- *   supabase/functions/liff-auth/index.ts) that isn't reachable by the
- *   student — this page detects that pattern and blocks saving until a
- *   real address is entered. Changing to a new email goes through
- *   Supabase Auth's own `updateUser({ email })`, which requires
- *   confirmation before it takes effect — not a raw table write.
+ * - Email (required, enforced — see below) — every account has one.
+ * - Display name (profiles.display_name).
+ * - Master Key, read-only, for reference (same identifier already shown
+ *   elsewhere in the app).
+ *
+ * profiles.gender/age_range/occupation are NOT here. Those are a
+ * one-time marketing survey gating a free download in Toolbox.tsx — a
+ * different thing with a different purpose — not account settings, and
+ * don't belong on this page. (An earlier version of this file copied
+ * that form wholesale onto this page; that was wrong and got reverted.)
+ *
+ * No new sensitive personal data either way — no phone, ID number,
+ * address, payment info.
+ *
+ * Email is required and enforced: a LINE sign-up gets a synthetic
+ * placeholder address (`line_<id>@line.creatr365.com`, set in
+ * supabase/functions/liff-auth/index.ts) that isn't reachable by the
+ * student — this page detects that pattern and blocks saving until a
+ * real address is entered. Changing to a new email goes through
+ * Supabase Auth's own `updateUser({ email })`, which requires
+ * confirmation before it takes effect — not a raw table write.
  */
-
-const AGE_RANGES = ['ต่ำกว่า 18', '18-24', '25-34', '35-44', '45-54', '55+'];
-const GENDERS = ['หญิง', 'ชาย', 'อื่น ๆ'];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const isSyntheticEmail = (email: string) => /^line_.+@line\.creatr365\.com$/i.test(email);
-
-interface ProfileRow {
-  display_name: string | null;
-  gender: string | null;
-  age_range: string | null;
-  occupation: string | null;
-}
 
 const Profile: React.FC = () => {
   useDarkPage();
@@ -50,9 +50,6 @@ const Profile: React.FC = () => {
   const [studentId, setStudentId] = useState<string | null>(null);
   const [emailInput, setEmailInput] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [gender, setGender] = useState('');
-  const [ageRange, setAgeRange] = useState('');
-  const [occupation, setOccupation] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -67,14 +64,10 @@ const Profile: React.FC = () => {
       setEmailInput(isSyntheticEmail(email) ? '' : email);
 
       const [{ data: prof }, { data: acct }] = await Promise.all([
-        supabase.from('profiles').select('display_name,gender,age_range,occupation').eq('user_id', session.user.id).maybeSingle(),
+        supabase.from('profiles').select('display_name').eq('user_id', session.user.id).maybeSingle(),
         supabase.from('user_accounts').select('student_id').eq('email', email.toLowerCase()).maybeSingle(),
       ]);
-      const p = prof as ProfileRow | null;
-      setDisplayName(p?.display_name || '');
-      setGender(p?.gender || '');
-      setAgeRange(p?.age_range || '');
-      setOccupation(p?.occupation || '');
+      setDisplayName((prof as { display_name: string | null } | null)?.display_name || '');
       setStudentId((acct as { student_id: string } | null)?.student_id ?? null);
       setLoading(false);
     })();
@@ -100,12 +93,9 @@ const Profile: React.FC = () => {
 
     setSaving(true);
     try {
-      const { error: profErr } = await supabase.from('profiles').update({
-        display_name: displayName.trim() || null,
-        gender: gender || null,
-        age_range: ageRange || null,
-        occupation: occupation.trim() || null,
-      }).eq('user_id', userId);
+      const { error: profErr } = await supabase.from('profiles')
+        .update({ display_name: displayName.trim() || null })
+        .eq('user_id', userId);
       if (profErr) throw profErr;
 
       if (emailChanged) {
@@ -173,49 +163,6 @@ const Profile: React.FC = () => {
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
               placeholder="ชื่อที่แสดงในระบบ"
-              className="w-full text-sm px-3 py-2 border border-border bg-background"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase block mb-1.5">เพศ</label>
-            <div className="flex gap-2">
-              {GENDERS.map(g => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => setGender(g)}
-                  className={`sharp-btn text-xs px-3 py-1.5 border flex-1 ${gender === g ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground'}`}
-                >
-                  {g}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase block mb-1.5">ช่วงอายุ</label>
-            <div className="flex flex-wrap gap-2">
-              {AGE_RANGES.map(a => (
-                <button
-                  key={a}
-                  type="button"
-                  onClick={() => setAgeRange(a)}
-                  className={`sharp-btn text-xs px-2.5 py-1.5 border ${ageRange === a ? 'bg-foreground text-background border-foreground' : 'border-border text-muted-foreground'}`}
-                >
-                  {a}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="profile-occupation" className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase block mb-1.5">อาชีพ</label>
-            <input
-              id="profile-occupation"
-              value={occupation}
-              onChange={e => setOccupation(e.target.value)}
-              placeholder="เช่น ครีเอเตอร์, นักการตลาด, ฟรีแลนซ์"
               className="w-full text-sm px-3 py-2 border border-border bg-background"
             />
           </div>
