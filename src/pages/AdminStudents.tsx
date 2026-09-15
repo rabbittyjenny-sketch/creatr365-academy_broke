@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, UserRound, BadgeCheck, Wallet, Download, GraduationCap } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 /**
  * Per-student audit view — search by Master Key (student_id) or email, see
@@ -66,7 +66,6 @@ interface StudentDetail {
 
 const money = (n: number | null) => (n == null ? '-' : `${n.toLocaleString('th-TH')} ฿`);
 const dateTh = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-const dayKey = (iso: string) => new Date(iso).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const STATUS_LABEL: Record<string, string> = { paid: 'ซื้อแล้ว', free: 'คอร์สฟรี', active: 'ใช้งานอยู่', pending: 'รอชำระเงิน' };
 
@@ -221,34 +220,19 @@ const AdminStudents: React.FC = () => {
     }
   };
 
-  // Merge purchases + downloads into one chronological, date-grouped feed —
-  // easiest shape to audit "what did this person do, and when".
-  const timelineGroups = React.useMemo(() => {
-    if (!detail) return [];
-    type Item = { at: string; label: string; detail: string };
-    const items: Item[] = [];
-    detail.enrollments.forEach(e => {
-      const discount = e.promo_code
-        ? ` (ใช้โค้ด ${e.promo_code}${e.discount_value ? `, ส่วนลด ${e.discount_value}${e.discount_type === 'percent' ? '%' : ' ฿'}` : ''})`
-        : '';
-      items.push({ at: e.created_at, label: `ซื้อคอร์ส: ${e.course_title}`, detail: `${STATUS_LABEL[e.status] || e.status} · ${money(e.amount_paid)}${discount}` });
-    });
-    detail.downloads.forEach(d => {
-      items.push({
-        at: d.at,
-        label: d.kind === 'resource' ? `ดาวน์โหลดเอกสารคอร์ส: ${d.title}` : `ดาวน์โหลด Toolbox: ${d.title}`,
-        detail: d.course_title ? `คอร์ส ${d.course_title}` : 'เอกสารฟรี (Toolbox)',
-      });
-    });
-    items.sort((a, b) => b.at.localeCompare(a.at));
-    const groups = new Map<string, Item[]>();
-    items.forEach(it => {
-      const key = dayKey(it.at);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(it);
-    });
-    return [...groups.entries()];
-  }, [detail]);
+  // Three separate logs, each newest-first — kept apart rather than merged
+  // into one feed. When an admin is checking a specific complaint ("paid but
+  // got nothing" vs. "downloaded then wants a refund"), they go straight to
+  // the one log that answers it instead of scanning a mixed list for it.
+  const purchaseLog = React.useMemo(() =>
+    [...(detail?.enrollments ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    [detail]);
+  const resourceLog = React.useMemo(() =>
+    (detail?.downloads ?? []).filter(d => d.kind === 'resource').sort((a, b) => b.at.localeCompare(a.at)),
+    [detail]);
+  const toolboxLog = React.useMemo(() =>
+    (detail?.downloads ?? []).filter(d => d.kind === 'toolbox').sort((a, b) => b.at.localeCompare(a.at)),
+    [detail]);
 
   const totalPaid = detail?.enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0) ?? 0;
 
@@ -292,71 +276,100 @@ const AdminStudents: React.FC = () => {
 
         {detail && !loadingDetail && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-white/10 p-4">
-                <UserRound className="w-4 h-4 text-[#D4A843] mb-2" />
+            <div className="rounded-md border border-white/10 flex flex-wrap divide-x divide-y divide-white/10 sm:divide-y-0">
+              <div className="px-3 py-2 flex-1 min-w-[150px]">
                 <p className="text-[10px] uppercase tracking-wider text-white/40">Master Key</p>
-                <p className="font-mono text-sm">{detail.studentId}</p>
-                {detail.displayName && <p className="text-xs text-white/50 mt-0.5">{detail.displayName}</p>}
+                <p className="font-mono text-sm text-[#D4A843]">{detail.studentId}</p>
+                {detail.displayName && <p className="text-xs text-white/40">{detail.displayName}</p>}
               </div>
-              <div className="rounded-xl border border-white/10 p-4">
-                <BadgeCheck className="w-4 h-4 text-[#D4A843] mb-2" />
+              <div className="px-3 py-2 flex-1 min-w-[150px]">
                 <p className="text-[10px] uppercase tracking-wider text-white/40">สมัครสมาชิกเมื่อ</p>
-                <p className="text-sm">{detail.registeredAt ? dateTh(detail.registeredAt) : 'UNKNOWN'}</p>
+                <p className="text-sm font-mono">{detail.registeredAt ? dateTh(detail.registeredAt) : 'UNKNOWN'}</p>
               </div>
-              <div className="rounded-xl border border-white/10 p-4">
-                <GraduationCap className="w-4 h-4 text-[#D4A843] mb-2" />
+              <div className="px-3 py-2 flex-1 min-w-[110px]">
                 <p className="text-[10px] uppercase tracking-wider text-white/40">คอร์สที่ได้รับสิทธิ์</p>
-                <p className="text-sm">{detail.enrollments.length} คอร์ส</p>
+                <p className="text-sm font-mono">{detail.enrollments.length}</p>
               </div>
-              <div className="rounded-xl border border-white/10 p-4">
-                <Wallet className="w-4 h-4 text-[#D4A843] mb-2" />
+              <div className="px-3 py-2 flex-1 min-w-[110px]">
                 <p className="text-[10px] uppercase tracking-wider text-white/40">ยอดชำระรวม</p>
-                <p className="text-sm">{money(totalPaid)}</p>
+                <p className="text-sm font-mono">{money(totalPaid)}</p>
               </div>
             </div>
 
             <div>
-              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><GraduationCap className="w-4 h-4" /> คอร์สและความคืบหน้า</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">คอร์สและความคืบหน้า</h2>
               {detail.progress.length === 0 ? (
                 <p className="text-sm text-white/40">ยังไม่มีคอร์สที่ได้รับสิทธิ์</p>
               ) : (
-                <div className="rounded-xl border border-white/10 divide-y divide-white/5">
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
                   {detail.progress.map(p => {
                     const pct = p.total_modules > 0 ? Math.round((p.completed_modules / p.total_modules) * 100) : 0;
                     return (
-                      <div key={p.course_id} className="p-3 flex items-center justify-between gap-3 text-sm">
+                      <div key={p.course_id} className="px-3 py-2 flex items-center justify-between gap-3 text-sm">
                         <span>{p.course_title}</span>
-                        <span className="text-white/50 text-xs">
-                          {p.total_modules > 0 ? `เรียนจบ ${p.completed_modules}/${p.total_modules} บท (${pct}%)` : 'ยังไม่มีบทเรียนในคอร์สนี้'}
+                        <span className="text-white/50 text-xs font-mono shrink-0">
+                          {p.total_modules > 0 ? `${p.completed_modules}/${p.total_modules} บท (${pct}%)` : 'ไม่มีบทเรียน'}
                         </span>
                       </div>
                     );
                   })}
                 </div>
               )}
-              <p className="text-[11px] text-white/30 mt-1.5">
-                * ระบบยังไม่มีการนับ "จำนวนครั้งที่เปิดดู" ต่อบทเรียน มีเฉพาะสถานะเรียนจบ/ยังไม่จบ ตามข้อมูลข้างต้น
+              <p className="text-[11px] text-white/30 mt-1">
+                * ระบบยังไม่มีการนับ "จำนวนครั้งที่เปิดดู" ต่อบทเรียน มีเฉพาะสถานะเรียนจบ/ยังไม่จบ
               </p>
             </div>
 
             <div>
-              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2"><Download className="w-4 h-4" /> ไทม์ไลน์กิจกรรม (เรียงตามวันที่)</h2>
-              {timelineGroups.length === 0 ? (
-                <p className="text-sm text-white/40">ยังไม่มีกิจกรรม</p>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการซื้อคอร์ส</h2>
+              {purchaseLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการซื้อ</p>
               ) : (
-                <div className="space-y-4">
-                  {timelineGroups.map(([day, items]) => (
-                    <div key={day}>
-                      <p className="text-[11px] font-semibold text-[#D4A843] uppercase tracking-wider mb-1.5">{day}</p>
-                      <div className="rounded-xl border border-white/10 divide-y divide-white/5">
-                        {items.map((it, i) => (
-                          <div key={i} className="p-3 text-sm">
-                            <p>{it.label}</p>
-                            <p className="text-xs text-white/40 mt-0.5">{it.detail}</p>
-                          </div>
-                        ))}
-                      </div>
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {purchaseLog.map(e => (
+                    <div key={e.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{e.course_title}</span>
+                      <span className="shrink-0 text-[10px] font-mono uppercase text-white/40">{STATUS_LABEL[e.status] || e.status}</span>
+                      <span className="shrink-0 font-mono text-xs w-20 text-right">{money(e.amount_paid)}</span>
+                      {e.promo_code && (
+                        <span className="shrink-0 font-mono text-[10px] text-white/40">
+                          {e.promo_code}{e.discount_value ? ` -${e.discount_value}${e.discount_type === 'percent' ? '%' : '฿'}` : ''}
+                        </span>
+                      )}
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(e.created_at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลดเอกสารคอร์ส</h2>
+              {resourceLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการดาวน์โหลด — ใช้ตรวจข้อพิพาทคืนเงิน (ถ้าดาวน์โหลดแล้ว แปลว่าได้รับเนื้อหาแล้ว)</p>
+              ) : (
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {resourceLog.map(d => (
+                    <div key={d.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{d.title}</span>
+                      <span className="shrink-0 text-xs text-white/40 truncate max-w-[35%]">{d.course_title}</span>
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(d.at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลด Toolbox (ฟรี)</h2>
+              {toolboxLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการดาวน์โหลด</p>
+              ) : (
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {toolboxLog.map(d => (
+                    <div key={d.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{d.title}</span>
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(d.at)}</span>
                     </div>
                   ))}
                 </div>
