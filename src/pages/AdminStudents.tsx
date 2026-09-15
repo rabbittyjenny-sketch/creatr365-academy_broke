@@ -66,12 +66,6 @@ interface StudentDetail {
 
 const money = (n: number | null) => (n == null ? '-' : `${n.toLocaleString('th-TH')} ฿`);
 const dateTh = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-const dayKey = (iso: string) => new Date(iso).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-const timeTh = (iso: string) => new Date(iso).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-
-const KIND_TAG: Record<'purchase' | 'resource' | 'toolbox', string> = {
-  purchase: 'ซื้อคอร์ส', resource: 'เอกสารคอร์ส', toolbox: 'Toolbox',
-};
 
 const STATUS_LABEL: Record<string, string> = { paid: 'ซื้อแล้ว', free: 'คอร์สฟรี', active: 'ใช้งานอยู่', pending: 'รอชำระเงิน' };
 
@@ -226,36 +220,19 @@ const AdminStudents: React.FC = () => {
     }
   };
 
-  // Merge purchases + downloads into one chronological, date-grouped feed —
-  // easiest shape to audit "what did this person do, and when".
-  const timelineGroups = React.useMemo(() => {
-    if (!detail) return [];
-    type Item = { at: string; kind: 'purchase' | 'resource' | 'toolbox'; label: string; detail: string };
-    const items: Item[] = [];
-    detail.enrollments.forEach(e => {
-      const discount = e.promo_code
-        ? ` · โค้ด ${e.promo_code}${e.discount_value ? ` (ลด ${e.discount_value}${e.discount_type === 'percent' ? '%' : ' ฿'})` : ''}`
-        : '';
-      items.push({
-        at: e.created_at, kind: 'purchase', label: e.course_title,
-        detail: `${STATUS_LABEL[e.status] || e.status} · ${money(e.amount_paid)}${discount}`,
-      });
-    });
-    detail.downloads.forEach(d => {
-      items.push({
-        at: d.at, kind: d.kind, label: d.title,
-        detail: d.course_title ? `คอร์ส ${d.course_title}` : 'เอกสารฟรี (Toolbox)',
-      });
-    });
-    items.sort((a, b) => b.at.localeCompare(a.at));
-    const groups = new Map<string, Item[]>();
-    items.forEach(it => {
-      const key = dayKey(it.at);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(it);
-    });
-    return [...groups.entries()];
-  }, [detail]);
+  // Three separate logs, each newest-first — kept apart rather than merged
+  // into one feed. When an admin is checking a specific complaint ("paid but
+  // got nothing" vs. "downloaded then wants a refund"), they go straight to
+  // the one log that answers it instead of scanning a mixed list for it.
+  const purchaseLog = React.useMemo(() =>
+    [...(detail?.enrollments ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    [detail]);
+  const resourceLog = React.useMemo(() =>
+    (detail?.downloads ?? []).filter(d => d.kind === 'resource').sort((a, b) => b.at.localeCompare(a.at)),
+    [detail]);
+  const toolboxLog = React.useMemo(() =>
+    (detail?.downloads ?? []).filter(d => d.kind === 'toolbox').sort((a, b) => b.at.localeCompare(a.at)),
+    [detail]);
 
   const totalPaid = detail?.enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0) ?? 0;
 
@@ -344,26 +321,55 @@ const AdminStudents: React.FC = () => {
             </div>
 
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ไทม์ไลน์กิจกรรม</h2>
-              {timelineGroups.length === 0 ? (
-                <p className="text-sm text-white/40">ยังไม่มีกิจกรรม</p>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการซื้อคอร์ส</h2>
+              {purchaseLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการซื้อ</p>
               ) : (
-                <div className="space-y-3">
-                  {timelineGroups.map(([day, items]) => (
-                    <div key={day}>
-                      <p className="text-[11px] text-white/40 mb-1">{day}</p>
-                      <div className="rounded-md border border-white/10 divide-y divide-white/5">
-                        {items.map((it, i) => (
-                          <div key={i} className="px-3 py-2 flex items-center gap-3 text-sm">
-                            <span className="shrink-0 w-20 font-mono text-[10px] uppercase tracking-wide text-white/40">{KIND_TAG[it.kind]}</span>
-                            <span className="flex-1 min-w-0 truncate">
-                              {it.label}
-                              <span className="text-white/40"> — {it.detail}</span>
-                            </span>
-                            <span className="shrink-0 font-mono text-xs text-white/50">{timeTh(it.at)}</span>
-                          </div>
-                        ))}
-                      </div>
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {purchaseLog.map(e => (
+                    <div key={e.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{e.course_title}</span>
+                      <span className="shrink-0 text-[10px] font-mono uppercase text-white/40">{STATUS_LABEL[e.status] || e.status}</span>
+                      <span className="shrink-0 font-mono text-xs w-20 text-right">{money(e.amount_paid)}</span>
+                      {e.promo_code && (
+                        <span className="shrink-0 font-mono text-[10px] text-white/40">
+                          {e.promo_code}{e.discount_value ? ` -${e.discount_value}${e.discount_type === 'percent' ? '%' : '฿'}` : ''}
+                        </span>
+                      )}
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(e.created_at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลดเอกสารคอร์ส</h2>
+              {resourceLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการดาวน์โหลด — ใช้ตรวจข้อพิพาทคืนเงิน (ถ้าดาวน์โหลดแล้ว แปลว่าได้รับเนื้อหาแล้ว)</p>
+              ) : (
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {resourceLog.map(d => (
+                    <div key={d.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{d.title}</span>
+                      <span className="shrink-0 text-xs text-white/40 truncate max-w-[35%]">{d.course_title}</span>
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(d.at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลด Toolbox (ฟรี)</h2>
+              {toolboxLog.length === 0 ? (
+                <p className="text-sm text-white/40">ไม่มีประวัติการดาวน์โหลด</p>
+              ) : (
+                <div className="rounded-md border border-white/10 divide-y divide-white/5">
+                  {toolboxLog.map(d => (
+                    <div key={d.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{d.title}</span>
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(d.at)}</span>
                     </div>
                   ))}
                 </div>

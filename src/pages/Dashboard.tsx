@@ -6,7 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award } from 'lucide-react';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award, UserCog } from 'lucide-react';
 import { tierLabel } from '@/lib/courseTag';
 import { DownloadConsentDialog } from '@/components/DownloadConsentDialog';
 
@@ -285,16 +285,26 @@ const Dashboard: React.FC = () => {
               <p className="text-xs text-muted-foreground">สวัสดีค่ะ 👋</p>
               <h1 className="text-2xl font-bold" data-accent="red">{displayName}</h1>
             </div>
-            {isAdmin && (
+            <div className="shrink-0 flex items-center gap-2">
               <Link
-                to="/admin"
-                className="shrink-0 flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border bg-muted hover-shift"
-                title="บัญชีนี้มีสิทธิ์ Admin — ไปที่ Admin Console"
+                to="/profile"
+                className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border bg-muted hover-shift"
+                title="แก้ไขโปรไฟล์"
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Admin Console
+                <UserCog className="w-3.5 h-3.5" />
+                โปรไฟล์
               </Link>
-            )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-border bg-muted hover-shift"
+                  title="บัญชีนี้มีสิทธิ์ Admin — ไปที่ Admin Console"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Admin Console
+                </Link>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-xs font-mono bg-muted border border-border px-2 py-0.5 rounded-md">{keyId}</span>
