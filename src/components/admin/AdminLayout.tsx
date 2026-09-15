@@ -9,6 +9,7 @@ import {
   LogOut,
   ExternalLink,
   Package,
+  UserSearch,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { to: '/admin/articles', label: 'บทความ', icon: Newspaper, match: (p: string) => p.startsWith('/admin/articles') },
   { to: '/admin/assignments', label: 'งานที่ส่ง', icon: ClipboardCheck, match: (p: string) => p.startsWith('/admin/assignments') },
   { to: '/admin/payments', label: 'การชำระเงิน', icon: CreditCard, match: (p: string) => p.startsWith('/admin/payments') },
+  { to: '/admin/students', label: 'ตรวจสอบนักเรียน', icon: UserSearch, match: (p: string) => p.startsWith('/admin/students') },
 ];
 
 interface AdminLayoutProps {
