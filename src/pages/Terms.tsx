@@ -72,10 +72,13 @@ const Terms: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-wrap gap-4 text-xs text-white/25 pt-8 border-t border-white/8">
-            <Link to="/privacy" className="hover:text-white/50 transition-colors">นโยบายความเป็นส่วนตัว</Link>
-            <Link to="/refund-policy" className="hover:text-white/50 transition-colors">นโยบายการคืนเงิน</Link>
-            <Link to="/faq" className="hover:text-white/50 transition-colors">FAQ</Link>
+          <div className="mt-10 pt-8 border-t border-white/8">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-white/25 uppercase mb-3">เอกสารที่เกี่ยวข้อง</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/45">
+              <Link to="/privacy">นโยบายความเป็นส่วนตัว</Link>
+              <Link to="/refund-policy">นโยบายการคืนเงิน</Link>
+              <Link to="/faq">คำถามที่พบบ่อย</Link>
+            </div>
           </div>
         </div>
       </main>
