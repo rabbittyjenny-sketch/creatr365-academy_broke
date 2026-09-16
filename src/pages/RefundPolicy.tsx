@@ -16,7 +16,7 @@ const RefundPolicy: React.FC = () => {
       <CourseNavbar />
       <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
         <div className="max-w-3xl mx-auto">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-8 transition-colors">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-white/40 text-sm mb-8">
             <ArrowLeft className="w-4 h-4" /> กลับหน้าแรก
           </Link>
           <div className="mb-6">
@@ -25,7 +25,7 @@ const RefundPolicy: React.FC = () => {
             <p className="text-white/40 text-sm">Refund, Exchange & Cancellation Policy — อัปเดตล่าสุด กันยายน 2569</p>
           </div>
           <p className="text-white/45 text-sm leading-relaxed mb-10">
-            นโยบายนี้ใช้กับการซื้อคอร์สเรียนทุกประเภทบนแพลตฟอร์ม CREATR365 ทั้งรูปแบบออนไลน์ (Online) และรูปแบบเรียนในสถานที่ (Offline / Onsite) เงื่อนไขเกี่ยวกับบัญชีผู้ใช้ การใช้งานเนื้อหา และการโอนสิทธิ์ เป็นไปตาม<Link to="/terms" className="text-[#D4A843] hover:opacity-80">ข้อกำหนดการใช้บริการ</Link>
+            นโยบายนี้ใช้กับการซื้อคอร์สเรียนทุกประเภทบนแพลตฟอร์ม CREATR365 ทั้งรูปแบบออนไลน์ (Online) และรูปแบบเรียนในสถานที่ (Offline / Onsite) เงื่อนไขเกี่ยวกับบัญชีผู้ใช้ การใช้งานเนื้อหา และการโอนสิทธิ์ เป็นไปตาม<Link to="/terms" className="text-[#D4A843] underline underline-offset-2">ข้อกำหนดการใช้บริการ</Link>
           </p>
 
           {/* Quick Summary */}
@@ -56,6 +56,7 @@ const RefundPolicy: React.FC = () => {
                 {[
                   'คืนเงินหรือเปลี่ยนคอร์สได้เฉพาะกรณีสั่งซื้อผิดคอร์ส หรือมีเหตุจำเป็นที่ไม่สามารถเรียนได้เท่านั้น',
                   'ต้องแจ้งภายใน 7 วัน นับจากวันที่ชำระเงิน และยังไม่ได้ดาวน์โหลดเอกสารประกอบการเรียน',
+                  'ก่อนดาวน์โหลดเอกสารครั้งแรกของแต่ละคอร์ส ระบบจะให้ท่านยืนยันรับทราบเงื่อนไขข้อนี้ก่อนทุกครั้ง',
                   'ปัญหาที่เกิดขึ้นจากระบบ ไม่ถือเป็นความผิดพลาดของผู้เรียน และไม่นับรวมในเงื่อนไขการปฏิเสธคืนเงิน',
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -188,17 +189,17 @@ const RefundPolicy: React.FC = () => {
             </div>
           </div>
 
-          <p className="text-white/25 text-xs italic mt-6">บริษัทฯ ขอสงวนสิทธิ์ในการเปลี่ยนแปลงเงื่อนไขใดๆ ข้างต้น โดยไม่จำต้องแจ้งให้ทราบล่วงหน้า</p>
+          <p className="text-white/25 text-xs italic mt-6">บริษัทฯ อาจปรับปรุงเงื่อนไขนี้ได้ตามความเหมาะสม โดยจะแจ้งให้ทราบผ่านอีเมลหรือหน้าเว็บไซต์ก่อนการเปลี่ยนแปลงมีผล</p>
 
           <div className="mt-8 p-5 rounded-2xl bg-[#111] border border-white/8">
             <p className="text-white/60 text-sm mb-1 font-medium">ต้องการขอคืนเงินหรือเปลี่ยนคอร์ส?</p>
             <p className="text-white/40 text-xs">ติดต่อ <a href="mailto:hello@creatr365.com" className="text-[#D4A843]">hello@creatr365.com</a> พร้อมแนบ Order ID ของท่าน</p>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-4 text-xs text-white/25 pt-8 border-t border-white/8">
-            <Link to="/privacy" className="hover:text-white/50 transition-colors">นโยบายความเป็นส่วนตัว</Link>
-            <Link to="/terms" className="hover:text-white/50 transition-colors">ข้อกำหนดการใช้บริการ</Link>
-            <Link to="/faq" className="hover:text-white/50 transition-colors">FAQ</Link>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/45 pt-8 border-t border-white/8">
+            <Link to="/privacy">นโยบายความเป็นส่วนตัว</Link>
+            <Link to="/terms">ข้อกำหนดการใช้บริการ</Link>
+            <Link to="/faq">คำถามที่พบบ่อย</Link>
           </div>
         </div>
       </main>
