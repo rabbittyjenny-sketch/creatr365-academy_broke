@@ -56,8 +56,8 @@ const FAQAccordion: React.FC<{ item: FAQItem }> = ({ item }) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="border-b border-white/8 last:border-0">
-      <button className="w-full text-left py-5 flex items-center justify-between gap-4 group" onClick={() => setOpen(!open)}>
-        <span className="text-white/80 text-sm font-medium leading-relaxed group-hover:text-white transition-colors">{item.q}</span>
+      <button className="w-full text-left py-5 flex items-center justify-between gap-4" onClick={() => setOpen(!open)}>
+        <span className="text-white/80 text-sm font-medium leading-relaxed">{item.q}</span>
         <ChevronDown className={`w-4 h-4 flex-shrink-0 text-white/30 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && <div className="pb-5 text-white/50 text-sm leading-relaxed pr-6">{item.a}</div>}
@@ -80,7 +80,7 @@ const FAQ: React.FC = () => {
           <div className="mb-16">
             <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Support</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-4">คำถามที่พบบ่อย</h1>
-            <p className="text-white/40">หากไม่พบคำตอบที่ต้องการ ติดต่อเราได้ที่ <a href="mailto:hello@creatr365.com" className="text-[#D4A843] hover:opacity-80">hello@creatr365.com</a></p>
+            <p className="text-white/40">หากไม่พบคำตอบที่ต้องการ ติดต่อเราได้ที่ <a href="mailto:hello@creatr365.com" className="text-[#D4A843] underline underline-offset-2">hello@creatr365.com</a></p>
           </div>
           <div className="space-y-10">
             {FAQS.map((group) => (
@@ -97,14 +97,17 @@ const FAQ: React.FC = () => {
               <p className="text-white font-semibold text-sm mb-1">ยังมีคำถามเพิ่มเติม?</p>
               <p className="text-white/40 text-xs">ทีมงานพร้อมช่วยเหลือคุณ 7 วัน 9.00–21.00 น.</p>
             </div>
-            <a href="mailto:hello@creatr365.com" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white border border-white/20 hover:border-[#D4A843]/50 hover:text-[#D4A843] transition-all">
+            <a href="mailto:hello@creatr365.com" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white border border-white/20">
               ติดต่อเรา
             </a>
           </div>
-          <div className="mt-8 flex flex-wrap gap-4 text-xs text-white/25">
-            <Link to="/privacy" className="hover:text-white/50 transition-colors">นโยบายความเป็นส่วนตัว</Link>
-            <Link to="/terms" className="hover:text-white/50 transition-colors">ข้อกำหนดการใช้บริการ</Link>
-            <Link to="/refund-policy" className="hover:text-white/50 transition-colors">นโยบายการคืนเงิน</Link>
+          <div className="mt-8 pt-8 border-t border-white/8">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-white/25 uppercase mb-3">เอกสารที่เกี่ยวข้อง</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/45">
+              <Link to="/privacy">นโยบายความเป็นส่วนตัว</Link>
+              <Link to="/terms">ข้อกำหนดการใช้บริการ</Link>
+              <Link to="/refund-policy">นโยบายการคืนเงิน</Link>
+            </div>
           </div>
         </div>
       </main>
