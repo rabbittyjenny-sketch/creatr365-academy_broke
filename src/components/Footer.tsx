@@ -36,9 +36,7 @@ export const Footer = () => (
         <p>© 2025 CREATR365. All rights reserved.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
           {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy'], ['คำถามที่พบบ่อย', '/faq']].map(([l, h]) => (
-            <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', transition: 'color .2s', fontFamily: 'inherit', fontSize: '13px' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}>
+            <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', fontFamily: 'inherit', fontSize: '13px' }}>
               {l}
             </Link>
           ))}
