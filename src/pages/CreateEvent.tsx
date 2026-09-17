@@ -12,6 +12,7 @@ import { User } from '@supabase/supabase-js';
 import { AuthSheet } from '@/components/AuthSheet';
 import { SEOHead } from '@/components/SEOHead';
 import { z } from 'zod';
+import { resolveContentType } from '@/lib/uploadFile';
 
 const eventSchema = z.object({
   eventName: z.string().trim().min(1, 'Event name is required').max(200, 'Event name must be less than 200 characters'),
@@ -153,7 +154,7 @@ const CreateEvent = () => {
 
       const { error: uploadError } = await supabase.storage
         .from('event-images')
-        .upload(filePath, imageFile);
+        .upload(filePath, imageFile, { contentType: resolveContentType(imageFile) });
 
       if (uploadError) throw uploadError;
 

@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/SEOHead';
 import { Plus, Pencil, Trash2, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
 
 /* ─── Types ────────────────────────────────────────────── */
 interface CourseRow {
@@ -182,7 +183,7 @@ const AdminCourses = () => {
     try {
       const ext = file.name.split('.').pop();
       const path = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-      const { error } = await supabase.storage.from('course-media').upload(path,file,{ upsert:false });
+      const { error } = await supabase.storage.from('course-media').upload(path,file,{ upsert:false, contentType: resolveContentType(file) });
       if (error) { toast({ title:'Upload error', description:error.message, variant:'destructive' }); return null; }
       return supabase.storage.from('course-media').getPublicUrl(path).data.publicUrl;
     } finally { setUploading(false); }
@@ -229,11 +230,11 @@ const AdminCourses = () => {
   const uploadResourceFile = async (file:File, courseId:string):Promise<{ path:string; name:string }|null> => {
     setUploading(true);
     try {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const safeName = sanitizeFileName(file.name);
       const path = `${courseId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safeName}`;
       // Private bucket — students only ever reach the file via a short-lived
       // signed URL that the Dashboard requests after their enrollment passes RLS.
-      const { error } = await supabase.storage.from('course-resources').upload(path,file,{ upsert:false });
+      const { error } = await supabase.storage.from('course-resources').upload(path,file,{ upsert:false, contentType: resolveContentType(file) });
       if (error) { toast({ title:'Upload error', description:error.message, variant:'destructive' }); return null; }
       return { path, name:file.name };
     } finally { setUploading(false); }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Download, Upload, Image as ImageIcon } from 'lucide-react';
+import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
 
 interface ToolboxAsset {
   id: string; title: string; description: string; category: string;
@@ -40,8 +41,11 @@ const AssetEditor: React.FC<{
     if (!file) return;
     setUploadingCover(true);
     try {
-      const path = `${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from('toolbox-covers').upload(path, file, { upsert: false });
+      const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+      const { error } = await supabase.storage.from('toolbox-covers').upload(path, file, {
+        upsert: false,
+        contentType: resolveContentType(file),
+      });
       if (error) { alert('อัปโหลดรูปปกไม่สำเร็จ: ' + error.message); return; }
       const { data } = supabase.storage.from('toolbox-covers').getPublicUrl(path);
       set('cover_image_url', data.publicUrl);
@@ -56,8 +60,11 @@ const AssetEditor: React.FC<{
     if (!file) return;
     setUploadingFile(true);
     try {
-      const path = `${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from('toolbox-files').upload(path, file, { upsert: false });
+      const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+      const { error } = await supabase.storage.from('toolbox-files').upload(path, file, {
+        upsert: false,
+        contentType: resolveContentType(file),
+      });
       if (error) { alert('อัปโหลดไฟล์ไม่สำเร็จ: ' + error.message); return; }
       set('file_path', path);
       set('file_name', file.name);

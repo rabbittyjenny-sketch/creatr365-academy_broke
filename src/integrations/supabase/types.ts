@@ -757,6 +757,7 @@ export type Database = {
         Row: {
           age_range: string | null
           asset_id: string
+          consented: boolean
           downloaded_at: string
           gender: string | null
           id: string
@@ -767,6 +768,7 @@ export type Database = {
         Insert: {
           age_range?: string | null
           asset_id: string
+          consented?: boolean
           downloaded_at?: string
           gender?: string | null
           id?: string
@@ -777,6 +779,7 @@ export type Database = {
         Update: {
           age_range?: string | null
           asset_id?: string
+          consented?: boolean
           downloaded_at?: string
           gender?: string | null
           id?: string
