@@ -103,7 +103,7 @@ function useRevealOnScroll(ref: React.RefObject<HTMLDivElement>) {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.35 }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -142,8 +142,10 @@ function BrandFitCard({ card, i }: { card: CardData; i: number }) {
           background: `linear-gradient(160deg, ${accent}22, #101010 70%)`,
         }}
       >
-        <div className="c365-brandfit-sheen" />
-        <img src={card.img} alt={card.alt} />
+        <div className="c365-brandfit-tilt">
+          <div className="c365-brandfit-sheen" />
+          <img src={card.img} alt={card.alt} />
+        </div>
       </div>
     </div>
   );
@@ -202,18 +204,29 @@ export function BrandFitSection() {
           border-radius: 16px;
           overflow: hidden;
           box-shadow: 0 14px 34px rgba(0,0,0,.4);
-          perspective: 900px;
           clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
           opacity: 0;
-          transform: translateY(18px);
-          transition: clip-path 1.1s cubic-bezier(.19,1,.22,1), opacity .8s ease-out, transform .9s cubic-bezier(.19,1,.22,1), box-shadow .3s ease;
+          transition: clip-path 1.1s cubic-bezier(.19,1,.22,1), opacity .9s ease-out, box-shadow .3s ease;
         }
         .c365-brandfit-card.is-in .c365-brandfit-card-inner {
           clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
           opacity: 1;
-          transform: translateY(0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
         }
-        .c365-brandfit-card-inner img {
+        /* Tilt lives on its own inner element with its own FAST transition —
+           kept separate from the entrance reveal above on purpose. Pointer
+           tracking sets --rx/--ry dozens of times per second; if it shared
+           the entrance's slow ~1s easing (as an earlier version did), each
+           mousemove would retrigger that slow transition chasing a target
+           that immediately moves again, so the tilt visually never catches
+           up — it looked frozen, and only the (unrelated) sheen worked.
+           A short transition here lets it actually track the cursor. */
+        .c365-brandfit-tilt {
+          position: absolute; inset: 0;
+          perspective: 900px;
+          transform: rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+          transition: transform .12s ease-out;
+        }
+        .c365-brandfit-tilt img {
           position: absolute; inset: 0; width: 100%; height: 100%;
           object-fit: contain; object-position: center;
         }
@@ -233,7 +246,8 @@ export function BrandFitSection() {
           .c365-brandfit-grid { grid-template-columns: 1fr !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .c365-brandfit-card-inner { transition: opacity .3s ease !important; clip-path: none !important; transform: none !important; }
+          .c365-brandfit-card-inner { transition: opacity .3s ease !important; clip-path: none !important; }
+          .c365-brandfit-tilt { transform: none !important; }
         }
       `}</style>
     </section>
