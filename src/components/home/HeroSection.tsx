@@ -203,7 +203,7 @@ export function HeroSection() {
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: 'clamp(10px,1.6vw,20px)', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
 
-        <h1 style={{ position: 'relative', zIndex: 2, margin: 0, fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(52px,12vw,180px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#F8F8F6', maxWidth: 'min(100%,14ch)' }}>
+        <h1 className="c365-h-nodefault" style={{ position: 'relative', zIndex: 2, margin: 0, fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(52px,12vw,180px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#F8F8F6', maxWidth: 'min(100%,14ch)' }}>
           <span style={lineStyle(0)}>Creatr</span><br />
           <span style={lineStyle(140)}>365.</span>
         </h1>
@@ -281,8 +281,20 @@ export function HeroSection() {
 
       {/* Small screens: let the scatter wrap under the CTA column instead of
           overlapping it — .c365-hero-scatter/.c365-hero-tag are unique to
-          this component, so this rule cannot touch any other section. */}
+          this component, so this rule cannot touch any other section.
+          .c365-h-nodefault turns off the sitewide h1/h2.../::after hover-
+          underline (src/index.css) specifically for this hero wordmark:
+          that rule sizes the underline to the widest of the heading's
+          lines ("Creatr") but anchors it under whichever line is last
+          ("365."), so on this two-line, very-different-width headline it
+          rendered as a long red bar overshooting "365." on hover — a
+          decorative heading convention that doesn't fit a display
+          wordmark like this one anyway. The override lives only on this
+          class, so index.css itself, and every other heading site-wide,
+          is untouched. */}
       <style>{`
+        .c365-h-nodefault::after { content: none !important; }
+        .c365-h-nodefault:hover { color: inherit !important; }
         @media (max-width: 820px) {
           .c365-hero-scatter { position: static !important; aspect-ratio: auto !important; max-height: none !important; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 12px !important; padding-block: 10px !important; }
           .c365-hero-scatter > div { position: static !important; left: auto !important; top: auto !important; width: auto !important; flex: 1 1 40% !important; max-width: 42% !important; }

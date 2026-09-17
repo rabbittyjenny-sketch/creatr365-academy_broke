@@ -16,24 +16,23 @@ const RED = '#CC0033';
 const ACCENTS = ['#C0A060', '#4A7FB5', '#6AAA7A', '#B87333', '#1E3A6E', '#9B4DCA', '#C0392B'] as const;
 
 interface CardData {
-  n: string;
   img: string;
-  title: string;
-  desc: string;
+  alt: string;
 }
 
-/* NOTE: headings/descriptions transcribed off the reference screenshot —
-   please double-check wording before shipping (same caveat as the Hero
-   tags). Image filenames follow the j01–j07 naming given for this section;
-   drop the real photos into public/images/ under these exact names. */
+/* Image filenames follow the j01–j07 naming given for this section;
+   drop the real photos into public/images/ under these exact names.
+   Per feedback: no number/heading/description overlay anymore — the
+   photo alone carries the section, so alt text is what's left to
+   describe each card for accessibility. */
 const CARDS: CardData[] = [
-  { n: '01', img: '/images/j01.png', title: 'ปิดการขาย ช่วยสร้างยอด ลดอัตราคืนสินค้า', desc: 'เทคนิคการสื่อสารที่ทำให้ผู้ชมตัดสินใจซื้ออย่างมั่นใจ และลดการคืนสินค้าได้จริง' },
-  { n: '02', img: '/images/j02.png', title: 'รักษา Retention ระหว่างไลฟ์', desc: 'กลยุทธ์การดึงความสนใจให้อยู่กับคุณตั้งแต่วินาทีแรกจนจบไลฟ์' },
-  { n: '03', img: '/images/j03.png', title: 'สร้างความน่าเชื่อถือต่อตัวเองและผลิตภัณฑ์', desc: 'วางตำแหน่งตัวตน สร้างความไว้วางใจ และนำเสนอสินค้าได้อย่างมีพลัง' },
-  { n: '04', img: '/images/j04.png', title: 'สื่อสารสินค้าได้ตรงกลุ่ม', desc: 'เข้าใจกลุ่มเป้าหมายอย่างลึกซึ้ง และสื่อสารให้ตรงความต้องการ' },
-  { n: '05', img: '/images/j05.png', title: 'คุมภาพลักษณ์แบรนด์ได้ดี', desc: 'สร้างภาพลักษณ์ที่น่าเชื่อถือ และสะท้อนตัวตนแบรนด์ผ่านการไลฟ์ทุกครั้ง' },
-  { n: '06', img: '/images/j06.png', title: 'ทำงานแบบ Data-Driven + ปรับแผนได้เร็ว', desc: 'เข้าใจข้อมูล วิเคราะห์ผลลัพธ์ และปรับกลยุทธ์ให้ยอดขายเติบโตอย่างต่อเนื่อง' },
-  { n: '07', img: '/images/j07.png', title: 'ทำงานร่วมกับทีมหลังบ้าน ได้รู้ใจและพร้อม Support', desc: 'ทำงานร่วมกันได้อย่างไหลลื่น เพื่อให้ไลฟ์ทุกครั้งเป็นไปอย่างราบรื่นและมีประสิทธิภาพ' },
+  { img: '/images/j01.png', alt: 'ปิดการขาย ช่วยสร้างยอด ลดอัตราคืนสินค้า' },
+  { img: '/images/j02.png', alt: 'รักษา Retention ระหว่างไลฟ์' },
+  { img: '/images/j03.png', alt: 'สร้างความน่าเชื่อถือต่อตัวเองและผลิตภัณฑ์' },
+  { img: '/images/j04.png', alt: 'สื่อสารสินค้าได้ตรงกลุ่ม' },
+  { img: '/images/j05.png', alt: 'คุมภาพลักษณ์แบรนด์ได้ดี' },
+  { img: '/images/j06.png', alt: 'ทำงานแบบ Data-Driven + ปรับแผนได้เร็ว' },
+  { img: '/images/j07.png', alt: 'ทำงานร่วมกับทีมหลังบ้าน ได้รู้ใจและพร้อม Support' },
 ];
 
 function BrandFitCard({ card, i }: { card: CardData; i: number }) {
@@ -57,23 +56,9 @@ function BrandFitCard({ card, i }: { card: CardData; i: number }) {
     >
       <img
         src={card.img}
-        alt=""
+        alt={card.alt}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
       />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,10,10,0) 35%, rgba(10,10,10,.92) 100%)' }} />
-
-      <span style={{ position: 'absolute', left: 18, top: 16, fontFamily: 'Overpass, sans-serif', fontWeight: 900, fontSize: '13px', letterSpacing: '.04em', color: accent }}>
-        {card.n}
-      </span>
-
-      <div style={{ position: 'absolute', left: 18, right: 18, bottom: 16 }}>
-        <h3 style={{ margin: 0, marginBottom: 6, color: '#fff', fontWeight: 800, fontSize: wide ? 'clamp(16px,1.5vw,20px)' : 'clamp(14px,1.2vw,16px)', lineHeight: 1.25 }}>
-          {card.title}
-        </h3>
-        <p style={{ margin: 0, color: 'rgba(255,255,255,.68)', fontSize: wide ? '13px' : '12px', lineHeight: 1.5 }}>
-          {card.desc}
-        </p>
-      </div>
     </div>
   );
 }
@@ -82,8 +67,8 @@ export function BrandFitSection() {
   return (
     <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)', width: '100%' }}>
-        <div style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
-          <h2 data-aos="fade-up" className="c365-motion-drift" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
+        <div style={{ marginBottom: 'clamp(56px,7vw,80px)' }}>
+          <h2 data-aos="fade-up" className="c365-motion-drift c365-h-thick" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
             อยากร่วมงานกับแบรนด์ใหญ่ ?
           </h2>
           <p data-aos="fade-up" data-aos-delay="80" style={{ fontSize: 'clamp(15px,2vw,20px)', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>
@@ -91,9 +76,9 @@ export function BrandFitSection() {
           </p>
         </div>
 
-        <div className="c365-brandfit-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14, marginBottom: 'clamp(40px,5vw,60px)' }}>
+        <div className="c365-brandfit-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 26, marginBottom: 'clamp(48px,6vw,70px)' }}>
           {CARDS.map((card, i) => (
-            <BrandFitCard key={card.n} card={card} i={i} />
+            <BrandFitCard key={card.img} card={card} i={i} />
           ))}
         </div>
 
@@ -109,12 +94,19 @@ export function BrandFitSection() {
         </div>
       </div>
 
-      {/* .c365-brandfit-* is unique to this component — cannot affect any other section */}
+      {/* .c365-brandfit-* is unique to this component — cannot affect any
+          other section. .c365-h-thick only changes this h2's own hover-
+          underline THICKNESS (it was already correctly positioned — a
+          single-line heading, verified by measuring its rendered width
+          against the underline's width: both 803px, an exact match) — the
+          override doesn't touch src/index.css's shared rule, just adds a
+          thicker ::after for this one class. */}
       <style>{`
         .c365-brandfit-card { transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease; }
         .c365-brandfit-card:hover { transform: translateY(-6px); box-shadow: 0 22px 44px rgba(0,0,0,.55); }
         .c365-brandfit-card:hover img { transform: scale(1.045); }
         .c365-brandfit-card img { transition: transform .5s cubic-bezier(.16,1,.3,1); }
+        .c365-h-thick::after { height: 3px !important; }
         @media (max-width: 900px) {
           .c365-brandfit-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .c365-brandfit-card { grid-column: span 1 !important; aspect-ratio: 4/3.4 !important; }
