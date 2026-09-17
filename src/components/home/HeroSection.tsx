@@ -204,28 +204,30 @@ export function HeroSection() {
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
 
+        {/* Logo lives on its own, above the row — NOT inside the same flex
+            column as badge/buttons/taglines. Putting it in that column
+            (previous turn) made the column much taller, and because the
+            scatter beside it is a flex sibling aligned to flex-start, the
+            scatter visually got pushed out of its previously-balanced
+            position as a side effect — nothing in the scatter's own code
+            changed, but the sibling it aligns against got much taller.
+            Kept large here (this is the actual size regression to fix —
+            it should read as the dominant element, only the badge below
+            it was asked to shrink), with its own bottom margin as the
+            explicit gap to the badge. */}
+        <h1 className="c365-h-nodefault" style={{ margin: 0, marginBottom: 'clamp(28px,3.4vw,44px)' }}>
+          <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', ...lineStyle(0) }} />
+        </h1>
+
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, flexWrap: 'wrap' }}>
 
-          {/* Left column — single flush-left stack, in the exact order
-              specified: logo, gap, badge, CTAs, English tagline, Thai
-              paragraph. Kept as one column (rather than the logo living
-              separately above) so "flush against the left edge" applies
-              to the whole group consistently, not just part of it. */}
+          {/* Left column: badge (shrunk, as asked) → CTAs → English tagline
+              → Thai paragraph. Flush left throughout. */}
           <div style={{
-            flex: '0 0 auto', width: 'clamp(240px,27vw,360px)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(20px,2.6vw,32px)',
+            flex: '0 0 auto', width: 'clamp(240px,27vw,360px)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(16px,2vw,24px)',
             opacity: entered ? 1 : 0, transform: entered ? 'translateY(0)' : 'translateY(46px)',
             transition: 'transform .95s cubic-bezier(.16,1,.3,1) 280ms, opacity .7s ease-out 280ms',
           }}>
-            <h1 className="c365-h-nodefault" style={{ margin: 0 }}>
-              {/* Real logo asset, public/images/w-logo-side.png — confirmed
-                  by direct viewing (two-line "Creatr / 365." wordmark,
-                  matches the reference design exactly). Named explicitly
-                  by the user; not a guess. */}
-              <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(220px,24vw,340px)', height: 'auto', ...lineStyle(0) }} />
-            </h1>
-
-            {/* Badge sized down deliberately — it was reading larger/more
-                dominant than the logo above it, which had it backwards. */}
             <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', width: 'max-content' }}>
@@ -237,17 +239,20 @@ export function HeroSection() {
               </Link>
             </div>
 
-            {/* English tagline — restored, now left-aligned inside this
-                column (its earlier full-width centered placement at the
-                very bottom was wrong per this feedback) and kept to one
-                line. */}
             <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontWeight: 600, fontSize: 'clamp(9px,.85vw,12px)', letterSpacing: '.22em', color: '#F8F8F6', textAlign: 'left', whiteSpace: 'nowrap' }}>
               A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE
             </p>
 
-            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 2, color: 'rgba(255,255,255,.55)', textAlign: 'left' }}>
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ
-              แต่คือการ <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
+            {/* Fixed: Overpass has no Thai glyphs at all (the project's own
+                tailwind config says so explicitly) — this was silently
+                falling back to a generic system font. Switched to IBM Plex
+                Sans Thai, the Thai font already loaded for this project.
+                Also single-line now (whiteSpace:nowrap, sized to its own
+                content like the English line above it) instead of wrapping
+                across three uneven lines. */}
+            <p style={{ margin: 0, fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(9px,.8vw,11px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left', whiteSpace: 'nowrap' }}>
+              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
+              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong> และ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
             </p>
