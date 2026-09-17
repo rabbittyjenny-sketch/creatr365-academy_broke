@@ -20,9 +20,15 @@ const PHOTOS = {
    FLOAT ITEM CONFIG
    Position/size come from the approved design; depth/rot/phase
    drive the idle sine-wave float; ex/ey/er/delay/dur drive the
-   one-time "fly into place" entrance. Numbers carried over from
-   the reference build so the motion feel matches exactly.
-════════════════════════════════════════════════════════ */
+   one-time "fly into place" entrance.
+
+   delay/dur are the reference build's own numbers × 2.3 — the
+   reference file was re-checked line-by-line against its actual
+   engine script (not just the DOM), and delay/dur here already
+   matched it exactly; "too fast" was a request to go slower than
+   the reference itself, not a bug in matching it, so every value
+   is stretched by the same factor to keep the original cascade/
+   timing relationships intact, just unfolding over ~2.3x longer. */
 type FloatKind = 'photo-host' | 'photo-beauty' | 'photo-food' | 'photo-fashion' | 'tag-standard' | 'tag-bubble' | 'tag-torn' | 'tag-host';
 
 interface FloatConfig {
@@ -33,14 +39,14 @@ interface FloatConfig {
 }
 
 const FLOAT_ITEMS: FloatConfig[] = [
-  { kind: 'photo-host',    left: '27.8%', top: '49.5%', width: '17.5%', depth: 1.1, rot: -3, phase: 0.4, ex: -70, ey: -540, er: 340,  delay: 880, dur: 1850 },
-  { kind: 'photo-beauty',  left: '47.4%', top: '46.5%', width: '18.2%', depth: 1.5, rot: 5,  phase: 1.9, ex: 90,  ey: -500, er: -300, delay: 640, dur: 1750 },
-  { kind: 'photo-food',    left: '64.3%', top: '19.7%', width: '17.6%', depth: 2,   rot: -2, phase: 3.4, ex: 60,  ey: -460, er: -320, delay: 220, dur: 1600 },
-  { kind: 'photo-fashion', left: '80%',   top: '42.9%', width: '17.6%', depth: 1.3, rot: 4,  phase: 4.7, ex: -40, ey: -420, er: 260,  delay: 420, dur: 1550 },
-  { kind: 'tag-standard',  left: '88.9%', top: '6.1%',  width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 40,  ey: -380, er: 300,  delay: 0,   dur: 1400 },
-  { kind: 'tag-bubble',    left: '86.5%', top: '80.8%', width: '13.5%', depth: 1.2, rot: -5, phase: 1.1, ex: 50,  ey: -360, er: -260, delay: 560, dur: 1450 },
-  { kind: 'tag-torn',      left: '57.5%', top: '21.2%', width: '9.5%',  depth: 1.7, rot: -6, phase: 2.6, ex: 30,  ey: -300, er: -220, delay: 100, dur: 1300 },
-  { kind: 'tag-host',      left: '69%',   top: '66.7%', width: '12.8%', depth: 1.4, rot: -3, phase: 0.6, ex: -20, ey: -340, er: 240,  delay: 480, dur: 1500 },
+  { kind: 'photo-host',    left: '27.8%', top: '49.5%', width: '17.5%', depth: 1.1, rot: -3, phase: 0.4, ex: -70, ey: -540, er: 340,  delay: 2025, dur: 4255 },
+  { kind: 'photo-beauty',  left: '47.4%', top: '46.5%', width: '18.2%', depth: 1.5, rot: 5,  phase: 1.9, ex: 90,  ey: -500, er: -300, delay: 1470, dur: 4025 },
+  { kind: 'photo-food',    left: '64.3%', top: '19.7%', width: '17.6%', depth: 2,   rot: -2, phase: 3.4, ex: 60,  ey: -460, er: -320, delay: 505,  dur: 3680 },
+  { kind: 'photo-fashion', left: '80%',   top: '42.9%', width: '17.6%', depth: 1.3, rot: 4,  phase: 4.7, ex: -40, ey: -420, er: 260,  delay: 965,  dur: 3565 },
+  { kind: 'tag-standard',  left: '88.9%', top: '6.1%',  width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 40,  ey: -380, er: 300,  delay: 0,    dur: 3220 },
+  { kind: 'tag-bubble',    left: '86.5%', top: '80.8%', width: '13.5%', depth: 1.2, rot: -5, phase: 1.1, ex: 50,  ey: -360, er: -260, delay: 1290, dur: 3335 },
+  { kind: 'tag-torn',      left: '57.5%', top: '21.2%', width: '9.5%',  depth: 1.7, rot: -6, phase: 2.6, ex: 30,  ey: -300, er: -220, delay: 230,  dur: 2990 },
+  { kind: 'tag-host',      left: '69%',   top: '66.7%', width: '12.8%', depth: 1.4, rot: -3, phase: 0.6, ex: -20, ey: -340, er: 240,  delay: 1105, dur: 3450 },
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -100,6 +106,8 @@ function useFloatMotion(containerRef: React.RefObject<HTMLDivElement>, itemRefs:
       const t = now / 1000;
       const width = root?.clientWidth ?? 1000;
       const narrow = width < 640 ? 0.5 : width < 900 ? 0.75 : 1;
+      const strength = 1.1; // matches the reference file's own default motionStrength
+      const k = strength * narrow;
       px += (tpx - px) * 0.07;
       py += (tpy - py) * 0.07;
       const elapsed = now - startTime;
@@ -124,9 +132,9 @@ function useFloatMotion(containerRef: React.RefObject<HTMLDivElement>, itemRefs:
         const eyO = it.ey * ease * narrow;
         const erO = it.er * ease * narrow;
 
-        const tx = (px * 30 * d + dx) + exO;
-        const ty = (py * 20 * d + dy) - it.hov * 16 + eyO;
-        const tr = it.rot + (px * 5.2 * d + dr) + it.hov * Math.sign(it.rot || 1) * 2 + erO;
+        const tx = (px * 30 * d + dx) * k + exO;
+        const ty = (py * 20 * d + dy) * k - it.hov * 16 + eyO;
+        const tr = it.rot + (px * 5.2 * d + dr) * k + it.hov * Math.sign(it.rot || 1) * 2 + erO;
 
         it.vx = (it.vx + (tx - it.x) * 0.085) * 0.84;
         it.vy = (it.vy + (ty - it.y) * 0.085) * 0.84;
@@ -180,10 +188,13 @@ export function HeroSection() {
   });
 
   let i = 0;
-  const nextRef = () => {
-    const idx = i++;
-    return (el: HTMLDivElement | null) => { itemRefs.current[idx] = el; };
-  };
+  // Stable per-index ref callbacks — created once and reused across
+  // renders (rather than a fresh closure per render), so React never
+  // sees the ref prop "change" and re-attach mid-animation.
+  const refCallbacks = useRef<Array<(el: HTMLDivElement | null) => void>>(
+    FLOAT_ITEMS.map((_, idx) => (el: HTMLDivElement | null) => { itemRefs.current[idx] = el; })
+  );
+  const nextRef = () => refCallbacks.current[i++];
 
   return (
     <section className="c365-scene" data-scene="1" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', background: '#0D0D0D' }}>
