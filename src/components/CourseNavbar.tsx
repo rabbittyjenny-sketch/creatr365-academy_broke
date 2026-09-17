@@ -55,7 +55,7 @@ export const CourseNavbar: React.FC = () => {
           {/* Two logo variants, one per theme — swapped by pure CSS (.dark ancestor)
               so it never races with the page's own dark-mode toggle effect. */}
           <img
-            src="https://ik.imagekit.io/ideas365logo/w-logo-side.png?updatedAt=1781551068906"
+            src="/images/w-logo-side.png"
             alt="Creatr365"
             className="navbar-logo-dark h-7 w-auto"
           />
