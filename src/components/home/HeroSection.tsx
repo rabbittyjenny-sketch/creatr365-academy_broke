@@ -9,7 +9,7 @@ import { ArrowRight } from 'lucide-react';
    (or removed from) Home.tsx without touching anything else. */
 const RED = '#CC0033';
 const BADGE = '/images/be-a-creator-live.png'; // existing asset, unchanged
-const LOGO = '/images/logoCreatr365/white_logo_center.png'; // real 2-line "Creatr / 365" logo asset
+const LOGO = '/images/w-logo-side.png'; // real "Creatr365." logo asset — confirmed by direct viewing, and named explicitly by the user
 const PHOTOS = {
   host: '/images/hero-host1.webp',
   beauty: '/images/hero-beauty1.webp',
@@ -202,35 +202,32 @@ export function HeroSection() {
       {/* soft brand-red glow, same treatment as the reference design */}
       <div style={{ position: 'absolute', left: '50%', top: '58%', width: '120vw', height: '70vh', transform: 'translate(-50%,-50%)', background: `radial-gradient(ellipse at center, ${RED}29, rgba(13,13,13,0) 62%)`, pointerEvents: 'none' }} />
 
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: 'clamp(10px,1.6vw,20px)', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
+      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
 
-        <h1 className="c365-h-nodefault" style={{ position: 'relative', zIndex: 2, margin: 0 }}>
-          {/* Real logo asset (public/images/logoCreatr365/white_logo_center.png) —
-              this used to be custom-typeset text in an unapproved font
-              (Playfair Display); that's why it could visually "change
-              color" like ordinary text — it WAS ordinary text, not the
-              logo. Swapped for the actual two-line logo graphic from the
-              project's own asset folder, so there is no text here at all
-              for any hover/theme rule to affect. */}
-          <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(220px,32vw,460px)', height: 'auto', ...lineStyle(0) }} />
-        </h1>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, flexWrap: 'wrap' }}>
 
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, marginTop: 'clamp(4px,.8vw,10px)', flexWrap: 'wrap' }}>
-
-          {/* left column: badge → CTAs → tagline (existing copy, unchanged) */}
+          {/* Left column — single flush-left stack, in the exact order
+              specified: logo, gap, badge, CTAs, English tagline, Thai
+              paragraph. Kept as one column (rather than the logo living
+              separately above) so "flush against the left edge" applies
+              to the whole group consistently, not just part of it. */}
           <div style={{
-            flex: '0 0 auto', width: 'clamp(220px,25vw,320px)', display: 'flex', flexDirection: 'column', gap: 'clamp(14px,1.8vw,20px)',
+            flex: '0 0 auto', width: 'clamp(240px,27vw,360px)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(20px,2.6vw,32px)',
             opacity: entered ? 1 : 0, transform: entered ? 'translateY(0)' : 'translateY(46px)',
             transition: 'transform .95s cubic-bezier(.16,1,.3,1) 280ms, opacity .7s ease-out 280ms',
           }}>
-            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: '100%', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
+            <h1 className="c365-h-nodefault" style={{ margin: 0 }}>
+              {/* Real logo asset, public/images/w-logo-side.png — confirmed
+                  by direct viewing (two-line "Creatr / 365." wordmark,
+                  matches the reference design exactly). Named explicitly
+                  by the user; not a guess. */}
+              <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(220px,24vw,340px)', height: 'auto', ...lineStyle(0) }} />
+            </h1>
 
-            {/* width:max-content + nowrap so the two CTAs never wrap onto
-                separate lines — the column above is deliberately narrow
-                (to match the badge's proportions), but that width shouldn't
-                also force-wrap this row; there's empty space to its right
-                before the photo scatter starts, so letting it size to its
-                own content is safe. */}
+            {/* Badge sized down deliberately — it was reading larger/more
+                dominant than the logo above it, which had it backwards. */}
+            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
+
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', width: 'max-content' }}>
               <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px clamp(20px,2.6vw,36px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4, whiteSpace: 'nowrap' }}>
                 BEGIN NOW <ArrowRight size={15} />
@@ -240,7 +237,15 @@ export function HeroSection() {
               </Link>
             </div>
 
-            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 2, color: 'rgba(255,255,255,.55)' }}>
+            {/* English tagline — restored, now left-aligned inside this
+                column (its earlier full-width centered placement at the
+                very bottom was wrong per this feedback) and kept to one
+                line. */}
+            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontWeight: 600, fontSize: 'clamp(9px,.85vw,12px)', letterSpacing: '.22em', color: '#F8F8F6', textAlign: 'left', whiteSpace: 'nowrap' }}>
+              A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE
+            </p>
+
+            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 2, color: 'rgba(255,255,255,.55)', textAlign: 'left' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ
               แต่คือการ <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong> และ{' '}
@@ -290,13 +295,6 @@ export function HeroSection() {
 
           </div>
         </div>
-
-        {/* Missing from the earlier build — restored from the reference
-            design: full-width, single line, sits below everything else
-            (last child of this flex-column wrapper). */}
-        <p style={{ position: 'relative', zIndex: 1, margin: 0, marginTop: 'clamp(14px,2vw,26px)', fontFamily: 'Overpass, sans-serif', fontWeight: 600, fontSize: 'clamp(10px,1.15vw,15px)', letterSpacing: '.34em', color: '#F8F8F6', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE
-        </p>
       </div>
 
       {/* Small screens: let the scatter wrap under the CTA column instead of
