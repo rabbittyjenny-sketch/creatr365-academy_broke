@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -35,30 +36,115 @@ const CARDS: CardData[] = [
   { img: '/images/j07.png', alt: 'ทำงานร่วมกับทีมหลังบ้าน ได้รู้ใจและพร้อม Support' },
 ];
 
+/* ════════════════════════════════════════════════════════
+   Card motion — deliberately not the site's usual data-aos
+   fade-up (that's the flat, generic "slide-and-fade" every
+   basic template/PowerPoint deck uses, which is exactly what
+   was asked to move away from here), and not a scale-to-zoom
+   hover either (scaling the photo past its frame is what was
+   cropping it — the whole point was to stop hiding any of the
+   photo). Two effects instead, both used for the reasons above:
+
+   1. Entrance: a diagonal clip-path wipe. The card reveals along
+      a moving diagonal edge rather than just fading up — a
+      "reveal" rather than a "slide", closer to an editorial/film
+      transition than a slide-deck one.
+   2. Hover: a light 3D tilt that follows the pointer, plus a soft
+      moving highlight — like glass catching light, not the photo
+      itself moving or scaling. Nothing here ever changes the
+      photo's own scale or crop; object-fit is `contain`, so the
+      full frame is always visible regardless of hover state.
+════════════════════════════════════════════════════════ */
+function useTiltHover(ref: React.RefObject<HTMLDivElement>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(hover: hover)').matches) return; // skip on touch devices
+
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;  // 0..1
+      const py = (e.clientY - r.top) / r.height;  // 0..1
+      const ry = (px - 0.5) * 14;  // rotateY range
+      const rx = (0.5 - py) * 10;  // rotateX range
+      el.style.setProperty('--rx', `${rx.toFixed(2)}deg`);
+      el.style.setProperty('--ry', `${ry.toFixed(2)}deg`);
+      el.style.setProperty('--mx', `${(px * 100).toFixed(1)}%`);
+      el.style.setProperty('--my', `${(py * 100).toFixed(1)}%`);
+    };
+    const onLeave = () => {
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    };
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerleave', onLeave);
+    return () => {
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+    };
+  }, [ref]);
+}
+
+function useRevealOnScroll(ref: React.RefObject<HTMLDivElement>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.classList.add('is-in');
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            el.classList.add('is-in');
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
+}
+
 function BrandFitCard({ card, i }: { card: CardData; i: number }) {
   const accent = ACCENTS[i];
   const wide = i < 3; // row 1 = 3 wide cards, row 2 = 4 narrower cards — matches the reference layout
+  const cardRef = useRef<HTMLDivElement>(null);
+  useTiltHover(cardRef);
+  useRevealOnScroll(cardRef);
+
   return (
+    // The clip-path reveal lives on the INNER div, not this outer one.
+    // IntersectionObserver measures an element's actually-visible area —
+    // a collapsed clip-path (zero-width sliver, the reveal's starting
+    // state) makes an element permanently report zero intersection, so
+    // observing the same node we clip creates a deadlock: it can never
+    // detect "now visible" because clipping already made it invisible.
+    // This outer node stays unclipped so it can always be observed
+    // correctly; the inner node is what actually animates.
     <div
-      data-aos="fade-up"
-      data-aos-delay={String(i * 90)}
-      className={`c365-brandfit-card${wide ? ' c365-motion-card' : ''}`}
+      ref={cardRef}
+      className="c365-brandfit-card"
       style={{
-        position: 'relative',
         gridColumn: wide ? 'span 4' : 'span 3',
         aspectRatio: wide ? '4/3.1' : '4/3.6',
-        borderRadius: 16,
-        overflow: 'hidden',
-        borderTop: `3px solid ${accent}`,
-        background: '#141414',
-        boxShadow: '0 14px 34px rgba(0,0,0,.4)',
       }}
     >
-      <img
-        src={card.img}
-        alt={card.alt}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-      />
+      <div
+        className="c365-brandfit-card-inner"
+        style={{
+          transitionDelay: `${i * 70}ms`,
+          borderTop: `3px solid ${accent}`,
+          background: `linear-gradient(160deg, ${accent}22, #101010 70%)`,
+        }}
+      >
+        <div className="c365-brandfit-sheen" />
+        <img src={card.img} alt={card.alt} />
+      </div>
     </div>
   );
 }
@@ -100,12 +186,44 @@ export function BrandFitSection() {
           single-line heading, verified by measuring its rendered width
           against the underline's width: both 803px, an exact match) — the
           override doesn't touch src/index.css's shared rule, just adds a
-          thicker ::after for this one class. */}
+          thicker ::after for this one class.
+
+          Card motion, see the two hooks above for the reasoning:
+          - clip-path reveal on scroll (.is-in), not a fade-up
+          - 3D pointer-tilt + moving sheen on hover, not a scale-zoom
+          - img uses object-fit: contain, never cover — the whole photo
+            stays visible in every state, nothing is ever cropped. */}
       <style>{`
-        .c365-brandfit-card { transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease; }
-        .c365-brandfit-card:hover { transform: translateY(-6px); box-shadow: 0 22px 44px rgba(0,0,0,.55); }
-        .c365-brandfit-card:hover img { transform: scale(1.045); }
-        .c365-brandfit-card img { transition: transform .5s cubic-bezier(.16,1,.3,1); }
+        .c365-brandfit-card {
+          position: relative;
+        }
+        .c365-brandfit-card-inner {
+          position: absolute; inset: 0;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 14px 34px rgba(0,0,0,.4);
+          perspective: 900px;
+          clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+          opacity: 0;
+          transform: translateY(18px);
+          transition: clip-path 1.1s cubic-bezier(.19,1,.22,1), opacity .8s ease-out, transform .9s cubic-bezier(.19,1,.22,1), box-shadow .3s ease;
+        }
+        .c365-brandfit-card.is-in .c365-brandfit-card-inner {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+          opacity: 1;
+          transform: translateY(0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+        }
+        .c365-brandfit-card-inner img {
+          position: absolute; inset: 0; width: 100%; height: 100%;
+          object-fit: contain; object-position: center;
+        }
+        .c365-brandfit-card:hover .c365-brandfit-card-inner { box-shadow: 0 24px 50px rgba(0,0,0,.55); }
+        .c365-brandfit-sheen {
+          position: absolute; inset: 0; z-index: 1; pointer-events: none;
+          opacity: 0; transition: opacity .3s ease;
+          background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.14), rgba(255,255,255,0) 45%);
+        }
+        .c365-brandfit-card:hover .c365-brandfit-sheen { opacity: 1; }
         .c365-h-thick::after { height: 3px !important; }
         @media (max-width: 900px) {
           .c365-brandfit-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -115,7 +233,7 @@ export function BrandFitSection() {
           .c365-brandfit-grid { grid-template-columns: 1fr !important; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .c365-brandfit-card, .c365-brandfit-card img { transition: none !important; }
+          .c365-brandfit-card-inner { transition: opacity .3s ease !important; clip-path: none !important; transform: none !important; }
         }
       `}</style>
     </section>
