@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { Download, FileText, Loader2, X } from 'lucide-react';
+import { ToolboxDownloadConsentDialog } from '@/components/ToolboxDownloadConsentDialog';
 
 interface ToolboxAsset {
   id: string;
@@ -49,6 +50,13 @@ const Toolbox: React.FC = () => {
   const [pendingAsset, setPendingAsset] = useState<ToolboxAsset | null>(null);
   const [form, setForm] = useState({ gender: '', age_range: '', occupation: '' });
   const [saving, setSaving] = useState(false);
+  // Which assets this user already accepted the free-file license for —
+  // ToolboxDownloadConsentDialog only needs to show once per asset, same
+  // "ask once, log every time" pattern as DownloadConsentDialog uses for
+  // course resources (see consentedResourceIds in Dashboard.tsx).
+  const [consentedAssetIds, setConsentedAssetIds] = useState<Set<string>>(new Set());
+  const [pendingConsentAsset, setPendingConsentAsset] = useState<ToolboxAsset | null>(null);
+  const [pendingConsentDemo, setPendingConsentDemo] = useState<{ gender: string; age_range: string; occupation: string } | null>(null);
 
   useEffect(() => {
     supabase
@@ -64,6 +72,9 @@ const Toolbox: React.FC = () => {
         supabase.from('profiles').select('gender,age_range,occupation,line_user_id')
           .eq('user_id', session.user.id).maybeSingle()
           .then(({ data }) => setProfile(data || null));
+        supabase.from('toolbox_downloads').select('asset_id')
+          .eq('user_id', session.user.id).eq('consented', true)
+          .then(({ data }) => setConsentedAssetIds(new Set((data || []).map(d => d.asset_id))));
       }
     });
   }, []);
@@ -112,12 +123,27 @@ const Toolbox: React.FC = () => {
         gender: demo.gender || null,
         age_range: demo.age_range || null,
         occupation: demo.occupation || null,
+        consented: true,
       });
       await supabase.rpc('increment_toolbox_download', { _asset_id: asset.id });
       setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, download_count: a.download_count + 1 } : a));
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  // Free-file license consent (ToolboxDownloadConsentDialog) is a separate
+  // gate from the one-time demographic form below — different purpose
+  // (legal acceptance vs. business planning data), different wording, and
+  // checked independently via consentedAssetIds so it's only asked once per
+  // asset, not re-asked on every repeat download of the same file.
+  const proceedToDownload = (asset: ToolboxAsset, demo: { gender: string; age_range: string; occupation: string }) => {
+    if (consentedAssetIds.has(asset.id)) {
+      performDownload(asset, demo);
+      return;
+    }
+    setPendingConsentDemo(demo);
+    setPendingConsentAsset(asset);
   };
 
   const handleDownloadClick = (asset: ToolboxAsset) => {
@@ -134,7 +160,7 @@ const Toolbox: React.FC = () => {
       setPendingAsset(asset);
       return;
     }
-    performDownload(asset, {
+    proceedToDownload(asset, {
       gender: profile?.gender || '',
       age_range: profile?.age_range || '',
       occupation: profile?.occupation || '',
@@ -154,10 +180,25 @@ const Toolbox: React.FC = () => {
       setProfile(prev => ({ ...(prev || { line_user_id: null }), ...form }));
       const asset = pendingAsset;
       setPendingAsset(null);
-      await performDownload(asset, form);
+      proceedToDownload(asset, form);
     } finally {
       setSaving(false);
     }
+  };
+
+  const confirmLicenseAndDownload = async () => {
+    if (!pendingConsentAsset || !pendingConsentDemo) return;
+    const asset = pendingConsentAsset;
+    const demo = pendingConsentDemo;
+    setConsentedAssetIds(prev => new Set(prev).add(asset.id));
+    setPendingConsentAsset(null);
+    setPendingConsentDemo(null);
+    await performDownload(asset, demo);
+  };
+
+  const cancelLicenseConsent = () => {
+    setPendingConsentAsset(null);
+    setPendingConsentDemo(null);
   };
 
   return (
@@ -318,6 +359,13 @@ const Toolbox: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ToolboxDownloadConsentDialog
+        open={pendingConsentAsset !== null}
+        assetTitle={pendingConsentAsset?.title || ''}
+        onConfirm={confirmLicenseAndDownload}
+        onCancel={cancelLicenseConsent}
+      />
     </>
   );
 };

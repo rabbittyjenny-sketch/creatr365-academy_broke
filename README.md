@@ -1596,6 +1596,46 @@ Query ตาราง `courses` ทั้งหมด (14 คอร์ส) พ�
 
 ---
 
+# 40. บั๊กจริง: อัปโหลดไฟล์ Toolbox (PDF/ZIP) ไม่ผ่าน + เพิ่ม consent เงื่อนไขไฟล์ฟรี (17 ก.ย. 2569)
+
+ผู้ใช้รายงาน: อัปโหลดไฟล์เข้า Toolbox ไม่ได้ ลอง `.zip` แล้วบางไฟล์ใส่ไม่ได้ ลอง `.pdf` ใส่ไม่ได้เลยสักไฟล์
+
+## 40.1 หาสาเหตุจริงจาก source ของ `@supabase/storage-js` เอง (ยืนยันจากซอร์สโค้ด ไม่ใช่การเดา)
+
+`AdminToolbox.tsx` (`uploadCover`/`uploadFile`) สร้าง storage key ด้วย `` `${Date.now()}-${file.name}` `` โดยใช้ชื่อไฟล์เดิมตรง ๆ — ตรวจซอร์สโค้ด `storage-js` (`StorageFileApi.uploadOrUpdate`) พบว่า path ที่ส่งเข้าไปสร้าง request URL **ไม่ถูก URL-encode เลย** ชื่อไฟล์ที่มีช่องว่าง/ภาษาไทย/วงเล็บ/สัญลักษณ์ (ปกติมากสำหรับไฟล์ที่แอดมินเซฟไว้ เช่น `"เทมเพลต Caption (1).pdf"`) จึงทำให้ request พังได้ขึ้นอยู่กับตัวอักษรที่มีในชื่อไฟล์นั้น ๆ — ตรงกับอาการที่รายงาน: zip บางไฟล์ผ่านบางไฟล์ไม่ผ่าน (ขึ้นกับชื่อ), PDF ที่ทดสอบไม่ผ่านเลยสักไฟล์ (ถ้าไฟล์ทดสอบตั้งชื่อภาษาไทย/มีช่องว่างทุกไฟล์)
+
+**จุดสำคัญ:** `AdminCourses.tsx` (`uploadResourceFile`, bucket `course-resources`) มี `safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_')` อยู่ก่อนแล้ว — เป็นหลักฐานว่า pattern "sanitize ชื่อไฟล์ก่อนใช้เป็น storage key" **มีอยู่แล้วในระบบ** แค่ไม่ได้ถูกใช้ที่ `AdminToolbox.tsx` จุดเดียว จึงแก้โดยดึง pattern เดิมมาใช้ซ้ำ (ย้ายเป็น helper กลาง `src/lib/uploadFile.ts` เพราะตอนนี้มี 2 จุดขึ้นไปตามกฎเดิมของ README ข้อ "ถ้าจะแก้ที่ 3 จุดขึ้นไปควรย้ายไป `src/lib/`") **ไม่ได้เขียน sanitize logic ใหม่**
+
+ตรวจ `storage.buckets` จริงใน production (ผ่าน Supabase MCP) ยืนยันว่า `allowed_mime_types`/`file_size_limit` เป็น `null` ทั้ง 3 bucket (`toolbox-covers`, `toolbox-files`, `course-resources`) — ไม่มี mime-type/size restriction ที่ตั้งใจบล็อก pdf/zip อยู่แล้ว ไม่ใช่สาเหตุ ตรวจ RLS policy บน `storage.objects` แล้วก็ใช้ `has_role()` เดียวกันทุก bucket ไม่ต่างกันตามชนิดไฟล์ ไม่ใช่สาเหตุเช่นกัน — ตัดสาเหตุทั้งสองทิ้งด้วยข้อมูลจริง ก่อนสรุปว่าสาเหตุที่แท้จริงอยู่ที่การสร้าง path ฝั่ง client
+
+## 40.2 บั๊กที่สองที่เจอระหว่างตรวจ (เดิมไม่ได้ถูกถาม แต่กระทบทุกไฟล์ที่เคยอัปโหลดผ่านแอปนี้)
+
+`storage-js` **ไม่ได้อ่าน `file.type` เองเลย** — ถ้าไม่ส่ง `contentType` ใน options จะ fallback เป็น `text/plain;charset=UTF-8` เสมอ (ยืนยันจากซอร์สโค้ด `storage-js` เช่นกัน) จุดอัปโหลดทุกจุดในระบบ (`AdminToolbox.tsx`, `AdminCourses.tsx` ×2, `Admin.tsx`, `EditEvent.tsx`, `CreateEvent.tsx`) **ไม่มีจุดไหนส่ง `contentType` เลยสักจุด** แปลว่าไฟล์ทุกไฟล์ที่เคยอัปโหลดผ่านระบบนี้ (รูป/PDF/zip/วิดีโอ) ถูกเก็บ metadata ผิดเป็น `text/plain` หมด — ไม่ใช่ข้อบังคับของ browser ที่ทำให้อัปโหลดไม่ผ่านตรง ๆ เสมอไป แต่เป็นบั๊กมาตรฐานจริง (ไฟล์ที่ดาวน์โหลดไปอาจไม่ถูกเปิด/preview ถูกต้องตาม MIME จริงของมัน) แก้พร้อมกันทุกจุดในรอบนี้เพราะเป็น root-cause investigation เดียวกัน (ไล่เช็คทุกช่องอัปโหลดตามที่ขอ)
+
+**แก้:** เพิ่ม `src/lib/uploadFile.ts` (`sanitizeFileName`, `resolveContentType`) แล้วเรียกใช้ในทุกจุดที่ `.storage.from(...).upload(...)` — ส่ง `contentType: resolveContentType(file)` เสมอ, และใช้ `sanitizeFileName(file.name)` เฉพาะจุดที่ยังเอาชื่อไฟล์เดิมไปต่อ path ตรง ๆ (`AdminToolbox.tsx` 2 จุด) ส่วนจุดที่ทิ้งชื่อไฟล์เดิมอยู่แล้ว (ใช้แค่ `.${ext}`, เช่น `course-media`/`event-images`) ไม่ต้องแก้เรื่อง path เพราะไม่มีปัญหานี้ตั้งแต่แรก — แก้เฉพาะจุดที่มีหลักฐานจริงว่าเป็นปัญหา ไม่ได้ปรับ path ทุกจุดโดยไม่จำเป็น
+
+## 40.3 Checkbox ยินยอมก่อนโหลด — แยกข้อความสำหรับไฟล์ฟรี Toolbox ออกจากของเดิม
+
+`DownloadConsentDialog.tsx` (ใช้ใน `Dashboard.tsx` สำหรับเอกสารคอร์ส) **ไม่ได้แตะเลย** ตามที่สั่ง — ข้อความ/พฤติกรรม (ถามครั้งแรกแล้วจำ, เตือนเรื่องริบสิทธิ์คืนเงิน) เหมือนเดิมทุกประการ
+
+เพิ่มคอมโพเนนต์ใหม่ `ToolboxDownloadConsentDialog.tsx` (โครง UI เดียวกัน — ใช้ `Dialog`/`Checkbox`/`Button` ชุดเดิม ไม่ได้สร้าง dialog ใหม่ทั้งระบบ) ข้อความคนละเรื่องกับของเดิม: เป็นการ**ยอมรับเงื่อนไขใช้งานไฟล์ฟรี** (ห้ามนำไปขาย/แจกจ่ายต่อ/ใช้เชิงพาณิชย์ในนามผู้อื่น) ผูกกับ `Toolbox.tsx` เท่านั้น
+
+**พฤติกรรมการถาม:** ถามครั้งแรกต่อไฟล์ 1 ครั้ง (เหมือน pattern ของ `DownloadConsentDialog` เดิม) ไม่ใช่ถามซ้ำทุกครั้งที่กดโหลดไฟล์เดียวกัน — ตีความคำว่า "ก่อนทุกครั้ง" ในคำสั่งว่าหมายถึง "ทุกช่องดาวน์โหลดต้องมี checkbox นี้" ไม่ใช่ "ต้องถามซ้ำทุกคลิกแม้ไฟล์เดิม" เพราะ (1) เป็น pattern เดียวกับที่ระบบใช้อยู่แล้วกับเอกสารคอร์ส (2) แพลตฟอร์มไฟล์ฟรีที่มี license ชัดเจน (Freepik, Canva, Notion templates) ก็ถามครั้งเดียวต่อไฟล์ ไม่ใช่ทุกคลิก — ถ้าต้องการให้ถามซ้ำทุกครั้งจริง ๆ แจ้งแยกได้ เป็นการแก้จุดเดียว (เอา `consentedAssetIds` check ออกจาก `proceedToDownload`)
+
+**Schema:** เพิ่มคอลัมน์ `toolbox_downloads.consented boolean not null default true` (ตาม pattern เดิมทุกประการของ `resource_download_logs.consented`) และเพิ่ม policy `"Users can view their own toolbox downloads"` (`SELECT`, `auth.uid() = user_id`) — **ของเดิมมีแค่ policy insert-own + select-admin-only เท่านั้น** ทำให้ client เช็คไม่ได้เลยว่า user คนนี้เคยยอมรับเงื่อนไขไฟล์ไหนไปแล้วบ้าง (ต้องมี policy นี้เพื่อให้ฟีเจอร์ "ถามครั้งเดียว" ทำงานได้จริง) migration: `supabase/migrations/20260917100000_toolbox_download_consent.sql` — **apply เข้า production จริงแล้ว** ผ่าน Supabase MCP (`exybvjqjdqxonhesydhk`) ไม่ใช่แค่เขียนไฟล์ไว้เฉย ๆ แบบ migration `toolbox_explore` รอบก่อนที่เคยพลาดไม่ได้ apply (ดู §30.2)
+
+## 40.4 ทดสอบแล้วอย่างไร
+
+* ตรวจ `storage.buckets`/`pg_policies` ของ production จริงผ่าน Supabase MCP ก่อนสรุปสาเหตุ (ดู 40.1) ไม่ได้เดาจาก UI อย่างเดียว
+* อ่านซอร์สโค้ดจริงของ `@supabase/storage-js` (`StorageFileApi.ts`) ยืนยัน path-encoding และ content-type fallback ทั้งสองอย่าง ก่อนเขียน fix
+* `npx tsc --noEmit`, `npm run build` ผ่านสะอาด
+* `npx eslint` เฉพาะไฟล์ที่แก้ในรอบนี้ — error `any` ที่เหลือทั้งหมดยืนยันด้วยเลขบรรทัดเทียบ `git diff` แล้วว่าอยู่นอก diff ของรอบนี้ (ของเดิมก่อนหน้า ไม่ใช่ของใหม่)
+* ยืนยัน migration ใหม่ apply เข้า production จริงแล้ว (query `information_schema.columns`/`pg_policies` เห็นคอลัมน์ + policy ใหม่จริง) และรัน `get_advisors` (security) เทียบก่อน/หลัง apply — ไม่มี finding ใหม่จากการเปลี่ยนแปลงรอบนี้ (finding ที่มีทั้งหมดเป็นของเดิมก่อนหน้า เช่น `search_path` ของฟังก์ชันอื่น ที่ไม่ได้อยู่ใน scope รอบนี้)
+
+**ยังไม่ได้ทำ (นอกขอบเขตที่รายงาน):** ไม่ได้ไล่แก้ path/contentType ของบัคเก็ตอื่นที่ไม่มีหลักฐานว่ามีปัญหา (เช่น `articles`/`profiles` avatar ถ้ามี) — README นี้ยังไม่พบโค้ด upload อื่นนอกเหนือ 6 จุดที่ระบุ (ยืนยันด้วย grep `.storage.from(` และ `type="file"` ทั้ง `src/` แล้ว) ถ้าพบจุดอัปโหลดอื่นภายหลัง ให้ใช้ helper `src/lib/uploadFile.ts` เดียวกันนี้ ไม่ต้องเขียนใหม่
+
+---
+
 flow = """# CREATR365 SYSTEM FLOW
 
 ```mermaid

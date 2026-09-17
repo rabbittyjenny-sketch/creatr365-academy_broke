@@ -12,6 +12,7 @@ import { User } from '@supabase/supabase-js';
 import { AuthSheet } from '@/components/AuthSheet';
 import { SEOHead } from '@/components/SEOHead';
 import { Trash2 } from 'lucide-react';
+import { resolveContentType } from '@/lib/uploadFile';
 import { z } from 'zod';
 
 const eventSchema = z.object({
@@ -247,7 +248,7 @@ const EditEvent = () => {
 
         const { error: uploadError } = await supabase.storage
           .from('event-images')
-          .upload(filePath, imageFile);
+          .upload(filePath, imageFile, { contentType: resolveContentType(imageFile) });
 
         if (uploadError) throw uploadError;
 

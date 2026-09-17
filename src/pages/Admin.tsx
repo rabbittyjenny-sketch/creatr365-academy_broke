@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { SEOHead } from '@/components/SEOHead';
+import { resolveContentType } from '@/lib/uploadFile';
 
 // Input validation schema
 const eventSchema = z.object({
@@ -131,7 +132,7 @@ const Admin = () => {
       
       const { error: uploadError } = await supabase.storage
         .from('event-images')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { upsert: true, contentType: resolveContentType(file) });
 
       if (uploadError) throw uploadError;
 
