@@ -126,7 +126,22 @@ function useFloatMotion(containerRef: React.RefObject<HTMLDivElement>, itemRefs:
         let ease = 1, targetOp = 0;
         if (localT <= 0) { ease = 1; targetOp = 0; }
         else if (localT >= it.dur) { ease = 0; targetOp = 1; }
-        else { const p = localT / it.dur; ease = Math.pow(1 - p, 3); targetOp = Math.min(1, localT / 220); }
+        else {
+          const p = localT / it.dur;
+          // was: Math.pow(1 - p, 3) — a cubic that has ZERO slope at p=1 (matches the
+          // held ease=0 after landing, fine) but a NON-zero slope at p=0 (≈ -3/dur).
+          // Right before p=0 the value is pinned flat at ease=1 (slope 0), so the
+          // instant an item's delay elapses, its target suddenly starts moving at
+          // that non-zero rate — a step in target-velocity the spring must snap onto,
+          // which is exactly the stutter before the "roll down" settles.
+          // Fix: smootherstep (Perlin) has zero 1st AND 2nd derivative at BOTH p=0
+          // and p=1, so it matches the flat pre/post regions on both sides — no
+          // velocity or acceleration step anywhere. p, dur, delay all untouched, so
+          // total timing/speed is identical; only the shape of the curve changed.
+          const s = p * p * p * (p * (p * 6 - 15) + 10);
+          ease = 1 - s;
+          targetOp = Math.min(1, localT / 220);
+        }
         it.op += (targetOp - it.op) * 0.2;
 
         const exO = it.ex * ease * narrow;
