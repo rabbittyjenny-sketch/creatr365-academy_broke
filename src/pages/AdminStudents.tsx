@@ -4,14 +4,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 
 /**
  * Per-student audit view — search by Master Key (student_id) or email, see
  * when they registered, what they bought (price paid / discount applied),
- * lesson-completion % per course, and every resource/toolbox download —
- * all in one place so a refund/"I paid but got nothing" dispute can be
- * checked without digging through 4-5 separate admin pages.
+ * lesson-completion % per course (expandable to each lesson's own quiz
+ * score), every resource/toolbox download, and the end-of-course Diagnostic
+ * Quiz score — all in one place so a refund/"I paid but got nothing"
+ * dispute, or a "did the exam scoring actually work" check, can be done
+ * without digging through separate admin pages or trusting the student's
+ * own screenshot of their Dashboard.
  *
  * What this page does NOT show, because the system does not track it:
  * a per-lesson "number of times opened" count. module_progress only has a
@@ -39,11 +42,29 @@ interface EnrollmentDetail {
   discount_value: number | null;
 }
 
+interface ModuleProgressDetail {
+  module_id: string;
+  code: string;
+  name: string;
+  status: string;
+  score: number | null;
+  completed_at: string | null;
+}
+
+interface DiagnosticAttemptDetail {
+  attempt_number: number;
+  score_pct: number;
+  accepted: boolean;
+  created_at: string;
+}
+
 interface CourseProgress {
   course_id: string;
   course_title: string;
   total_modules: number;
   completed_modules: number;
+  modules: ModuleProgressDetail[];
+  diagnosticAttempts: DiagnosticAttemptDetail[];
 }
 
 interface DownloadEvent {
@@ -77,6 +98,15 @@ const AdminStudents: React.FC = () => {
   const [detail, setDetail] = useState<StudentDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+
+  const toggleCourse = (courseId: string) => {
+    setExpandedCourses(prev => {
+      const next = new Set(prev);
+      if (next.has(courseId)) next.delete(courseId); else next.add(courseId);
+      return next;
+    });
+  };
 
   const search = async () => {
     const q = query.trim();
@@ -104,6 +134,7 @@ const AdminStudents: React.FC = () => {
   const loadStudent = async (studentId: string) => {
     setLoadingDetail(true);
     setError(null);
+    setExpandedCourses(new Set());
     try {
       // 1. Every identity (web + LINE) linked under this Master Key.
       const { data: accounts, error: acctErr } = await supabase
@@ -171,30 +202,67 @@ const AdminStudents: React.FC = () => {
         discount_value: e.promo_codes?.discount_value ?? null,
       }));
 
-      // 3. Lesson-completion % per enrolled course.
+      // 3. Lesson-by-lesson completion + score per enrolled course, plus the
+      // end-of-course Diagnostic Quiz attempts — the two things needed to
+      // actually audit "did scoring/pass-fail work for this student", not
+      // just a rolled-up percentage.
       const courseIds = [...new Set(enrollments.map(e => e.course_id))];
       let progress: CourseProgress[] = [];
       if (courseIds.length > 0) {
-        const [{ data: mods }, { data: prog }] = await Promise.all([
-          supabase.from('course_modules').select('id,course_id').in('course_id', courseIds),
-          supabase.from('module_progress').select('module_id,status').in('user_id', ids),
+        const [{ data: mods }, { data: prog }, { data: diag }] = await Promise.all([
+          supabase.from('course_modules').select('id,course_id,code,name,sort_order').in('course_id', courseIds),
+          supabase.from('module_progress').select('module_id,status,score,completed_at').in('user_id', ids),
+          supabase.from('diagnostic_attempts').select('course_id,attempt_number,score_pct,accepted,created_at').in('user_id', ids).in('course_id', courseIds),
         ]);
-        const modsByCourse = new Map<string, string[]>();
-        (mods || []).forEach((m: { id: string; course_id: string }) => {
+
+        type ModuleRow = { id: string; course_id: string; code: string; name: string; sort_order: number };
+        const modsByCourse = new Map<string, ModuleRow[]>();
+        (mods as ModuleRow[] | null || []).forEach((m) => {
           if (!modsByCourse.has(m.course_id)) modsByCourse.set(m.course_id, []);
-          modsByCourse.get(m.course_id)!.push(m.id);
+          modsByCourse.get(m.course_id)!.push(m);
         });
-        const progRows = (prog as { module_id: string; status: string }[] | null) || [];
-        const completedModuleIds = new Set(progRows.filter(p => p.status === 'completed').map(p => p.module_id));
+
+        type ProgRow = { module_id: string; status: string; score: number | null; completed_at: string | null };
+        const progByModule = new Map<string, ProgRow>();
+        ((prog as ProgRow[] | null) || []).forEach(p => {
+          // If both linked identities somehow have a row for the same
+          // module, "completed" always wins as the more correct answer.
+          const existing = progByModule.get(p.module_id);
+          if (!existing || (existing.status !== 'completed' && p.status === 'completed')) {
+            progByModule.set(p.module_id, p);
+          }
+        });
+
+        type DiagRow = { course_id: string; attempt_number: number; score_pct: number; accepted: boolean; created_at: string };
+        const diagByCourse = new Map<string, DiagRow[]>();
+        ((diag as DiagRow[] | null) || []).forEach(d => {
+          if (!diagByCourse.has(d.course_id)) diagByCourse.set(d.course_id, []);
+          diagByCourse.get(d.course_id)!.push(d);
+        });
+
         progress = enrollments
           .filter((e, i) => enrollments.findIndex(x => x.course_id === e.course_id) === i)
           .map(e => {
-            const moduleIds = modsByCourse.get(e.course_id) || [];
+            const courseModules = (modsByCourse.get(e.course_id) || []).slice().sort((a, b) => a.sort_order - b.sort_order);
+            const modules: ModuleProgressDetail[] = courseModules.map(m => {
+              const p = progByModule.get(m.id);
+              return {
+                module_id: m.id,
+                code: m.code,
+                name: m.name,
+                status: p?.status ?? 'not_started',
+                score: p?.score ?? null,
+                completed_at: p?.completed_at ?? null,
+              };
+            });
+            const diagnosticAttempts = (diagByCourse.get(e.course_id) || []).sort((a, b) => a.attempt_number - b.attempt_number);
             return {
               course_id: e.course_id,
               course_title: e.course_title,
-              total_modules: moduleIds.length,
-              completed_modules: moduleIds.filter(id => completedModuleIds.has(id)).length,
+              total_modules: modules.length,
+              completed_modules: modules.filter(m => m.status === 'completed').length,
+              modules,
+              diagnosticAttempts,
             };
           });
       }
@@ -304,12 +372,54 @@ const AdminStudents: React.FC = () => {
                 <div className="rounded-md border border-white/10 divide-y divide-white/5">
                   {detail.progress.map(p => {
                     const pct = p.total_modules > 0 ? Math.round((p.completed_modules / p.total_modules) * 100) : 0;
+                    const isOpen = expandedCourses.has(p.course_id);
                     return (
-                      <div key={p.course_id} className="px-3 py-2 flex items-center justify-between gap-3 text-sm">
-                        <span>{p.course_title}</span>
-                        <span className="text-white/50 text-xs font-mono shrink-0">
-                          {p.total_modules > 0 ? `${p.completed_modules}/${p.total_modules} บท (${pct}%)` : 'ไม่มีบทเรียน'}
-                        </span>
+                      <div key={p.course_id}>
+                        <button
+                          onClick={() => toggleCourse(p.course_id)}
+                          className="w-full px-3 py-2 flex items-center justify-between gap-3 text-sm hover:bg-white/5 text-left"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-white/40" /> : <ChevronRight className="w-3.5 h-3.5 text-white/40" />}
+                            {p.course_title}
+                          </span>
+                          <span className="text-white/50 text-xs font-mono shrink-0">
+                            {p.total_modules > 0 ? `${p.completed_modules}/${p.total_modules} บท (${pct}%)` : 'ไม่มีบทเรียน'}
+                          </span>
+                        </button>
+                        {isOpen && (
+                          <div className="bg-black/20 px-3 py-2 space-y-2">
+                            {p.modules.length === 0 ? (
+                              <p className="text-xs text-white/30">ยังไม่มีบทเรียนตั้งค่าไว้ในคอร์สนี้</p>
+                            ) : (
+                              <div className="space-y-1">
+                                {p.modules.map(m => (
+                                  <div key={m.module_id} className="flex items-center gap-3 text-xs">
+                                    <span className="flex-1 min-w-0 truncate text-white/70">{m.name}</span>
+                                    <span className="shrink-0 font-mono text-white/30 w-16 truncate">{m.code}</span>
+                                    <span className={`shrink-0 font-mono w-24 text-center ${m.status === 'completed' ? 'text-emerald-400' : m.status === 'in_progress' ? 'text-amber-400' : 'text-white/30'}`}>
+                                      {m.status === 'completed' ? 'ผ่านแล้ว' : m.status === 'in_progress' ? 'กำลังเรียน' : 'ยังไม่เริ่ม'}
+                                    </span>
+                                    <span className="shrink-0 font-mono text-white/50 w-14 text-right">{m.score != null ? `${m.score}%` : '-'}</span>
+                                    <span className="shrink-0 font-mono text-white/30 w-32 text-right">{m.completed_at ? dateTh(m.completed_at) : '-'}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {p.diagnosticAttempts.length > 0 && (
+                              <div className="pt-1.5 mt-1.5 border-t border-white/10 space-y-1">
+                                <p className="text-[10px] uppercase tracking-wider text-white/30">Diagnostic Quiz (ไม่มีตก/ผ่าน — snapshot ทักษะ)</p>
+                                {p.diagnosticAttempts.map(d => (
+                                  <div key={d.attempt_number} className="flex items-center gap-3 text-xs">
+                                    <span className="text-white/50">ครั้งที่ {d.attempt_number}{d.accepted ? '' : ' (ไม่ถูกใช้คำนวณ)'}</span>
+                                    <span className="font-mono text-white/70">{d.score_pct}%</span>
+                                    <span className="font-mono text-white/30 ml-auto">{dateTh(d.created_at)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

@@ -30,6 +30,14 @@ interface CompletionRecordRow {
   id: string; course_id: string; record_code: string; issued_at: string;
   diagnostic_attempts: { score_pct: number } | null;
 }
+interface AssignmentRow {
+  id: string; course_id: string; status: string; score: number | null;
+  note: string | null; created_at: string;
+}
+
+const ASSIGNMENT_STATUS_LABEL: Record<string, string> = {
+  pending: 'รอตรวจ', submitted: 'รอตรวจ', approved: 'อนุมัติแล้ว', rejected: 'ปฏิเสธ',
+};
 
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
 
@@ -63,6 +71,7 @@ const Dashboard: React.FC = () => {
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [completionRecords, setCompletionRecords] = useState<CompletionRecordRow[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   // Resource IDs this user has already consented to before — lets repeat
   // downloads of the same file skip the consent dialog (still logged every time).
@@ -119,7 +128,7 @@ const Dashboard: React.FC = () => {
       .map(e => e.course_id);
 
     if (activeIds.length > 0) {
-      const [{ data: mods }, { data: prog }, { data: res }, { data: logs }, { data: records }] = await Promise.all([
+      const [{ data: mods }, { data: prog }, { data: res }, { data: logs }, { data: records }, { data: subs }] = await Promise.all([
         supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
           .in('course_id', activeIds).order('sort_order'),
         supabase.from('module_progress')
@@ -141,6 +150,13 @@ const Dashboard: React.FC = () => {
         supabase.from('completion_records')
               .select('id,course_id,record_code,issued_at,diagnostic_attempts(score_pct)')
               .eq('user_id', session.user.id),
+        // Submitted from the LMS's "ส่งงาน" card (course-level work like a
+        // Hook script/video link), reviewed manually by the team in
+        // AdminAssignments.tsx — status starts "pending" until graded.
+        supabase.from('assignments')
+              .select('id,course_id,status,score,note,created_at')
+              .eq('user_id', session.user.id)
+              .order('created_at', { ascending: false }),
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
@@ -148,6 +164,7 @@ const Dashboard: React.FC = () => {
       const logRows = (logs as { resource_id: string }[] | null) || [];
       setConsentedResourceIds(new Set(logRows.map(l => l.resource_id)));
       setCompletionRecords((records as unknown as CompletionRecordRow[]) || []);
+      setAssignments((subs as unknown as AssignmentRow[]) || []);
     }
     setLoading(false);
   };
@@ -212,7 +229,8 @@ const Dashboard: React.FC = () => {
         return;
       }
       const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(studentId || '')}`;
-      const lmsUrl = `${LMS_URL}?token=${encodeURIComponent(data.token)}&returnTo=${encodeURIComponent(returnTo)}`;
+      const dashboardUrl = `${window.location.origin}/dashboard`;
+      const lmsUrl = `${LMS_URL}?token=${encodeURIComponent(data.token)}&returnTo=${encodeURIComponent(returnTo)}&dashboardUrl=${encodeURIComponent(dashboardUrl)}`;
       window.open(lmsUrl, '_blank', 'noopener,noreferrer');
     } finally {
       setEnteringLmsSlug(null);
@@ -630,6 +648,39 @@ const Dashboard: React.FC = () => {
                     })}
                   </div>
                 )}
+
+                {assignments.length > 0 && (
+                  <div className="mt-8">
+                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground mb-3">งานที่ส่งตรวจ</p>
+                    <div className="space-y-2">
+                      {assignments.map(a => {
+                        const c = courses.find(cc => cc.id === a.course_id);
+                        return (
+                          <div key={a.id} className="sharp-card border border-border bg-card p-3 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{c?.title || 'คอร์ส'}</p>
+                              {a.note && <p className="text-xs text-muted-foreground truncate">{a.note}</p>}
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                ส่งเมื่อ {new Date(a.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                              </p>
+                            </div>
+                            <div className="flex-shrink-0 text-right">
+                              <span className={`text-[10px] font-bold tracking-wider px-2.5 py-1 inline-block ${
+                                a.status === 'approved' ? 'bg-[#34A853]/15 text-[#34A853]' :
+                                a.status === 'rejected' ? 'bg-destructive/15 text-destructive' :
+                                'bg-muted text-muted-foreground'
+                              }`}>
+                                {ASSIGNMENT_STATUS_LABEL[a.status] || a.status}
+                              </span>
+                              {a.score !== null && <p className="text-xs font-semibold mt-1">{a.score}/100</p>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-xs text-muted-foreground mt-4">
                   บันทึกนี้ยืนยันว่าเรียนจบและผ่านเนื้อหาบังคับครบถ้วน ไม่ใช่ใบรับรองมาตรฐานวิชาชีพ — การรับรองมาตรฐาน (Certification) แยกต่างหากยังไม่เปิดใช้งาน
                 </p>
