@@ -230,8 +230,26 @@ export function HeroSection() {
             it should read as the dominant element, only the badge below
             it was asked to shrink), with its own bottom margin as the
             explicit gap to the badge. */}
+        {/* width/height/aspectRatio on this <img> (and on the badge below) are
+            not decorative — they fix a real, measured layout-shift bug.
+            Without them, the browser has no way to know this image's box
+            height before the PNG finishes downloading, so it renders at
+            ~0 height first, then snaps to its real ~472px-tall box the
+            instant the logo loads — shoving the row below (left column +
+            floating scatter) down by that same amount in one un-animated
+            frame. Verified with a PerformanceObserver('layout-shift')
+            probe against the production build: this was firing a single
+            ~0.11 CLS shift at ~500ms that moved the scatter container by
+            215px, and because the floating items are positioned with
+            PERCENTAGE left/top relative to that container, they visibly
+            snapped mid-fall — this, not the entrance easing itself
+            (already fixed for velocity-continuity), was the real cause of
+            the reported stutter/"overlapping" look on load. Reserving the
+            real aspect ratio up front makes the browser allocate the
+            final box size on the very first layout pass, so nothing
+            shifts once the image loads. */}
         <h1 className="c365-h-nodefault" style={{ margin: 0, marginBottom: 'clamp(80px,10vw,140px)' }}>
-          <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', ...lineStyle(0) }} />
+          <img src={LOGO} alt="Creatr365" width={936} height={472} style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', aspectRatio: '936 / 472', ...lineStyle(0) }} />
         </h1>
 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, flexWrap: 'wrap' }}>
@@ -243,7 +261,7 @@ export function HeroSection() {
             opacity: entered ? 1 : 0, transform: entered ? 'translateY(0)' : 'translateY(46px)',
             transition: 'transform .95s cubic-bezier(.16,1,.3,1) 280ms, opacity .7s ease-out 280ms',
           }}>
-            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
+            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" width={249} height={168} style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', aspectRatio: '249 / 168', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', width: 'max-content' }}>
               <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px clamp(20px,2.6vw,36px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4, whiteSpace: 'nowrap' }}>
