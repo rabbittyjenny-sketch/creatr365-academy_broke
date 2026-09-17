@@ -215,6 +215,24 @@ export default function Home() {
   return (
     <main className="home-scroll" style={{ background: '#0a0a0a', overflowX: 'hidden', fontSize: '18px' }}>
       <style>{MOTION_CSS}</style>
+      {/* Heading-hover thickness/position touch-ups for THIS page's own
+          headings — added as a separate block, MOTION_CSS above is
+          untouched. .c365-h-thick only bumps the shared ::after bar from
+          2px to 3px for headings confirmed (by measuring rendered width
+          against the underline width) to already be positioned correctly.
+          .c365-h-nodefault turns the default hover/underline off for a
+          heading that needs a different treatment instead (paired with a
+          .heading-hover span placed precisely on the line that needs it) —
+          used once below, on the "YOUR JOURNEY / STARTS HERE." heading,
+          whose two lines differ enough in width (708px vs 659px) that the
+          shared rule overshot the second line by ~49px on hover. Neither
+          rule edits src/index.css's shared selector, so no other heading
+          on this site is affected. */}
+      <style>{`
+        .c365-h-thick::after { height: 3px !important; }
+        .c365-h-nodefault::after { content: none !important; }
+        .c365-h-nodefault:hover { color: inherit !important; }
+      `}</style>
 <CourseNavbar />
       {/* ══════════════════════════════════════
           §1  HERO — extracted to its own component
@@ -292,7 +310,7 @@ export default function Home() {
           <div style={{ maxWidth: '560px', marginLeft: 'auto' }}>
             <h2
               data-aos="fade-up"
-              className="c365-motion-drift"
+              className="c365-motion-drift c365-h-thick"
               style={{
                 fontSize: 'clamp(2.4rem,5vw,4rem)',
                 fontWeight: 900,
@@ -393,7 +411,7 @@ export default function Home() {
           {/* LEFT */}
           <div data-aos="fade-up">
             <h2
-              className="c365-motion-drift"
+              className="c365-motion-drift c365-h-thick"
               style={{
                 fontSize: 'clamp(1.8rem,3.8vw,3rem)',
                 fontWeight: 900,
@@ -433,7 +451,7 @@ export default function Home() {
           >
             <h2
               data-aos="fade-left"
-              className="c365-motion-float-slow"
+              className="c365-motion-float-slow c365-h-thick"
               data-aos-delay="150"
               style={{
                 fontSize: 'clamp(1.8rem,3.8vw,3rem)',
@@ -507,7 +525,7 @@ export default function Home() {
         >
           {/* HEADER */}
           <div data-aos="fade-up" className="c365-motion-drift" style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
+            <h2 className="c365-h-thick" style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, color: '#333' }}>
               Welcome to Creatr365's Family
             </h2>
             <p style={{ color: '#4a4a4a', marginTop: '6px' }}>
@@ -889,8 +907,8 @@ export default function Home() {
           <p data-aos="fade-in" style={{ fontSize: '11px', letterSpacing: '0.5em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.52)', marginBottom: '10px' }}>
             CONSUMER → CREATOR
           </p>
-          <h2 data-aos="fade-up" data-aos-delay="120" className="c365-motion-drift" style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
-            YOUR JOURNEY<br /><span style={{ color: RED }}>STARTS HERE.</span>
+          <h2 data-aos="fade-up" data-aos-delay="120" className="c365-motion-drift c365-h-nodefault" style={{ fontSize: 'clamp(2.5rem,6vw,5.2rem)', fontWeight: 900, color: '#fff', lineHeight: 1.02 }}>
+            YOUR JOURNEY<br /><span className="heading-hover c365-h-thick" style={{ color: RED }}>STARTS HERE.</span>
           </h2>
         </div>
 
@@ -922,9 +940,9 @@ export default function Home() {
               the parent's, so the row delays below simply start later than
               the heading's — no layout restructuring needed. */}
           <div data-aos="fade-up" data-aos-delay="200" className="c365-motion-drift" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', flexWrap: 'wrap', marginBottom: 'clamp(40px,5vw,60px)' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>WHY</h2>
+            <h2 className="c365-h-thick" style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>WHY</h2>
             <img src={LOGO} alt="Creatr365" style={{ height: 'clamp(26px,3vw,40px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
-            <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>DIFFERENCE?</h2>
+            <h2 className="c365-h-thick" style={{ fontSize: 'clamp(1.8rem,4vw,3.2rem)', fontWeight: 900, color: '#fff' }}>DIFFERENCE?</h2>
           </div>
 
           <div data-aos="fade-up" data-aos-delay="0" style={{ border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
