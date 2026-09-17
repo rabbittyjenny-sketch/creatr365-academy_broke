@@ -9,6 +9,7 @@ import { ArrowRight } from 'lucide-react';
    (or removed from) Home.tsx without touching anything else. */
 const RED = '#CC0033';
 const BADGE = '/images/be-a-creator-live.png'; // existing asset, unchanged
+const LOGO = '/images/logoCreatr365/white_logo_center.png'; // real 2-line "Creatr / 365" logo asset
 const PHOTOS = {
   host: '/images/hero-host1.webp',
   beauty: '/images/hero-beauty1.webp',
@@ -203,9 +204,15 @@ export function HeroSection() {
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: 'clamp(10px,1.6vw,20px)', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
 
-        <h1 className="c365-h-nodefault" style={{ position: 'relative', zIndex: 2, margin: 0, fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 'clamp(52px,12vw,180px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#F8F8F6', maxWidth: 'min(100%,14ch)' }}>
-          <span style={lineStyle(0)}>Creatr</span><br />
-          <span style={lineStyle(140)}>365.</span>
+        <h1 className="c365-h-nodefault" style={{ position: 'relative', zIndex: 2, margin: 0 }}>
+          {/* Real logo asset (public/images/logoCreatr365/white_logo_center.png) —
+              this used to be custom-typeset text in an unapproved font
+              (Playfair Display); that's why it could visually "change
+              color" like ordinary text — it WAS ordinary text, not the
+              logo. Swapped for the actual two-line logo graphic from the
+              project's own asset folder, so there is no text here at all
+              for any hover/theme rule to affect. */}
+          <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(220px,32vw,460px)', height: 'auto', ...lineStyle(0) }} />
         </h1>
 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, marginTop: 'clamp(4px,.8vw,10px)', flexWrap: 'wrap' }}>
@@ -218,20 +225,26 @@ export function HeroSection() {
           }}>
             <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: '100%', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4 }}>
+            {/* width:max-content + nowrap so the two CTAs never wrap onto
+                separate lines — the column above is deliberately narrow
+                (to match the badge's proportions), but that width shouldn't
+                also force-wrap this row; there's empty space to its right
+                before the photo scatter starts, so letting it size to its
+                own content is safe. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', width: 'max-content' }}>
+              <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px clamp(20px,2.6vw,36px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4, whiteSpace: 'nowrap' }}>
                 BEGIN NOW <ArrowRight size={15} />
               </Link>
-              <Link to="/auth" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,.22)', color: 'rgba(255,255,255,.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4 }}>
+              <Link to="/auth" style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(16px,2.2vw,28px)', border: '1px solid rgba(255,255,255,.22)', color: 'rgba(255,255,255,.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4, whiteSpace: 'nowrap' }}>
                 FREE ACCOUNT
               </Link>
             </div>
 
-            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,.55)' }}>
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
-              และ<strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
+            <p style={{ margin: 0, fontFamily: 'Overpass, sans-serif', fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 2, color: 'rgba(255,255,255,.55)' }}>
+              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ
+              แต่คือการ <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
+              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong> และ{' '}
+              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
             </p>
           </div>
 
@@ -277,6 +290,13 @@ export function HeroSection() {
 
           </div>
         </div>
+
+        {/* Missing from the earlier build — restored from the reference
+            design: full-width, single line, sits below everything else
+            (last child of this flex-column wrapper). */}
+        <p style={{ position: 'relative', zIndex: 1, margin: 0, marginTop: 'clamp(14px,2vw,26px)', fontFamily: 'Overpass, sans-serif', fontWeight: 600, fontSize: 'clamp(10px,1.15vw,15px)', letterSpacing: '.34em', color: '#F8F8F6', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE
+        </p>
       </div>
 
       {/* Small screens: let the scatter wrap under the CTA column instead of
