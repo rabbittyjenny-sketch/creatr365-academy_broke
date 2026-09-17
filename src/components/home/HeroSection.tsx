@@ -257,7 +257,7 @@ export function HeroSection() {
                 optically smaller than Latin caps (shorter x-height, no
                 ascenders/descenders to fill the line), so matching the
                 raw number undershoots visual parity; this compensates. */}
-            <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(10px,1vw,14px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left' }}>
+                        <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(10px,1vw,14px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left', whiteSpace: 'nowrap' }}>
               เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ<br />
               แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
