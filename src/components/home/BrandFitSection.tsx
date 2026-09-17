@@ -94,13 +94,14 @@ function useRevealOnScroll(ref: React.RefObject<HTMLDivElement>) {
       el.classList.add('is-in');
       return;
     }
+    // Toggles on every crossing (no disconnect after the first fire) —
+    // matches how every other section on this page behaves: their
+    // reveal replays each time you scroll back to them, rather than
+    // firing once and staying frozen forever after.
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            el.classList.add('is-in');
-            io.disconnect();
-          }
+          el.classList.toggle('is-in', entry.isIntersecting);
         });
       },
       { threshold: 0.35 }
@@ -206,7 +207,7 @@ export function BrandFitSection() {
           box-shadow: 0 14px 34px rgba(0,0,0,.4);
           clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
           opacity: 0;
-          transition: clip-path 1.1s cubic-bezier(.19,1,.22,1), opacity .9s ease-out, box-shadow .3s ease;
+          transition: clip-path 2s cubic-bezier(.19,1,.22,1), opacity 1.4s ease-out, box-shadow .3s ease;
         }
         .c365-brandfit-card.is-in .c365-brandfit-card-inner {
           clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
