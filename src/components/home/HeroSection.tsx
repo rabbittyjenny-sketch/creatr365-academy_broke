@@ -215,7 +215,7 @@ export function HeroSection() {
             it should read as the dominant element, only the badge below
             it was asked to shrink), with its own bottom margin as the
             explicit gap to the badge. */}
-        <h1 className="c365-h-nodefault" style={{ margin: 0, marginBottom: 'clamp(28px,3.4vw,44px)' }}>
+        <h1 className="c365-h-nodefault" style={{ margin: 0, marginBottom: 'clamp(80px,10vw,140px)' }}>
           <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', ...lineStyle(0) }} />
         </h1>
 
