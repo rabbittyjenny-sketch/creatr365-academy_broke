@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
 import { HeroSection } from '@/components/home/HeroSection';
+import { BrandFitSection } from '@/components/home/BrandFitSection';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
@@ -245,40 +246,10 @@ export default function Home() {
           แถวบน: brand1.png (4 กรอบ) slide-in from left
           แถวล่าง: brand2.png (3 กรอบ) slide-in from right
       ══════════════════════════════════════ */}
-      <section style={{ background: '#1a1a1a', padding: 'clamp(60px,8vw,100px) 0', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 clamp(20px,4vw,48px)', width: '100%' }}>
-          <div style={{ marginBottom: 'clamp(40px,5vw,60px)' }}>
-            <h2 data-aos="fade-up" className="c365-motion-drift" style={{ fontSize: 'clamp(2rem,5vw,3.8rem)', fontWeight: 900, color: '#fff', marginBottom: '8px' }}>
-              อยากร่วมงานกับแบรนด์ใหญ่ ?
-            </h2>
-            <p data-aos="fade-up" data-aos-delay="80" style={{ fontSize: 'clamp(15px,2vw,20px)', fontWeight: 300, color: 'rgba(255,255,255,0.5)' }}>
-              สิ่งที่ตลาดต้องการ คือ…
-            </p>
-          </div>
-
-          {/* แถวบน: brand1.png — slide in from left */}
-          <div data-aos="fade-right" data-aos-delay="180" style={{ marginBottom: '16px', lineHeight: 0 }}>
-            <img className="c365-motion-card" src="/images/brand1.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
-          </div>
-
-          {/* แถวล่าง: brand2.png — slide in from right */}
-          <div data-aos="fade-left" data-aos-delay="260" style={{ marginBottom: 'clamp(40px,5vw,60px)', lineHeight: 0 }}>
-            <img className="c365-motion-card" src="/images/brand2.png" alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
-          </div>
-
-          {/* ปุ่มกึ่งกลางล่าง */}
-          <div data-aos="fade-up" data-aos-delay="360" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/courses"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(28px,3vw,44px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
-              ดูหลักสูตร <ArrowRight size={15} />
-            </Link>
-            <Link to="/articles/diagnostic-quiz"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px clamp(24px,2.5vw,36px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.62)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
-              ▷ Find Your Path
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* §3 — extracted to its own component (src/components/home/BrandFitSection.tsx).
+          Same heading/subtitle/CTAs as before; the 2 banner images are replaced
+          with the 7-card grid. Fully self-contained, own <style>, own class names. */}
+      <BrandFitSection />
 
       {/* ═════════════════════════════════════
           §4  เป็นเหมือนกันไหม ?
@@ -554,10 +525,12 @@ export default function Home() {
             }}
           >
             <div
+              className="c365-family-row"
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, clamp(200px,18vw,280px))',
-                gap: '10px'
+                display: 'flex',
+                flexWrap: 'nowrap',
+                gap: '14px',
+                width: '100%'
               }}
             >
               {[
@@ -574,6 +547,8 @@ export default function Home() {
                   className="c365-motion-card"
                   data-aos-delay={String(i * 80 + 120)}
                   style={{
+                    flex: '1 1 0',
+                    minWidth: 0,
                     width: '100%',
                     height: 'auto',
                     display: 'block',
@@ -584,16 +559,23 @@ export default function Home() {
             </div>
           </div>
 
-          {/* MARQUEE */}
+          {/* MARQUEE — full-bleed fix: this div's containing block is the
+              maxWidth:1320px wrapper above (it's position:relative), so the
+              old width:'100%' capped the bar at 1320px instead of the full
+              section — confirmed by measuring it at 1320px on a 1920px
+              screen. left:50%+width:100vw+margin-left:-50vw breaks it out to
+              the true viewport width regardless of that ancestor. */}
           <div
             style={{
               position: 'absolute',
               bottom: 0,
-              width: '100%',
+              left: '50%',
+              width: '100vw',
+              marginLeft: '-50vw',
               overflow: 'hidden',
               borderTop: '1px solid rgba(255,255,255,0.08)',
               background: 'rgba(0,0,0,0.7)',
-              padding: '10px 0'
+              padding: '12px 0'
             }}
           >
             <div
@@ -617,10 +599,10 @@ export default function Home() {
                   <span
                     key={i}
                     style={{
-                      fontSize: '12px',
+                      fontSize: '13px',
                       fontWeight: 700,
-                      letterSpacing: '0.28em',
-                      color: 'rgba(255,255,255,0.55)',
+                      letterSpacing: '0.22em',
+                      color: 'rgba(255,255,255,0.88)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '10px'
@@ -640,6 +622,13 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* .c365-family-row is unique to §6 — cannot affect any other section */}
+        <style>{`
+          @media (max-width: 700px) {
+            .c365-family-row { flex-wrap: wrap !important; }
+            .c365-family-row img { flex: 1 1 calc(50% - 7px) !important; width: calc(50% - 7px) !important; }
+          }
+        `}</style>
       </section>
 
       {/* ═════════════════════════════════════
