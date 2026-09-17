@@ -212,7 +212,8 @@ const Dashboard: React.FC = () => {
         return;
       }
       const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(studentId || '')}`;
-      const lmsUrl = `${LMS_URL}?token=${encodeURIComponent(data.token)}&returnTo=${encodeURIComponent(returnTo)}`;
+      const dashboardUrl = `${window.location.origin}/dashboard`;
+      const lmsUrl = `${LMS_URL}?token=${encodeURIComponent(data.token)}&returnTo=${encodeURIComponent(returnTo)}&dashboardUrl=${encodeURIComponent(dashboardUrl)}`;
       window.open(lmsUrl, '_blank', 'noopener,noreferrer');
     } finally {
       setEnteringLmsSlug(null);
