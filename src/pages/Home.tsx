@@ -1026,11 +1026,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-
-          {/* bottom-right logo — ปั๊มตราปิดท้าย แล้วลอยเบาๆต่อเนื่อง */}
-          <div data-aos="fade-in" data-aos-delay="480" data-aos-once="true" style={{ marginTop: 'clamp(40px,6vw,80px)', display: 'flex', justifyContent: 'flex-end' }}>
-            <img src={LOGO} alt="Creatr365" className="float-y c365-motion-float-slow" style={{ height: 'clamp(28px,3.5vw,48px)', width: 'auto', filter: 'brightness(0) invert(1)' }} />
-          </div>
         </div>
       </section>
 
