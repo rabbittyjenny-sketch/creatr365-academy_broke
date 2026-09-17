@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
+import { HeroSection } from '@/components/home/HeroSection';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
@@ -201,7 +202,6 @@ export default function Home() {
     return () => document.documentElement.classList.remove('dark');
   }, []);
 
-  const heroBgRef    = useParallax(0.2);
   const problemBgRef = useParallax(0.13);
   const journeyBgRef = useParallax(0.13);
 
@@ -216,45 +216,12 @@ export default function Home() {
       <style>{MOTION_CSS}</style>
 <CourseNavbar />
       {/* ══════════════════════════════════════
-          §1  HERO
-          BG: Hero-team1.png — brightness(0.72) เฉพาะ hero
-          ไม่มี overlay gradient ทั้ง 2 อัน (ลบตามสเปก)
-          layout: ซ้ายทั้งหมด
+          §1  HERO — extracted to its own component
+          (src/components/home/HeroSection.tsx). Fully self-contained:
+          its own motion loop, its own <style> for its own class names.
+          Nothing else in this file reads or writes anything inside it.
       ══════════════════════════════════════ */}
-      <section className="c365-scene" data-scene="1" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-        {/* BG parallax layer — brightness filter only, no overlays */}
-        <div ref={heroBgRef} style={{ position: 'absolute', inset: 0, zIndex: 0, willChange: 'transform' }}>
-          <div className="c365-scene-bg-reveal">
-<img
-            className="c365-motion-bg" src="/images/blog_new.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center right'}}
-          />
-</div>
-        </div>
-
-        {/* Content — ปุ่ม + tagline ล่างสุดกลาง */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', padding: 'clamp(20px,4vw,48px) clamp(24px,7vw,96px)', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(16px,2vw,24px)' }}>
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <Link to="/courses" data-aos="fade-up"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px clamp(24px,3vw,40px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', borderRadius: '4px', cursor: 'pointer', border: 'none', }}>
-                BEGIN NOW <ArrowRight size={15} />
-              </Link>
-              <Link to="/auth" data-aos="fade-up" data-aos-delay="90"
-                style={{ display: 'inline-flex', alignItems: 'center', padding: '14px clamp(20px,2.5vw,32px)', border: '1px solid rgba(255,255,255,0.22)', color: 'rgba(255,255,255,0.6)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.08em', textDecoration: 'none', cursor: 'pointer', }}>
-                FREE ACCOUNT
-              </Link>
-            </div>
-            <p data-aos="fade-up" data-aos-delay="200" style={{ fontSize: 'clamp(12px,1.3vw,15px)', lineHeight: 1.8, color: 'rgba(255,255,255,0.42)', textAlign: 'left' }}>
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ{' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>{' '}
-              <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong>{' '}
-              และ<strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
-            </p>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* ══════════════════════════════════════
           §2  STATS / MARKET DATA
