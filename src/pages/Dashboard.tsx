@@ -26,6 +26,10 @@ interface ResourceRow {
   id: string; course_id: string; resource_type: string; title: string;
   file_path: string; file_name: string | null;
 }
+interface CompletionRecordRow {
+  id: string; course_id: string; record_code: string; issued_at: string;
+  diagnostic_attempts: { score_pct: number } | null;
+}
 
 const LEVEL_NAMES = ['STARTER', 'DEVELOPING', 'COMPETENT', 'PROFICIENT', 'MASTER'];
 
@@ -58,6 +62,7 @@ const Dashboard: React.FC = () => {
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [progress, setProgress] = useState<ProgressRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
+  const [completionRecords, setCompletionRecords] = useState<CompletionRecordRow[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   // Resource IDs this user has already consented to before — lets repeat
   // downloads of the same file skip the consent dialog (still logged every time).
@@ -114,7 +119,7 @@ const Dashboard: React.FC = () => {
       .map(e => e.course_id);
 
     if (activeIds.length > 0) {
-      const [{ data: mods }, { data: prog }, { data: res }, { data: logs }] = await Promise.all([
+      const [{ data: mods }, { data: prog }, { data: res }, { data: logs }, { data: records }] = await Promise.all([
         supabase.from('course_modules').select('id,course_id,code,name,duration_label,has_quiz,sort_order')
           .in('course_id', activeIds).order('sort_order'),
         supabase.from('module_progress')
@@ -129,12 +134,20 @@ const Dashboard: React.FC = () => {
               .select('resource_id')
               .eq('user_id', session.user.id)
               .eq('consented', true),
+        // Issued by issue_completion_record (server-side, via save-score)
+        // the first time this user's diagnostic quiz completes for a
+        // course after every module is marked "completed" — see the
+        // mandatory_gate_completion_records migration.
+        supabase.from('completion_records')
+              .select('id,course_id,record_code,issued_at,diagnostic_attempts(score_pct)')
+              .eq('user_id', session.user.id),
       ]);
       setModules((mods as any) || []);
       setProgress((prog as any) || []);
       setResources((res as any) || []);
       const logRows = (logs as { resource_id: string }[] | null) || [];
       setConsentedResourceIds(new Set(logRows.map(l => l.resource_id)));
+      setCompletionRecords((records as unknown as CompletionRecordRow[]) || []);
     }
     setLoading(false);
   };
@@ -585,21 +598,40 @@ const Dashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {completedCoursesList.map(({ course: c }) => (
-                      <div key={c.id} className="sharp-card border border-border bg-card p-4 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-bold tracking-widest text-muted-foreground">{tierLabel(c.tag)}</p>
-                          <p className="text-sm font-semibold truncate">{c.title}</p>
+                    {completedCoursesList.map(({ course: c }) => {
+                      const record = completionRecords.find(r => r.course_id === c.id);
+                      return (
+                        <div key={c.id} className="sharp-card border border-border bg-card p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-bold tracking-widest text-muted-foreground">{tierLabel(c.tag)}</p>
+                              <p className="text-sm font-semibold truncate">{c.title}</p>
+                            </div>
+                            <span className={`flex-shrink-0 text-[10px] font-bold tracking-wider px-2.5 py-1 ${record ? 'bg-[#34A853]/15 text-[#34A853]' : 'bg-muted text-muted-foreground'}`}>
+                              {record ? 'ออกแล้ว' : 'รอออกใบสรุป'}
+                            </span>
+                          </div>
+                          {record ? (
+                            <div className="mt-3 pt-3 border-t border-border/60 text-xs text-muted-foreground space-y-1">
+                              <p>Record of Learning Completion — ผ่านเนื้อหาบังคับครบถ้วน</p>
+                              {record.diagnostic_attempts && (
+                                <p>ผลคะแนนแบบประเมินทักษะ (Diagnostic Assessment): <span className="font-semibold text-foreground">{record.diagnostic_attempts.score_pct}%</span></p>
+                              )}
+                              <p>ออกเมื่อ {new Date(record.issued_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} · รหัสอ้างอิง <span className="font-mono">{record.record_code}</span></p>
+                              <p className="italic pt-1">เอกสารนี้เป็นบันทึกการสำเร็จการเรียนรู้ ไม่ใช่การรับรองมาตรฐานวิชาชีพ</p>
+                            </div>
+                          ) : (
+                            <p className="mt-3 pt-3 border-t border-border/60 text-xs text-muted-foreground">
+                              เรียนจบครบทุกบทเรียนแล้ว — ระบบจะออกใบสรุปการเรียนให้หลังทำแบบประเมินวินิจฉัยท้ายคอร์สในรอบถัดไป
+                            </p>
+                          )}
                         </div>
-                        <span className="flex-shrink-0 text-[10px] font-bold tracking-wider px-2.5 py-1 bg-muted text-muted-foreground">
-                          เร็วๆ นี้
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
                 <p className="text-xs text-muted-foreground mt-4">
-                  ระบบออกใบประกาศอัตโนมัติยังไม่เปิดใช้งาน — โครงสร้างส่วนนี้เตรียมไว้แล้ว จะแจ้งเตือนเมื่อพร้อมให้ดาวน์โหลดจริง
+                  บันทึกนี้ยืนยันว่าเรียนจบและผ่านเนื้อหาบังคับครบถ้วน ไม่ใช่ใบรับรองมาตรฐานวิชาชีพ — การรับรองมาตรฐาน (Certification) แยกต่างหากยังไม่เปิดใช้งาน
                 </p>
               </div>
             )}

@@ -38,11 +38,60 @@ async function resolveLinkedUserIds(supabase: ReturnType<typeof createClient>, s
   return [...userIds];
 }
 
+// Diagnostic Quiz has no pass/fail (per the Completion Record framework —
+// it's a skill-radar snapshot, not a gate), so the LMS always sends
+// passed=true for it. Recording it here — separately from module_progress
+// — is what lets a real Completion Record ever be issued: completion
+// requires a diagnostic_attempts row, and issue_completion_record checks
+// that plus the Mandatory Knowledge Gate (inert today — see the
+// mandatory_gate_completion_records migration for why) plus every module
+// in the course being "completed".
+async function recordDiagnosticAndMaybeIssueRecord(
+  supabase: ReturnType<typeof createClient>,
+  authUserId: string,
+  courseId: string,
+  scorePct: number,
+) {
+  const { count } = await supabase
+    .from("diagnostic_attempts")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", authUserId)
+    .eq("course_id", courseId);
+
+  const { data: attempt, error: attemptErr } = await supabase
+    .from("diagnostic_attempts")
+    .insert({
+      user_id: authUserId,
+      course_id: courseId,
+      attempt_number: (count ?? 0) + 1,
+      score_pct: scorePct,
+      accepted: true,
+    })
+    .select("id")
+    .single();
+  if (attemptErr) {
+    console.error("diagnostic_attempts insert failed:", attemptErr.message);
+    return;
+  }
+
+  const { error: issueErr } = await supabase.rpc("issue_completion_record", {
+    _user_id: authUserId,
+    _course_id: courseId,
+    _diagnostic_attempt_id: attempt.id,
+  });
+  // Expected to fail with "course modules not all completed" if this
+  // diagnostic attempt's own module_progress upsert (below, same request)
+  // hasn't committed yet in another identity's loop iteration, or if the
+  // Mandatory Knowledge Gate has real active topics this student hasn't
+  // passed — neither is an error worth surfacing to the student mid-quiz.
+  if (issueErr) console.warn("issue_completion_record not issued yet:", issueErr.message);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { student_id, course_slug, module_code, score, passed } = await req.json();
+    const { student_id, course_slug, module_code, score, passed, quiz_type } = await req.json();
     if (!student_id || !module_code) throw new Error("student_id and module_code required");
 
     const supabase = createClient(
@@ -55,7 +104,7 @@ serve(async (req) => {
     if (authUserIds.length === 0) throw new Error("student_id not found: " + student_id);
 
     // หา module: ลอง course_slug + module_code ก่อน, fallback ด้วย module_code เดียว
-    let mod: { id: string } | null = null;
+    let mod: { id: string; course_id: string } | null = null;
 
     if (course_slug) {
       const { data: course } = await supabase
@@ -67,7 +116,7 @@ serve(async (req) => {
       if (course?.id) {
         const { data: m } = await supabase
           .from("course_modules")
-          .select("id")
+          .select("id, course_id")
           .eq("course_id", course.id)
           .eq("code", module_code)
           .maybeSingle();
@@ -79,7 +128,7 @@ serve(async (req) => {
     if (!mod) {
       const { data: m, error: modErr } = await supabase
         .from("course_modules")
-        .select("id")
+        .select("id, course_id")
         .eq("code", module_code)
         .maybeSingle();
       if (modErr) throw new Error("course_modules lookup failed: " + modErr.message);
@@ -116,6 +165,10 @@ serve(async (req) => {
           _user_id: authUserId,
         });
         if (unlockErr) console.error("unlock_next_module failed:", unlockErr.message);
+      }
+
+      if (quiz_type === "diagnostic" && passed && typeof score === "number") {
+        await recordDiagnosticAndMaybeIssueRecord(supabase, authUserId, mod.course_id, score);
       }
     }
 

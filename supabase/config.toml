@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.redeem-lms-handoff]
 verify_jwt = false
+
+[functions.get-progress]
+verify_jwt = false
