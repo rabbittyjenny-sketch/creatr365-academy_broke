@@ -675,8 +675,8 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'LIVE COMMERCE STARTER KIT', sub: 'FREE',          slug: 'live-commerce-starter-kit' },
-            { name: 'HOOK & HOLD',               sub: 'LOW TICKET 1', slug: 'hook-and-hold' }
+            { name: 'MAGNET — LIVE COMMERCE BLUEPRINT', sub: 'FREE',          slug: 'magnet' },
+            { name: 'THE FOUNDATION',               sub: 'ONLINE', slug: 'foundation' }
           ].map((course, i) => (
             <Link
               key={course.name}
@@ -729,8 +729,8 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               slug:  'live-sales-system' },
-            { name: 'STAGE',  sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'live-commerce-business-global' }
+            { name: 'SIGNAL', sub: 'THE CONVERSION HOST : ONLINE',               slug:  'signal' },
+            { name: 'STAGE',  sub: 'COMMUNICATION MASTERY LAB : ONSITE 1 DAY', slug: 'stage' }
           ].map((course, i) => (
             <Link
               key={course.name}
@@ -828,9 +828,9 @@ export default function Home() {
           }}
         >
           {[
-            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'live-psychology-conversion' },
-            { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'live-tech-setup' },
-            { name: 'STAGE',          sub: 'THE SIGNATURE INTENSIVE LAB : ONSITE 1 DAY', slug: 'ai-for-live-commerce'}
+            { name: 'THE FOUNDATION', sub: 'LIVE EXPLORER',                             slug: 'foundation' },
+            { name: 'SIGNAL',         sub: 'THE CONVERSION HOST : ONLINE',               slug: 'signal' },
+            { name: 'STAGE',          sub: 'THE COMMUNICATION MASTERY LAB : ONSITE 1 DAY', slug: 'stage'}
           ].map((course, i) => (
             <Link
               key={course.name}
