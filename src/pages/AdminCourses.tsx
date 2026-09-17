@@ -20,6 +20,7 @@ interface CourseRow {
 interface ModuleRow {
   id:string; course_id:string; code:string; name:string; summary:string;
   duration_label:string; vod_url:string|null; has_quiz:boolean; has_assignment:boolean; sort_order:number;
+  onsite_unlock_code:string|null; onsite_session_label:string|null;
 }
 interface PromoCode {
   id:string; course_id:string; code:string; discount_type:string;
@@ -208,7 +209,7 @@ const AdminCourses = () => {
   };
   const updateModule = (m:ModuleRow, patch:Partial<ModuleRow>) => setModules(modules.map(x=>x.id===m.id?{...x,...patch}:x));
   const saveModule   = async (m:ModuleRow) => {
-    const { error } = await supabase.from('course_modules').update({ code:m.code, name:m.name, summary:m.summary, duration_label:m.duration_label, vod_url:m.vod_url, has_quiz:m.has_quiz, has_assignment:m.has_assignment, sort_order:m.sort_order } as any).eq('id',m.id);
+    const { error } = await supabase.from('course_modules').update({ code:m.code, name:m.name, summary:m.summary, duration_label:m.duration_label, vod_url:m.vod_url, has_quiz:m.has_quiz, has_assignment:m.has_assignment, sort_order:m.sort_order, onsite_unlock_code:m.onsite_unlock_code||null, onsite_session_label:m.onsite_session_label||null } as any).eq('id',m.id);
     if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
     else toast({ title:'บันทึกโมดูล ✓' });
   };
@@ -721,6 +722,27 @@ const AdminCourses = () => {
                             </label>
                           ))}
                         </div>
+
+                        {/* Onsite lessons only: the 4-digit code a trainer
+                            reads aloud in the room before a student can start
+                            this lesson's exam (LMS's "กรอกรหัส" screen).
+                            Overwrite before each training day — this is the
+                            current code, not a rotation history. */}
+                        {ec.learning_type !== 'online' && (
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                            <Field label="รหัสปลดล็อค Onsite (4 หลัก)" hint="ให้ผู้เรียนกรอกก่อนเริ่มข้อสอบท้ายบทนี้ — เว้นว่าง = ยังกรอกอะไรก็ไม่ผ่าน">
+                              <input className={`${inp} font-mono text-center tracking-widest`} maxLength={4}
+                                value={m.onsite_unlock_code||''}
+                                onChange={e=>updateModule(m,{onsite_unlock_code:e.target.value.replace(/\D/g,'').slice(0,4)||null})}
+                                placeholder="0000" />
+                            </Field>
+                            <Field label="หมายเหตุรอบสอน (ถ้ามี)" hint="ใช้จดจำเฉยๆ เช่น วันที่เปิดสอน — ไม่ส่งผลต่อการตรวจรหัส">
+                              <input className={`${inp} text-xs`} value={m.onsite_session_label||''}
+                                onChange={e=>updateModule(m,{onsite_session_label:e.target.value||null})}
+                                placeholder="รอบ 15 มี.ค. 2569" />
+                            </Field>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
