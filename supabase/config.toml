@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.save-score]
 verify_jwt = false
+
+[functions.redeem-lms-handoff]
+verify_jwt = false

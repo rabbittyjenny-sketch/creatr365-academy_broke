@@ -64,6 +64,8 @@ const Dashboard: React.FC = () => {
   const [consentedResourceIds, setConsentedResourceIds] = useState<Set<string>>(new Set());
   const [pendingResource, setPendingResource] = useState<ResourceRow | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
+  // Which course's "เข้าเรียน" button is currently fetching a handoff token
+  const [enteringLmsSlug, setEnteringLmsSlug] = useState<string | null>(null);
   const [section, setSection] = useState<SectionKey>('overview');
   // Separate from the student dashboard below — an admin gets a link out to
   // the dedicated Admin Console (its own layout/routes), never a second
@@ -175,6 +177,32 @@ const Dashboard: React.FC = () => {
       downloadResource(r);
     } else {
       setPendingResource(r);
+    }
+  };
+
+  // Sends the student into the LMS (a separate app/origin) without ever
+  // putting their Master Key in the URL. create-lms-handoff resolves the
+  // key server-side from this session and returns a 60-second, single-use
+  // token instead — same short-lived-handoff pattern as the signed URLs
+  // used for resource downloads above, just for a cross-app redirect
+  // instead of a Storage object. Replaces the old `?kid=<masterKey>` link.
+  const enterLms = async (courseSlug: string) => {
+    if (!user) return;
+    setEnteringLmsSlug(courseSlug);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-lms-handoff', {
+        body: { course_slug: courseSlug },
+      });
+      if (error || !data?.token) {
+        console.error('create-lms-handoff failed', error);
+        alert('เข้าเรียนไม่สำเร็จ ลองใหม่อีกครั้ง');
+        return;
+      }
+      const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(studentId || '')}`;
+      const lmsUrl = `${LMS_URL}?token=${encodeURIComponent(data.token)}&returnTo=${encodeURIComponent(returnTo)}`;
+      window.open(lmsUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setEnteringLmsSlug(null);
     }
   };
 
@@ -386,8 +414,6 @@ const Dashboard: React.FC = () => {
                     const done = courseMods.filter(m => completedModuleIds.has(m.id)).length;
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                     const isOpen = openCourse === c.id;
-                    const returnTo = `${window.location.origin}/register?master_key=${encodeURIComponent(keyId)}`;
-                    const lmsUrl = `${LMS_URL}?kid=${encodeURIComponent(keyId)}&course=${encodeURIComponent(c.slug)}&returnTo=${encodeURIComponent(returnTo)}`;
 
                     return (
                       <div key={c.id} className="sharp-card border border-border bg-card overflow-hidden" data-accent={accent}>
@@ -425,15 +451,16 @@ const Dashboard: React.FC = () => {
 
                           {/* Action buttons */}
                           <div className="mt-4 flex items-center gap-2">
-                            <a
-                              href={lmsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={() => enterLms(c.slug)}
+                              disabled={enteringLmsSlug === c.slug}
                               data-accent={accent}
-                              className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5 flex-shrink-0"
+                              className="btn-brand text-xs px-4 py-2 flex items-center gap-1.5 flex-shrink-0 disabled:opacity-50"
                             >
-                              เข้าเรียน <ExternalLink className="w-3 h-3" />
-                            </a>
+                              {enteringLmsSlug === c.slug
+                                ? <Loader2 className="w-3 h-3 animate-spin" />
+                                : <>เข้าเรียน <ExternalLink className="w-3 h-3" /></>}
+                            </button>
                             {total > 0 && (
                               <button
                                 onClick={() => setOpenCourse(isOpen ? null : c.id)}
