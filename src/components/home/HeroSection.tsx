@@ -247,16 +247,19 @@ export function HeroSection() {
                 tailwind config says so explicitly) — this was silently
                 falling back to a generic system font. Switched to IBM Plex
                 Sans Thai, the Thai font already loaded for this project.
-                Deliberately 2 lines now, broken with an explicit <br/> at
-                the clause boundary ("แต่คือการ" / "สร้างคุณค่า...") rather
-                than left to wrap on its own — a manual break holds at
-                exactly 2 lines at any column width, avoiding the earlier
-                uncontrolled wrap across three uneven lines. Font size now
-                matches the English line above it (same clamp), and its own
-                marginTop (on top of the column's flex gap) sets it apart
-                as the closing line of this block. */}
-            <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(9px,.85vw,12px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left' }}>
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ<br />
+                2 lines via an explicit <br/>, broken after "ไม่ใช่แค่การ
+                ขายของ" (line 1 = the "what it isn't" clause, line 2 = the
+                "what it is" clause + the 3 bolded terms), per request.
+                Line-height between the 2 lines left at the browser
+                default, unchanged, per request. Font-size bumped a step
+                past the English line's own clamp (9px/.85vw/12px) to
+                10px/1vw/14px — Thai text at an identical px value reads
+                optically smaller than Latin caps (shorter x-height, no
+                ascenders/descenders to fill the line), so matching the
+                raw number undershoots visual parity; this compensates. */}
+                        <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(10px,1vw,14px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left', whiteSpace: 'nowrap' }}>
+              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ<br />
+              แต่คือการ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong> และ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
