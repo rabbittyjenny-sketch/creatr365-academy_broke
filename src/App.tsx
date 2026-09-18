@@ -23,6 +23,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import FAQ from "./pages/FAQ";
 import AdminCourses from "./pages/AdminCourses";
 import AdminAssignments from "./pages/AdminAssignments";
+import AdminOnsiteScoring from "./pages/AdminOnsiteScoring";
 import AdminPayments from "./pages/AdminPayments";
 import AdminArticles from "./pages/AdminArticles";
 import AdminToolbox from "./pages/AdminToolbox";
@@ -68,6 +69,7 @@ const App = () => (
         <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
         <Route path="/admin/courses" element={<RequireAdmin><AdminCourses /></RequireAdmin>} />
         <Route path="/admin/assignments" element={<RequireAdmin><AdminAssignments /></RequireAdmin>} />
+        <Route path="/admin/onsite-scoring" element={<RequireAdmin><AdminOnsiteScoring /></RequireAdmin>} />
         <Route path="/admin/payments" element={<RequireAdmin><AdminPayments /></RequireAdmin>} />
         <Route path="/admin/articles" element={<RequireAdmin><AdminArticles /></RequireAdmin>} />
         <Route path="/admin/toolbox" element={<RequireAdmin><AdminToolbox /></RequireAdmin>} />

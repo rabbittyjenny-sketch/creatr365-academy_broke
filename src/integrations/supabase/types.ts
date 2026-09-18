@@ -72,11 +72,13 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
+          dimension_scores: Json | null
           id: string
           module_id: string | null
           note: string | null
           reviewed_at: string | null
           reviewer_id: string | null
+          rubric_id: string | null
           score: number | null
           status: string
           user_id: string
@@ -85,11 +87,13 @@ export type Database = {
         Insert: {
           course_id: string
           created_at?: string
+          dimension_scores?: Json | null
           id?: string
           module_id?: string | null
           note?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
+          rubric_id?: string | null
           score?: number | null
           status?: string
           user_id: string
@@ -98,11 +102,13 @@ export type Database = {
         Update: {
           course_id?: string
           created_at?: string
+          dimension_scores?: Json | null
           id?: string
           module_id?: string | null
           note?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
+          rubric_id?: string | null
           score?: number | null
           status?: string
           user_id?: string

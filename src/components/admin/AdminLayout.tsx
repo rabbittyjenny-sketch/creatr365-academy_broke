@@ -11,6 +11,7 @@ import {
   Package,
   UserSearch,
   Image as ImageIcon,
+  Star,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
   { to: '/admin/page-banners', label: 'Banner Explore', icon: ImageIcon, match: (p: string) => p.startsWith('/admin/page-banners') },
   { to: '/admin/articles', label: 'บทความ', icon: Newspaper, match: (p: string) => p.startsWith('/admin/articles') },
   { to: '/admin/assignments', label: 'งานที่ส่ง', icon: ClipboardCheck, match: (p: string) => p.startsWith('/admin/assignments') },
+  { to: '/admin/onsite-scoring', label: 'ให้คะแนน Onsite', icon: Star, match: (p: string) => p.startsWith('/admin/onsite-scoring') },
   { to: '/admin/payments', label: 'การชำระเงิน', icon: CreditCard, match: (p: string) => p.startsWith('/admin/payments') },
   { to: '/admin/students', label: 'ตรวจสอบนักเรียน', icon: UserSearch, match: (p: string) => p.startsWith('/admin/students') },
 ];

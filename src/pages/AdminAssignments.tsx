@@ -6,11 +6,13 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { RUBRICS } from '@/lib/rubrics';
 
 interface Row {
   id: string; user_id: string; course_id: string; module_id: string | null;
   video_url: string | null; note: string | null; status: string;
   score: number | null; created_at: string;
+  rubric_id: string | null; dimension_scores: Record<string, number> | null;
   courses?: { title: string } | null;
   course_modules?: { code: string; name: string } | null;
 }
@@ -23,6 +25,11 @@ const AdminAssignments = () => {
   const [loading, setLoading] = useState(true);
   // Map of assignment id → score input value (for pending items)
   const [scoreInputs, setScoreInputs] = useState<Record<string, string>>({});
+  // Map of assignment id → { dimension name → score } — a scoring aid, kept
+  // separate from the 0-100 `score` field the approve/unlock flow actually
+  // uses (see comment on the Rubric_Header data: it doesn't define a
+  // rubric-points-to-0-100 conversion, so this stays advisory, not binding).
+  const [dimInputs, setDimInputs] = useState<Record<string, Record<string, string>>>({});
 
   const load = async () => {
     // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
@@ -48,8 +55,14 @@ const AdminAssignments = () => {
       toast({ title: 'กรุณากรอกคะแนน 0–100', variant: 'destructive' }); return;
     }
 
+    const rawDims = dimInputs[r.id];
+    const dimension_scores = rawDims && Object.keys(rawDims).length
+      ? Object.fromEntries(Object.entries(rawDims).filter(([, v]) => v !== '').map(([k, v]) => [k, Number(v)]))
+      : null;
+
     const { error } = await supabase.from('assignments').update({
       status, score: status === 'approved' ? score : null,
+      dimension_scores: status === 'approved' ? dimension_scores : null,
       reviewer_id: session!.user.id, reviewed_at: new Date().toISOString(),
     }).eq('id', r.id);
     if (error) { toast({ title:'Error', description:error.message, variant:'destructive' }); return; }
@@ -58,6 +71,7 @@ const AdminAssignments = () => {
     }
     toast({ title: status === 'approved' ? 'อนุมัติแล้ว ปลดล็อคบทถัดไป' : 'ปฏิเสธแล้ว' });
     setScoreInputs(prev => { const n = {...prev}; delete n[r.id]; return n; });
+    setDimInputs(prev => { const n = {...prev}; delete n[r.id]; return n; });
     load();
   };
 
@@ -93,6 +107,54 @@ const AdminAssignments = () => {
               {r.video_url && (
                 <video src={r.video_url} controls className="w-full max-h-72 rounded-lg bg-foreground mb-3" />
               )}
+
+              {r.rubric_id && RUBRICS[r.rubric_id] && (() => {
+                const rubric = RUBRICS[r.rubric_id];
+                const dims = dimInputs[r.id] || {};
+                const setDim = (name: string, v: string) =>
+                  setDimInputs(prev => ({ ...prev, [r.id]: { ...prev[r.id], [name]: v } }));
+                const total = Object.values(dims).reduce((s, v) => s + (Number(v) || 0), 0);
+                return (
+                  <div className="mb-3 rounded-lg border border-border bg-muted/30 p-3">
+                    <p className="text-xs font-semibold mb-1">
+                      Rubric: {r.rubric_id} — {rubric.name} <span className="text-muted-foreground font-normal">({rubric.sessionRef})</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mb-2">เกณฑ์ผ่าน: {rubric.passRule}</p>
+                    <div className="space-y-2">
+                      {rubric.dimensions.map(d => (
+                        <div key={d.name} className="flex items-start gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium">{d.name}</p>
+                            {d.levels && (
+                              <p className="text-[10px] text-muted-foreground leading-snug">
+                                4: {d.levels[4]} · 3: {d.levels[3]} · 2: {d.levels[2]} · 1: {d.levels[1]}
+                              </p>
+                            )}
+                          </div>
+                          {r.status === 'pending' && (
+                            <Input
+                              type="number" min={0} max={4}
+                              className="w-14 h-7 text-xs shrink-0"
+                              placeholder="-"
+                              value={dims[d.name] ?? ''}
+                              onChange={e => setDim(d.name, e.target.value)}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {r.status === 'pending' ? (
+                      <p className="text-[11px] mt-2 text-muted-foreground">
+                        รวมตาม Rubric: {total}/{rubric.maxScore} — ใช้เป็นตัวช่วยกะคะแนน 0-100 ด้านล่าง (ไม่ได้แปลงให้อัตโนมัติ เพราะ rubric_master ไม่ได้กำหนดสูตรแปลงไว้)
+                      </p>
+                    ) : r.dimension_scores ? (
+                      <p className="text-[11px] mt-2 text-muted-foreground">
+                        บันทึกไว้: {Object.entries(r.dimension_scores).map(([k, v]) => `${k}=${v}`).join(', ')}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })()}
 
               {r.status === 'pending' && (
                 <div className="flex items-center gap-2 flex-wrap">
