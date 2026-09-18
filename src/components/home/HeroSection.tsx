@@ -39,29 +39,15 @@ interface FloatConfig {
   ex: number; ey: number; er: number; delay: number; dur: number;
 }
 
-// Positions below were re-laid-out from the original design's numbers:
-// the container's 2.5/1 aspect ratio (now 2.1/1, see scatterRef below) made
-// each square-ish photo item's actual on-screen HEIGHT roughly 2x its
-// width%, so several items' bounding boxes genuinely overlapped at rest —
-// not an animation glitch, confirmed with screenshots at multiple points
-// during and after the entrance (photo-beauty sat on top of photo-food,
-// photo-fashion covered tag-host and nearly all of tag-bubble). Left/top/
-// width were recomputed to keep every pair's footprint clear (checked
-// pairwise in %, accounting for each item's real aspect ratio), and ex/ey/er
-// (the entrance flight distance) were scaled down by ~45% so items travel a
-// shorter path relative to the container and spend less time passing
-// through each other's space mid-flight — delay/dur (the actual timing/
-// stagger, matched to the reference build) are untouched, so the rhythm of
-// the cascade is unchanged, only how far each item travels to get there.
 const FLOAT_ITEMS: FloatConfig[] = [
-  { kind: 'photo-host',    left: '20%', top: '44%', width: '15%',   depth: 1.1, rot: -3, phase: 0.4, ex: -39, ey: -297, er: 187,  delay: 2025, dur: 4255 },
-  { kind: 'photo-beauty',  left: '40%', top: '12%', width: '15.5%', depth: 1.5, rot: 5,  phase: 1.9, ex: 50,  ey: -275, er: -165, delay: 1470, dur: 4025 },
-  { kind: 'photo-food',    left: '62%', top: '40%', width: '15%',   depth: 2,   rot: -2, phase: 3.4, ex: 33,  ey: -253, er: -176, delay: 505,  dur: 3680 },
-  { kind: 'photo-fashion', left: '82%', top: '10%', width: '15%',   depth: 1.3, rot: 4,  phase: 4.7, ex: -22, ey: -231, er: 143,  delay: 965,  dur: 3565 },
-  { kind: 'tag-standard',  left: '88%', top: '62%', width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 22,  ey: -209, er: 165,  delay: 0,    dur: 3220 },
-  { kind: 'tag-bubble',    left: '58%', top: '70%', width: '15%',   depth: 1.2, rot: -5, phase: 1.1, ex: 28,  ey: -198, er: -143, delay: 1290, dur: 3335 },
-  { kind: 'tag-torn',      left: '30%', top: '78%', width: '11%',   depth: 1.7, rot: -6, phase: 2.6, ex: 17,  ey: -165, er: -121, delay: 230,  dur: 2990 },
-  { kind: 'tag-host',      left: '8%',  top: '72%', width: '12.5%', depth: 1.4, rot: -3, phase: 0.6, ex: -11, ey: -187, er: 132,  delay: 1105, dur: 3450 },
+  { kind: 'photo-host',    left: '27.8%', top: '49.5%', width: '17.5%', depth: 1.1, rot: -3, phase: 0.4, ex: -70, ey: -540, er: 340,  delay: 2025, dur: 4255 },
+  { kind: 'photo-beauty',  left: '47.4%', top: '46.5%', width: '18.2%', depth: 1.5, rot: 5,  phase: 1.9, ex: 90,  ey: -500, er: -300, delay: 1470, dur: 4025 },
+  { kind: 'photo-food',    left: '64.3%', top: '19.7%', width: '17.6%', depth: 2,   rot: -2, phase: 3.4, ex: 60,  ey: -460, er: -320, delay: 505,  dur: 3680 },
+  { kind: 'photo-fashion', left: '80%',   top: '42.9%', width: '17.6%', depth: 1.3, rot: 4,  phase: 4.7, ex: -40, ey: -420, er: 260,  delay: 965,  dur: 3565 },
+  { kind: 'tag-standard',  left: '88.9%', top: '6.1%',  width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 40,  ey: -380, er: 300,  delay: 0,    dur: 3220 },
+  { kind: 'tag-bubble',    left: '86.5%', top: '80.8%', width: '13.5%', depth: 1.2, rot: -5, phase: 1.1, ex: 50,  ey: -360, er: -260, delay: 1290, dur: 3335 },
+  { kind: 'tag-torn',      left: '57.5%', top: '21.2%', width: '9.5%',  depth: 1.7, rot: -6, phase: 2.6, ex: 30,  ey: -300, er: -220, delay: 230,  dur: 2990 },
+  { kind: 'tag-host',      left: '69%',   top: '66.7%', width: '12.8%', depth: 1.4, rot: -3, phase: 0.6, ex: -20, ey: -340, er: 240,  delay: 1105, dur: 3450 },
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -140,22 +126,7 @@ function useFloatMotion(containerRef: React.RefObject<HTMLDivElement>, itemRefs:
         let ease = 1, targetOp = 0;
         if (localT <= 0) { ease = 1; targetOp = 0; }
         else if (localT >= it.dur) { ease = 0; targetOp = 1; }
-        else {
-          const p = localT / it.dur;
-          // was: Math.pow(1 - p, 3) — a cubic that has ZERO slope at p=1 (matches the
-          // held ease=0 after landing, fine) but a NON-zero slope at p=0 (≈ -3/dur).
-          // Right before p=0 the value is pinned flat at ease=1 (slope 0), so the
-          // instant an item's delay elapses, its target suddenly starts moving at
-          // that non-zero rate — a step in target-velocity the spring must snap onto,
-          // which is exactly the stutter before the "roll down" settles.
-          // Fix: smootherstep (Perlin) has zero 1st AND 2nd derivative at BOTH p=0
-          // and p=1, so it matches the flat pre/post regions on both sides — no
-          // velocity or acceleration step anywhere. p, dur, delay all untouched, so
-          // total timing/speed is identical; only the shape of the curve changed.
-          const s = p * p * p * (p * (p * 6 - 15) + 10);
-          ease = 1 - s;
-          targetOp = Math.min(1, localT / 220);
-        }
+        else { const p = localT / it.dur; ease = Math.pow(1 - p, 3); targetOp = Math.min(1, localT / 220); }
         it.op += (targetOp - it.op) * 0.2;
 
         const exO = it.ex * ease * narrow;
@@ -244,26 +215,8 @@ export function HeroSection() {
             it should read as the dominant element, only the badge below
             it was asked to shrink), with its own bottom margin as the
             explicit gap to the badge. */}
-        {/* width/height/aspectRatio on this <img> (and on the badge below) are
-            not decorative — they fix a real, measured layout-shift bug.
-            Without them, the browser has no way to know this image's box
-            height before the PNG finishes downloading, so it renders at
-            ~0 height first, then snaps to its real ~472px-tall box the
-            instant the logo loads — shoving the row below (left column +
-            floating scatter) down by that same amount in one un-animated
-            frame. Verified with a PerformanceObserver('layout-shift')
-            probe against the production build: this was firing a single
-            ~0.11 CLS shift at ~500ms that moved the scatter container by
-            215px, and because the floating items are positioned with
-            PERCENTAGE left/top relative to that container, they visibly
-            snapped mid-fall — this, not the entrance easing itself
-            (already fixed for velocity-continuity), was the real cause of
-            the reported stutter/"overlapping" look on load. Reserving the
-            real aspect ratio up front makes the browser allocate the
-            final box size on the very first layout pass, so nothing
-            shifts once the image loads. */}
         <h1 className="c365-h-nodefault" style={{ margin: 0, marginBottom: 'clamp(80px,10vw,140px)' }}>
-          <img src={LOGO} alt="Creatr365" width={936} height={472} style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', aspectRatio: '936 / 472', ...lineStyle(0) }} />
+          <img src={LOGO} alt="Creatr365" style={{ display: 'block', width: 'clamp(280px,34vw,480px)', height: 'auto', ...lineStyle(0) }} />
         </h1>
 
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 'clamp(20px,3vw,48px)', width: '100%', flex: 1, flexWrap: 'wrap' }}>
@@ -275,7 +228,7 @@ export function HeroSection() {
             opacity: entered ? 1 : 0, transform: entered ? 'translateY(0)' : 'translateY(46px)',
             transition: 'transform .95s cubic-bezier(.16,1,.3,1) 280ms, opacity .7s ease-out 280ms',
           }}>
-            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" width={249} height={168} style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', aspectRatio: '249 / 168', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
+            <img src={BADGE} alt="Be Creator. Not Consumer. Live Stream" style={{ display: 'block', width: 'clamp(120px,13vw,170px)', height: 'auto', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.4))' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', width: 'max-content' }}>
               <Link to="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px clamp(20px,2.6vw,36px)', background: RED, color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '.08em', borderRadius: 4, whiteSpace: 'nowrap' }}>
@@ -290,23 +243,20 @@ export function HeroSection() {
               A CREATIVE HOUSE FOR THE FUTURE OF LIVE COMMERCE
             </p>
 
-                       {/* Fixed: Overpass has no Thai glyphs at all (the project's own
+            {/* Fixed: Overpass has no Thai glyphs at all (the project's own
                 tailwind config says so explicitly) — this was silently
                 falling back to a generic system font. Switched to IBM Plex
                 Sans Thai, the Thai font already loaded for this project.
-                2 lines via an explicit <br/>, broken after "ไม่ใช่แค่การ
-                ขายของ" (line 1 = the "what it isn't" clause, line 2 = the
-                "what it is" clause + the 3 bolded terms), per request.
-                Line-height between the 2 lines left at the browser
-                default, unchanged, per request. Font-size bumped a step
-                past the English line's own clamp (9px/.85vw/12px) to
-                10px/1vw/14px — Thai text at an identical px value reads
-                optically smaller than Latin caps (shorter x-height, no
-                ascenders/descenders to fill the line), so matching the
-                raw number undershoots visual parity; this compensates. */}
-                        <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(10px,1vw,14px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left', whiteSpace: 'nowrap' }}>
-              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ<br />
-              แต่คือการ{' '}
+                Deliberately 2 lines now, broken with an explicit <br/> at
+                the clause boundary ("แต่คือการ" / "สร้างคุณค่า...") rather
+                than left to wrap on its own — a manual break holds at
+                exactly 2 lines at any column width, avoiding the earlier
+                uncontrolled wrap across three uneven lines. Font size now
+                matches the English line above it (same clamp), and its own
+                marginTop (on top of the column's flex gap) sets it apart
+                as the closing line of this block. */}
+            <p style={{ margin: 0, marginTop: 'clamp(28px,3.4vw,44px)', fontFamily: "'IBM Plex Sans Thai', sans-serif", fontSize: 'clamp(9px,.85vw,12px)', letterSpacing: '.02em', color: 'rgba(255,255,255,.55)', textAlign: 'left' }}>
+              เพราะอนาคตของ Live Commerce ไม่ใช่แค่การขายของ แต่คือการ<br />
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างคุณค่า</strong>,{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอิทธิพล</strong> และ{' '}
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
@@ -314,7 +264,7 @@ export function HeroSection() {
           </div>
 
           {/* scattered photo bubbles + tags — pointer-parallax + entrance driven by useFloatMotion */}
-          <div ref={scatterRef} className="c365-hero-scatter" style={{ position: 'relative', flex: 1, minWidth: 280, aspectRatio: '2.1/1', maxHeight: '62vh' }}>
+          <div ref={scatterRef} className="c365-hero-scatter" style={{ position: 'relative', flex: 1, minWidth: 280, aspectRatio: '2.5/1', maxHeight: '62vh' }}>
 
             <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[0].left, top: FLOAT_ITEMS[0].top, width: FLOAT_ITEMS[0].width, aspectRatio: '1/1', opacity: 0, borderRadius: '50%', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#1D4ED8', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
               <img src={PHOTOS.host} alt="Live host at desk setup" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
