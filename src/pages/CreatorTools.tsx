@@ -4,6 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
+import { PageBanner } from '@/components/PageBanner';
 import { Wrench } from 'lucide-react';
 
 /**
@@ -27,6 +28,8 @@ const CreatorTools: React.FC = () => {
             <span aria-hidden="true">/</span>
             <span className="text-foreground" aria-current="page">Creator Tools</span>
           </nav>
+
+          <PageBanner pageKey="creator-tools" accent="#B87333" />
 
           <div className="sharp-tile p-8 md:p-12 bg-card border border-border border-t-4 border-t-[#B87333]">
             <span className="text-[10px] font-bold tracking-widest text-[#B87333] block">CREATOR TOOLS</span>
