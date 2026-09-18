@@ -11,7 +11,7 @@ interface Article {
   is_active: boolean; sort_order: number; created_at: string;
 }
 
-const KINDS = ['blog', 'news', 'update', 'tool', 'community', 'quiz'];
+const KINDS = ['blog', 'video', 'news', 'update', 'tool', 'community', 'quiz'];
 const EMPTY: Partial<Article> = {
   title: '', slug: '', summary: '', body: '', cover_image_url: '',
   kind: 'blog', author: 'CREATR365 Team', tags: [], meta_description: '',
