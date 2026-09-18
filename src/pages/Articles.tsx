@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Newspaper, Wrench, Users, ClipboardCheck, Rss, ExternalLink } from 'lucide-react';
+import { useDarkPage } from '@/hooks/useDarkPage';
+import { ArrowRight, Newspaper, Wrench, Users, ClipboardCheck, Rss, ExternalLink, PlayCircle } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 
 interface ArticleRow {
@@ -13,138 +14,132 @@ interface ArticleRow {
 }
 
 const KIND_META: Record<string,{ label:string; Icon:React.FC<{className?:string}> }> = {
-  news:      { label:'NEWS',       Icon:Newspaper },
-  tool:      { label:'TOOL',       Icon:Wrench },
-  community: { label:'COMMUNITY',  Icon:Users },
-  quiz:      { label:'DIAGNOSTIC', Icon:ClipboardCheck },
-  blog:      { label:'BLOG',       Icon:Rss },
-  update:    { label:'UPDATE',     Icon:Newspaper },
+  video:     { label:'คลิปความรู้', Icon:PlayCircle },
+  blog:      { label:'บทความ',      Icon:Rss },
+  news:      { label:'ข่าวกิจกรรม', Icon:Newspaper },
+  update:    { label:'ข่าวกิจกรรม', Icon:Newspaper },
+  tool:      { label:'TOOL',        Icon:Wrench },
+  community: { label:'COMMUNITY',   Icon:Users },
+  quiz:      { label:'DIAGNOSTIC',  Icon:ClipboardCheck },
 };
 
-/* Single brand accent for every category — icon shape (see KIND_META)
-   differentiates the tags, not color, so the page reads as one brand. */
-const KIND_COLORS: Record<string,string> = {
-  news:'#CC0033', tool:'#CC0033', community:'#CC0033', quiz:'#CC0033', blog:'#CC0033', update:'#CC0033',
-};
+// Groups this page is organized into, in display order — separate,
+// explicit sections (not one flat filtered grid) per request, each reusing
+// this site's existing per-section wayfinding accent colors (same system
+// Explore.tsx/Toolbox.tsx already use) so this page reads as part of the
+// same site rather than a bolted-on forum layout.
+const GROUPS: { label:string; accent:string; kinds:string[] }[] = [
+  { label:'คลิปความรู้', accent:'#4A7FB5', kinds:['video'] },
+  { label:'บทความ',      accent:'#C0A060', kinds:['blog', 'tool'] },
+  { label:'ข่าวกิจกรรม', accent:'#B87333', kinds:['news', 'update', 'community', 'quiz'] },
+];
 
 const Articles: React.FC = () => {
+  useDarkPage();
   const [items, setItems] = useState<ArticleRow[]>([]);
-  const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-    return () => document.documentElement.classList.remove('dark');
-  }, []);
-
-  useEffect(() => {
     supabase.from('articles').select('*').eq('is_active',true).order('sort_order')
-      .then(({ data }) => { setItems((data as any)||[]); setLoading(false); });
+      .then(({ data }) => { setItems((data as unknown as ArticleRow[])||[]); setLoading(false); });
   }, []);
 
-  const kinds = ['all', ...Array.from(new Set(items.map(i=>i.kind)))];
-  const filtered = filter==='all' ? items : items.filter(i=>i.kind===filter);
+  const renderCard = (a: ArticleRow, accent: string) => {
+    const meta = KIND_META[a.kind] || KIND_META.news;
+    const Icon = meta.Icon;
+    const isInternal = !!a.body || a.target_url.startsWith('/');
+    const href = isInternal ? `/articles/${a.slug}` : a.target_url;
+
+    const CardContent = (
+      <div className="group sharp-card border border-border bg-card overflow-hidden h-full flex flex-col transition-all duration-300 hover:-translate-y-0.5">
+        {a.cover_image_url && (
+          <div className="aspect-video overflow-hidden bg-muted">
+            <img src={a.cover_image_url} alt={a.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          </div>
+        )}
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest px-2 py-1 rounded-full"
+              style={{ background:accent+'18', color:accent, border:`1px solid ${accent}40` }}>
+              <Icon className="w-2.5 h-2.5" /> {meta.label}
+            </span>
+            {!isInternal && <ExternalLink className="w-3 h-3 text-muted-foreground/40" />}
+          </div>
+          <h3 className="font-bold text-sm leading-tight mb-1.5 line-clamp-2">{a.title}</h3>
+          <p className="text-muted-foreground text-xs leading-relaxed mb-3 flex-1 line-clamp-3">{a.summary}</p>
+          <div className="mt-auto pt-2.5 border-t border-border/60 flex items-center justify-between">
+            <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-1.5 transition-all" style={{ color:accent }}>
+              {isInternal ? 'อ่านต่อ' : 'ดูเพิ่มเติม'}
+              <ArrowRight className="w-3 h-3" />
+            </span>
+            {a.author && <span className="text-muted-foreground/50 text-[10px]">{a.author}</span>}
+          </div>
+        </div>
+      </div>
+    );
+
+    return isInternal ? (
+      <Link key={a.id} to={href}>{CardContent}</Link>
+    ) : (
+      <a key={a.id} href={href} target="_blank" rel="noopener noreferrer">{CardContent}</a>
+    );
+  };
 
   return (
     <>
       <SEOHead
-        title="บทความ — CREATR365"
-        description="ข่าวสาร บทความ เครื่องมือ และชุมชนของนักสร้างไลฟ์คอมเมิร์ซ"
+        title="Community — CREATR365"
+        description="คลิปความรู้ บทความ และข่าวกิจกรรมของ Creatr365"
       />
       <CourseNavbar />
 
-      <main className="bg-[#080808] min-h-screen">
-        {/* Header */}
-        <div className="pt-28 pb-12 px-6 border-b border-white/5">
-          <div className="max-w-5xl mx-auto">
-            <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Knowledge Hub</span>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-3">บทความ</h1>
-            <p className="text-white/40 text-base">ข่าวสาร · เครื่องมือ · ชุมชน Creator</p>
+      <section className="pt-28 pb-20 px-4 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
+            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/explore" className="hover:text-foreground transition-colors">Explore</Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-foreground" aria-current="page">Community</span>
+          </nav>
 
-            {/* Filter tabs */}
-            {kinds.length > 2 && (
-              <div className="flex flex-wrap gap-2 mt-8">
-                {kinds.map(k => {
-                  const meta = KIND_META[k];
-                  const color = KIND_COLORS[k] || '#888';
-                  const active = filter===k;
-                  return (
-                    <button
-                      key={k}
-                      onClick={() => setFilter(k)}
-                      className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                      style={{
-                        background: active ? color+'20' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${active ? color+'50' : 'rgba(255,255,255,0.1)'}`,
-                        color: active ? color : 'rgba(255,255,255,0.4)',
-                      }}
-                    >
-                      {k==='all' ? 'ทั้งหมด' : (meta?.label || k.toUpperCase())}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-3" data-accent="red">Community</h1>
+          <p className="text-muted-foreground text-base md:text-lg mb-12 max-w-xl">
+            พื้นที่รวมคลิปความรู้ บทความ และข่าวกิจกรรมของ Creatr365 — อัปเดตให้ทันทุกความเคลื่อนไหว
+          </p>
 
-        {/* Grid */}
-        <div className="max-w-5xl mx-auto px-6 py-12">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1,2,3].map(n=><div key={n} className="h-72 rounded-2xl bg-white/3 animate-pulse" />)}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1,2,3].map(n=><div key={n} className="h-64 rounded-lg bg-muted animate-pulse" />)}
             </div>
-          ) : filtered.length === 0 ? (
-            <p className="text-white/25 text-center py-16 text-sm">ยังไม่มีบทความในหมวดนี้</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filtered.map(a => {
-                const meta = KIND_META[a.kind] || KIND_META.news;
-                const Icon = meta.Icon;
-                const color = KIND_COLORS[a.kind] || '#888';
-                // Internal article if has body, external if only target_url
-                const isInternal = !!a.body || a.target_url.startsWith('/');
-                const href = isInternal ? `/articles/${a.slug}` : a.target_url;
-
-                const CardContent = (
-                  <div className="group rounded-2xl border border-white/8 bg-[#111] overflow-hidden h-full flex flex-col transition-all duration-300 hover:-translate-y-0.5 hover:border-white/15 hover:shadow-xl hover:shadow-black/40">
-                    {a.cover_image_url && (
-                      <div className="aspect-video overflow-hidden">
-                        <img src={a.cover_image_url} alt={a.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80" />
+            <div className="space-y-12">
+              {GROUPS.map(group => {
+                const groupItems = items.filter(i => group.kinds.includes(i.kind));
+                return (
+                  <div key={group.label}>
+                    <div className="flex items-center gap-3 mb-5">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: group.accent }} aria-hidden="true" />
+                      <h2 className="text-lg font-bold tracking-tight">{group.label}</h2>
+                    </div>
+                    {groupItems.length === 0 ? (
+                      <div className="sharp-tile border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                        ยังไม่มีเนื้อหาในหมวดนี้ — กลับมาดูใหม่เร็ว ๆ นี้
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupItems.map(a => renderCard(a, group.accent))}
                       </div>
                     )}
-                    <div className="p-5 flex-1 flex flex-col">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full"
-                          style={{ background:color+'15', color, border:`1px solid ${color}30` }}>
-                          <Icon className="w-2.5 h-2.5" /> {meta.label}
-                        </span>
-                        {!isInternal && <ExternalLink className="w-3 h-3 text-white/20" />}
-                      </div>
-                      <h3 className="text-white font-semibold text-base leading-tight mb-2 line-clamp-2 group-hover:text-white transition-colors">{a.title}</h3>
-                      <p className="text-white/40 text-xs leading-relaxed mb-4 flex-1 line-clamp-3">{a.summary}</p>
-                      <div className="mt-auto pt-3 border-t border-white/6 flex items-center justify-between">
-                        <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-1.5 transition-all" style={{ color }}>
-                          {isInternal ? 'อ่านบทความ' : 'ดูเพิ่มเติม'}
-                          <ArrowRight className="w-3 h-3" />
-                        </span>
-                        {a.author && <span className="text-white/20 text-[10px]">{a.author}</span>}
-                      </div>
-                    </div>
                   </div>
-                );
-
-                return isInternal ? (
-                  <Link key={a.id} to={href}>{CardContent}</Link>
-                ) : (
-                  <a key={a.id} href={href} target="_blank" rel="noopener noreferrer">{CardContent}</a>
                 );
               })}
             </div>
           )}
         </div>
-      </main>
+      </section>
+
       <Footer />
     </>
   );

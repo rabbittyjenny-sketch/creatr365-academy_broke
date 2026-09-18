@@ -39,15 +39,29 @@ interface FloatConfig {
   ex: number; ey: number; er: number; delay: number; dur: number;
 }
 
+// Positions below were re-laid-out from the original design's numbers:
+// the container's 2.5/1 aspect ratio (now 2.1/1, see scatterRef below) made
+// each square-ish photo item's actual on-screen HEIGHT roughly 2x its
+// width%, so several items' bounding boxes genuinely overlapped at rest —
+// not an animation glitch, confirmed with screenshots at multiple points
+// during and after the entrance (photo-beauty sat on top of photo-food,
+// photo-fashion covered tag-host and nearly all of tag-bubble). Left/top/
+// width were recomputed to keep every pair's footprint clear (checked
+// pairwise in %, accounting for each item's real aspect ratio), and ex/ey/er
+// (the entrance flight distance) were scaled down by ~45% so items travel a
+// shorter path relative to the container and spend less time passing
+// through each other's space mid-flight — delay/dur (the actual timing/
+// stagger, matched to the reference build) are untouched, so the rhythm of
+// the cascade is unchanged, only how far each item travels to get there.
 const FLOAT_ITEMS: FloatConfig[] = [
-  { kind: 'photo-host',    left: '27.8%', top: '49.5%', width: '17.5%', depth: 1.1, rot: -3, phase: 0.4, ex: -70, ey: -540, er: 340,  delay: 2025, dur: 4255 },
-  { kind: 'photo-beauty',  left: '47.4%', top: '46.5%', width: '18.2%', depth: 1.5, rot: 5,  phase: 1.9, ex: 90,  ey: -500, er: -300, delay: 1470, dur: 4025 },
-  { kind: 'photo-food',    left: '64.3%', top: '19.7%', width: '17.6%', depth: 2,   rot: -2, phase: 3.4, ex: 60,  ey: -460, er: -320, delay: 505,  dur: 3680 },
-  { kind: 'photo-fashion', left: '80%',   top: '42.9%', width: '17.6%', depth: 1.3, rot: 4,  phase: 4.7, ex: -40, ey: -420, er: 260,  delay: 965,  dur: 3565 },
-  { kind: 'tag-standard',  left: '88.9%', top: '6.1%',  width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 40,  ey: -380, er: 300,  delay: 0,    dur: 3220 },
-  { kind: 'tag-bubble',    left: '86.5%', top: '80.8%', width: '13.5%', depth: 1.2, rot: -5, phase: 1.1, ex: 50,  ey: -360, er: -260, delay: 1290, dur: 3335 },
-  { kind: 'tag-torn',      left: '57.5%', top: '21.2%', width: '9.5%',  depth: 1.7, rot: -6, phase: 2.6, ex: 30,  ey: -300, er: -220, delay: 230,  dur: 2990 },
-  { kind: 'tag-host',      left: '69%',   top: '66.7%', width: '12.8%', depth: 1.4, rot: -3, phase: 0.6, ex: -20, ey: -340, er: 240,  delay: 1105, dur: 3450 },
+  { kind: 'photo-host',    left: '20%', top: '44%', width: '15%',   depth: 1.1, rot: -3, phase: 0.4, ex: -39, ey: -297, er: 187,  delay: 2025, dur: 4255 },
+  { kind: 'photo-beauty',  left: '40%', top: '12%', width: '15.5%', depth: 1.5, rot: 5,  phase: 1.9, ex: 50,  ey: -275, er: -165, delay: 1470, dur: 4025 },
+  { kind: 'photo-food',    left: '62%', top: '40%', width: '15%',   depth: 2,   rot: -2, phase: 3.4, ex: 33,  ey: -253, er: -176, delay: 505,  dur: 3680 },
+  { kind: 'photo-fashion', left: '82%', top: '10%', width: '15%',   depth: 1.3, rot: 4,  phase: 4.7, ex: -22, ey: -231, er: 143,  delay: 965,  dur: 3565 },
+  { kind: 'tag-standard',  left: '88%', top: '62%', width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 22,  ey: -209, er: 165,  delay: 0,    dur: 3220 },
+  { kind: 'tag-bubble',    left: '58%', top: '70%', width: '15%',   depth: 1.2, rot: -5, phase: 1.1, ex: 28,  ey: -198, er: -143, delay: 1290, dur: 3335 },
+  { kind: 'tag-torn',      left: '30%', top: '78%', width: '11%',   depth: 1.7, rot: -6, phase: 2.6, ex: 17,  ey: -165, er: -121, delay: 230,  dur: 2990 },
+  { kind: 'tag-host',      left: '8%',  top: '72%', width: '12.5%', depth: 1.4, rot: -3, phase: 0.6, ex: -11, ey: -187, er: 132,  delay: 1105, dur: 3450 },
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -300,7 +314,7 @@ export function HeroSection() {
           </div>
 
           {/* scattered photo bubbles + tags — pointer-parallax + entrance driven by useFloatMotion */}
-          <div ref={scatterRef} className="c365-hero-scatter" style={{ position: 'relative', flex: 1, minWidth: 280, aspectRatio: '2.5/1', maxHeight: '62vh' }}>
+          <div ref={scatterRef} className="c365-hero-scatter" style={{ position: 'relative', flex: 1, minWidth: 280, aspectRatio: '2.1/1', maxHeight: '62vh' }}>
 
             <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[0].left, top: FLOAT_ITEMS[0].top, width: FLOAT_ITEMS[0].width, aspectRatio: '1/1', opacity: 0, borderRadius: '50%', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#1D4ED8', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
               <img src={PHOTOS.host} alt="Live host at desk setup" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
