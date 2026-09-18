@@ -22,6 +22,8 @@ export interface Rubric {
   passScore: number;
   passRule: string;
   dimensions: RubricDimension[];
+  /** True for rubrics authored here (not sourced from rubric_master) — see RUB-17. */
+  custom?: boolean;
 }
 
 export const RUBRICS: Record<string, Rubric> = {
@@ -91,7 +93,16 @@ export const RUBRICS: Record<string, Rubric> = {
     dimensions: [{ name: "ขั้น1 Price Anchor" }, { name: "ขั้น2 Urgency" }, { name: "ขั้น3 Scarcity" }, { name: "ขั้น4 Social Proof" }],
   },
   "RUB-07": {
-    name: "Hook Submission (MICRO)", usedInCourse: "MICRO EXPRESS", sessionRef: "Hook Submission Assignment",
+    // rubric_master lists this as "MICRO EXPRESS", but the live catalog has no
+    // separate Micro course — FR_MAGNET (the free lead-magnet) is its closest
+    // ladder-position match. Kept assigned to COURSE_0_FOUNDATION's existing
+    // "ส่ง Hook เขียน 1 ชิ้น" submission anyway: the 3 dimensions here are a
+    // *written* hook (no delivery/video dimension), which matches what
+    // FOUNDATION's assignment actually asks for — content match wins over the
+    // sheet's stale course label. Not moved to FR_MAGNET: it's a free
+    // pre-purchase course, and adding a graded assignment there would be
+    // friction on the conversion funnel rather than a learning checkpoint.
+    name: "Hook Submission (MICRO)", usedInCourse: "MICRO EXPRESS (สอบทานแล้ว 18 ก.ย. 69 — ใช้กับ FOUNDATION เพราะเนื้อหาตรงกัน)", sessionRef: "Hook Submission Assignment",
     maxScore: 3, passScore: 3, passRule: "ผ่านครบทั้ง 3 องค์ประกอบ (Pass/Fail)",
     dimensions: [{ name: "Grabber" }, { name: "Value Preview" }, { name: "Call to Stay" }],
   },
@@ -111,7 +122,13 @@ export const RUBRICS: Record<string, Rubric> = {
     dimensions: [{ name: "ให้คะแนน 4 มิติครบ" }, { name: "มีเหตุผล" }, { name: "จุดแข็ง+หลักฐาน" }, { name: "จุดพัฒนา+แนวทาง" }, { name: "Action Plan 7 วัน" }],
   },
   "RUB-11": {
-    name: "EPK Draft", usedInCourse: "BLUEPRINT", sessionRef: "B3 EPK Draft",
+    // "BLUEPRINT" (rubric_master's tier name) maps to COURSE_3_BRAND_HOST in
+    // the live catalog. Confirmed content match 18 ก.ย. 69: an EPK's usual
+    // contents (name, photo, bio, brand soul, clips, testimonial, pricing) is
+    // exactly the tangible output of BH1 "5 Hidden Souls — Host Archetype DNA"
+    // + BH2 "Brand CI 4 มิติ" — wired as the onsite trainer-scored rubric for
+    // BH2 in AdminOnsiteScoring.tsx.
+    name: "EPK Draft", usedInCourse: "BLUEPRINT → BRAND HOST ARCHITECT (BH2)", sessionRef: "B3 EPK Draft",
     maxScore: 10, passScore: 8, passRule: "≥8/10 (Checklist Pass/Fail)",
     dimensions: [{ name: "ชื่อ" }, { name: "รูป" }, { name: "Bio" }, { name: "Soul" }, { name: "KPI" }, { name: "คลิป 3" }, { name: "Testimonial" }, { name: "ช่องทาง" }, { name: "ราคา" }, { name: "Layout" }],
   },
@@ -129,7 +146,11 @@ export const RUBRICS: Record<string, Rubric> = {
     ],
   },
   "RUB-14": {
-    name: "Team Production Simulation", usedInCourse: "BLUEPRINT", sessionRef: "B6+B7 Simulation",
+    // Confirmed content match 18 ก.ย. 69: dimensions here (Producer switching
+    // scenes, hand-signal cues for Chat Mod/Inventory, Dead Air) are exactly
+    // what BH6 "Team Production System & Hand Signals" teaches — wired as its
+    // onsite trainer-scored rubric.
+    name: "Team Production Simulation", usedInCourse: "BLUEPRINT → BRAND HOST ARCHITECT (BH6)", sessionRef: "B6+B7 Simulation",
     maxScore: 6, passScore: 5, passRule: "Pass ≥5/6",
     dimensions: [{ name: "Host ไม่มอง Producer" }, { name: "Producer สลับฉากทัน" }, { name: "Chat Mod <30วิ" }, { name: "Inventory แจ้งทัน" }, { name: "Dead Air <3วิ" }, { name: "ไม่มีเสียงกวน" }],
   },
@@ -146,6 +167,28 @@ export const RUBRICS: Record<string, Rubric> = {
       { name: "ตัวเลข P&L สมเหตุสมผล", levels: { 4: "คำนวณถูกต้อง ≥80% Margin สมจริง", 3: "ถูกส่วนใหญ่ มีผิดเล็กน้อย", 2: "มีผิดหลายจุด", 1: "ผิดหมด หรือไม่มีตัวเลข" } },
       { name: "เข้าใจตลาดต่างประเทศ", levels: { 4: "ระบุ VAT/กฎหมาย/พฤติกรรมผู้บริโภคได้ถูกต้อง", 3: "เข้าใจภาพรวม ขาดรายละเอียด", 2: "รู้บ้าง แต่มีเข้าใจผิด", 1: "ไม่รู้" } },
       { name: "นำเสนอชัดเจน มั่นใจ", levels: { 4: "พูดได้ไหลลื่น มั่นใจ ตอบคำถาม Panel ได้", 3: "ค่อนข้างดี สะดุดบ้าง", 2: "ลังเล อ่านโน้ตมาก", 1: "ไม่ผ่านเลย" } },
+    ],
+  },
+  "RUB-17": {
+    // NOT from rubric_master — authored here 18 ก.ย. 69 with Jennie's
+    // go-ahead, because no existing rubric covered this deliverable. The live
+    // COURSE_3_BRAND_HOST submission has always been labeled "ส่ง Scaling
+    // Readiness Scorecard + P&L Worksheet" but was pointing at RUB-11 (an EPK
+    // checklist with zero P&L content) — a real mismatch. RUB-11 has been
+    // moved to BH2's onsite scoring instead (see its own comment), and this
+    // new rubric replaces it for the course-level worksheet submission,
+    // grounded directly in what BH7 "P&L Mastery & Live Unit Economics" and
+    // BH8 "Global Market Intel & Scaling Strategy" actually teach.
+    custom: true,
+    name: "Scaling Readiness Scorecard & P&L Worksheet",
+    usedInCourse: "BRAND HOST ARCHITECT (สร้างใหม่ — ไม่มีใน rubric_master ต้นฉบับ)",
+    sessionRef: "BH7 P&L Mastery + BH8 Global Market Intel & Scaling",
+    maxScore: 16, passScore: 12, passRule: "≥12/16 และไม่มีมิติใดได้ 1 คะแนน",
+    dimensions: [
+      { name: "P&L Calculation Accuracy", levels: { 4: "คำนวณ Net Margin/Unit Economics ถูกต้องครบทุกรายการ มีที่มาชัดเจน", 3: "คำนวณถูกเป็นส่วนใหญ่ มีผิดพลาดเล็กน้อยที่ไม่กระทบข้อสรุป", 2: "คำนวณผิดหลายจุด หรือขาดรายการสำคัญ (COGS/Platform Fee)", 1: "ตัวเลขผิดทั้งหมด หรือไม่มี Worksheet ส่งมา" } },
+      { name: "Unit Economics Understanding", levels: { 4: "อธิบายความสัมพันธ์ GMV/COGS/Fee/Net Profit ได้ถูกต้องและเชื่อมโยงกับการตัดสินใจธุรกิจ", 3: "เข้าใจภาพรวมแต่เชื่อมโยงกับการตัดสินใจได้ไม่ชัด", 2: "เข้าใจนิยามศัพท์แต่คำนวณเชื่อมโยงกันไม่ได้", 1: "สับสนระหว่างนิยามพื้นฐาน" } },
+      { name: "Scaling Readiness", levels: { 4: "ระบุคอขวด (bottleneck) และแผนขยายทีม/กำลังผลิตที่สมเหตุสมผลตามตัวเลขจริง", 3: "มีแผนขยายแต่ไม่ได้อ้างอิงตัวเลข P&L ของตัวเอง", 2: "แผนกว้างเกินไป ไม่เจาะจง", 1: "ไม่มีแผน Scaling" } },
+      { name: "Global Market Intelligence", levels: { 4: "ระบุกฎศุลกากร/ภาษี/พฤติกรรมผู้บริโภคของตลาดเป้าหมายได้ถูกต้อง อ้างอิงแหล่งที่มา", 3: "ระบุได้ถูกต้องแต่ขาดแหล่งอ้างอิง", 2: "ระบุได้บางส่วน มีจุดเข้าใจผิด", 1: "ไม่ได้ค้นคว้าตลาดเป้าหมาย" } },
     ],
   },
 };
