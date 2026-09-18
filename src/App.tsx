@@ -26,6 +26,7 @@ import AdminAssignments from "./pages/AdminAssignments";
 import AdminPayments from "./pages/AdminPayments";
 import AdminArticles from "./pages/AdminArticles";
 import AdminToolbox from "./pages/AdminToolbox";
+import AdminPageBanners from "./pages/AdminPageBanners";
 import AdminStudents from "./pages/AdminStudents";
 import Admin from "./pages/Admin";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
@@ -70,6 +71,7 @@ const App = () => (
         <Route path="/admin/payments" element={<RequireAdmin><AdminPayments /></RequireAdmin>} />
         <Route path="/admin/articles" element={<RequireAdmin><AdminArticles /></RequireAdmin>} />
         <Route path="/admin/toolbox" element={<RequireAdmin><AdminToolbox /></RequireAdmin>} />
+        <Route path="/admin/page-banners" element={<RequireAdmin><AdminPageBanners /></RequireAdmin>} />
         <Route path="/admin/students" element={<RequireAdmin><AdminStudents /></RequireAdmin>} />
         <Route path="/articles" element={<Articles />} />
         <Route path="/articles/diagnostic-quiz" element={<DiagnosticQuiz />} />

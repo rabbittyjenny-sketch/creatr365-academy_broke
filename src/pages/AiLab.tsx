@@ -4,6 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
+import { PageBanner } from '@/components/PageBanner';
 import { Sparkles } from 'lucide-react';
 
 /**
@@ -29,6 +30,8 @@ const AiLab: React.FC = () => {
             <span aria-hidden="true">/</span>
             <span className="text-foreground" aria-current="page">AI Lab</span>
           </nav>
+
+          <PageBanner pageKey="ai-lab" accent="#6AAA7A" />
 
           <div
             className="sharp-tile p-8 md:p-12 bg-card border border-border border-t-4 border-t-[#6AAA7A] text-foreground"

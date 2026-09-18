@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { Download, FileText, Loader2, X } from 'lucide-react';
 import { ToolboxDownloadConsentDialog } from '@/components/ToolboxDownloadConsentDialog';
+import { PageBanner } from '@/components/PageBanner';
 
 interface ToolboxAsset {
   id: string;
@@ -216,6 +217,8 @@ const Toolbox: React.FC = () => {
             <span className="text-foreground" aria-current="page">Toolbox</span>
           </nav>
 
+          <PageBanner pageKey="toolbox" accent="#4A7FB5" />
+
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-3" data-accent="red">Toolbox</h1>
           <p className="text-muted-foreground text-base md:text-lg mb-8 max-w-xl">
             หยิบ template ไปใช้ต่อ แล้วกลับมาเรียนรู้ให้ลึกขึ้นเมื่อคุณพร้อม — ของฟรีทั้งหมด ล็อกอินเพื่อโหลด
@@ -246,37 +249,37 @@ const Toolbox: React.FC = () => {
               ยังไม่มีของให้โหลดในหมวดนี้ — กลับมาดูใหม่เร็ว ๆ นี้
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {filtered.map(asset => (
                 <div key={asset.id} className="sharp-card border border-border bg-card overflow-hidden flex flex-col">
-                  <div className="aspect-[4/3] bg-muted overflow-hidden">
+                  <div className="aspect-[16/10] bg-muted overflow-hidden">
                     {asset.cover_image_url ? (
                       <img src={asset.cover_image_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full grid place-items-center">
-                        <FileText className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
+                        <FileText className="w-6 h-6 text-muted-foreground/40" aria-hidden="true" />
                       </div>
                     )}
                   </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">{categoryLabel(asset.category)}</span>
+                  <div className="p-3 flex flex-col flex-1">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[9px] font-bold tracking-widest text-muted-foreground uppercase">{categoryLabel(asset.category)}</span>
                       {asset.file_type && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 bg-muted text-muted-foreground uppercase">{asset.file_type}</span>
+                        <span className="text-[8px] font-bold px-1 py-0.5 bg-muted text-muted-foreground uppercase">{asset.file_type}</span>
                       )}
                     </div>
-                    <h3 className="font-bold text-base leading-tight mb-1">{asset.title}</h3>
+                    <h3 className="font-bold text-sm leading-tight mb-1 line-clamp-2">{asset.title}</h3>
                     {asset.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{asset.description}</p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1 mb-2">{asset.description}</p>
                     )}
                     <button
                       onClick={() => handleDownloadClick(asset)}
                       disabled={downloadingId === asset.id}
-                      className="sharp-btn mt-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold tracking-wide px-4 py-2.5 bg-[#C0A060] text-[#0D0D0D] disabled:opacity-50"
+                      className="sharp-btn mt-auto inline-flex items-center justify-center gap-1.5 text-[11px] font-bold tracking-wide px-3 py-2 bg-[#C0A060] text-[#0D0D0D] disabled:opacity-50"
                     >
                       {downloadingId === asset.id
-                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
-                        : <Download className="w-3.5 h-3.5" aria-hidden="true" />}
+                        ? <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
+                        : <Download className="w-3 h-3" aria-hidden="true" />}
                       ดาวน์โหลด
                     </button>
                   </div>
