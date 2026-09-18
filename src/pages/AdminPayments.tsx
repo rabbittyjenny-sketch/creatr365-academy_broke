@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +37,7 @@ const AdminPayments = () => {
   if (loading) return <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">Loading...</div>;
 
   return (
-    <AdminLayout title="รายการการชำระเงิน" onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}>
+    <AdminLayout title="รายการการชำระเงิน" onSignOut={() => fullSignOut().then(() => navigate('/auth'))}>
         <div className="flex gap-2 mb-4">
           {(['all','pending','paid','free'] as const).map(f=>(
             <Button key={f} size="sm" variant={filter===f?'default':'outline'} onClick={()=>setFilter(f)}>{f}</Button>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
+import { fullSignOut } from '@/lib/fullSignOut';
 import { Upload, Save, Image as ImageIcon, Video, X } from 'lucide-react';
 
 interface Banner {
@@ -80,7 +81,7 @@ const AdminPageBanners: React.FC = () => {
     <AdminLayout
       title="Banner หน้า Explore"
       eyebrow="Explore"
-      onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}
+      onSignOut={() => fullSignOut().then(() => navigate('/auth'))}
     >
       <p className="text-white/30 text-xs mb-6">
         รูปหรือวิดีโอที่แสดงเป็น header ด้านบนของหน้า Toolbox / AI Lab / Creator Tools — เว้นว่างได้ ถ้าไม่ตั้งค่า หน้านั้นจะแสดงแบบข้อความล้วนเหมือนปัจจุบัน
