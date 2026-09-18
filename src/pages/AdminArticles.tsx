@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink } from 'lucide-react';
 
 interface Article {
@@ -245,7 +246,7 @@ const AdminArticles: React.FC = () => {
   useEffect(() => { load(); }, [load]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await fullSignOut();
     navigate('/auth');
   };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 
 // Kept in sync with CourseNavbar.tsx's MAIN_NAV labels (same 5 routes, same
 // English copy) — this component exists separately only for the scroll
@@ -40,7 +41,7 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await fullSignOut();
     setOpen(false);
     navigate('/');
   };

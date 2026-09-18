@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -305,7 +306,7 @@ const AdminStudents: React.FC = () => {
   const totalPaid = detail?.enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0) ?? 0;
 
   return (
-    <AdminLayout title="ตรวจสอบกิจกรรมนักเรียน" eyebrow="Student Audit" onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}>
+    <AdminLayout title="ตรวจสอบกิจกรรมนักเรียน" eyebrow="Student Audit" onSignOut={() => fullSignOut().then(() => navigate('/auth'))}>
       <div className="space-y-6">
         <div className="flex gap-2">
           <Input

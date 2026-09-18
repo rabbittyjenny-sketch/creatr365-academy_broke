@@ -6,6 +6,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Plus, Pencil, Trash2, Save, X, ArrowUp, ArrowDown, Ticket, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
+import { fullSignOut } from '@/lib/fullSignOut';
 
 /* ─── Types ────────────────────────────────────────────── */
 interface CourseRow {
@@ -316,7 +317,7 @@ const AdminCourses = () => {
       <SEOHead title="Admin — จัดการหลักสูตร · CREATR365" description="Course management admin" />
       <AdminLayout
         title="จัดการหลักสูตร"
-        onSignOut={() => supabase.auth.signOut().then(() => navigate('/auth'))}
+        onSignOut={() => fullSignOut().then(() => navigate('/auth'))}
       >
 
         {/* Tabs */}

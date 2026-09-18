@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { fullSignOut } from '@/lib/fullSignOut';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Download, Upload, Image as ImageIcon } from 'lucide-react';
 import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
 
@@ -220,7 +221,7 @@ const AdminToolbox: React.FC = () => {
   useEffect(() => { load(); }, [load]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await fullSignOut();
     navigate('/auth');
   };
 
