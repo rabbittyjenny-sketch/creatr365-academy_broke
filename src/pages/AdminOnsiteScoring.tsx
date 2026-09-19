@@ -21,20 +21,25 @@ import { RUBRICS } from '@/lib/rubrics';
  *
  * Content-verified lesson→rubric pairs only (by matching lesson name against
  * rubric_master's Session_Ref, not by position/index):
- *   ST1 Vocal Engine Lab      → RUB-02
- *   ST2 Camera Presence       → RUB-08
- *   ST3 Hook Factory          → RUB-05
- *   ST5 Crisis Improv Lab     → RUB-09
- *   ST6 KPI Test & Debrief    → RUB-03
- * ST4 "Narrative Performance" has no matching rubric in rubric_master — left
- * unmapped rather than guessed. BRAND HOST ARCHITECT's rubrics (RUB-11/12/14/15,
- * all EPK-deliverable-shaped) didn't clearly match any of its 8 live lesson
- * names when checked, so it's deliberately not pre-mapped either — the
- * trainer can still pick any rubric manually for any offline lesson.
+ *   ST1 Vocal Engine Lab                       → RUB-02
+ *   ST2 Camera Presence                        → RUB-08
+ *   ST3 Hook Factory                           → RUB-05
+ *   ST5 Crisis Improv Lab                      → RUB-09
+ *   ST6 KPI Test & Debrief                     → RUB-03
+ *   BH2 Brand CI 4 มิติ (+ BH1 Soul)            → RUB-11 (EPK Draft — an EPK's
+ *     usual contents are exactly name/photo/bio/soul/clips/testimonial/price)
+ *   BH6 Team Production System & Hand Signals  → RUB-14 (dimensions here are
+ *     literally the hand-signal cues this lesson teaches)
+ * ST4 "Narrative Performance" still has no matching rubric in rubric_master —
+ * left unmapped rather than guessed. BH1/BH3/BH4/BH5/BH7/BH8 likewise have no
+ * confirmed 1:1 rubric match — the trainer can still pick any rubric manually
+ * for any offline lesson (RUB-17, the new P&L/Scaling rubric, is used on the
+ * course-level async submission instead — see Creatr365_LMS_v2.jsx).
  */
 
 const SUGGESTED_RUBRIC: Record<string, string> = {
   ST1: 'RUB-02', ST2: 'RUB-08', ST3: 'RUB-05', ST5: 'RUB-09', ST6: 'RUB-03',
+  BH2: 'RUB-11', BH6: 'RUB-14',
 };
 
 interface AccountMatch { student_id: string; email: string | null }
