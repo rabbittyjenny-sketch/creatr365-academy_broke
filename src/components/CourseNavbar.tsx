@@ -3,25 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
+import { MAIN_NAV } from '@/lib/mainNav';
 
-// English nav copy (replaces the old Thai labels): Home/Courses/Quiz/Articles/
-// Contact map to HOME/EXPLORE/TEST YOURSELF/COMMUNITY/C365 respectively — the
-// `to` paths are unchanged, only the displayed label changed. `Navbar.tsx`
-// (used only on the Events pages, with its own scroll-transparency style)
-// carries the same five labels for the same five routes — keep both in sync
-// if either changes, rather than letting them drift back into Thai/English
-// mismatch.
-//
-// No per-item `accent` anymore — the navbar uses red only (no blue/green/
-// yellow), which is already the default hover/active color from
-// .site-hover-scope's fallback chain once no data-accent is set.
-const MAIN_NAV = [
-  { to: '/', label: 'HOME' },
-  { to: '/explore', label: 'EXPLORE' },
-  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF' },
-  { to: '/articles', label: 'COMMUNITY' },
-  { to: '/contact', label: 'C365' },
-] as const;
+// Nav items now come from src/lib/mainNav.ts, shared with Navbar.tsx (the
+// Events-pages variant), so the two can no longer drift out of sync — see
+// that file's comment for why this was split out.
 
 export const CourseNavbar: React.FC = () => {
   const navigate = useNavigate();
