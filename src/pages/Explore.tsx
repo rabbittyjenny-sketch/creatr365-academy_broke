@@ -4,7 +4,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { ArrowUpRight, GraduationCap, Package, Sparkles, Wrench } from 'lucide-react';
+import { ArrowUpRight, Calendar, GraduationCap, Package, Sparkles, Wrench } from 'lucide-react';
 
 /**
  * /explore — the ecosystem landing page. Replaces "EXPLORE = /courses" with
@@ -48,7 +48,10 @@ const Explore: React.FC = () => {
             ไม่ใช่แค่หัวข้อที่น่าสนใจ — เรียนรู้เป็นลำดับ หยิบของไปใช้ทันที ทดลอง AI หรือใช้เครื่องมือของ Creatr365
           </p>
 
-          {/* 4 giant tiles — DOM order: Courses, Toolbox, AI Lab, Creator Tools */}
+          {/* 5 tiles — DOM order: Courses, Toolbox, AI Lab, Creator Tools, Events.
+              Bottom row now holds two half-width tiles instead of one
+              full-width Creator Tools tile, to make room for Events without
+              disturbing the Courses/Toolbox/AI Lab layout above it. */}
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[220px_220px_160px] gap-3">
             <Link
               to="/courses"
@@ -111,7 +114,7 @@ const Explore: React.FC = () => {
 
             <Link
               to="/creator-tools"
-              className="sharp-card sharp-tile section-accent md:col-span-2 md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#B87333] overflow-hidden group"
+              className="sharp-card sharp-tile section-accent md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#B87333] overflow-hidden group"
               style={{ '--hover-accent': '#B87333', '--section-accent': '#B87333' } as React.CSSProperties}
             >
               <div>
@@ -120,6 +123,19 @@ const Explore: React.FC = () => {
                 <p className="text-xs text-muted-foreground mt-1">Coming soon — utility ที่ Creatr365 กำลังจัดเตรียมสำหรับสมาชิก</p>
               </div>
               <Wrench className="w-6 h-6 text-[#B87333] shrink-0" aria-hidden="true" />
+            </Link>
+
+            <Link
+              to="/events"
+              className="sharp-card sharp-tile section-accent md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#C0567A] overflow-hidden group"
+              style={{ '--hover-accent': '#C0567A', '--section-accent': '#C0567A' } as React.CSSProperties}
+            >
+              <div>
+                <span className="text-[10px] font-bold tracking-widest text-[#C0567A] block">05 / EVENTS</span>
+                <h2 className="text-xl md:text-2xl font-bold leading-[0.95] mt-1">Events</h2>
+                <p className="text-xs text-muted-foreground mt-1">เวิร์กช็อปและกิจกรรมที่เปิดรับสมัครตอนนี้</p>
+              </div>
+              <Calendar className="w-6 h-6 text-[#C0567A] shrink-0" aria-hidden="true" />
             </Link>
           </div>
         </div>
