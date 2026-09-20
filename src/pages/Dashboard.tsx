@@ -282,10 +282,15 @@ const Dashboard: React.FC = () => {
 
   const totalResourceCount = resources.length;
 
-  // Courses where every module is completed — backs both the "ใบประกาศ" stat
-  // tile and the Certificates section's list (see 34.5 in README for why
-  // that section shows "เร็วๆ นี้" instead of a download button: there's no
-  // real certificate file/generation behind this yet).
+  // Courses where every module is completed — backs both the "ใบบันทึกการเรียนจบ"
+  // stat tile and the completion-records section's list. Per the Completion
+  // Record Framework doc §3.2, words like "ใบประกาศ" / "certificate" /
+  // "ได้รับการรับรอง" / a level name (STARTER..MASTER) must never appear on
+  // anything a learner can present externally — those are reserved for the
+  // future, separate, paid Certification exam (Phase 2). This menu is no
+  // longer flagged "เร็วๆ นี้": issue_completion_record() has been issuing
+  // real records since the mandatory_gate_completion_records migration; the
+  // only thing actually missing was learners being told about it.
   const completedCoursesList = useMemo(() =>
     enrolledCourses.filter(({ course: c }) => {
       const mods = modulesByCourse.get(c.id) || [];
@@ -304,7 +309,7 @@ const Dashboard: React.FC = () => {
       { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'red' },
       { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'red' },
       { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
-      { label: 'ใบประกาศ', value: completedCoursesList.length, accent: 'red' },
+      { label: 'ใบบันทึกการเรียนจบ', value: completedCoursesList.length, accent: 'red' },
     ];
   }, [enrolledCourses.length, progress, completedCoursesList.length]);
 
@@ -312,7 +317,8 @@ const Dashboard: React.FC = () => {
     { key: 'overview', label: 'ภาพรวม', Icon: LayoutGrid },
     { key: 'courses', label: 'คอร์สของฉัน', Icon: GraduationCap, count: enrolledCourses.length },
     { key: 'resources', label: 'เอกสาร', Icon: FolderOpen, count: totalResourceCount },
-    { key: 'certificates', label: 'ใบประกาศ', Icon: Award, comingSoon: true },
+    // comingSoon removed: the mechanism behind this tab is live (see above).
+    { key: 'certificates', label: 'ใบบันทึกการเรียนจบ', Icon: Award },
   ];
 
   if (loading || !user) {
@@ -425,7 +431,7 @@ const Dashboard: React.FC = () => {
 
                 <div className="rounded-xl border border-border/50 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
                   <p className="font-medium text-foreground/70">วิธีเข้าระบบ LMS</p>
-                  <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะนำ Master Key ของคุณ (<span className="font-mono">{keyId}</span>) เข้าสู่ LMS โดยอัตโนมัติ</p>
+                  <p>กด <span className="font-semibold">เข้าเรียน</span> — ระบบจะออกตั๋วเข้าห้องเรียนแบบใช้ครั้งเดียว (หมดอายุใน 60 วินาที) เพื่อพาเข้าสู่ LMS โดยอัตโนมัติ โดยไม่ต้องแชร์ Master Key (<span className="font-mono">{keyId}</span>) ของคุณผ่านลิงก์</p>
                   <p>หากต้องการเข้าด้วยตัวเอง: ไปที่ <span className="font-mono">6course-quiz.vercel.app</span> แล้วใส่ Master Key ด้านบน</p>
                 </div>
               </div>
@@ -640,7 +646,7 @@ const Dashboard: React.FC = () => {
                             </div>
                           ) : (
                             <p className="mt-3 pt-3 border-t border-border/60 text-xs text-muted-foreground">
-                              เรียนจบครบทุกบทเรียนแล้ว — ระบบจะออกใบสรุปการเรียนให้หลังทำแบบประเมินวินิจฉัยท้ายคอร์สในรอบถัดไป
+                              เรียนจบครบทุกบทเรียนแล้ว — ทำแบบประเมินวินิจฉัยท้ายคอร์สแล้วกด "ยืนยันรับผล" ในห้องเรียน ระบบจะออกใบบันทึกการเรียนจบให้ทันที
                             </p>
                           )}
                         </div>
