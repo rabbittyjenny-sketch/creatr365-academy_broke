@@ -125,24 +125,44 @@ const AdminAssignments = () => {
                         <div key={d.name} className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium">{d.name}</p>
-                            {d.levels && (
+                            {rubric.kind === 'scale' && d.levels && (
                               <p className="text-[10px] text-muted-foreground leading-snug">
                                 4: {d.levels[4]} · 3: {d.levels[3]} · 2: {d.levels[2]} · 1: {d.levels[1]}
                               </p>
                             )}
+                            {rubric.kind === 'checklist' && d.criterion && (
+                              <p className="text-[10px] text-muted-foreground leading-snug">{d.criterion}</p>
+                            )}
                           </div>
                           {r.status === 'pending' && (
-                            <Input
-                              type="number" min={0} max={4}
-                              className="w-14 h-7 text-xs shrink-0"
-                              placeholder="-"
-                              value={dims[d.name] ?? ''}
-                              onChange={e => setDim(d.name, e.target.value)}
-                            />
+                            rubric.kind === 'checklist' ? (
+                              <label className="flex items-center gap-1.5 shrink-0 text-xs">
+                                <input type="checkbox" className="h-4 w-4"
+                                  checked={dims[d.name] === '1'}
+                                  onChange={e => setDim(d.name, e.target.checked ? '1' : '0')} />
+                                ผ่าน
+                              </label>
+                            ) : (
+                              <Input
+                                type="number" min={0} max={rubric.maxPerDimension}
+                                className="w-14 h-7 text-xs shrink-0"
+                                placeholder="-"
+                                value={dims[d.name] ?? ''}
+                                onChange={e => setDim(d.name, e.target.value)}
+                              />
+                            )
                           )}
                         </div>
                       ))}
                     </div>
+                    {rubric.additionalGates && rubric.additionalGates.length > 0 && (
+                      <div className="mt-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2">
+                        <p className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 mb-0.5">เงื่อนไขเพิ่มเติมนอกเหนือจากคะแนน Rubric:</p>
+                        {rubric.additionalGates.map((g, i) => (
+                          <p key={i} className="text-[10px] text-amber-700 dark:text-amber-400">• {g}</p>
+                        ))}
+                      </div>
+                    )}
                     {r.status === 'pending' ? (
                       <p className="text-[11px] mt-2 text-muted-foreground">
                         รวมตาม Rubric: {total}/{rubric.maxScore} — ใช้เป็นตัวช่วยกะคะแนน 0-100 ด้านล่าง (ไม่ได้แปลงให้อัตโนมัติ เพราะ rubric_master ไม่ได้กำหนดสูตรแปลงไว้)
