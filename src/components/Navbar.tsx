@@ -3,20 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
+import { MAIN_NAV } from '@/lib/mainNav';
 
-// Kept in sync with CourseNavbar.tsx's MAIN_NAV labels (same 5 routes, same
-// English copy) — this component exists separately only for the scroll
-// transparency→glass behavior the Events pages need, not for different nav
-// content. If these ever need to diverge in wording, that's the signal to
-// stop copy-pasting and share one nav-items source instead.
-const MAIN_NAV = [
-  { to: '/', label: 'HOME' },
-  { to: '/explore', label: 'EXPLORE' },
-  { to: '/articles/diagnostic-quiz', label: 'TEST YOURSELF' },
-  { to: '/articles', label: 'COMMUNITY' },
-  { to: '/contact', label: 'C365' },
-] as const;
-
+// Nav items now come from src/lib/mainNav.ts, shared with CourseNavbar.tsx.
+// This component still exists separately only for the scroll
+// transparency→glass behavior the Events pages need.
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
