@@ -6,7 +6,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { RUBRICS } from '@/lib/rubrics';
+import { RUBRICS, MODULE_RUBRIC_HINTS } from '@/lib/rubrics';
 
 /**
  * Trainer live-scoring for onsite (offline) lessons — STAGE / BRAND HOST
@@ -19,28 +19,14 @@ import { RUBRICS } from '@/lib/rubrics';
  * progression (unlock_next_module is deliberately never called here; that
  * stays driven by the session code + quiz as it already is).
  *
- * Content-verified lesson→rubric pairs only (by matching lesson name against
- * rubric_master's Session_Ref, not by position/index):
- *   ST1 Vocal Engine Lab                       → RUB-02
- *   ST2 Camera Presence                        → RUB-08
- *   ST3 Hook Factory                           → RUB-05
- *   ST5 Crisis Improv Lab                      → RUB-09
- *   ST6 KPI Test & Debrief                     → RUB-03
- *   BH2 Brand CI 4 มิติ (+ BH1 Soul)            → RUB-11 (EPK Draft — an EPK's
- *     usual contents are exactly name/photo/bio/soul/clips/testimonial/price)
- *   BH6 Team Production System & Hand Signals  → RUB-14 (dimensions here are
- *     literally the hand-signal cues this lesson teaches)
- * ST4 "Narrative Performance" still has no matching rubric in rubric_master —
- * left unmapped rather than guessed. BH1/BH3/BH4/BH5/BH7/BH8 likewise have no
- * confirmed 1:1 rubric match — the trainer can still pick any rubric manually
- * for any offline lesson (RUB-17, the new P&L/Scaling rubric, is used on the
- * course-level async submission instead — see Creatr365_LMS_v2.jsx).
+ * The lesson→rubric suggestions themselves now live in ONE place —
+ * MODULE_RUBRIC_HINTS in src/lib/rubrics.ts — instead of being duplicated
+ * here as a second, hand-maintained map. That file's comment documents the
+ * confirmed pairs (including ST4 → RUB-05, added after ST4 turned out to
+ * score the same three observable behaviours as Hook Factory Speak). Any
+ * lesson without a confirmed match is simply absent from that map, and the
+ * trainer can still pick any rubric manually for any offline lesson.
  */
-
-const SUGGESTED_RUBRIC: Record<string, string> = {
-  ST1: 'RUB-02', ST2: 'RUB-08', ST3: 'RUB-05', ST5: 'RUB-09', ST6: 'RUB-03',
-  BH2: 'RUB-11', BH6: 'RUB-14',
-};
 
 interface AccountMatch { student_id: string; email: string | null }
 interface CourseOpt { id: string; slug: string; title: string }
@@ -108,7 +94,7 @@ const AdminOnsiteScoring = () => {
   useEffect(() => {
     setDims({}); setScoreInput('');
     const mod = modules.find(m => m.id === moduleId);
-    setRubricId(mod && SUGGESTED_RUBRIC[mod.code] ? SUGGESTED_RUBRIC[mod.code] : '');
+    setRubricId(mod && MODULE_RUBRIC_HINTS[mod.code] ? MODULE_RUBRIC_HINTS[mod.code] : '');
   }, [moduleId, modules]);
 
   const loadHistory = async (ids: string[]) => {
@@ -237,17 +223,37 @@ const AdminOnsiteScoring = () => {
                     <div key={d.name} className="flex items-start gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium">{d.name}</p>
-                        {d.levels && (
+                        {rubric.kind === 'scale' && d.levels && (
                           <p className="text-[10px] text-muted-foreground leading-snug">
                             4: {d.levels[4]} · 3: {d.levels[3]} · 2: {d.levels[2]} · 1: {d.levels[1]}
                           </p>
                         )}
+                        {rubric.kind === 'checklist' && d.criterion && (
+                          <p className="text-[10px] text-muted-foreground leading-snug">{d.criterion}</p>
+                        )}
                       </div>
-                      <Input type="number" min={0} max={4} className="w-14 h-7 text-xs shrink-0"
-                        value={dims[d.name] ?? ''} onChange={e => setDims(prev => ({ ...prev, [d.name]: e.target.value }))} />
+                      {rubric.kind === 'checklist' ? (
+                        <label className="flex items-center gap-1.5 shrink-0 text-xs">
+                          <input type="checkbox" className="h-4 w-4"
+                            checked={dims[d.name] === '1'}
+                            onChange={e => setDims(prev => ({ ...prev, [d.name]: e.target.checked ? '1' : '0' }))} />
+                          ผ่าน
+                        </label>
+                      ) : (
+                        <Input type="number" min={0} max={rubric.maxPerDimension} className="w-14 h-7 text-xs shrink-0"
+                          value={dims[d.name] ?? ''} onChange={e => setDims(prev => ({ ...prev, [d.name]: e.target.value }))} />
+                      )}
                     </div>
                   ))}
                 </div>
+                {rubric.additionalGates && rubric.additionalGates.length > 0 && (
+                  <div className="mt-2 rounded border border-amber-300 bg-amber-50 dark:bg-amber-950/30 p-2">
+                    <p className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 mb-0.5">เงื่อนไขเพิ่มเติมนอกเหนือจากคะแนน Rubric:</p>
+                    {rubric.additionalGates.map((g, i) => (
+                      <p key={i} className="text-[10px] text-amber-700 dark:text-amber-400">• {g}</p>
+                    ))}
+                  </div>
+                )}
                 <p className="text-[11px] mt-2 text-muted-foreground">รวมตาม Rubric: {dimTotal}/{rubric.maxScore}</p>
               </div>
             )}
