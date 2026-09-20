@@ -15,7 +15,8 @@ export const Footer = () => (
         <div style={{ display: 'flex', gap: 'clamp(28px,4vw,56px)', flexWrap: 'wrap' }}>
           {Object.entries({
             'หลักสูตร': [['/courses','ดูทั้งหมด'],['/course/magnet','THE MAGNET'],['/course/foundation','THE FOUNDATION'],['/course/signal','SIGNAL'],['/course/stage','STAGE'],['/course/brand-host-architect','BRAND HOST ARCHITECT']],
-            'ข้อมูล': [['/articles','บทความ'],['/contact','ติดต่อ'],['/faq','คำถามที่พบบ่อย']],
+            'ชุมชน': [['/events','กิจกรรม'],['/my-events','กิจกรรมของฉัน'],['/articles','บทความ']],
+            'ข้อมูล': [['/contact','ติดต่อ'],['/faq','คำถามที่พบบ่อย']],
           }).map(([title, links]) => (
             <div key={title}>
               <p style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: '14px', fontFamily: 'inherit' }}>{title}</p>
@@ -33,7 +34,7 @@ export const Footer = () => (
         </div>
       </div>
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '22px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '10px', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-        <p>© 2025 CREATR365. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} CREATR365. All rights reserved.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px' }}>
           {[['นโยบายความเป็นส่วนตัว', '/privacy'], ['ข้อกำหนดการใช้บริการ', '/terms'], ['นโยบายการคืนเงิน', '/refund-policy'], ['คำถามที่พบบ่อย', '/faq']].map(([l, h]) => (
             <Link key={l} to={h} style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', fontFamily: 'inherit', fontSize: '13px' }}>
