@@ -52,7 +52,7 @@ const DiagnosticQuiz: React.FC = () => {
 
   return (
     <>
-      <SEOHead title="Diagnostic Quiz - Creatr365" description="แบบทดสอบวัดทักษะ Live Commerce 10 ข้อ รู้ว่าคุณควรเริ่มจากตรงไหน" />
+      <SEOHead title="Diagnostic Quiz - Creatr365" description="แบบประเมินความพร้อม Live Commerce Host 30 ข้อ ตามระบบ PPACT รู้ว่าคุณควรเริ่มจากตรงไหน" />
       <CourseNavbar />
       <main className="max-w-3xl mx-auto px-4 pt-28 pb-20">
         <Link to="/" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-8 transition-colors">
@@ -64,11 +64,11 @@ const DiagnosticQuiz: React.FC = () => {
             <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase" data-accent="red">Diagnostic</p>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight" data-accent="red">รู้ก่อนว่าคุณ<br/>ควรเริ่มจากตรงไหน</h1>
             <p className="text-lg text-muted-foreground max-w-xl" data-accent="red">
-              10 สถานการณ์จริง วัดทักษะ 5 มิติ — ไม่มีถูกหรือผิดตายตัว มีแค่ผลสรุปที่บอกว่าคุณอยู่จุดไหน
+              30 ข้อ (15 สถานการณ์จำลองหน้างานจริง + 15 ข้อความรู้พื้นฐาน) วัดศักยภาพ 5 ด้านตามระบบ PPACT — ไม่มีถูกหรือผิดตายตัว มีแค่ผลสรุปที่บอกว่าคุณอยู่จุดไหน
             </p>
             <ul className="text-sm text-muted-foreground space-y-1 list-none">
-              <li>⏱ ใช้เวลาประมาณ 8 นาที</li>
-              <li>📊 วัด 5 มิติ: AC · TB · EI · DO · ST</li>
+              <li>⏱ ใช้เวลาประมาณ 15–20 นาที</li>
+              <li>📊 วัด 5 ด้าน: Presence · Psychology · Authority · Communication · Trust (PPACT)</li>
               <li>🎯 แนะนำคอร์สที่เหมาะกับระดับของคุณ</li>
             </ul>
             <button onClick={() => setStage('survey')} data-accent="red" className="btn-brand px-8 py-4 rounded-lg font-semibold">
