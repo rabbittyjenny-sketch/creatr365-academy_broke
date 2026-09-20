@@ -179,9 +179,9 @@ const Discover = () => {
   };
   return <div className="min-h-screen bg-white">
       <SEOHead 
-        title="Discover Events"
-        description="Explore popular events near you, browse by category, or check out some of the great community calendars."
-        keywords="events, discover events, community events, local events, event calendar"
+        title="กิจกรรมและเวิร์กช็อป - Creatr365"
+        description="ดูเวิร์กช็อปและกิจกรรมของ Creatr365 ที่กำลังเปิดรับสมัคร ค้นหาตามวันที่ที่คุณสะดวก"
+        keywords="กิจกรรม, เวิร์กช็อป, Creatr365, live commerce event"
       />
       <div className="animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
         <Navbar />
@@ -200,16 +200,16 @@ const Discover = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium mb-6 md:mb-10 inline-flex flex-col items-center" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             <div className="flex items-center">
-              <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>Discover</span>
-              <span className="bg-[#ff6bff] border border-black px-3 md:px-6 py-2 md:py-4 rounded-[20px] md:rounded-[40px] -ml-px animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>events</span>
+              <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>ค้นหา</span>
+              <span className="bg-[#ff6bff] border border-black px-3 md:px-6 py-2 md:py-4 rounded-[20px] md:rounded-[40px] -ml-px animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>กิจกรรม</span>
             </div>
             <div className="flex items-center -mt-px">
-              <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>near</span>
-              <span className="border border-l-0 border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>you</span>
+              <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>ของ</span>
+              <span className="border border-l-0 border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>Creatr365</span>
             </div>
           </h1>
           <p className="text-sm md:text-base lg:text-[18px] text-black max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.7s', animationFillMode: 'both' }}>
-            Explore popular events near you, browse by category, or check out some of the great community calendars.
+            เวิร์กช็อปและกิจกรรมสดที่กำลังเปิดรับสมัคร — เลือกดูตามวันที่ที่คุณสะดวก
           </p>
         </div>
       </section>
@@ -221,7 +221,7 @@ const Discover = () => {
       <section id="events-section" className="px-4 md:px-8 pb-16 pt-6 md:pt-16">
         <div>
           <div className="flex flex-wrap items-center gap-0 mb-6 md:mb-8 animate-fade-in" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
-            <h2 className="text-base md:text-lg lg:text-xl font-normal w-full sm:w-auto mb-2 sm:mb-0">Browsing events in</h2>
+            <h2 className="text-base md:text-lg lg:text-xl font-normal w-full sm:w-auto mb-2 sm:mb-0">กำลังดูกิจกรรมใน</h2>
             <span className="text-base md:text-lg lg:text-xl font-normal border border-black px-2 py-1 sm:ml-2">{userCountry}</span>
             
             {/* Calendar button for mobile/tablet */}
@@ -235,7 +235,7 @@ const Discover = () => {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "MMM do, yyyy") : <span>Pick a date</span>}
+                    {date ? format(date, "d MMM yyyy") : <span>เลือกวันที่</span>}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -259,10 +259,10 @@ const Discover = () => {
             {/* Event Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:col-start-2 gap-5">
               {loading ? (
-                <div className="col-span-full text-center py-12">Loading events...</div>
+                <div className="col-span-full text-center py-12">กำลังโหลดกิจกรรม...</div>
               ) : filteredEvents.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  {date ? `No events found for ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}` : 'No events found'}
+                  {date ? `ไม่พบกิจกรรมในวันที่ ${date.toLocaleDateString('th-TH', { weekday: 'long', month: 'long', day: 'numeric' })}` : 'ยังไม่มีกิจกรรมในขณะนี้ — กลับมาดูใหม่เร็ว ๆ นี้'}
                 </div>
               ) : (
                 filteredEvents.map((event, index) => (
