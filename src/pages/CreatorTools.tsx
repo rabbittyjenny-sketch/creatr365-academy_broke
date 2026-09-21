@@ -20,6 +20,12 @@ const CreatorTools: React.FC = () => {
       <CourseNavbar />
 
       <section className="pt-28 pb-24 px-4 bg-background min-h-[70vh]">
+        {/* Same fix as AiLab.tsx: banner gets the section's full width, not
+            the narrower max-w-3xl reading column below it. */}
+        <div className="max-w-6xl mx-auto mb-8">
+          <PageBanner pageKey="creator-tools" accent="#B87333" />
+        </div>
+
         <div className="max-w-3xl mx-auto">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
@@ -28,8 +34,6 @@ const CreatorTools: React.FC = () => {
             <span aria-hidden="true">/</span>
             <span className="text-foreground" aria-current="page">Creator Tools</span>
           </nav>
-
-          <PageBanner pageKey="creator-tools" accent="#B87333" />
 
           <div className="sharp-tile p-8 md:p-12 bg-card border border-border border-t-4 border-t-[#B87333]">
             <span className="text-[10px] font-bold tracking-widest text-[#B87333] block">CREATOR TOOLS</span>

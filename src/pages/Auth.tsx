@@ -123,115 +123,123 @@ const Auth = () => {
         title={isLogin ? 'เข้าสู่ระบบ - Creatr365' : 'สมัครสมาชิก - Creatr365'}
         description="เข้าสู่ระบบเพื่อเริ่มเรียนกับ Creatr365"
       />
-      <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-16">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 pt-16 pb-16">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-6">
             <Link to="/" className="inline-block mb-6">
               <img src={logoCreatr} alt="Creatr365" className="h-12 w-auto mx-auto" />
             </Link>
-            <h2 className="text-2xl font-bold text-foreground">
-              {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
-            </p>
           </div>
 
-          {/* LINE Login via LIFF */}
-          {LIFF_CONFIGURED && (
-            <div className="space-y-3">
-              {liff.ready && liff.loggedIn && liff.accessToken ? (
-                <button
-                  type="button"
-                  disabled={liffLoading}
-                  onClick={() => handleLiffSignIn(liff.accessToken!)}
-                  className="w-full h-12 rounded-lg font-medium flex items-center justify-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white transition-colors disabled:opacity-50"
-                >
-                  {liffLoading ? 'กำลังเข้าสู่ระบบ...' : (
-                    <>
-                      <LineIcon />
-                      เข้าสู่ระบบด้วย LINE
-                      {liff.profile?.displayName && (
-                        <span className="text-xs opacity-80">({liff.profile.displayName})</span>
-                      )}
-                    </>
-                  )}
-                </button>
-              ) : liff.ready && !liff.loggedIn ? (
-                <button
-                  type="button"
-                  onClick={() => liff.login()}
-                  className="w-full h-12 rounded-lg font-medium flex items-center justify-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white transition-colors"
-                >
-                  <LineIcon />
-                  เข้าสู่ระบบด้วย LINE
-                </button>
-              ) : !liff.ready && (
-                <button disabled className="w-full h-12 rounded-lg font-medium flex items-center justify-center gap-3 bg-[#06C755]/50 text-white cursor-not-allowed">
-                  <LineIcon />
-                  กำลังโหลด LINE...
-                </button>
-              )}
-
-              <div className="relative flex items-center gap-3">
-                <div className="flex-1 border-t border-border" />
-                <span className="text-xs text-muted-foreground">หรือ</span>
-                <div className="flex-1 border-t border-border" />
-              </div>
+          {/* Bordered sharp-tile container — every other content page on the
+              site puts its content in a bordered box; this page used to float
+              its form directly on the background with rounded corners. */}
+          <div className="sharp-tile border border-border bg-card p-6 sm:p-8 space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-foreground">
+                {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
+              </p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="อีเมล"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="h-12 rounded-xl"
-            />
-            <div>
-              <PasswordInput
-                placeholder="รหัสผ่าน"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
-                className="h-12 rounded-xl"
-                minLength={8}
-              />
-              <div className="mt-1.5 flex items-center justify-between gap-3 text-xs">
-                <p className="ml-1 text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
-                {isLogin && (
+            {/* LINE Login via LIFF */}
+            {LIFF_CONFIGURED && (
+              <div className="space-y-3">
+                {liff.ready && liff.loggedIn && liff.accessToken ? (
                   <button
                     type="button"
-                    onClick={handleForgotPassword}
-                    disabled={loading}
-                    className="shrink-0 text-foreground/70 hover:text-foreground transition-colors disabled:opacity-50"
+                    disabled={liffLoading}
+                    onClick={() => handleLiffSignIn(liff.accessToken!)}
+                    className="sharp-btn w-full h-12 rounded-none border border-foreground font-medium flex items-center justify-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white transition-colors disabled:opacity-50"
                   >
-                    ลืมรหัสผ่าน?
+                    {liffLoading ? 'กำลังเข้าสู่ระบบ...' : (
+                      <>
+                        <LineIcon />
+                        เข้าสู่ระบบด้วย LINE
+                        {liff.profile?.displayName && (
+                          <span className="text-xs opacity-80">({liff.profile.displayName})</span>
+                        )}
+                      </>
+                    )}
+                  </button>
+                ) : liff.ready && !liff.loggedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => liff.login()}
+                    className="sharp-btn w-full h-12 rounded-none border border-foreground font-medium flex items-center justify-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white transition-colors"
+                  >
+                    <LineIcon />
+                    เข้าสู่ระบบด้วย LINE
+                  </button>
+                ) : !liff.ready && (
+                  <button disabled className="w-full h-12 rounded-none border border-foreground font-medium flex items-center justify-center gap-3 bg-[#06C755]/50 text-white cursor-not-allowed">
+                    <LineIcon />
+                    กำลังโหลด LINE...
                   </button>
                 )}
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-brand w-full h-12 rounded-lg font-medium disabled:opacity-50 transition-opacity"
-            >
-              {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
-            </button>
-          </form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="hover:text-foreground transition-colors"
-            >
-              {isLogin ? 'ยังไม่มีบัญชี? สมัครสมาชิก' : 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ'}
-            </button>
-          </p>
+                <div className="relative flex items-center gap-3">
+                  <div className="flex-1 border-t border-border" />
+                  <span className="text-xs text-muted-foreground">หรือ</span>
+                  <div className="flex-1 border-t border-border" />
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="อีเมล"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="h-12 rounded-none"
+              />
+              <div>
+                <PasswordInput
+                  placeholder="รหัสผ่าน"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                  className="h-12 rounded-none"
+                  minLength={8}
+                />
+                <div className="mt-1.5 flex items-center justify-between gap-3 text-xs">
+                  <p className="ml-1 text-muted-foreground">{PASSWORD_REQUIREMENTS_TEXT}</p>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="shrink-0 text-foreground/70 hover:text-foreground transition-colors disabled:opacity-50"
+                    >
+                      ลืมรหัสผ่าน?
+                    </button>
+                  )}
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-brand w-full h-12 rounded-none font-medium disabled:opacity-50 transition-opacity"
+              >
+                {loading ? 'กำลังดำเนินการ...' : isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
+              </button>
+            </form>
+
+            <p className="text-center text-sm text-muted-foreground">
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="hover:text-foreground transition-colors"
+              >
+                {isLogin ? 'ยังไม่มีบัญชี? สมัครสมาชิก' : 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ'}
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </>
