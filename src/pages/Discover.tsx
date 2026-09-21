@@ -5,13 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ArrowUpRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import arrowDown from '@/assets/arrow-down.png';
 import { SEOHead } from '@/components/SEOHead';
 import { EventsCarousel } from '@/components/EventsCarousel';
 import { RotatingBadge } from '@/components/RotatingBadge';
+
+// Same wayfinding accent Explore.tsx already uses for its Events tile —
+// reused here so the listing page reads as the same destination, not a
+// bolted-on separate design.
+const EVENTS_ACCENT = '#C0567A';
 
 interface Event {
   id: string;
@@ -38,33 +43,45 @@ const EventCard = ({
   };
   
   const eventLive = isEventLive();
-  
+
   return (
-    <div 
-      className="relative cursor-pointer group"
+    <div
+      className="sharp-card section-accent group cursor-pointer border border-border bg-card overflow-hidden h-full flex flex-col"
+      style={{ '--hover-accent': EVENTS_ACCENT, '--section-accent': EVENTS_ACCENT } as React.CSSProperties}
       onClick={() => navigate(`/event/${event.id}`)}
     >
-      <div className="overflow-hidden mb-3">
-        <div 
+      <div className="relative overflow-hidden border-b border-border">
+        <div
           className="aspect-square bg-gray-300 bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-110"
           style={{ backgroundImage: `url(${event.background_image_url})` }}
         ></div>
-      </div>
-      <div className="absolute top-4 left-4 flex flex-col gap-0">
-        <div className="bg-white border border-black px-3 h-[23px] flex items-center">
-          <div className="text-[11px] font-medium uppercase leading-none">{event.date}</div>
-        </div>
-        <div className="bg-white border border-t-0 border-black px-3 h-[23px] flex items-center">
-          <div className="text-[11px] font-medium leading-none">{event.time}</div>
-        </div>
-        {eventLive && (
-          <div className="bg-white border border-t-0 border-black px-3 h-[23px] flex items-center">
-            <div className="text-[11px] font-medium uppercase leading-none">LIVE NOW</div>
+        <div className="absolute top-4 left-4 flex flex-col gap-0">
+          <div className="bg-white border border-black px-3 h-[23px] flex items-center">
+            <div className="text-[11px] font-medium uppercase leading-none">{event.date}</div>
           </div>
-        )}
+          <div className="bg-white border border-t-0 border-black px-3 h-[23px] flex items-center">
+            <div className="text-[11px] font-medium leading-none">{event.time}</div>
+          </div>
+          {eventLive && (
+            <div className="bg-[#CC0033] border border-t-0 border-black px-3 h-[23px] flex items-center">
+              <div className="text-[11px] font-bold uppercase leading-none text-white">LIVE NOW</div>
+            </div>
+          )}
+        </div>
       </div>
-      <h3 className="text-lg font-medium">{event.title}</h3>
-      <p className="text-sm text-gray-500 mt-1">{event.address}</p>
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="text-lg font-bold leading-tight mb-1.5">{event.title}</h3>
+        <p className="text-muted-foreground text-sm flex-1">{event.address}</p>
+        <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
+          <span
+            className="text-xs font-semibold flex items-center gap-1 group-hover:gap-1.5 transition-all"
+            style={{ color: EVENTS_ACCENT }}
+          >
+            ดูรายละเอียด
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -201,7 +218,7 @@ const Discover = () => {
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium mb-6 md:mb-10 inline-flex flex-col items-center" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             <div className="flex items-center">
               <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>ค้นหา</span>
-              <span className="bg-[#ff6bff] border border-black px-3 md:px-6 py-2 md:py-4 rounded-[20px] md:rounded-[40px] -ml-px animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>กิจกรรม</span>
+              <span className="text-white border border-black px-3 md:px-6 py-2 md:py-4 -ml-px animate-fade-in" style={{ background: EVENTS_ACCENT, animationDelay: '0.4s', animationFillMode: 'both' }}>กิจกรรม</span>
             </div>
             <div className="flex items-center -mt-px">
               <span className="border border-black px-3 md:px-6 py-2 md:py-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>ของ</span>

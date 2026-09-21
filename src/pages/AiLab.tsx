@@ -5,7 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { PageBanner } from '@/components/PageBanner';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, PenLine, Palette, Search, ListChecks, Lightbulb } from 'lucide-react';
 
 /**
  * /ai-lab — honest "coming soon" placeholder. Real route (not a dead link
@@ -13,7 +13,20 @@ import { Sparkles } from 'lucide-react';
  * research this redesign is based on explicitly warns against claiming
  * tools/content that don't exist yet. Green (#6AAA7A) matches this tile's
  * slot in Explore.tsx's System B wayfinding rotation.
+ *
+ * The workflow tiles below are the same 5 categories already named in the
+ * body copy ("เขียน / ออกแบบ / วิจัย / จัดการ / ทดลองไอเดีย") — reformatted as
+ * tiles, not a list of specific named tools, so the honesty rule above
+ * still holds.
  */
+const WORKFLOW_TILES = [
+  { label: 'เขียน', Icon: PenLine, accent: '#C0A060' },
+  { label: 'ออกแบบ', Icon: Palette, accent: '#4A7FB5' },
+  { label: 'วิจัย', Icon: Search, accent: '#6AAA7A' },
+  { label: 'จัดการ', Icon: ListChecks, accent: '#B87333' },
+  { label: 'ทดลองไอเดีย', Icon: Lightbulb, accent: '#C0A060' },
+] as const;
+
 const AiLab: React.FC = () => {
   useDarkPage();
   return (
@@ -22,6 +35,12 @@ const AiLab: React.FC = () => {
       <CourseNavbar />
 
       <section className="pt-28 pb-24 px-4 bg-background min-h-[70vh]">
+        {/* Full section width, not the narrower reading column below — was
+            trapped inside max-w-3xl, so it rendered far short of the page. */}
+        <div className="max-w-6xl mx-auto mb-8">
+          <PageBanner pageKey="ai-lab" accent="#6AAA7A" />
+        </div>
+
         <div className="max-w-3xl mx-auto">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
@@ -30,8 +49,6 @@ const AiLab: React.FC = () => {
             <span aria-hidden="true">/</span>
             <span className="text-foreground" aria-current="page">AI Lab</span>
           </nav>
-
-          <PageBanner pageKey="ai-lab" accent="#6AAA7A" />
 
           <div
             className="sharp-tile p-8 md:p-12 bg-card border border-border border-t-4 border-t-[#6AAA7A] text-foreground"
@@ -49,6 +66,27 @@ const AiLab: React.FC = () => {
               กำลังคัดเลือก AI ที่ใช้งานได้จริงตามขั้นตอนงานของ creator (เขียน / ออกแบบ / วิจัย / จัดการ / ทดลองไอเดีย)
               พร้อม review date และไม่ใช่แค่รายชื่อเครื่องมือที่กระแสดี — เร็ว ๆ นี้ค่ะ
             </p>
+          </div>
+
+          {/* Workflow categories, as tiles — same sharp-card + rotating-accent
+              language as Explore.tsx, no invented tool names. */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+            {WORKFLOW_TILES.map(({ label, Icon, accent }) => (
+              <div
+                key={label}
+                className="sharp-card sharp-tile section-accent flex flex-col items-start justify-between gap-4 p-5 bg-card border border-border border-t-4"
+                style={{ borderTopColor: accent, '--hover-accent': accent, '--section-accent': accent } as React.CSSProperties}
+              >
+                <Icon className="w-5 h-5" style={{ color: accent }} aria-hidden="true" />
+                <span className="font-bold text-sm">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Where the embedded tool goes once it's ready — kept as an
+              explicit, visible slot rather than silently absent. */}
+          <div className="mt-6 sharp-tile border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            ตำแหน่งฝัง iframe เครื่องมือ AI — <span className="font-mono text-xs">&lt;iframe /&gt;</span> เต็มความกว้างคอลัมน์นี้ (max-w-3xl)
           </div>
 
           <div className="mt-8 flex items-center gap-3 text-sm">
