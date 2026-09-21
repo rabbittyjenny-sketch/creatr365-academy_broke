@@ -103,7 +103,8 @@ export const PPACT: PpactDimension[] = [
     // that were actually about ethics/legal rules or on-camera/business-role
     // identity — neither fits Trust's own definition any worse than QG-06
     // did (ethics and "consistent identity" are both named in it above).
-    // See qgCategories.js in the 6course-quiz repo for the per-QG breakdown.
+    // See RADAR_DIMS in 6course-quiz/src/Creatr365_LMS_v2.jsx for the
+    // per-QG breakdown (that file is the canonical QG list; keep in sync).
     qgs: ['QG-06', 'QG-08', 'QG-09', 'QG-10'],
     knowledgeAssessable: true,
     rubrics: ['RUB-11', 'RUB-14'],
