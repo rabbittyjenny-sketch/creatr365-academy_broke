@@ -5,7 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { PageBanner } from '@/components/PageBanner';
-import { Sparkles, PenLine, Palette, Search, ListChecks, Lightbulb } from 'lucide-react';
+import { Sparkles, PenLine, Palette, Search, ListChecks, Lightbulb, ExternalLink } from 'lucide-react';
 
 /**
  * /ai-lab — honest "coming soon" placeholder. Real route (not a dead link
@@ -83,11 +83,28 @@ const AiLab: React.FC = () => {
             ))}
           </div>
 
-          {/* Where the embedded tool goes once it's ready — kept as an
-              explicit, visible slot rather than silently absent. */}
-          <div className="mt-6 sharp-tile border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            ตำแหน่งฝัง iframe เครื่องมือ AI — <span className="font-mono text-xs">&lt;iframe /&gt;</span> เต็มความกว้างคอลัมน์นี้ (max-w-3xl)
-          </div>
+          {/* First real tool, live and being tested — a plain link-out card
+              for now rather than an iframe: this deployment may still have
+              Vercel's branch/preview protection on, which would 403 an
+              embedded iframe for every visitor even though the admin can
+              see it logged into Vercel. A link always works regardless. */}
+          <a
+            href="https://host-compass-main.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sharp-card section-accent group mt-6 flex items-center justify-between gap-4 p-6 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
+            style={{ '--hover-accent': '#6AAA7A', '--section-accent': '#6AAA7A' } as React.CSSProperties}
+          >
+            <div>
+              <span className="text-[10px] font-bold tracking-widest text-[#6AAA7A] flex items-center gap-1.5 mb-2">
+                <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[#6AAA7A] inline-block" aria-hidden="true" />
+                กำลังทดสอบ
+              </span>
+              <div className="font-bold text-lg">Host Compass</div>
+              <p className="text-sm text-muted-foreground mt-1">เครื่องมือ AI ตัวแรกของ AI Lab — เปิดทดสอบแล้ววันนี้</p>
+            </div>
+            <ExternalLink className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
+          </a>
 
           <div className="mt-8 flex items-center gap-3 text-sm">
             <Sparkles className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
