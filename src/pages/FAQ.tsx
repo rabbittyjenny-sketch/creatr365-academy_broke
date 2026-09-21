@@ -47,7 +47,7 @@ const FAQS: FAQGroup[] = [
     section: 'ข้อมูลส่วนตัวและความปลอดภัย',
     items: [
       { q: 'ข้อมูลของฉันปลอดภัยไหม?', a: (<>เราใช้การเข้ารหัส SSL/TLS และการควบคุมการเข้าถึงตามบทบาท ดูรายละเอียดที่ <Link to="/privacy" className="text-[#D4A843] underline">นโยบายความเป็นส่วนตัว (PDPA)</Link></>) },
-      { q: 'จะยกเลิกบัญชีหรือลบข้อมูลได้อย่างไร?', a: 'ท่านมีสิทธิ์ขอลบข้อมูลได้ตาม พ.ร.บ. PDPA โดยติดต่อได้ที่ hello@creatr365.com ทีมงานจะดำเนินการภายใน 30 วัน' },
+      { q: 'จะยกเลิกบัญชีหรือลบข้อมูลได้อย่างไร?', a: 'ท่านมีสิทธิ์ขอลบข้อมูลได้ตาม พ.ร.บ. PDPA โดยติดต่อได้ที่ c365-support@ideas365.space ทีมงานจะดำเนินการภายใน 30 วัน' },
     ],
   },
 ];
@@ -80,7 +80,7 @@ const FAQ: React.FC = () => {
           <div className="mb-16">
             <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Support</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-4">คำถามที่พบบ่อย</h1>
-            <p className="text-white/40">หากไม่พบคำตอบที่ต้องการ ติดต่อเราได้ที่ <a href="mailto:hello@creatr365.com" className="text-[#D4A843] underline underline-offset-2">hello@creatr365.com</a></p>
+            <p className="text-white/40">หากไม่พบคำตอบที่ต้องการ ติดต่อเราได้ที่ <a href="mailto:c365-support@ideas365.space" className="text-[#D4A843] underline underline-offset-2">c365-support@ideas365.space</a></p>
           </div>
           <div className="space-y-10">
             {FAQS.map((group) => (
@@ -97,7 +97,7 @@ const FAQ: React.FC = () => {
               <p className="text-white font-semibold text-sm mb-1">ยังมีคำถามเพิ่มเติม?</p>
               <p className="text-white/40 text-xs">ทีมงานพร้อมช่วยเหลือคุณ 7 วัน 9.00–21.00 น.</p>
             </div>
-            <a href="mailto:hello@creatr365.com" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white border border-white/20">
+            <a href="mailto:c365-support@ideas365.space" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white border border-white/20">
               ติดต่อเรา
             </a>
           </div>

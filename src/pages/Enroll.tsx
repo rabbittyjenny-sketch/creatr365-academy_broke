@@ -211,7 +211,7 @@ const Enroll: React.FC = () => {
                 {!isFreeCourse && (
                   <div className="text-xs text-muted-foreground text-center space-y-1 mt-4">
                     <p>การชำระเงินผ่านระบบ Stripe ที่ปลอดภัยตามมาตรฐาน PCI DSS</p>
-                    <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ hello@creatr365.com</p>
+                    <p>หากมีปัญหาในการชำระเงิน กรุณาติดต่อ c365-support@ideas365.space</p>
                     <p>สามารถขอคืนเงินได้ภายใน 7 วัน ตาม พ.ร.บ.คุ้มครองผู้บริโภค</p>
                   </div>
                 )}
