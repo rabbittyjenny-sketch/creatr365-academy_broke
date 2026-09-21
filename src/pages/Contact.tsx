@@ -32,8 +32,7 @@ const Contact: React.FC = () => {
               </div>
               <h2 className="text-xl font-bold mb-4 hover-shift" data-accent="green">LINE Official</h2>
               <img src={LINE_QR_URL} alt="LINE QR Code" className="w-36 h-36 mx-auto rounded-lg mb-4" />
-              <p className="text-sm font-semibold text-foreground mb-4">LINE ID: @creatr365</p>
-              <a href="https://line.me/R/ti/p/@creatr365" target="_blank" rel="noopener noreferrer" className="btn-outline">
+              <a href="https://lin.ee/9Mw97Rc" target="_blank" rel="noopener noreferrer" className="btn-outline">
                 เพิ่มเพื่อน
               </a>
             </div>
@@ -47,7 +46,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold mb-1">Email</h2>
-                    <a href="mailto:hello@creatr365.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">hello@creatr365.com</a>
+                    <a href="mailto:c365-support@ideas365.space" className="text-sm text-muted-foreground hover:text-foreground transition-colors">c365-support@ideas365.space</a>
                   </div>
                 </div>
               </div>

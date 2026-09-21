@@ -193,7 +193,7 @@ const RefundPolicy: React.FC = () => {
 
           <div className="mt-8 p-5 rounded-2xl bg-[#111] border border-white/8">
             <p className="text-white/60 text-sm mb-1 font-medium">ต้องการขอคืนเงินหรือเปลี่ยนคอร์ส?</p>
-            <p className="text-white/40 text-xs">ติดต่อ <a href="mailto:hello@creatr365.com" className="text-[#D4A843]">hello@creatr365.com</a> พร้อมแนบ Order ID ของท่าน</p>
+            <p className="text-white/40 text-xs">ติดต่อ <a href="mailto:c365-support@ideas365.space" className="text-[#D4A843]">c365-support@ideas365.space</a> พร้อมแนบ Order ID ของท่าน</p>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/45 pt-8 border-t border-white/8">
