@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
-import { Mail, Globe, MessageCircle } from 'lucide-react';
+import { Mail, Globe } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 
 const LINE_QR_URL = 'https://ik.imagekit.io/ideas365logo/L_926gxgxq_BW-1.png?updatedAt=1774500421226';
+const LINE_ICON_URL = '/images/icon-line-w.png';
 
 // Icon files live at /public/images/<name> — drop each PNG in there with
 // these exact names and the button picks it up automatically.
@@ -25,7 +26,7 @@ const Contact: React.FC = () => {
 
   return (
     <>
-      <SEOHead title="ติดต่อสอบถาม - Creatr365" description="ติดต่อ Creatr365 Live Streamer Academy" />
+      <SEOHead title="ติดต่อสอบถาม - Creatr365" description="ติดต่อ Creatr365 — A Creative House for the Future of Live Commerce" />
       <CourseNavbar />
 
       <section className="page-shell pt-28 pb-16 px-4">
@@ -37,7 +38,7 @@ const Contact: React.FC = () => {
             {/* LINE Official */}
             <div className="card-water surface-card p-8 text-center" data-accent="green">
               <div className="w-12 h-12 rounded-xl bg-foreground/5 flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-6 h-6 text-foreground/70" />
+                <img src={LINE_ICON_URL} alt="LINE" className="w-6 h-6 object-contain" />
               </div>
               <h2 className="text-xl font-bold mb-4 hover-shift" data-accent="green">LINE Official</h2>
               <img src={LINE_QR_URL} alt="LINE QR Code" className="w-36 h-36 mx-auto rounded-lg mb-4" />
@@ -54,20 +55,26 @@ const Contact: React.FC = () => {
                     <Mail className="w-5 h-5 text-foreground/70" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold mb-1">Email</h2>
+                    {/* Headings are `inline-block` globally (for the
+                        underline-hover effect) — force block here so the
+                        label doesn't run into the value on the same line. */}
+                    <h2 className="block text-lg font-bold mb-1">Email</h2>
                     <a href="mailto:c365-support@ideas365.space" className="text-sm text-muted-foreground hover:text-foreground transition-colors">c365-support@ideas365.space</a>
                   </div>
                 </div>
               </div>
 
-              <div className="card-water surface-card p-6" data-accent="red">
+              {/* Yellow, not red — red is already the page's/site's default
+                  accent (nav active state, heading-hover), so a second red
+                  card right under the blue Email one read as repetitive. */}
+              <div className="card-water surface-card p-6" data-accent="yellow">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
                     <Globe className="w-5 h-5 text-foreground/70" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold mb-1">Website</h2>
-                    <a href="https://creatr365.com" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">creatr365.com</a>
+                    <h2 className="block text-lg font-bold mb-1">Website</h2>
+                    <a href="https://c365.ideas365.space" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">c365.ideas365.space</a>
                   </div>
                 </div>
               </div>
@@ -75,10 +82,8 @@ const Contact: React.FC = () => {
               <div className="warm-card p-6">
                 <span className="warm-badge block mb-3">Visit Us</span>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Creatr365 Live Streamer Academy</strong><br />
-                  Bangkok, Thailand<br /><br />
-                  เปิดรับสมัครตลอดทั้งปี<br />
-                  ทีมงานพร้อมช่วยเหลือคุณ 7 วัน 9.00–21.00 น.
+                  <strong className="text-foreground">Creatr365 — A Creative House for the Future of Live Commerce</strong><br />
+                  Bangkok, Thailand
                 </p>
               </div>
             </div>
