@@ -45,10 +45,13 @@ export const Navbar: React.FC = () => {
     return location.pathname === to || location.pathname.startsWith(`${to}/`);
   };
 
-  /* ── Colors: white when transparent, dark when scrolled ── */
-  const linkColor   = scrolled ? undefined : 'rgba(255,255,255,0.9)';
-  const buttonColor = scrolled ? undefined : 'rgba(255,255,255,0.9)';
-  const borderColor = scrolled ? undefined : 'rgba(255,255,255,0.35)';
+  /* Text/logo always stay dark (readable) — this navbar's transparent→glass
+     background transition was designed against a dark hero image, but the
+     page it's actually used on (Discover.tsx) has a plain white hero, which
+     made the white-on-white text invisible before the first scroll. */
+  const linkColor   = undefined;
+  const buttonColor = undefined;
+  const borderColor = undefined;
 
   return (
     <nav
@@ -67,7 +70,6 @@ export const Navbar: React.FC = () => {
             src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png"
             alt="Creatr365"
             className="h-7 w-auto"
-            style={{ filter: scrolled ? 'none' : 'brightness(0) invert(1)' }}
           />
         </Link>
 

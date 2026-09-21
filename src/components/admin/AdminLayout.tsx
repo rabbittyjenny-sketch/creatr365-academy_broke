@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
   GraduationCap,
   Newspaper,
   ClipboardCheck,
@@ -36,11 +35,10 @@ import {
  * of sync across pages).
  */
 const NAV_ITEMS = [
-  { to: '/admin', label: 'Event CMS', icon: LayoutDashboard, match: (p: string) => p === '/admin' },
+  { to: '/admin/articles', label: 'เนื้อหา', icon: Newspaper, match: (p: string) => p.startsWith('/admin/articles') },
   { to: '/admin/courses', label: 'หลักสูตร', icon: GraduationCap, match: (p: string) => p.startsWith('/admin/courses') },
   { to: '/admin/toolbox', label: 'Toolbox', icon: Package, match: (p: string) => p.startsWith('/admin/toolbox') },
   { to: '/admin/page-banners', label: 'Banner Explore', icon: ImageIcon, match: (p: string) => p.startsWith('/admin/page-banners') },
-  { to: '/admin/articles', label: 'เนื้อหา', icon: Newspaper, match: (p: string) => p.startsWith('/admin/articles') },
   { to: '/admin/assignments', label: 'งานที่ส่ง', icon: ClipboardCheck, match: (p: string) => p.startsWith('/admin/assignments') },
   { to: '/admin/onsite-scoring', label: 'ให้คะแนน Onsite', icon: Star, match: (p: string) => p.startsWith('/admin/onsite-scoring') },
   { to: '/admin/payments', label: 'การชำระเงิน', icon: CreditCard, match: (p: string) => p.startsWith('/admin/payments') },

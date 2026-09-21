@@ -6,6 +6,15 @@ import { Footer } from '@/components/Footer';
 
 const LINE_QR_URL = 'https://ik.imagekit.io/ideas365logo/L_926gxgxq_BW-1.png?updatedAt=1774500421226';
 
+// Icon files live at /public/images/<name> — drop each PNG in there with
+// these exact names and the button picks it up automatically.
+const SOCIAL_LINKS = [
+  { name: 'Instagram', href: 'https://www.instagram.com/creatr365/', icon: '/images/icon-ig-w.png' },
+  { name: 'Facebook', href: 'https://www.facebook.com/creatr365/', icon: '/images/icon-fb-w.png' },
+  { name: 'YouTube', href: 'https://www.youtube.com/@Creatr365-Family', icon: '/images/icon-yt-w.png' },
+  { name: 'TikTok', href: 'https://www.tiktok.com/@creatr365', icon: '/images/icon-tt-w.png' },
+] as const;
+
 const Contact: React.FC = () => {
   /* Cinematic dark tone — matches the landing page. Cleanup on unmount
      so the dark scope never leaks to the next route. */
@@ -72,6 +81,26 @@ const Contact: React.FC = () => {
                   ทีมงานพร้อมช่วยเหลือคุณ 7 วัน 9.00–21.00 น.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Social channels */}
+          <div className="card-water surface-card p-8 mt-8 text-center">
+            <h2 className="text-lg font-bold mb-6">ช่องทางโซเชียลมีเดีย</h2>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              {SOCIAL_LINKS.map((s) => (
+                <a
+                  key={s.name}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.name}
+                  title={s.name}
+                  className="w-14 h-14 rounded-full bg-foreground/8 hover:bg-foreground/15 flex items-center justify-center transition-colors hover-shift"
+                >
+                  <img src={s.icon} alt={s.name} className="w-6 h-6 object-contain" />
+                </a>
+              ))}
             </div>
           </div>
         </div>

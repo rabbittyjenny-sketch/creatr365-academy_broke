@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
@@ -29,7 +29,6 @@ import AdminArticles from "./pages/AdminArticles";
 import AdminToolbox from "./pages/AdminToolbox";
 import AdminPageBanners from "./pages/AdminPageBanners";
 import AdminStudents from "./pages/AdminStudents";
-import Admin from "./pages/Admin";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
@@ -66,7 +65,12 @@ const App = () => (
         <Route path="/terms" element={<Terms />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
+        {/* Event CMS was a single-event-only editor (blank whenever there
+            were 0 events, and it could only edit whichever event happened
+            to load first) — fully superseded by the unified content admin
+            below, which has real event CRUD. Redirected rather than left
+            rendering a confusing blank page. */}
+        <Route path="/admin" element={<Navigate to="/admin/articles" replace />} />
         <Route path="/admin/courses" element={<RequireAdmin><AdminCourses /></RequireAdmin>} />
         <Route path="/admin/assignments" element={<RequireAdmin><AdminAssignments /></RequireAdmin>} />
         <Route path="/admin/onsite-scoring" element={<RequireAdmin><AdminOnsiteScoring /></RequireAdmin>} />
