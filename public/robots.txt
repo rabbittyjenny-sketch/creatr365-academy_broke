@@ -10,5 +10,37 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI assistant / answer-engine crawlers — explicitly allowed, not just
+# caught by the wildcard rule below, so this is a deliberate choice on
+# record rather than an accident either way.
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /auth
+Disallow: /register
+Disallow: /reset-password
+Disallow: /profile
+Disallow: /my-events
+Disallow: /create-event
+Disallow: /edit-event
+
+Sitemap: https://c365.ideas365.space/sitemap.xml
