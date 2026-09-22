@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
+import { FAQSchema } from '@/components/schema/FAQSchema';
 import { ChevronDown } from 'lucide-react';
 
 interface FAQItem { q: string; a: React.ReactNode }
@@ -52,6 +53,23 @@ const FAQS: FAQGroup[] = [
   },
 ];
 
+/* Plain-text mirror of FAQS for FAQPage schema.org markup — schema.org
+   acceptedAnswer.text can't hold JSX. Kept immediately below FAQS so a
+   future edit to one is hard to miss making in the other; the two JSX
+   answers above (e-receipt, refund policy) are restated here as flat
+   text pointing to the same real page instead of an inline link. */
+const FAQ_SCHEMA_ITEMS = FAQS.flatMap((group) =>
+  group.items.map((item) => ({
+    question: item.q,
+    answer:
+      item.q === 'ขอใบเสร็จรับเงิน / ใบกำกับภาษีได้หรือไม่?'
+        ? 'ได้ ท่านสามารถขอใบเสร็จรับเงินได้ภายใน 15 วัน นับจากวันชำระเงิน โดยแจ้งเลขที่คำสั่งซื้อและข้อมูลออกใบกำกับภาษีมาที่ LINE OA หรืออีเมล c365-support@ideas365.space ทางเราจะออกเอกสาร e-Receipt ให้ภายใน 7 วันทำการ'
+        : item.q === 'นโยบายคืนเงินเป็นอย่างไร?'
+        ? 'ขอคืนเงินหรือเปลี่ยนคอร์สได้เฉพาะกรณีสั่งซื้อผิดคอร์ส หรือมีเหตุจำเป็นที่ไม่สามารถเรียนได้ โดยต้องแจ้งภายใน 7 วัน นับจากวันชำระเงิน และยังไม่ได้ดาวน์โหลดเอกสารประกอบการเรียน คอร์สที่ซื้อในโปรโมชันไม่สามารถคืนหรือเปลี่ยนได้ทุกกรณี ดูรายละเอียดเพิ่มเติมที่หน้านโยบายการคืนเงิน (/refund-policy)'
+        : (item.a as string),
+  })),
+);
+
 const FAQAccordion: React.FC<{ item: FAQItem }> = ({ item }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -74,6 +92,7 @@ const FAQ: React.FC = () => {
   return (
     <>
       <SEOHead title="คำถามที่พบบ่อย (FAQ) — CREATR365" description="คำถามและคำตอบเกี่ยวกับหลักสูตร การชำระเงิน การคืนเงิน และนโยบายต่าง ๆ ของ CREATR365" />
+      <FAQSchema items={FAQ_SCHEMA_ITEMS} />
       <CourseNavbar />
       <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
         <div className="max-w-3xl mx-auto">

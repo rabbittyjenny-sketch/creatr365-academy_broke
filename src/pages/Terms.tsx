@@ -42,7 +42,7 @@ const Terms: React.FC = () => {
   }, []);
   return (
     <>
-      <SEOHead title="ข้อกำหนดการใช้บริการ — CREATR365" description="ข้อกำหนดและเงื่อนไขการใช้บริการ CREATR365 Academy" />
+      <SEOHead title="ข้อกำหนดการใช้บริการ — CREATR365" description="ข้อกำหนดและเงื่อนไขการใช้บริการของ Creatr365 — A Creative House for the Future of Live Commerce" />
       <CourseNavbar />
       <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
         <div className="max-w-3xl mx-auto">

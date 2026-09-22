@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
+import { CourseSchema } from '@/components/schema/CourseSchema';
 import { AuthSheet } from '@/components/AuthSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
@@ -114,6 +115,7 @@ const CourseDetail: React.FC = () => {
   return (
     <>
       <SEOHead title={`${course.title} - Creatr365`} description={course.description} />
+      <CourseSchema title={course.title} description={course.description} slug={course.slug} price={course.price} />
       <CourseNavbar />
 
       <section className="pt-28 pb-12 px-4 bg-background border-b border-border">

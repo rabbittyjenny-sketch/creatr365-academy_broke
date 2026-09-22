@@ -5,6 +5,7 @@ import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
 import { HeroSection } from '@/components/home/HeroSection';
 import { BrandFitSection } from '@/components/home/BrandFitSection';
+import { SEOHead } from '@/components/SEOHead';
 
 /* ─── constants ─────────────────────────── */
 const RED  = '#CC0033';
@@ -233,6 +234,11 @@ export default function Home() {
         .c365-h-nodefault::after { content: none !important; }
         .c365-h-nodefault:hover { color: inherit !important; }
       `}</style>
+      <SEOHead
+        title="Creatr365 — A Creative House for the Future of Live Commerce"
+        description="ประเทศไทยครองอันดับ 1 ของโลกด้านการซื้อสินค้าออนไลน์รายสัปดาห์ (66.6%) — Creatr365 พัฒนาโฮสต์ไลฟ์คอมเมิร์ซมืออาชีพด้วยหลักจิตวิทยา ข้อมูล และการสื่อสาร Be a Creator, Not a Consumer."
+        url="https://c365.ideas365.space/"
+      />
 <CourseNavbar />
       {/* ══════════════════════════════════════
           §1  HERO — extracted to its own component
