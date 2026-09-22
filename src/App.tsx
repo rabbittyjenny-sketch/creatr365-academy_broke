@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import Toolbox from "./pages/Toolbox";
@@ -45,6 +46,7 @@ const App = () => (
     <Toaster />
     <Sonner />
     <div className="site-hover-scope">
+      <CookieConsentBanner />
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
