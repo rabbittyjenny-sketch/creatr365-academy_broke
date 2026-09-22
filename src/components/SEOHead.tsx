@@ -11,7 +11,7 @@ interface SEOHeadProps {
 export const SEOHead = ({ 
   title, 
   description, 
-  keywords = 'events, discover events, event management, community events',
+  keywords = 'live commerce, live selling, โฮสต์ไลฟ์สด, ไลฟ์คอมเมิร์ซ, TikTok Live, Creatr365',
   image = '/placeholder.svg',
   url = window.location.href
 }: SEOHeadProps) => {

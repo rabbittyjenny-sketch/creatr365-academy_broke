@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { openCookiePreferences } from '@/lib/consent';
 
 const LOGO = '/images/w-logo-side.png';
 
@@ -41,6 +42,12 @@ export const Footer = () => (
               {l}
             </Link>
           ))}
+          <button
+            onClick={openCookiePreferences}
+            style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none', fontFamily: 'inherit', fontSize: '13px', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+          >
+            จัดการคุกกี้
+          </button>
         </div>
       </div>
     </div>
