@@ -1,3 +1,22 @@
+# Explicit self-redirects for the three crawler-facing static files, placed
+# BEFORE the SPA catch-all (Netlify matches redirects in file order — first
+# match wins) — belt and suspenders on top of Netlify's default "serve a
+# real file before falling back to index.html" behavior for this idiom.
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+[[redirects]]
+  from = "/llms.txt"
+  to = "/llms.txt"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
