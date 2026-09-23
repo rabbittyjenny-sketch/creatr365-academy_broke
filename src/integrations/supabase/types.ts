@@ -131,6 +131,51 @@ export type Database = {
           },
         ]
       }
+      completion_records: {
+        Row: {
+          accepted_diagnostic_attempt_id: string | null
+          all_mandatory_passed: boolean
+          course_id: string
+          id: string
+          issued_at: string
+          record_code: string
+          user_id: string
+        }
+        Insert: {
+          accepted_diagnostic_attempt_id?: string | null
+          all_mandatory_passed: boolean
+          course_id: string
+          id?: string
+          issued_at?: string
+          record_code: string
+          user_id: string
+        }
+        Update: {
+          accepted_diagnostic_attempt_id?: string | null
+          all_mandatory_passed?: boolean
+          course_id?: string
+          id?: string
+          issued_at?: string
+          record_code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completion_records_accepted_diagnostic_attempt_id_fkey"
+            columns: ["accepted_diagnostic_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "completion_records_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_enrollments: {
         Row: {
           amount_paid: number | null
@@ -196,6 +241,8 @@ export type Database = {
           id: string
           is_test: boolean
           name: string
+          onsite_session_label: string | null
+          onsite_unlock_code: string | null
           phase: string
           sort_order: number
           summary: string | null
@@ -212,6 +259,8 @@ export type Database = {
           id?: string
           is_test?: boolean
           name: string
+          onsite_session_label?: string | null
+          onsite_unlock_code?: string | null
           phase?: string
           sort_order?: number
           summary?: string | null
@@ -228,6 +277,8 @@ export type Database = {
           id?: string
           is_test?: boolean
           name?: string
+          onsite_session_label?: string | null
+          onsite_unlock_code?: string | null
           phase?: string
           sort_order?: number
           summary?: string | null
@@ -438,44 +489,43 @@ export type Database = {
         }
         Relationships: []
       }
-      resource_download_logs: {
+      diagnostic_attempts: {
         Row: {
-          consented: boolean
+          accepted: boolean
+          attempt_number: number
           course_id: string
-          downloaded_at: string
+          created_at: string
           id: string
-          resource_id: string
+          radar_breakdown: Json | null
+          score_pct: number
           user_id: string
         }
         Insert: {
-          consented?: boolean
+          accepted?: boolean
+          attempt_number: number
           course_id: string
-          downloaded_at?: string
+          created_at?: string
           id?: string
-          resource_id: string
+          radar_breakdown?: Json | null
+          score_pct: number
           user_id: string
         }
         Update: {
-          consented?: boolean
+          accepted?: boolean
+          attempt_number?: number
           course_id?: string
-          downloaded_at?: string
+          created_at?: string
           id?: string
-          resource_id?: string
+          radar_breakdown?: Json | null
+          score_pct?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "resource_download_logs_course_id_fkey"
+            foreignKeyName: "diagnostic_attempts_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resource_download_logs_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "course_resources"
             referencedColumns: ["id"]
           },
         ]
@@ -634,6 +684,146 @@ export type Database = {
         }
         Relationships: []
       }
+      lms_handoff_tokens: {
+        Row: {
+          course_slug: string | null
+          created_at: string
+          expires_at: string
+          student_id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          course_slug?: string | null
+          created_at?: string
+          expires_at: string
+          student_id: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          course_slug?: string | null
+          created_at?: string
+          expires_at?: string
+          student_id?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lms_lesson_state: {
+        Row: {
+          course_slug: string
+          first_seen_at: string
+          id: string
+          lesson_code: string
+          pretest_done: boolean
+          student_id: string
+          updated_at: string
+          video_view_count: number
+          video_watched: boolean
+        }
+        Insert: {
+          course_slug: string
+          first_seen_at?: string
+          id?: string
+          lesson_code: string
+          pretest_done?: boolean
+          student_id: string
+          updated_at?: string
+          video_view_count?: number
+          video_watched?: boolean
+        }
+        Update: {
+          course_slug?: string
+          first_seen_at?: string
+          id?: string
+          lesson_code?: string
+          pretest_done?: boolean
+          student_id?: string
+          updated_at?: string
+          video_view_count?: number
+          video_watched?: boolean
+        }
+        Relationships: []
+      }
+      mandatory_topic_attempts: {
+        Row: {
+          attempt_number: number
+          created_at: string
+          id: string
+          passed: boolean
+          score_pct: number
+          topic_id: string
+          user_id: string
+        }
+        Insert: {
+          attempt_number: number
+          created_at?: string
+          id?: string
+          passed: boolean
+          score_pct: number
+          topic_id: string
+          user_id: string
+        }
+        Update: {
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          passed?: boolean
+          score_pct?: number
+          topic_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mandatory_topic_attempts_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "mandatory_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mandatory_topics: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          min_pass_pct: number
+          reference_source: string
+          slot_code: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_pass_pct?: number
+          reference_source: string
+          slot_code: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_pass_pct?: number
+          reference_source?: string
+          slot_code?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       module_progress: {
         Row: {
           completed_at: string | null
@@ -672,11 +862,62 @@ export type Database = {
           },
         ]
       }
+      onsite_code_redemptions: {
+        Row: {
+          id: string
+          module_id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onsite_code_redemptions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_banners: {
+        Row: {
+          image_url: string | null
+          page_key: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          image_url?: string | null
+          page_key: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          image_url?: string | null
+          page_key?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age_range: string | null
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
           gender: string | null
           id: string
@@ -689,6 +930,7 @@ export type Database = {
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           gender?: string | null
           id?: string
@@ -701,6 +943,7 @@ export type Database = {
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
           gender?: string | null
           id?: string
@@ -710,6 +953,252 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string
+          course_id: string | null
+          created_at: string
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number
+          used_count: number
+        }
+        Insert: {
+          code: string
+          course_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          course_id?: string | null
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_codes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_bank: {
+        Row: {
+          auto_gradable: boolean | null
+          bloom_level: string | null
+          choice_a: string | null
+          choice_b: string | null
+          choice_c: string | null
+          choice_d: string | null
+          correct_choice: string | null
+          course_scheme: string | null
+          created_at: string
+          explanation: string | null
+          is_active: boolean
+          is_diagnostic: boolean
+          legacy_ids: string[]
+          model_answer: string | null
+          pass_criteria: string | null
+          phase: string
+          progression_level: string | null
+          q_id: string
+          qg: string
+          question: string
+          question_set: string | null
+          question_type: string
+          recommended_courses: string[]
+          sales_pitch: string | null
+          skill_tags: string[]
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          auto_gradable?: boolean | null
+          bloom_level?: string | null
+          choice_a?: string | null
+          choice_b?: string | null
+          choice_c?: string | null
+          choice_d?: string | null
+          correct_choice?: string | null
+          course_scheme?: string | null
+          created_at?: string
+          explanation?: string | null
+          is_active?: boolean
+          is_diagnostic?: boolean
+          legacy_ids?: string[]
+          model_answer?: string | null
+          pass_criteria?: string | null
+          phase: string
+          progression_level?: string | null
+          q_id: string
+          qg: string
+          question: string
+          question_set?: string | null
+          question_type: string
+          recommended_courses?: string[]
+          sales_pitch?: string | null
+          skill_tags?: string[]
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          auto_gradable?: boolean | null
+          bloom_level?: string | null
+          choice_a?: string | null
+          choice_b?: string | null
+          choice_c?: string | null
+          choice_d?: string | null
+          correct_choice?: string | null
+          course_scheme?: string | null
+          created_at?: string
+          explanation?: string | null
+          is_active?: boolean
+          is_diagnostic?: boolean
+          legacy_ids?: string[]
+          model_answer?: string | null
+          pass_criteria?: string | null
+          phase?: string
+          progression_level?: string | null
+          q_id?: string
+          qg?: string
+          question?: string
+          question_set?: string | null
+          question_type?: string
+          recommended_courses?: string[]
+          sales_pitch?: string | null
+          skill_tags?: string[]
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_bank_qg_fkey"
+            columns: ["qg"]
+            isOneToOne: false
+            referencedRelation: "quiz_groups"
+            referencedColumns: ["qg"]
+          },
+        ]
+      }
+      quiz_groups: {
+        Row: {
+          name: string
+          qg: string
+          sort_order: number
+        }
+        Insert: {
+          name: string
+          qg: string
+          sort_order?: number
+        }
+        Update: {
+          name?: string
+          qg?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          answer: string | null
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          prompt: string
+          q_no: number
+          quiz_id: string
+          type: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          prompt: string
+          q_no: number
+          quiz_id: string
+          type?: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          prompt?: string
+          q_no?: number
+          quiz_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "course_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_download_logs: {
+        Row: {
+          consented: boolean
+          course_id: string
+          downloaded_at: string
+          id: string
+          resource_id: string
+          user_id: string
+        }
+        Insert: {
+          consented?: boolean
+          course_id: string
+          downloaded_at?: string
+          id?: string
+          resource_id: string
+          user_id: string
+        }
+        Update: {
+          consented?: boolean
+          course_id?: string
+          downloaded_at?: string
+          id?: string
+          resource_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_download_logs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_download_logs_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "course_resources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       toolbox_assets: {
         Row: {
@@ -803,94 +1292,6 @@ export type Database = {
           },
         ]
       }
-      promo_codes: {
-        Row: {
-          code: string
-          course_id: string | null
-          created_at: string
-          discount_type: string
-          discount_value: number
-          id: string
-          is_active: boolean
-          max_uses: number
-          used_count: number
-        }
-        Insert: {
-          code: string
-          course_id?: string | null
-          created_at?: string
-          discount_type?: string
-          discount_value?: number
-          id?: string
-          is_active?: boolean
-          max_uses?: number
-          used_count?: number
-        }
-        Update: {
-          code?: string
-          course_id?: string | null
-          created_at?: string
-          discount_type?: string
-          discount_value?: number
-          id?: string
-          is_active?: boolean
-          max_uses?: number
-          used_count?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "promo_codes_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quiz_questions: {
-        Row: {
-          answer: string | null
-          created_at: string
-          explanation: string | null
-          id: string
-          options: Json
-          prompt: string
-          q_no: number
-          quiz_id: string
-          type: string
-        }
-        Insert: {
-          answer?: string | null
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          options?: Json
-          prompt: string
-          q_no: number
-          quiz_id: string
-          type?: string
-        }
-        Update: {
-          answer?: string | null
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          options?: Json
-          prompt?: string
-          q_no?: number
-          quiz_id?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quiz_questions_quiz_id_fkey"
-            columns: ["quiz_id"]
-            isOneToOne: false
-            referencedRelation: "course_quizzes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_accounts: {
         Row: {
           email: string | null
@@ -953,6 +1354,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_diagnostic_attempt: {
+        Args: { _attempt_id: string; _user_id: string }
+        Returns: {
+          accepted_diagnostic_attempt_id: string | null
+          all_mandatory_passed: boolean
+          course_id: string
+          id: string
+          issued_at: string
+          record_code: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "completion_records"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       ensure_master_student_account: {
         Args: { _email?: string }
         Returns: string
@@ -962,6 +1381,10 @@ export type Database = {
         Returns: string
       }
       generate_master_student_id: { Args: { _seed: string }; Returns: string }
+      has_passed_mandatory_gate: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -974,9 +1397,41 @@ export type Database = {
         Args: { _asset_id: string }
         Returns: undefined
       }
+      issue_completion_record: {
+        Args: {
+          _course_id: string
+          _diagnostic_attempt_id: string
+          _user_id: string
+        }
+        Returns: {
+          accepted_diagnostic_attempt_id: string | null
+          all_mandatory_passed: boolean
+          course_id: string
+          id: string
+          issued_at: string
+          record_code: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "completion_records"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       link_line_master_student_account: {
         Args: { _email?: string; _line_user_id: string; _student_id?: string }
         Returns: string
+      }
+      lms_touch_lesson_state: {
+        Args: {
+          _course_slug: string
+          _increment_view?: boolean
+          _lesson_code: string
+          _student_id: string
+          _watched?: boolean
+        }
+        Returns: undefined
       }
       normalize_master_student_id: {
         Args: { _student_id: string }
@@ -1004,12 +1459,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1033,11 +1488,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1058,11 +1513,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1083,11 +1538,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1100,11 +1555,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
