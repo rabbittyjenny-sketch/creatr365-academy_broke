@@ -104,6 +104,31 @@ level system), not as a new QG feeding the Diagnostic Quiz radar. The
 change was reverted. Lesson: an abandoned PR's proposal is not truth; check
 the current BIBLE's actual lesson table before retagging any QG.
 
+## Audit logs + deploy state (2026-09-23)
+
+- `quiz_attempts` is an append-only row for **every** quiz submission
+  (pretest, knowledge_check, diagnostic, no_quiz). It is written only by
+  `save-score`. `module_progress` still holds just the latest state per
+  lesson, and that is what unlocking and completion read.
+- `purchase_events` is an append-only log of every checkout step. It is
+  written only by `create-checkout` / `verify-payment` / `stripe-webhook`.
+  `create-checkout` no longer deletes stale `pending` enrollments; it
+  marks them `abandoned`. `course_enrollments.status` can therefore be
+  `pending | paid | free | active | abandoned`.
+- A diagnostic attempt with `accepted=false` that is the latest for its
+  course counts as "unanswered". `get-progress` returns it as
+  `pending_diagnostics`, and the LMS reopens the accept/retake prompt until
+  the learner chooses. Never auto-accept.
+- `my_linked_user_ids()` plus SELECT policies let a signed-in learner read
+  rows from every auth identity under the same Master Key. The Dashboard
+  queries with `.in('user_id', ids)`.
+- As of 2026-09-23 the deployed edge functions match this repo for
+  save-score, get-progress, lms-state (first deploy, `verify_jwt=false`),
+  create-checkout, verify-payment and stripe-webhook. Before that,
+  production still ran the pre-2026-09-20 `save-score`, which auto-accepted
+  diagnostics. Check `list_edge_functions` rather than assuming the repo is
+  what's live.
+
 ## Document authority — check timestamps, this changes
 
 As of 2026-09-21, in descending order of trust for anything about current

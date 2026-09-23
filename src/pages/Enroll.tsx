@@ -62,6 +62,24 @@ const Enroll: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Back from Stripe via "cancel": close that pending attempt server-side so
+  // the purchase log shows it was cancelled (verify-payment checks Stripe
+  // first, so a session that was actually paid is never marked cancelled).
+  useEffect(() => {
+    if (searchParams.get('cancelled') !== 'true') return;
+    const enrollmentId = searchParams.get('enrollment_id');
+    if (!enrollmentId) return;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      try {
+        await supabase.functions.invoke('verify-payment', {
+          body: { enrollmentId, cancelled: true },
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+        });
+      } catch { /* logging only — the page works the same without it */ }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const loadCourse = async () => {
       const { data } = await supabase.from('courses').select('*').eq('slug', id).single();

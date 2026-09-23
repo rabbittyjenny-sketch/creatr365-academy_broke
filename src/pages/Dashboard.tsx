@@ -98,10 +98,17 @@ const Dashboard: React.FC = () => {
     setUser(u);
     isCurrentUserAdmin(session.user.id).then(setIsAdmin);
 
+    // One Master Key can own several sign-in identities (LINE + email). The
+    // LMS, save-score and the completion record already work per Master Key,
+    // so read everything for all of them — otherwise a learner who bought
+    // with email and signs in with LINE (or vice versa) sees an empty studio.
+    const { data: linked } = await supabase.rpc('my_linked_user_ids');
+    const userIds: string[] = Array.isArray(linked) && linked.length > 0 ? (linked as string[]) : [session.user.id];
+
     const [{ data: prof }, { data: cs }, { data: en }] = await Promise.all([
       supabase.from('profiles').select('display_name,line_user_id').eq('user_id', session.user.id).maybeSingle(),
       supabase.from('courses').select('id,slug,tag,title,subtitle,color,learning_type,level').eq('is_active', true).order('sort_order'),
-      supabase.from('course_enrollments').select('id,course_id,status').eq('user_id', session.user.id),
+      supabase.from('course_enrollments').select('id,course_id,status').in('user_id', userIds),
     ]);
 
     setProfile(prof || null);
@@ -133,7 +140,7 @@ const Dashboard: React.FC = () => {
           .in('course_id', activeIds).order('sort_order'),
         supabase.from('module_progress')
               .select('module_id, status, score, completed_at')
-              .eq('user_id', session.user.id),
+              .in('user_id', userIds),
         // RLS already limits this to active resources for courses this user
         // is actually enrolled in — no extra filtering needed client-side.
         supabase.from('course_resources')
@@ -149,17 +156,24 @@ const Dashboard: React.FC = () => {
         // mandatory_gate_completion_records migration.
         supabase.from('completion_records')
               .select('id,course_id,record_code,issued_at,diagnostic_attempts(score_pct)')
-              .eq('user_id', session.user.id),
+              .in('user_id', userIds),
         // Submitted from the LMS's "ส่งงาน" card (course-level work like a
         // Hook script/video link), reviewed manually by the team in
         // AdminAssignments.tsx — status starts "pending" until graded.
         supabase.from('assignments')
               .select('id,course_id,status,score,note,created_at')
-              .eq('user_id', session.user.id)
+              .in('user_id', userIds)
               .order('created_at', { ascending: false }),
       ]);
       setModules((mods as any) || []);
-      setProgress((prog as any) || []);
+      // save-score writes the same module row once per linked identity; keep
+      // one per module, "completed" winning (same rule as get-progress).
+      const byModule = new Map<string, ProgressRow>();
+      for (const p of ((prog as any) || []) as ProgressRow[]) {
+        const cur = byModule.get(p.module_id);
+        if (!cur || (cur.status !== 'completed' && p.status === 'completed')) byModule.set(p.module_id, p);
+      }
+      setProgress([...byModule.values()]);
       setResources((res as any) || []);
       const logRows = (logs as { resource_id: string }[] | null) || [];
       setConsentedResourceIds(new Set(logRows.map(l => l.resource_id)));
@@ -309,9 +323,11 @@ const Dashboard: React.FC = () => {
       { label: 'คอร์สที่เรียนอยู่', value: enrolledCourses.length, accent: 'red' },
       { label: 'Quiz ผ่านแล้ว', value: progress.filter(p => (p.score ?? 0) >= 70).length, accent: 'red' },
       { label: 'คะแนนเฉลี่ย', value: avgScore ? `${avgScore}%` : '-', accent: 'red' },
-      { label: 'ใบบันทึกการเรียนจบ', value: completedCoursesList.length, accent: 'red' },
+      // Records actually issued by the server — not "courses with every
+      // module done", which also counts courses still waiting on "ยืนยันรับผล".
+      { label: 'ใบบันทึกการเรียนจบ', value: completionRecords.length, accent: 'red' },
     ];
-  }, [enrolledCourses.length, progress, completedCoursesList.length]);
+  }, [enrolledCourses.length, progress, completionRecords.length]);
 
   const NAV_ITEMS: { key: SectionKey; label: string; Icon: typeof LayoutGrid; count?: number; comingSoon?: boolean }[] = [
     { key: 'overview', label: 'ภาพรวม', Icon: LayoutGrid },
@@ -618,7 +634,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 ) : completedCoursesList.length === 0 ? (
                   <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                    ยังไม่มีคอร์สที่เรียนจบครบทุกบทเรียน — เรียนให้ครบเพื่อปลดล็อกใบประกาศ
+                    ยังไม่มีคอร์สที่เรียนจบครบทุกบทเรียน — เรียนให้ครบเพื่อรับใบบันทึกการเรียนจบ
                   </div>
                 ) : (
                   <div className="space-y-3">

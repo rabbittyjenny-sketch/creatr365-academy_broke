@@ -20,7 +20,7 @@ serve(async (req) => {
     const { data: u } = await supaUser.auth.getUser(auth.replace("Bearer ", ""));
     if (!u.user) throw new Error("Not authenticated");
 
-    const { enrollmentId } = await req.json();
+    const { enrollmentId, cancelled } = await req.json();
     if (!enrollmentId) throw new Error("enrollmentId required");
 
     const supaAdmin = createClient(
@@ -63,6 +63,30 @@ serve(async (req) => {
 
     if (!stripeSession) throw new Error("Stripe session not found");
 
+    // Append-only purchase audit (see create-checkout). Never throws.
+    const logPurchase = async (event: string, extra: Record<string, unknown> = {}) => {
+      try {
+        const { error } = await supaAdmin.from("purchase_events").insert({
+          user_id: u.user!.id, course_id: enr.course_id, enrollment_id: enrollmentId,
+          stripe_session_id: stripeSession!.id, event, ...extra,
+        });
+        if (error) console.error("purchase_events insert failed:", error.message);
+      } catch (e) { console.error("purchase_events insert threw:", e); }
+    };
+
+    // Learner came back through Stripe's cancel_url. Only a still-unpaid
+    // attempt is closed — Stripe is asked first, so a session that was in
+    // fact paid is never marked abandoned.
+    if (cancelled === true && stripeSession.payment_status !== "paid") {
+      if (enr.status === "pending") {
+        await supaAdmin.from("course_enrollments").update({ status: "abandoned" }).eq("id", enrollmentId);
+      }
+      await logPurchase("checkout_cancelled", { detail: { stripe_status: stripeSession.status } });
+      return new Response(JSON.stringify({ status: "abandoned" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (stripeSession.payment_status === "paid") {
       await supaAdmin
         .from("course_enrollments")
@@ -86,6 +110,11 @@ serve(async (req) => {
             { onConflict: "user_id,module_id" }
           );
       }
+
+      await logPurchase("payment_verified", {
+        amount_final: typeof stripeSession.amount_total === "number" ? stripeSession.amount_total / 100 : null,
+        detail: { via: "verify-payment", previous_status: enr.status },
+      });
 
       return new Response(JSON.stringify({ status: "paid" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

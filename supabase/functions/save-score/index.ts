@@ -140,6 +140,29 @@ async function recordDiagnosticAttempt(
   return attempt.id as string;
 }
 
+/**
+ * Append-only log of every quiz submission (quiz_attempts). module_progress
+ * keeps only the latest state per module, so without this a failed Knowledge
+ * Check was overwritten by the next try and the pre-test score was never
+ * stored anywhere (BIBLE A4 step 8: "บันทึกคะแนนทุกครั้ง"). Never throws —
+ * an audit-log failure must not fail the learner's actual score save.
+ */
+async function logQuizAttempt(
+  supabase: ReturnType<typeof createClient>,
+  row: {
+    student_id: string; user_id: string | null; course_id: string | null; module_id: string | null;
+    lesson_code: string | null; quiz_type: string; qg: string | null;
+    score_pct: number | null; correct: number | null; total: number | null; passed: boolean | null;
+  },
+) {
+  const QUIZ_TYPES = ["pretest", "knowledge_check", "diagnostic", "no_quiz"];
+  if (!QUIZ_TYPES.includes(row.quiz_type)) return;
+  const { error } = await supabase.from("quiz_attempts").insert(row);
+  if (error) console.error("quiz_attempts insert failed:", error.message);
+}
+
+const numOrNull = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v) : null);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -180,11 +203,24 @@ serve(async (req) => {
     }
 
     // ── Regular score-save path ────────────────────────────────────────────
-    const { course_slug, module_code, score, passed, quiz_type, radar_breakdown } = body;
-    if (!module_code) throw new Error("module_code required");
+    const { course_slug, module_code, score, passed, quiz_type, radar_breakdown, correct, total, qg } = body;
+    const isPretest = quiz_type === "pretest";
+    if (!module_code && !isPretest) throw new Error("module_code required");
 
     const authUserIds = await resolveLinkedUserIds(supabase, sid);
     if (authUserIds.length === 0) throw new Error("student_id not found: " + student_id);
+    const canonicalUserId = await resolveCanonicalUserId(supabase, sid);
+    const attemptBase = {
+      student_id: sid,
+      user_id: canonicalUserId,
+      lesson_code: module_code ? String(module_code) : null,
+      quiz_type: String(quiz_type || ""),
+      qg: qg ? String(qg) : null,
+      score_pct: numOrNull(score),
+      correct: numOrNull(correct),
+      total: numOrNull(total),
+      passed: typeof passed === "boolean" ? passed : null,
+    };
 
     // Z3-2 — accept either the DB slug ("signal") or the LMS course code
     // ("COURSE_1_SIGNAL"). The mapping now lives in one shared file instead of
@@ -220,6 +256,14 @@ serve(async (req) => {
       .maybeSingle();
     if (courseErr) throw new Error("courses lookup failed: " + courseErr.message);
 
+    // The pre-test is course-level (no module, no pass/fail — BIBLE D4.1
+    // "วัด Baseline"). It only needs its score kept; it must not touch
+    // module_progress or lesson unlocking.
+    if (isPretest) {
+      await logQuizAttempt(supabase, { ...attemptBase, course_id: course?.id ?? null, module_id: null, lesson_code: null });
+      return jsonResp({ ok: true, pretest_saved: true });
+    }
+
     let mod: { id: string; course_id: string } | null = null;
     if (course?.id) {
       const { data: m, error: modErr } = await supabase
@@ -235,6 +279,7 @@ serve(async (req) => {
     if (!mod) {
       // module ไม่เจอในคอร์สนี้ — log แต่ไม่ fail (อาจเป็นบทที่ยังไม่ได้ตั้งค่าใน DB)
       console.warn(`module_code "${module_code}" not found in course "${slug}", skipping progress update`);
+      await logQuizAttempt(supabase, { ...attemptBase, course_id: course?.id ?? null, module_id: null });
       return jsonResp({ ok: true, warning: "module not found in this course, score not saved to progress" });
     }
 
@@ -263,12 +308,13 @@ serve(async (req) => {
       }
     }
 
+    await logQuizAttempt(supabase, { ...attemptBase, course_id: mod.course_id, module_id: mod.id });
+
     // Diagnostic attempts are written ONCE, against the canonical identity
     // only — not once per linked identity (see resolveCanonicalUserId for
     // why fanning this out like module_progress would be wrong here).
     let diagnosticAttemptId: string | null = null;
     if (quiz_type === "diagnostic" && typeof score === "number") {
-      const canonicalUserId = await resolveCanonicalUserId(supabase, sid);
       if (canonicalUserId) {
         diagnosticAttemptId = await recordDiagnosticAttempt(
           supabase,

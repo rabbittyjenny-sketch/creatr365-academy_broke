@@ -24,6 +24,9 @@ verify_jwt = false
 [functions.get-progress]
 verify_jwt = false
 
+[functions.lms-state]
+verify_jwt = false
+
 [functions.save-submission]
 verify_jwt = false
 

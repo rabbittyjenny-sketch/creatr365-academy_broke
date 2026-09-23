@@ -30,6 +30,35 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
+  // Append-only purchase audit (see create-checkout). Never throws.
+  const logPurchase = async (row: Record<string, unknown>) => {
+    try {
+      const { error } = await supabaseAdmin.from("purchase_events").insert(row);
+      if (error) console.error("purchase_events insert failed:", error.message);
+    } catch (e) { console.error("purchase_events insert threw:", e); }
+  };
+
+  // Stripe sends this when an unpaid Checkout Session times out (24h by
+  // default). Only delivered if the event is enabled on the webhook endpoint
+  // in the Stripe Dashboard; harmless otherwise.
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const enrollmentId = session.metadata?.enrollment_id;
+    if (enrollmentId) {
+      const { data: enr } = await supabaseAdmin
+        .from("course_enrollments")
+        .update({ status: "abandoned" })
+        .eq("id", enrollmentId)
+        .eq("status", "pending")
+        .select("user_id, course_id")
+        .maybeSingle();
+      await logPurchase({
+        user_id: enr?.user_id ?? null, course_id: enr?.course_id ?? session.metadata?.course_id ?? null,
+        enrollment_id: enrollmentId, stripe_session_id: session.id, event: "checkout_expired",
+      });
+    }
+  }
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const enrollmentId = session.metadata?.enrollment_id;
@@ -62,6 +91,14 @@ serve(async (req) => {
             );
         }
       }
+
+      await logPurchase({
+        user_id: enr?.user_id ?? null, course_id: enr?.course_id ?? session.metadata?.course_id ?? null,
+        enrollment_id: enrollmentId, stripe_session_id: session.id, event: "webhook_paid",
+        promo_code_id: promoCodeId || null,
+        amount_final: typeof session.amount_total === "number" ? session.amount_total / 100 : null,
+        detail: { payment_status: session.payment_status, event_id: event.id },
+      });
 
       // Increment promo usage
       if (promoCodeId) {

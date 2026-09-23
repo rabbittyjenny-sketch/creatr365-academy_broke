@@ -11,7 +11,16 @@
  * server-side, but nothing ever read it back into the LMS UI.
  *
  * Request body (JSON):  { student_id: string }
- * Response: { progress: { [course_slug]: { [module_code]: { status, score } } } }
+ * Response: {
+ *   progress: { [course_slug]: { [module_code]: { status, score } } },
+ *   pending_diagnostics: { [course_slug]: { attempt_id, attempt_number, score_pct, radar_breakdown, created_at } },
+ * }
+ *
+ * pending_diagnostics — the latest diagnostic attempt per course when the
+ * learner has not yet pressed "ยืนยันรับผล" or "ทำแบบประเมินใหม่" on it
+ * (Completion Record Framework §4.1). The LMS reopens that review screen on
+ * the next visit instead of losing the decision to a closed tab: the
+ * attempt row itself is the saved state, so this works across devices too.
  */
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -76,7 +85,7 @@ serve(async (req) => {
     const sid = student_id.trim().toUpperCase();
     const authUserIds = await resolveLinkedUserIds(supabase, sid);
     if (authUserIds.length === 0) {
-      return jsonResp({ progress: {} });
+      return jsonResp({ progress: {}, pending_diagnostics: {} });
     }
 
     const { data: rows, error } = await supabase
@@ -103,7 +112,36 @@ serve(async (req) => {
       }
     }
 
-    return jsonResp({ progress });
+    const { data: attempts, error: diagErr } = await supabase
+      .from("diagnostic_attempts")
+      .select("id, attempt_number, score_pct, accepted, radar_breakdown, created_at, courses(slug)")
+      .in("user_id", authUserIds);
+    // Never let this extra lookup take lesson progress down with it.
+    if (diagErr) console.error("diagnostic_attempts lookup failed:", diagErr.message);
+
+    const latestBySlug: Record<string, any> = {};
+    for (const a of (attempts ?? []) as any[]) {
+      const slug = a.courses?.slug;
+      if (!slug) continue;
+      const cur = latestBySlug[slug];
+      if (!cur || a.attempt_number > cur.attempt_number
+          || (a.attempt_number === cur.attempt_number && a.created_at > cur.created_at)) {
+        latestBySlug[slug] = a;
+      }
+    }
+    const pending_diagnostics: Record<string, unknown> = {};
+    for (const [slug, a] of Object.entries(latestBySlug)) {
+      if (a.accepted) continue;
+      pending_diagnostics[slug] = {
+        attempt_id: a.id,
+        attempt_number: a.attempt_number,
+        score_pct: a.score_pct,
+        radar_breakdown: a.radar_breakdown ?? null,
+        created_at: a.created_at,
+      };
+    }
+
+    return jsonResp({ progress, pending_diagnostics });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "unknown";
     return jsonResp({ error: msg }, 400);
