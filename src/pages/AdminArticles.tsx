@@ -46,6 +46,16 @@ const EMPTY_EVENT: EditorForm = {
   address: '', target_date: '', background_image_url: '',
 };
 
+// A loaded row's `_kind` is the table it came from ('article' | 'event'),
+// but the editor's `_kind` is the content type — for articles that's the
+// row's own `kind` (blog, video, ...). Passing the row through unchanged
+// made saving an edit overwrite every article's kind with "article", which
+// drops it out of its Community/Articles group.
+function toEditorForm(row: ContentRow): EditorForm {
+  if (row._kind === 'event') return { ...row };
+  return { ...row, _kind: (row.kind || 'blog') as ContentKind };
+}
+
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9ก-๙\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 }
@@ -436,12 +446,27 @@ const AdminArticles: React.FC = () => {
       // Save button is disabled until title+slug are filled (see canSave in
       // ContentEditor), so both are guaranteed present here.
       if (!form.title || !form.slug) return;
-      const { _kind, id, created_at, ...rest } = form;
-      if (id) {
-        await supabase.from('articles').update({ ...rest, kind: _kind }).eq('id', id);
+      // Only article columns go to the articles table — the form type also
+      // carries the event fields, which don't exist there.
+      const payload = {
+        title: form.title,
+        slug: form.slug,
+        summary: form.summary ?? '',
+        body: form.body ?? null,
+        cover_image_url: form.cover_image_url ?? null,
+        author: form.author ?? null,
+        tags: form.tags ?? null,
+        meta_description: form.meta_description ?? null,
+        target_url: form.target_url || '/',
+        is_active: form.is_active ?? true,
+        sort_order: form.sort_order ?? 0,
+        kind: form._kind,
+      };
+      if (form.id) {
+        await supabase.from('articles').update(payload).eq('id', form.id);
         setMsg('อัปเดตเนื้อหาเรียบร้อย');
       } else {
-        await supabase.from('articles').insert([{ ...rest, kind: _kind, title: form.title, slug: form.slug, target_url: form.target_url || '/' }]);
+        await supabase.from('articles').insert([payload]);
         setMsg('สร้างเนื้อหาใหม่เรียบร้อย');
       }
     }
@@ -537,7 +562,7 @@ const AdminArticles: React.FC = () => {
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         )}
-                        <button onClick={() => setEditing({ ...row })} className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
+                        <button onClick={() => setEditing(toEditorForm(row))} className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => handleDelete(row)} className="p-1.5 rounded-lg text-white/30 hover:text-[#CC0033] hover:bg-[#CC0033]/10 transition-all">

@@ -77,9 +77,23 @@ the record for display — it is not a criterion.
 
 Canonical QG list lives in **`6course-quiz/src/Creatr365_LMS_v2.jsx`**
 (`RADAR_DIMS`) — keep `src/lib/ppact.ts` (`PPACT[].qgs`) in sync with it,
-always. QG-01 through QG-07 only, as of this writing.
+always.
 
-**Case study — do not repeat this:** a session found an abandoned,
+**Current state (2026-09-23): QG-01 through QG-10.** The owner confirmed
+the QG-08/09/10 split as the final spec in the 35-lesson table. QG-08 is
+F02/S01/S06/BH4, QG-09 is F03/BH1 (includes 5 Hidden Souls), and QG-10 is
+MG03. All three roll up into PPACT Trust. The split is merged on main in
+both repos. `quiz_groups` and `quiz_bank` hold the questions: imported
+2026-09-23, with 3 rows `is_active=false` pending content review. The case
+study below describes an *earlier* revert and is kept only as a
+process lesson. Its conclusion about the split is superseded.
+
+Ethics/legal questions in QG-08 are Knowledge Check content for those
+lessons. They do **not** replace the Mandatory Knowledge Gate
+(`mandatory_topics`), which is still a separate, account-level,
+completion-blocking system.
+
+**Case study — the process lesson still applies:** a session found an abandoned,
 closed-without-merge PR (`6course-quiz` #14) proposing QG-08 (Ethics/Legal),
 QG-09/10 (two Host Identity splits), based on a Sept-3 content audit. It
 implemented that split, only to later find the BIBLE's own course-lesson

@@ -22,7 +22,10 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();  // ← FIX: was missing destructure
-  const redirectTo = new URLSearchParams(location.search).get('redirect') || '/dashboard';
+  // Same-site paths only. `?redirect=//evil.com` or `/\evil.com` would
+  // otherwise send a freshly signed-in user off-site (GHSA-wrjc-x8rr-h8h6).
+  const rawRedirect = new URLSearchParams(location.search).get('redirect') || '';
+  const redirectTo = /^\/(?![/\\])/.test(rawRedirect) ? rawRedirect : '/dashboard';
 
   // FIX: call useLiff hook properly (was using liff as bare global)
   const liff = useLiff();

@@ -14,6 +14,15 @@ graceful-fallback) รันผ่านจริงในเครื่อง�
 
 ## 2. Prerender (impact สูงสุด) — `scripts/prerender.mjs`
 
+> **อัปเดตภายหลัง (ถอดออกแล้ว):** ขั้น prerender ถูกถอดออกจาก `npm run build` แล้ว พร้อมลบ puppeteer ออกจาก devDependencies
+> เหตุผลมี 4 ข้อ
+> - build image ของ Vercel ไม่มี Chrome และขาด library ที่ Chrome ต้องใช้ ขั้นนี้จึงไม่ทำงานจริงบน production (fail-open แบบเงียบ)
+> - puppeteer ดึงช่องโหว่ระดับ high มาด้วย 5 ตัว และเป็นต้นเหตุของคำเตือน `allow-scripts`
+> - `package.json` กับ `package-lock.json` ไม่ตรงกัน ทำให้ `npm ci` ล้ม
+> - ถ้ามันทำงานได้ มันจะเขียนทับ `dist/index.html` ด้วยหน้า Home ทำให้ทุก route ที่ไม่ได้ prerender ได้ meta/canonical ของหน้า Home ไปด้วย
+>
+> ส่วน sitemap, robots และ `public/llms.txt` ยังอยู่ครบ ถ้าต้องการ HTML ที่ render ไว้ล่วงหน้าให้ crawler จริงๆ ให้ทำเป็น SSG ใน Phase 2
+
 - เพิ่ม Puppeteer เป็น devDependency, สร้าง static file server ในเครื่อง (`http` module ล้วน ไม่เพิ่ม dependency ใหม่) จำลองพฤติกรรม hosting จริง
 - crawl ทุก route หลัง `vite build` เสร็จ แล้วบันทึก `page.content()` (HTML ที่ render จริงหลัง JS + Supabase fetch ทำงานเสร็จ) ทับ `dist/index.html` และ `dist/<route>/index.html`
 - **route แบบไดนามิก (`/course/:slug`, `/articles/:slug`) ดึงจริงจาก Supabase table `courses`/`articles` โดยกรองด้วย `is_active = true`** — ใช้ flag นี้เพราะโค้ด `Courses.tsx` เขียนคอมเมนต์ยืนยันเองว่า "is_active คือสวิตช์เผยแพร่ตัวเดียว" ไม่ได้เดา
