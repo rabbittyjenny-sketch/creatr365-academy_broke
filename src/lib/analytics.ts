@@ -17,6 +17,7 @@ declare global {
     fbq?: ((...args: unknown[]) => void) & { callMethod?: unknown; queue?: unknown[] };
     _fbq?: unknown;
     ttq?: any;
+    TiktokAnalyticsObject?: string;
   }
 }
 
@@ -95,33 +96,49 @@ function initTikTokPixel() {
   // already true — never load-then-deny for this one.
   if (!TIKTOK_PIXEL_ID || tiktokInitialized) return;
   tiktokInitialized = true;
-  (function (w: Window) {
-    const ttq: any = (w.ttq = w.ttq || {});
-    if (ttq.__init) return;
-    ttq.__init = true;
-    const methods = ['page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once', 'ready', 'alias', 'group', 'enableCookie', 'disableCookie', 'holdConsent', 'revokeConsent', 'grantConsent'];
-    ttq.methods = methods;
-    ttq.setAndDefer = function (t: any, m: string) {
-      t[m] = function (...args: unknown[]) { t.push([m, args]); };
+  // Mirrors TikTok's own base code exactly. Critically, `ttq` must be
+  // initialized as an ARRAY (`w[t] || []`), not a plain object — the
+  // queued-call shim below does `target.push(...)`, which only exists on
+  // arrays. Getting this wrong (an earlier version of this file used `{}`)
+  // makes both this shim AND TikTok's own events.js throw immediately.
+  (function (w: any, d: Document, t: string) {
+    w.TiktokAnalyticsObject = t;
+    const ttq: any = (w[t] = w[t] || []);
+    ttq.methods = [
+      'page', 'track', 'identify', 'instances', 'debug', 'on', 'off', 'once',
+      'ready', 'alias', 'group', 'enableCookie', 'disableCookie',
+      'holdConsent', 'revokeConsent', 'grantConsent',
+    ];
+    ttq.setAndDefer = function (target: any, method: string) {
+      target[method] = function (...args: unknown[]) {
+        target.push([method, ...args]);
+      };
     };
-    for (const m of methods) ttq.setAndDefer(ttq, m);
+    for (const m of ttq.methods) ttq.setAndDefer(ttq, m);
     ttq.instance = function (id: string) {
-      const inst = ttq._i?.[id] || [];
-      for (const m of methods) ttq.setAndDefer(inst, m);
-      return inst;
+      const e = ttq._i[id] || [];
+      for (const m of ttq.methods) ttq.setAndDefer(e, m);
+      return e;
     };
-    ttq.load = function (id: string) {
+    ttq.load = function (id: string, options?: { partner?: string }) {
+      const url = 'https://analytics.tiktok.com/i18n/pixel/events.js';
       ttq._i = ttq._i || {};
       ttq._i[id] = [];
-      const script = document.createElement('script');
+      ttq._i[id]._u = url;
+      ttq._t = ttq._t || {};
+      ttq._t[id] = Date.now();
+      ttq._o = ttq._o || {};
+      ttq._o[id] = options || {};
+      const script = d.createElement('script');
       script.type = 'text/javascript';
       script.async = true;
-      script.src = `https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${id}&lib=ttq`;
-      document.getElementsByTagName('script')[0].parentNode?.insertBefore(script, document.getElementsByTagName('script')[0]);
+      script.src = `${url}?sdkid=${id}&lib=${t}`;
+      const first = d.getElementsByTagName('script')[0];
+      first.parentNode?.insertBefore(script, first);
     };
     ttq.load(TIKTOK_PIXEL_ID);
     ttq.page();
-  })(window);
+  })(window, document, 'ttq');
 }
 
 /**
