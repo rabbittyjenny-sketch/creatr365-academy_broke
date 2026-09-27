@@ -32,7 +32,7 @@ interface CompletionRecordRow {
 }
 interface AssignmentRow {
   id: string; course_id: string; status: string; score: number | null;
-  note: string | null; created_at: string;
+  note: string | null; created_at: string; review_note: string | null;
 }
 
 const ASSIGNMENT_STATUS_LABEL: Record<string, string> = {
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
         // Hook script/video link), reviewed manually by the team in
         // AdminAssignments.tsx — status starts "pending" until graded.
         supabase.from('assignments')
-              .select('id,course_id,status,score,note,created_at')
+              .select('id,course_id,status,score,note,created_at,review_note')
               .eq('user_id', session.user.id)
               .order('created_at', { ascending: false }),
       ]);
@@ -669,6 +669,11 @@ const Dashboard: React.FC = () => {
                               <p className="text-[10px] text-muted-foreground mt-0.5">
                                 ส่งเมื่อ {new Date(a.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}
                               </p>
+                              {a.review_note && (
+                                <p className="text-xs mt-1.5 border-l-2 border-border pl-2 whitespace-pre-line">
+                                  <span className="font-semibold">ความเห็นจากผู้ตรวจ:</span> {a.review_note}
+                                </p>
+                              )}
                             </div>
                             <div className="flex-shrink-0 text-right">
                               <span className={`text-[10px] font-bold tracking-wider px-2.5 py-1 inline-block ${

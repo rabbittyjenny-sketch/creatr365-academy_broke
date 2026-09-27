@@ -31,7 +31,7 @@ const Explore: React.FC = () => {
       />
       <CourseNavbar />
 
-      <section className="pt-28 pb-20 px-4 bg-background">
+      <section className="page-cinematic stage-page pt-28 pb-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
@@ -52,7 +52,7 @@ const Explore: React.FC = () => {
               Bottom row now holds two half-width tiles instead of one
               full-width Creator Tools tile, to make room for Events without
               disturbing the Courses/Toolbox/AI Lab layout above it. */}
-          <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[220px_220px_160px] gap-3">
+          <div className="stagger-in grid grid-cols-1 md:grid-cols-2 md:grid-rows-[220px_220px_160px] gap-3">
             <Link
               to="/courses"
               className="sharp-card sharp-tile section-accent md:col-start-1 md:row-start-1 md:row-span-2 relative flex flex-col justify-between p-6 md:p-8 bg-card text-foreground border border-border border-t-4 border-t-[#C0A060] overflow-hidden group"
@@ -67,7 +67,7 @@ const Explore: React.FC = () => {
                 <p className="text-sm text-muted-foreground max-w-xs">เส้นทางเรียนรู้ที่เป็นลำดับ — ฟรีและชำระเงิน พร้อม progress ของคุณ</p>
               </div>
               <span className="absolute right-4 bottom-4 md:right-6 md:bottom-6 w-9 h-9 grid place-items-center bg-[#C0A060] text-[#0D0D0D] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
-                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                <ArrowUpRight className="motion-arrow w-4 h-4" aria-hidden="true" />
               </span>
             </Link>
 
@@ -85,7 +85,7 @@ const Explore: React.FC = () => {
                 <p className="text-xs text-muted-foreground max-w-xs">เทมเพลต ไฟล์ และของฟรีให้โหลดไปใช้งานได้ทันที</p>
               </div>
               <span className="absolute right-4 bottom-4 w-8 h-8 grid place-items-center bg-[#4A7FB5] text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
-                <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+                <ArrowUpRight className="motion-arrow w-3.5 h-3.5" aria-hidden="true" />
               </span>
             </Link>
 

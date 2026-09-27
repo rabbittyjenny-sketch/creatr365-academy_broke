@@ -13,8 +13,36 @@ interface Row {
   video_url: string | null; note: string | null; status: string;
   score: number | null; created_at: string;
   rubric_id: string | null; dimension_scores: Record<string, number> | null;
+  review_note: string | null;
   courses?: { title: string } | null;
   course_modules?: { code: string; name: string } | null;
+}
+
+interface Who { name: string | null; studentId: string | null; email: string | null }
+
+const STATUS_TH: Record<string, string> = { pending: 'รอตรวจ', approved: 'อนุมัติแล้ว', rejected: 'ส่งกลับแก้ไข' };
+
+// user_id → the human the reviewer actually needs to see. Web accounts are
+// linked in user_accounts as "web:<uuid>"; LINE accounts via profiles.
+async function resolveWho(userIds: string[]): Promise<Record<string, Who>> {
+  const out: Record<string, Who> = {};
+  if (!userIds.length) return out;
+  const { data: profs } = await supabase.from('profiles').select('user_id,display_name,line_user_id').in('user_id', userIds);
+  const lineByUser: Record<string, string> = {};
+  (profs || []).forEach(p => {
+    out[p.user_id] = { name: p.display_name, studentId: null, email: null };
+    if (p.line_user_id) lineByUser[p.user_id] = p.line_user_id;
+  });
+  const keys = [...userIds.map(u => `web:${u}`), ...Object.values(lineByUser)];
+  const { data: accts } = await supabase.from('user_accounts').select('line_user_id,student_id,email').in('line_user_id', keys);
+  (accts || []).forEach(a => {
+    const uid = a.line_user_id.startsWith('web:')
+      ? a.line_user_id.slice(4)
+      : Object.keys(lineByUser).find(u => lineByUser[u] === a.line_user_id);
+    if (!uid) return;
+    out[uid] = { name: out[uid]?.name ?? null, studentId: a.student_id, email: a.email };
+  });
+  return out;
 }
 
 const AdminAssignments = () => {
@@ -30,13 +58,18 @@ const AdminAssignments = () => {
   // uses (see comment on the Rubric_Header data: it doesn't define a
   // rubric-points-to-0-100 conversion, so this stays advisory, not binding).
   const [dimInputs, setDimInputs] = useState<Record<string, Record<string, string>>>({});
+  const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
+  const [who, setWho] = useState<Record<string, Who>>({});
 
   const load = async () => {
     // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
     let q = supabase.from('assignments').select('*, courses(title), course_modules(code,name)').order('created_at',{ascending:false});
     if (filter !== 'all') q = q.eq('status', filter);
-    const { data } = await q;
-    setRows((data as any) || []);
+    const { data, error } = await q;
+    if (error) toast({ title: 'โหลดรายการไม่สำเร็จ', description: error.message, variant: 'destructive' });
+    const list = (data as unknown as Row[]) || [];
+    setRows(list);
+    setWho(await resolveWho([...new Set(list.map(r => r.user_id))]));
     setLoading(false);
   };
 
@@ -54,6 +87,12 @@ const AdminAssignments = () => {
     if (status === 'approved' && (score === null || isNaN(score) || score < 0 || score > 100)) {
       toast({ title: 'กรุณากรอกคะแนน 0–100', variant: 'destructive' }); return;
     }
+    const review_note = (noteInputs[r.id] || '').trim() || null;
+    // A returned submission with no reason leaves the learner guessing —
+    // this note is what their Dashboard shows under the submission.
+    if (status === 'rejected' && !review_note) {
+      toast({ title: 'กรุณาเขียนเหตุผลที่ส่งกลับ ให้ผู้เรียนรู้ว่าต้องแก้อะไร', variant: 'destructive' }); return;
+    }
 
     const rawDims = dimInputs[r.id];
     const dimension_scores = rawDims && Object.keys(rawDims).length
@@ -63,15 +102,24 @@ const AdminAssignments = () => {
     const { error } = await supabase.from('assignments').update({
       status, score: status === 'approved' ? score : null,
       dimension_scores: status === 'approved' ? dimension_scores : null,
+      review_note,
       reviewer_id: session!.user.id, reviewed_at: new Date().toISOString(),
     }).eq('id', r.id);
-    if (error) { toast({ title:'Error', description:error.message, variant:'destructive' }); return; }
+    if (error) { toast({ title:'บันทึกผลตรวจไม่สำเร็จ', description:error.message, variant:'destructive' }); return; }
     if (status === 'approved' && r.module_id) {
-      await supabase.rpc('unlock_next_module', { _user_id: r.user_id, _module_id: r.module_id });
+      const { error: unlockErr } = await supabase.rpc('unlock_next_module', { _user_id: r.user_id, _module_id: r.module_id });
+      if (unlockErr) {
+        // The grade is saved; only the unlock failed. Say so, don't claim success.
+        toast({ title: 'อนุมัติแล้ว แต่ปลดล็อคบทถัดไปไม่สำเร็จ', description: unlockErr.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'อนุมัติแล้ว ปลดล็อคบทถัดไป' });
+      }
+    } else {
+      toast({ title: status === 'approved' ? 'อนุมัติแล้ว' : 'ส่งกลับให้ผู้เรียนแก้ไขแล้ว' });
     }
-    toast({ title: status === 'approved' ? 'อนุมัติแล้ว ปลดล็อคบทถัดไป' : 'ปฏิเสธแล้ว' });
     setScoreInputs(prev => { const n = {...prev}; delete n[r.id]; return n; });
     setDimInputs(prev => { const n = {...prev}; delete n[r.id]; return n; });
+    setNoteInputs(prev => { const n = {...prev}; delete n[r.id]; return n; });
     load();
   };
 
@@ -82,7 +130,7 @@ const AdminAssignments = () => {
         <div className="flex gap-2 mb-4 flex-wrap">
           {(['pending','approved','rejected','all'] as const).map(f=>(
             <Button key={f} size="sm" variant={filter===f?'default':'outline'} onClick={()=>setFilter(f)}>
-              {f === 'pending' ? 'รอตรวจ' : f === 'approved' ? 'อนุมัติแล้ว' : f === 'rejected' ? 'ปฏิเสธ' : 'ทั้งหมด'}
+              {f === 'all' ? 'ทั้งหมด' : STATUS_TH[f]}
             </Button>
           ))}
         </div>
@@ -93,15 +141,23 @@ const AdminAssignments = () => {
               <div className="flex items-start justify-between gap-4 mb-2">
                 <div>
                   <p className="text-sm font-semibold">{r.courses?.title} · {r.course_modules?.code} {r.course_modules?.name}</p>
-                  <p className="text-xs text-muted-foreground">user: {r.user_id.slice(0,8)} · {new Date(r.created_at).toLocaleString('th-TH')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {who[r.user_id]?.name || 'ไม่มีชื่อ'}
+                    {who[r.user_id]?.studentId && <> · <span className="font-mono">{who[r.user_id]!.studentId}</span></>}
+                    {who[r.user_id]?.email && <> · {who[r.user_id]!.email}</>}
+                    {' · '}{new Date(r.created_at).toLocaleString('th-TH')}
+                  </p>
                   {r.note && <p className="text-xs mt-1 text-foreground">หมายเหตุ: {r.note}</p>}
                   {r.score !== null && <p className="text-xs mt-0.5 font-medium">คะแนน: {r.score}/100</p>}
+                  {r.status !== 'pending' && r.review_note && (
+                    <p className="text-xs mt-1 text-muted-foreground whitespace-pre-line">ความเห็นที่ส่งถึงผู้เรียน: {r.review_note}</p>
+                  )}
                 </div>
-                <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border whitespace-nowrap ${
-                  r.status === 'approved' ? 'bg-green-50 border-green-200 text-green-700' :
-                  r.status === 'rejected' ? 'bg-red-50 border-red-200 text-red-700' :
+                <span className={`text-[10px] tracking-wider px-2 py-1 border whitespace-nowrap ${
+                  r.status === 'approved' ? 'bg-[#34A853]/15 border-[#34A853]/30 text-[#34A853]' :
+                  r.status === 'rejected' ? 'bg-[#CC0033]/15 border-[#CC0033]/30 text-[#FF6B7F]' :
                   'bg-muted border-border'
-                }`}>{r.status}</span>
+                }`}>{STATUS_TH[r.status] || r.status}</span>
               </div>
 
               {r.video_url && (
@@ -177,6 +233,13 @@ const AdminAssignments = () => {
               })()}
 
               {r.status === 'pending' && (
+                <div className="space-y-2">
+                <textarea
+                  className="w-full bg-background border border-input px-3 py-2 text-sm min-h-[64px]"
+                  placeholder="ความเห็นถึงผู้เรียน (แสดงใน Dashboard ของผู้เรียน) — จำเป็นเมื่อส่งกลับแก้ไข"
+                  value={noteInputs[r.id] ?? ''}
+                  onChange={e => setNoteInputs(prev => ({ ...prev, [r.id]: e.target.value }))}
+                />
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5">
                     <label className="text-xs text-muted-foreground whitespace-nowrap">คะแนน (0–100):</label>
@@ -194,8 +257,9 @@ const AdminAssignments = () => {
                     ✓ อนุมัติ + ปลดล็อคบทถัดไป
                   </Button>
                   <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => review(r, 'rejected')}>
-                    ✗ ปฏิเสธ
+                    ✗ ส่งกลับแก้ไข
                   </Button>
+                </div>
                 </div>
               )}
             </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
-import { resolveContentType } from '@/lib/uploadFile';
+import { resolveContentType, sanitizeFileName } from '@/lib/uploadFile';
 import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload } from 'lucide-react';
 
 interface Article {
@@ -16,6 +16,7 @@ interface Article {
 interface EventRow {
   id: string; title: string; description: string; date: string; time: string;
   target_date: string; address: string; creator: string; background_image_url: string;
+  is_published: boolean;
 }
 
 type ContentKind = 'blog' | 'video' | 'news' | 'update' | 'tool' | 'community' | 'quiz' | 'event';
@@ -31,6 +32,62 @@ const TYPE_LABEL: Record<ContentKind, string> = {
   tool: 'เครื่องมือ', community: 'คอมมูนิตี้', quiz: 'แบบทดสอบ', event: 'กิจกรรม',
 };
 
+const TYPE_GUIDE: Record<ContentKind, {
+  target: string;
+  url: string;
+  media: string;
+  required: string;
+}> = {
+  blog: {
+    target: 'แสดงในหน้า Community > หมวดบทความ และเปิดอ่านเป็นหน้า /articles/:slug',
+    url: '/articles/[slug]',
+    media: 'แนะนำรูปปก 16:9 ขนาดอย่างน้อย 1600x900 ชื่อไฟล์: article-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, เนื้อหา HTML',
+  },
+  video: {
+    target: 'แสดงในหน้า Community > หมวดคลิปความรู้',
+    url: '/articles/[slug] หรือ external URL',
+    media: 'แนะนำรูป thumbnail 16:9 ชื่อไฟล์: video-[slug]-thumb.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, URL หรือเนื้อหา HTML',
+  },
+  news: {
+    target: 'แสดงในหน้า Community > หมวดข่าวกิจกรรม',
+    url: '/articles/[slug] หรือ external URL',
+    media: 'แนะนำรูปปกข่าว 16:9 ชื่อไฟล์: news-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ',
+  },
+  update: {
+    target: 'แสดงในหน้า Community > หมวดข่าวกิจกรรม',
+    url: '/articles/[slug]',
+    media: 'ใช้รูปปกได้แต่ไม่บังคับ ชื่อไฟล์: update-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ',
+  },
+  tool: {
+    target: 'แสดงในหน้า Community > หมวดบทความ/เครื่องมือ ถ้าเป็นไฟล์ดาวน์โหลดจริงให้ใช้เมนู Toolbox',
+    url: '/articles/[slug] หรือ external URL',
+    media: 'แนะนำรูปปก 16:9 ชื่อไฟล์: tool-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, URL หรือเนื้อหา HTML',
+  },
+  community: {
+    target: 'แสดงในหน้า Community > หมวดข่าวกิจกรรม',
+    url: '/articles/[slug]',
+    media: 'ใช้รูปปกได้แต่ไม่บังคับ ชื่อไฟล์: community-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ',
+  },
+  quiz: {
+    target: 'แสดงในหน้า Community > หมวดข่าวกิจกรรม/แบบทดสอบ',
+    url: '/articles/diagnostic-quiz หรือ URL ที่กำหนด',
+    media: 'ใช้รูปปกได้แต่ไม่บังคับ ชื่อไฟล์: quiz-[slug]-cover.jpg',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, Target URL',
+  },
+  event: {
+    target: 'แสดงในหน้า Events และเปิดรายละเอียดเป็น /event/:id',
+    url: '/events และ /event/[id]',
+    media: 'ควรอัปโหลดภาพ event 1:1 หรือ 4:5 ชื่อไฟล์: event-[title]-cover.jpg',
+    required: 'ชื่อกิจกรรม, วันที่แสดงผล, เวลา, สถานที่, วันเวลาจริง',
+  },
+};
+
 // Form state is a loose union of both shapes so one editor component can
 // drive either table — only the fields relevant to `_kind` are ever read
 // back out when saving.
@@ -43,8 +100,23 @@ const EMPTY_ARTICLE: EditorForm = {
 };
 const EMPTY_EVENT: EditorForm = {
   _kind: 'event', title: '', creator: '', description: '', date: '', time: '',
-  address: '', target_date: '', background_image_url: '',
+  address: '', target_date: '', background_image_url: '', is_published: true,
 };
+
+const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+// target_date is stored as a UTC ISO string. <input type="datetime-local">
+// wants local wall-clock time — slicing the ISO string showed UTC, so every
+// open-and-save moved the event 7 hours earlier (Bangkok is UTC+7).
+function isoToLocalInput(iso?: string | null) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+type FilterKey = 'all' | 'articles' | 'events';
 
 // A loaded row's `_kind` is the table it came from ('article' | 'event'),
 // but the editor's `_kind` is the content type — for articles that's the
@@ -60,26 +132,47 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9ก-๙\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 }
 
+/* ─── Shared publish switch (articles + events) ──────────── */
+const PublishToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; hint?: string }> = ({ value, onChange, hint }) => (
+  <div>
+    <div className="inline-flex border border-white/10" role="group" aria-label="สถานะการเผยแพร่">
+      <button type="button" onClick={() => onChange(true)} aria-pressed={value}
+        className={`px-4 py-2 text-xs font-semibold transition-colors ${value ? 'bg-[#34A853] text-black' : 'text-white/40 hover:text-white'}`}>
+        เผยแพร่
+      </button>
+      <button type="button" onClick={() => onChange(false)} aria-pressed={!value}
+        className={`px-4 py-2 text-xs font-semibold transition-colors ${!value ? 'bg-white/15 text-white' : 'text-white/40 hover:text-white'}`}>
+        ฉบับร่าง
+      </button>
+    </div>
+    {hint && <p className="text-white/25 text-xs mt-1.5">{hint}</p>}
+  </div>
+);
+
 /* ─── Editor modal ─────────────────────────────────────── */
 const ContentEditor: React.FC<{
   initial: EditorForm | null;
-  onSave: (data: EditorForm) => Promise<void>;
+  /** Resolves to an error message, or null on success. */
+  onSave: (data: EditorForm) => Promise<string | null>;
   onClose: () => void;
 }> = ({ initial, onSave, onClose }) => {
   const [form, setForm] = useState<EditorForm>(initial ?? EMPTY_ARTICLE);
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
   const [tagInput, setTagInput] = useState((initial?.tags || []).join(', '));
 
   const isEditingExisting = !!initial?.id;
   const isEvent = form._kind === 'event';
+  const guide = TYPE_GUIDE[form._kind] || TYPE_GUIDE.blog;
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
 
   const pickType = (k: ContentKind) => {
     if (isEditingExisting) return; // switching table for an existing row isn't a simple update
     setForm(k === 'event' ? { ...EMPTY_EVENT } : { ...EMPTY_ARTICLE, kind: k, _kind: k });
+    setTagInput('');
   };
 
   const handleTitle = (v: string) => {
@@ -87,25 +180,29 @@ const ContentEditor: React.FC<{
     if (!initial?.id && !isEvent) set('slug', slugify(v));
   };
 
-  const handleEventImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return;
-    const file = e.target.files[0];
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) return;
-    if (file.size > 5 * 1024 * 1024) return;
-
+  // Both article covers and event images go to the public course-media
+  // bucket (admin-write, public-read). There is no `event-images` bucket in
+  // this project — uploads there failed with "bucket not found".
+  const uploadImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    folder: 'articles' | 'events',
+    field: 'cover_image_url' | 'background_image_url',
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    if (!IMAGE_TYPES.includes(file.type)) { setError('รองรับเฉพาะไฟล์ JPG, PNG, GIF หรือ WebP'); return; }
+    if (file.size > MAX_IMAGE_BYTES) { setError('ไฟล์ใหญ่เกิน 5MB'); return; }
     setUploading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+      const path = `${folder}/${Date.now()}-${sanitizeFileName(file.name)}`;
       const { error: uploadError } = await supabase.storage
-        .from('event-images')
-        .upload(fileName, file, { upsert: true, contentType: resolveContentType(file) });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('event-images').getPublicUrl(fileName);
-      set('background_image_url', publicUrl);
+        .from('course-media')
+        .upload(path, file, { upsert: false, contentType: resolveContentType(file) });
+      if (uploadError) { setError('อัปโหลดไม่สำเร็จ: ' + uploadError.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from('course-media').getPublicUrl(path);
+      set(field, publicUrl);
     } finally {
       setUploading(false);
     }
@@ -113,17 +210,19 @@ const ContentEditor: React.FC<{
 
   const handleSave = async () => {
     setSaving(true);
+    setError('');
     const tags = tagInput.split(',').map(t => t.trim()).filter(Boolean);
-    await onSave(isEvent ? form : { ...form, tags });
+    const err = await onSave(isEvent ? form : { ...form, tags });
+    if (err) setError(err);
     setSaving(false);
   };
 
   const canSave = isEvent
     ? !!form.title && !!form.date
-    : !!form.title && !!form.slug;
+    : !!form.title && !!form.slug && !!form.summary;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+    <div className="admin-modal-surface fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
       <div className="relative bg-[#111] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#111] border-b border-white/8 px-6 py-4 flex items-center justify-between">
@@ -145,27 +244,41 @@ const ContentEditor: React.FC<{
               form the whole content pipeline goes through, instead of one
               page for articles and a separate one for events. */}
           <div>
-            <label className="text-xs text-white/40 font-medium block mb-2">ประเภทเนื้อหา — กำหนดว่าจะไปแสดงที่หน้าไหน</label>
-            <div className="grid grid-cols-4 gap-2">
+            <label htmlFor="content-kind" className="text-xs text-white/40 font-medium block mb-2">
+              เลือกหน้า/ประเภทที่จะแสดงผล
+            </label>
+            <select
+              id="content-kind"
+              disabled={isEditingExisting}
+              value={form._kind}
+              onChange={e => pickType(e.target.value as ContentKind)}
+              className="w-full bg-[#1a1a1a] border border-white/10 px-4 py-3 text-white text-sm font-semibold focus:outline-none focus:border-[#D4A843]/50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
               {[...ARTICLE_KINDS, 'event' as const].map(k => (
-                <button
-                  key={k}
-                  type="button"
-                  disabled={isEditingExisting}
-                  onClick={() => pickType(k)}
-                  className={`text-xs font-semibold px-3 py-2 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                    form._kind === k
-                      ? 'bg-[#D4A843] text-black border-[#D4A843]'
-                      : 'bg-[#1a1a1a] text-white/50 border-white/10 hover:text-white'
-                  }`}
-                >
-                  {TYPE_LABEL[k]}
-                </button>
+                <option key={k} value={k}>{TYPE_LABEL[k]}</option>
               ))}
-            </div>
+            </select>
             {isEditingExisting && (
               <p className="text-white/20 text-xs mt-1.5">แก้ไขประเภทไม่ได้หลังสร้างแล้ว — ลบแล้วสร้างใหม่ถ้าต้องการเปลี่ยน</p>
             )}
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="border border-white/10 bg-white/[0.03] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4A843] mb-1">แสดงที่</p>
+                <p className="text-xs text-white/55 leading-relaxed">{guide.target}</p>
+              </div>
+              <div className="border border-white/10 bg-white/[0.03] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4A843] mb-1">ต้องเตรียม</p>
+                <p className="text-xs text-white/55 leading-relaxed">{guide.required}</p>
+              </div>
+              <div className="border border-white/10 bg-white/[0.03] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4A843] mb-1">URL</p>
+                <p className="text-xs text-white/55 leading-relaxed font-mono">{guide.url}</p>
+              </div>
+              <div className="border border-white/10 bg-white/[0.03] p-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#D4A843] mb-1">รูป/ไฟล์</p>
+                <p className="text-xs text-white/55 leading-relaxed">{guide.media}</p>
+              </div>
+            </div>
           </div>
 
           {isEvent ? (
@@ -229,7 +342,7 @@ const ContentEditor: React.FC<{
                 <input
                   type="datetime-local"
                   className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
-                  value={form.target_date ? form.target_date.slice(0, 16) : ''}
+                  value={isoToLocalInput(form.target_date)}
                   onChange={e => set('target_date', e.target.value ? new Date(e.target.value).toISOString() : '')}
                 />
               </div>
@@ -241,9 +354,14 @@ const ContentEditor: React.FC<{
                 <label className="flex items-center gap-2 w-full bg-[#1a1a1a] border border-dashed border-white/15 rounded-xl px-4 py-3 text-white/40 text-sm cursor-pointer hover:text-white hover:border-white/30 transition-colors">
                   <Upload className="w-4 h-4" />
                   {uploading ? 'กำลังอัปโหลด...' : 'อัปโหลดภาพ (JPG/PNG/GIF/WebP, สูงสุด 5MB)'}
-                  <input type="file" accept="image/*" onChange={handleEventImageUpload} disabled={uploading} className="hidden" />
+                  <input type="file" accept="image/*" onChange={e => uploadImage(e, 'events', 'background_image_url')} disabled={uploading} className="hidden" />
                 </label>
               </div>
+              <PublishToggle
+                value={form.is_published ?? true}
+                onChange={v => set('is_published', v)}
+                hint="ฉบับร่าง = ไม่แสดงในหน้า Events และเปิดลิงก์ /event/:id ไม่ได้"
+              />
             </>
           ) : preview ? (
             <div>
@@ -318,13 +436,23 @@ const ContentEditor: React.FC<{
                 />
               </div>
               <div>
-                <label className="text-xs text-white/40 font-medium block mb-1">URL รูปปก</label>
-                <input
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
-                  placeholder="https://..."
-                  value={form.cover_image_url || ''}
-                  onChange={e => set('cover_image_url', e.target.value)}
-                />
+                <label className="text-xs text-white/40 font-medium block mb-1">รูปปก</label>
+                {form.cover_image_url && (
+                  <img src={form.cover_image_url} alt="" className="w-full h-32 object-cover mb-2 border border-white/10" />
+                )}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <label className="inline-flex items-center justify-center gap-2 bg-[#1a1a1a] border border-dashed border-white/15 px-4 py-3 text-white/40 text-sm cursor-pointer hover:text-white hover:border-white/30 transition-colors sm:w-56">
+                    <Upload className="w-4 h-4" />
+                    {uploading ? 'กำลังอัปโหลด...' : 'อัปโหลดรูปปก'}
+                    <input type="file" accept="image/*" onChange={e => uploadImage(e, 'articles', 'cover_image_url')} disabled={uploading} className="hidden" />
+                  </label>
+                  <input
+                    className="flex-1 bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
+                    placeholder="หรือวาง URL รูปปกจากภายนอก..."
+                    value={form.cover_image_url || ''}
+                    onChange={e => set('cover_image_url', e.target.value)}
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
@@ -345,16 +473,8 @@ const ContentEditor: React.FC<{
                     onChange={e => set('sort_order', parseInt(e.target.value) || 0)}
                   />
                 </div>
-                <div className="flex items-end pb-1">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <div
-                      onClick={() => set('is_active', !form.is_active)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${form.is_active ? 'bg-[#34A853]' : 'bg-white/20'}`}
-                    >
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.is_active ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                    </div>
-                    <span className="text-white/50 text-sm">{form.is_active ? 'เผยแพร่แล้ว' : 'ฉบับร่าง'}</span>
-                  </label>
+                <div className="flex items-end">
+                  <PublishToggle value={form.is_active ?? true} onChange={v => set('is_active', v)} />
                 </div>
               </div>
               <div>
@@ -372,7 +492,8 @@ const ContentEditor: React.FC<{
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#111] border-t border-white/8 px-6 py-4 flex justify-end gap-3">
+        <div className="sticky bottom-0 bg-[#111] border-t border-white/8 px-6 py-4 flex items-center justify-end gap-3">
+          {error && <p className="mr-auto text-xs text-[#FF6B7F]" role="alert">{error}</p>}
           <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-white/40 hover:text-white transition-colors">ยกเลิก</button>
           <button
             onClick={handleSave}
@@ -394,12 +515,18 @@ const AdminArticles: React.FC = () => {
   const [rows, setRows] = useState<ContentRow[]>([]);
   const [editing, setEditing] = useState<EditorForm | null | false>(false);
   const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState('');
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [filter, setFilter] = useState<FilterKey>('all');
+
+  const flash = (text: string, ok = true) => {
+    setMsg({ text, ok });
+    setTimeout(() => setMsg(null), ok ? 3000 : 6000);
+  };
 
   const load = useCallback(async () => {
     const [{ data: articleData }, { data: eventData }] = await Promise.all([
       supabase.from('articles').select('*').order('sort_order'),
-      supabase.from('events').select('*'),
+      supabase.from('events').select('*').order('target_date', { ascending: false }),
     ]);
     const articleRows: ContentRow[] = ((articleData as unknown as Article[]) || [])
       .map(a => ({ _kind: 'article' as const, ...a }));
@@ -422,9 +549,9 @@ const AdminArticles: React.FC = () => {
     return <div className="min-h-screen bg-[#080808] flex items-center justify-center"><div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" /></div>;
   }
 
-  const handleSave = async (form: EditorForm) => {
+  const handleSave = async (form: EditorForm): Promise<string | null> => {
     if (form._kind === 'event') {
-      if (!form.title || !form.date) return;
+      if (!form.title || !form.date) return 'กรอกชื่อกิจกรรมและวันที่';
       const payload = {
         title: form.title.trim(),
         creator: (form.creator ?? '').trim(),
@@ -434,18 +561,17 @@ const AdminArticles: React.FC = () => {
         address: (form.address ?? '').trim(),
         target_date: form.target_date ?? '',
         background_image_url: form.background_image_url ?? '',
+        is_published: form.is_published ?? true,
       };
-      if (form.id) {
-        await supabase.from('events').update(payload).eq('id', form.id);
-        setMsg('อัปเดตกิจกรรมเรียบร้อย');
-      } else {
-        await supabase.from('events').insert([payload]);
-        setMsg('สร้างกิจกรรมใหม่เรียบร้อย');
-      }
+      const { error } = form.id
+        ? await supabase.from('events').update(payload).eq('id', form.id)
+        : await supabase.from('events').insert([payload]);
+      if (error) return 'บันทึกไม่สำเร็จ: ' + error.message;
+      flash(form.id ? 'อัปเดตกิจกรรมเรียบร้อย' : 'สร้างกิจกรรมใหม่เรียบร้อย');
     } else {
       // Save button is disabled until title+slug are filled (see canSave in
       // ContentEditor), so both are guaranteed present here.
-      if (!form.title || !form.slug) return;
+      if (!form.title || !form.slug) return 'กรอกชื่อเรื่องและ Slug';
       // Only article columns go to the articles table — the form type also
       // carries the event fields, which don't exist there.
       const payload = {
@@ -462,29 +588,47 @@ const AdminArticles: React.FC = () => {
         sort_order: form.sort_order ?? 0,
         kind: form._kind,
       };
-      if (form.id) {
-        await supabase.from('articles').update(payload).eq('id', form.id);
-        setMsg('อัปเดตเนื้อหาเรียบร้อย');
-      } else {
-        await supabase.from('articles').insert([payload]);
-        setMsg('สร้างเนื้อหาใหม่เรียบร้อย');
+      const { error } = form.id
+        ? await supabase.from('articles').update(payload).eq('id', form.id)
+        : await supabase.from('articles').insert([payload]);
+      if (error) {
+        // Unique slug is the one constraint admins actually hit.
+        if (error.code === '23505') return 'Slug นี้มีอยู่แล้ว — เปลี่ยน Slug ใหม่';
+        return 'บันทึกไม่สำเร็จ: ' + error.message;
       }
+      flash(form.id ? 'อัปเดตเนื้อหาเรียบร้อย' : 'สร้างเนื้อหาใหม่เรียบร้อย');
     }
     setEditing(false);
     load();
-    setTimeout(() => setMsg(''), 3000);
+    return null;
   };
 
-  const toggleActive = async (a: Article) => {
-    await supabase.from('articles').update({ is_active: !a.is_active }).eq('id', a.id);
+  const togglePublished = async (row: ContentRow) => {
+    const { error } = row._kind === 'event'
+      ? await supabase.from('events').update({ is_published: !row.is_published }).eq('id', row.id)
+      : await supabase.from('articles').update({ is_active: !row.is_active }).eq('id', row.id);
+    if (error) flash('เปลี่ยนสถานะไม่สำเร็จ: ' + error.message, false);
     load();
   };
 
   const handleDelete = async (row: ContentRow) => {
-    if (!confirm(row._kind === 'event' ? 'ลบกิจกรรมนี้?' : 'ลบเนื้อหานี้?')) return;
-    await supabase.from(row._kind === 'event' ? 'events' : 'articles').delete().eq('id', row.id);
+    const warn = row._kind === 'event'
+      ? `ลบกิจกรรม "${row.title}"? รายชื่อผู้ลงทะเบียนของกิจกรรมนี้จะถูกลบไปด้วย — ถ้าแค่ต้องการซ่อน ให้ใช้ "ฉบับร่าง" แทน`
+      : `ลบ "${row.title}"? ถ้าแค่ต้องการซ่อน ให้ใช้ "ฉบับร่าง" แทน`;
+    if (!confirm(warn)) return;
+    const { error } = await supabase.from(row._kind === 'event' ? 'events' : 'articles').delete().eq('id', row.id);
+    if (error) flash('ลบไม่สำเร็จ: ' + error.message, false);
     load();
   };
+
+  const isPublished = (row: ContentRow) => row._kind === 'event' ? row.is_published : row.is_active;
+  const counts = {
+    all: rows.length,
+    articles: rows.filter(r => r._kind === 'article').length,
+    events: rows.filter(r => r._kind === 'event').length,
+  };
+  const visibleRows = rows.filter(r =>
+    filter === 'all' ? true : filter === 'events' ? r._kind === 'event' : r._kind === 'article');
 
   return (
     <>
@@ -493,7 +637,7 @@ const AdminArticles: React.FC = () => {
         onSignOut={handleSignOut}
         actions={
           <button
-            onClick={() => setEditing(EMPTY_ARTICLE)}
+            onClick={() => setEditing(filter === 'events' ? EMPTY_EVENT : EMPTY_ARTICLE)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" /> สร้างเนื้อหาใหม่
@@ -501,8 +645,21 @@ const AdminArticles: React.FC = () => {
         }
       >
           {msg && (
-            <div className="mb-4 p-3 rounded-xl bg-[#34A853]/15 border border-[#34A853]/25 text-[#34A853] text-sm">{msg}</div>
+            <div role="status" className={`mb-4 p-3 border text-sm ${msg.ok
+              ? 'bg-[#34A853]/15 border-[#34A853]/25 text-[#34A853]'
+              : 'bg-[#CC0033]/15 border-[#CC0033]/30 text-[#FF6B7F]'}`}>{msg.text}</div>
           )}
+
+          <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="กรองประเภทเนื้อหา">
+            {([['all', 'ทั้งหมด'], ['articles', 'บทความ / ข่าว / คลิป'], ['events', 'กิจกรรม']] as const).map(([k, l]) => (
+              <button key={k} role="tab" aria-selected={filter === k} onClick={() => setFilter(k)}
+                className={`px-4 py-2 text-xs font-semibold border transition-colors ${filter === k
+                  ? 'bg-[#D4A843] text-black border-[#D4A843]'
+                  : 'border-white/10 text-white/50 hover:text-white'}`}>
+                {l} <span className="opacity-60">({counts[k]})</span>
+              </button>
+            ))}
+          </div>
 
           {/* Table — articles and events together: one place to manage
               everything that goes out on the site, instead of articles
@@ -519,7 +676,7 @@ const AdminArticles: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {rows.map(row => (
+                {visibleRows.map(row => (
                   <tr key={`${row._kind}-${row.id}`} className="bg-[#0D0D0D] hover:bg-[#131313] transition-colors">
                     <td className="px-5 py-4">
                       <p className="text-white font-medium text-sm line-clamp-1">{row.title}</p>
@@ -533,47 +690,42 @@ const AdminArticles: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-4 text-center hidden sm:table-cell">
-                      {row._kind === 'article' ? (
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${row.is_active ? 'text-[#34A853]' : 'text-white/30'}`}>
-                          {row.is_active ? '● เผยแพร่' : '○ ฉบับร่าง'}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold text-white/30">—</span>
-                      )}
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${isPublished(row) ? 'text-[#34A853]' : 'text-white/30'}`}>
+                        {isPublished(row) ? '● เผยแพร่' : '○ ฉบับร่าง'}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        {row._kind === 'article' && (
-                          <>
-                            {row.body && (
-                              <a href={`/articles/${row.slug}`} target="_blank" rel="noopener noreferrer"
-                                className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
-                                <ExternalLink className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                            <button onClick={() => toggleActive(row)} className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
-                              {row.is_active ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            </button>
-                          </>
-                        )}
-                        {row._kind === 'event' && (
-                          <a href={`/event/${row.id}`} target="_blank" rel="noopener noreferrer"
+                        {row._kind === 'article' && row.body && (
+                          <a href={`/articles/${row.slug}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"
                             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         )}
-                        <button onClick={() => setEditing(toEditorForm(row))} className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
+                        {row._kind === 'event' && row.is_published && (
+                          <a href={`/event/${row.id}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"
+                            className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        <button onClick={() => togglePublished(row)}
+                          aria-label={isPublished(row) ? 'เปลี่ยนเป็นฉบับร่าง' : 'เผยแพร่'}
+                          title={isPublished(row) ? 'เปลี่ยนเป็นฉบับร่าง' : 'เผยแพร่'}
+                          className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
+                          {isPublished(row) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                        <button onClick={() => setEditing(toEditorForm(row))} aria-label="แก้ไข" className="p-1.5 rounded-lg text-white/30 hover:text-[#D4A843] hover:bg-[#D4A843]/10 transition-all">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDelete(row)} className="p-1.5 rounded-lg text-white/30 hover:text-[#CC0033] hover:bg-[#CC0033]/10 transition-all">
+                        <button onClick={() => handleDelete(row)} aria-label="ลบ" className="p-1.5 rounded-lg text-white/30 hover:text-[#CC0033] hover:bg-[#CC0033]/10 transition-all">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {rows.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-12 text-white/20">ยังไม่มีเนื้อหา — กด "+ สร้างเนื้อหาใหม่" เพื่อเริ่ม</td></tr>
+                {visibleRows.length === 0 && (
+                  <tr><td colSpan={4} className="text-center py-12 text-white/20">ยังไม่มีเนื้อหาในหมวดนี้ — กด "+ สร้างเนื้อหาใหม่" เพื่อเริ่ม</td></tr>
                 )}
               </tbody>
             </table>

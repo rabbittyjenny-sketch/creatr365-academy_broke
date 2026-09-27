@@ -36,6 +36,8 @@ interface HistoryRow {
   course_modules: { code: string; name: string } | null;
 }
 
+// Characters that change the meaning of a PostgREST .or() filter string.
+const orSafe = (q: string) => q.replace(/[,()*\\]/g, ' ').trim();
 const dateTh = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
 
 async function resolveUserIds(studentId: string): Promise<string[]> {
@@ -116,7 +118,7 @@ const AdminOnsiteScoring = () => {
     setStudentId(null); setUserIds([]); setHistory([]);
     const { data, error } = await supabase
       .from('user_accounts').select('student_id,email')
-      .or(`student_id.ilike.%${q}%,email.ilike.%${q}%`)
+      .or(`student_id.ilike.%${orSafe(q)}%,email.ilike.%${orSafe(q)}%`)
       .order('registered_at', { ascending: false }).limit(25);
     setSearching(false);
     if (error) { toast({ title: 'ค้นหาไม่สำเร็จ', description: error.message, variant: 'destructive' }); return; }

@@ -38,8 +38,8 @@ export const EventDetailPage: React.FC = () => {
   
   const fetchEvent = async () => {
     const { data, error } = id
-      ? await supabase.from('events').select('*').eq('id', id).maybeSingle()
-      : await supabase.from('events').select('*').limit(1).maybeSingle();
+      ? await supabase.from('events').select('*').eq('id', id).eq('is_published', true).maybeSingle()
+      : await supabase.from('events').select('*').eq('is_published', true).limit(1).maybeSingle();
     
     if (error) {
       if (import.meta.env.DEV) console.error('Error fetching event:', error);

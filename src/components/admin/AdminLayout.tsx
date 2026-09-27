@@ -61,11 +61,11 @@ export function AdminLayout({ title, eyebrow = 'Admin', actions, onSignOut, chil
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-[#080808] text-white">
+      <div className="admin-console-surface min-h-screen flex w-full bg-[#080808] text-white">
         <Sidebar collapsible="icon" className="border-white/8">
           <SidebarHeader className="px-3 py-4">
             <Link to="/" className="flex items-center gap-2.5 px-1 group">
-              <span className="w-8 h-8 rounded-lg bg-[#D4A843] text-black font-bold text-sm flex items-center justify-center shrink-0">
+              <span className="w-8 h-8 rounded-sm bg-[#D4A843] text-black font-bold text-sm flex items-center justify-center shrink-0">
                 C
               </span>
               <span className="flex flex-col leading-tight overflow-hidden group-data-[collapsible=icon]:hidden">

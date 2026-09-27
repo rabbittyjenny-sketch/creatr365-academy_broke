@@ -83,7 +83,7 @@ const AssetEditor: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+    <div className="admin-modal-surface fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
       <div className="relative bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 z-10 bg-[#111] border-b border-white/8 px-6 py-4 flex items-center justify-between">
           <h2 className="text-white font-semibold text-base">{initial?.id ? 'แก้ไขไฟล์ Toolbox' : 'เพิ่มไฟล์ Toolbox ใหม่'}</h2>
@@ -209,7 +209,8 @@ const AdminToolbox: React.FC = () => {
   const [assets, setAssets] = useState<ToolboxAsset[]>([]);
   const [editing, setEditing] = useState<Partial<ToolboxAsset> | null | false>(false);
   const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState('');
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const flash = (text: string, ok = true) => { setMsg({ text, ok }); setTimeout(() => setMsg(null), ok ? 3000 : 6000); };
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('toolbox_assets').select('*').order('sort_order');
@@ -227,27 +228,31 @@ const AdminToolbox: React.FC = () => {
 
   const handleSave = async (form: Partial<ToolboxAsset>) => {
     if (!form.title || !form.file_path) return;
-    if (form.id) {
-      const { id, download_count, ...rest } = form as ToolboxAsset;
-      await supabase.from('toolbox_assets').update(rest).eq('id', id);
-      setMsg('อัปเดตเรียบร้อย');
-    } else {
-      await supabase.from('toolbox_assets').insert([{ ...form, title: form.title, file_path: form.file_path }]);
-      setMsg('เพิ่มไฟล์ใหม่เรียบร้อย');
-    }
+    const payload = {
+      title: form.title, description: form.description ?? '', category: form.category || 'downloadable',
+      cover_image_url: form.cover_image_url || null, file_path: form.file_path,
+      file_name: form.file_name || null, file_type: form.file_type || null,
+      sort_order: form.sort_order ?? 0, is_active: form.is_active ?? true,
+    };
+    const { error } = form.id
+      ? await supabase.from('toolbox_assets').update(payload).eq('id', form.id)
+      : await supabase.from('toolbox_assets').insert([payload]);
+    if (error) { flash('บันทึกไม่สำเร็จ: ' + error.message, false); return; }
+    flash(form.id ? 'อัปเดตเรียบร้อย' : 'เพิ่มไฟล์ใหม่เรียบร้อย');
     setEditing(false);
     load();
-    setTimeout(() => setMsg(''), 3000);
   };
 
   const toggleActive = async (a: ToolboxAsset) => {
-    await supabase.from('toolbox_assets').update({ is_active: !a.is_active }).eq('id', a.id);
+    const { error } = await supabase.from('toolbox_assets').update({ is_active: !a.is_active }).eq('id', a.id);
+    if (error) flash('เปลี่ยนสถานะไม่สำเร็จ: ' + error.message, false);
     load();
   };
 
   const handleDelete = async (a: ToolboxAsset) => {
-    if (!confirm(`ลบ "${a.title}"?`)) return;
-    await supabase.from('toolbox_assets').delete().eq('id', a.id);
+    if (!confirm(`ลบ "${a.title}"? ประวัติการดาวน์โหลดของไฟล์นี้จะถูกลบไปด้วย — ถ้าแค่ต้องการซ่อน ให้ใช้ปุ่มซ่อนแทน`)) return;
+    const { error } = await supabase.from('toolbox_assets').delete().eq('id', a.id);
+    if (error) { flash('ลบไม่สำเร็จ: ' + error.message, false); return; }
     await supabase.storage.from('toolbox-files').remove([a.file_path]); // best-effort cleanup
     load();
   };
@@ -268,7 +273,9 @@ const AdminToolbox: React.FC = () => {
         }
       >
         {msg && (
-          <div className="mb-4 p-3 rounded-xl bg-[#34A853]/15 border border-[#34A853]/25 text-[#34A853] text-sm">{msg}</div>
+          <div role="status" className={`mb-4 p-3 border text-sm ${msg.ok
+            ? 'bg-[#34A853]/15 border-[#34A853]/25 text-[#34A853]'
+            : 'bg-[#CC0033]/15 border-[#CC0033]/30 text-[#FF6B7F]'}`}>{msg.text}</div>
         )}
 
         {loading ? (

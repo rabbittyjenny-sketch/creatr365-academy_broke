@@ -19,6 +19,7 @@ interface CourseRow {
   color: string;
   learning_type: string;
   max_slots: number | null;
+  is_active: boolean;
 }
 
 const LEARNING_LABELS: Record<string, string> = {
@@ -173,7 +174,15 @@ const Enroll: React.FC = () => {
             <p className="text-xs text-muted-foreground mb-4">{LEARNING_LABELS[course.learning_type] || course.learning_type}</p>
             <p className={`text-2xl font-bold ${colors.text} mb-6`}>{isFreeCourse ? 'ฟรี' : course.price}</p>
 
-            {isFull ? (
+            {/* Same rule create-checkout enforces server-side: a hidden course,
+                or one the admin marked Coming Soon / Fully Booked, can't be
+                bought — it used to be buyable by anyone with the direct link. */}
+            {!course.is_active || course.status === 'coming_soon' ? (
+              <div className="text-center py-8">
+                <p className="text-lg font-bold mb-2">ยังไม่เปิดรับสมัคร</p>
+                <p className="text-sm text-muted-foreground">หลักสูตรนี้ยังไม่เปิดให้ลงทะเบียน — ติดตามได้ที่หน้าหลักสูตรทั้งหมด</p>
+              </div>
+            ) : isFull || course.status === 'fully_booked' ? (
               <div className="text-center py-8">
                 <p className="text-lg font-bold text-red-500 mb-2">เต็มแล้ว</p>
                 <p className="text-sm text-muted-foreground">หลักสูตรนี้รับสมัครเต็มจำนวนแล้ว</p>
