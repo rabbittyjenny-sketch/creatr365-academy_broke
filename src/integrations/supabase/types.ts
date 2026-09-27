@@ -619,23 +619,76 @@ export type Database = {
           },
         ]
       }
+      event_private_details: {
+        Row: {
+          attendee_info: string
+          event_id: string
+          online_url: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_info?: string
+          event_id: string
+          online_url?: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_info?: string
+          event_id?: string
+          online_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_private_details_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_registrations: {
         Row: {
+          admin_note: string
+          decided_at: string | null
+          email: string
           event_id: string
+          full_name: string
           id: string
+          line_name: string
+          note: string
+          phone: string
           registered_at: string
+          status: string
           user_id: string
         }
         Insert: {
+          admin_note?: string
+          decided_at?: string | null
+          email?: string
           event_id: string
+          full_name?: string
           id?: string
+          line_name?: string
+          note?: string
+          phone?: string
           registered_at?: string
+          status?: string
           user_id: string
         }
         Update: {
+          admin_note?: string
+          decided_at?: string | null
+          email?: string
           event_id?: string
+          full_name?: string
           id?: string
+          line_name?: string
+          note?: string
+          phone?: string
           registered_at?: string
+          status?: string
           user_id?: string
         }
         Relationships: [
@@ -652,41 +705,74 @@ export type Database = {
         Row: {
           address: string
           background_image_url: string
+          capacity: number | null
           created_by: string
           creator: string
           date: string
           description: string
+          early_bird_price: number | null
+          early_bird_until: string | null
+          ends_at: string | null
           id: string
           is_published: boolean
+          location_type: string
+          map_url: string
+          price: number | null
+          price_note: string
+          registration_closes_at: string | null
+          registration_opens_at: string | null
           target_date: string
           time: string
           title: string
+          venue_name: string
         }
         Insert: {
           address?: string
           background_image_url?: string
+          capacity?: number | null
           created_by?: string
           creator?: string
           date: string
           description?: string
+          early_bird_price?: number | null
+          early_bird_until?: string | null
+          ends_at?: string | null
           id?: string
           is_published?: boolean
+          location_type?: string
+          map_url?: string
+          price?: number | null
+          price_note?: string
+          registration_closes_at?: string | null
+          registration_opens_at?: string | null
           target_date?: string
           time?: string
           title: string
+          venue_name?: string
         }
         Update: {
           address?: string
           background_image_url?: string
+          capacity?: number | null
           created_by?: string
           creator?: string
           date?: string
           description?: string
+          early_bird_price?: number | null
+          early_bird_until?: string | null
+          ends_at?: string | null
           id?: string
           is_published?: boolean
+          location_type?: string
+          map_url?: string
+          price?: number | null
+          price_note?: string
+          registration_closes_at?: string | null
+          registration_opens_at?: string | null
           target_date?: string
           time?: string
           title?: string
+          venue_name?: string
         }
         Relationships: []
       }
@@ -1508,6 +1594,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_event_registration: {
+        Args: { _event_id: string }
+        Returns: undefined
+      }
       ensure_master_student_account: {
         Args: { _email?: string }
         Returns: string
@@ -1515,6 +1605,13 @@ export type Database = {
       ensure_master_student_account_for_identity: {
         Args: { _email?: string; _line_user_id: string; _student_id?: string }
         Returns: string
+      }
+      event_confirmed_counts: {
+        Args: { _event_ids: string[] }
+        Returns: {
+          confirmed: number
+          event_id: string
+        }[]
       }
       generate_master_student_id: { Args: { _seed: string }; Returns: string }
       has_passed_mandatory_gate: {
@@ -1574,6 +1671,36 @@ export type Database = {
       normalize_master_student_id: {
         Args: { _student_id: string }
         Returns: string
+      }
+      request_event_registration: {
+        Args: {
+          _email: string
+          _event_id: string
+          _full_name: string
+          _line_name: string
+          _note?: string
+          _phone: string
+        }
+        Returns: {
+          admin_note: string
+          decided_at: string | null
+          email: string
+          event_id: string
+          full_name: string
+          id: string
+          line_name: string
+          note: string
+          phone: string
+          registered_at: string
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "event_registrations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       unlock_next_module: {
         Args: { _module_id: string; _user_id: string }

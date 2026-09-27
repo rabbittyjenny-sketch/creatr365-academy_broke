@@ -4,7 +4,10 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
 import { resolveContentType, sanitizeFileName } from '@/lib/uploadFile';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users } from 'lucide-react';
+import { EventFormFields } from '@/components/admin/EventFormFields';
+import { validateEventForm } from '@/lib/events';
+import { EventRegistrantsPanel } from '@/components/admin/EventRegistrantsPanel';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
@@ -17,6 +20,11 @@ interface EventRow {
   id: string; title: string; description: string; date: string; time: string;
   target_date: string; address: string; creator: string; background_image_url: string;
   is_published: boolean;
+  ends_at: string | null; capacity: number | null;
+  registration_opens_at: string | null; registration_closes_at: string | null;
+  location_type: string; venue_name: string; map_url: string;
+  price: number | null; early_bird_price: number | null; early_bird_until: string | null;
+  price_note: string;
 }
 
 type ContentKind = 'blog' | 'video' | 'news' | 'update' | 'tool' | 'community' | 'quiz' | 'event';
@@ -84,14 +92,17 @@ const TYPE_GUIDE: Record<ContentKind, {
     target: 'แสดงในหน้า Events และเปิดรายละเอียดเป็น /event/:id',
     url: '/events และ /event/[id]',
     media: 'ควรอัปโหลดภาพ event 1:1 หรือ 4:5 ชื่อไฟล์: event-[title]-cover.jpg',
-    required: 'ชื่อกิจกรรม, วันที่แสดงผล, เวลา, สถานที่, วันเวลาจริง',
+    required: 'ชื่อกิจกรรม, วันเวลาเริ่ม, สถานที่หรือลิงก์ออนไลน์ — ที่นั่ง/ช่วงรับสมัคร/ราคาไม่บังคับ',
   },
 };
 
 // Form state is a loose union of both shapes so one editor component can
 // drive either table — only the fields relevant to `_kind` are ever read
 // back out when saving.
-type EditorForm = { _kind: ContentKind; id?: string; created_at?: string } & Partial<Article> & Partial<EventRow>;
+// `_online_url` / `_attendee_info` live in event_private_details (readable
+// only by confirmed attendees), not in the public events row.
+type EditorForm = { _kind: ContentKind; id?: string; created_at?: string; _online_url?: string; _attendee_info?: string }
+  & Partial<Article> & Partial<EventRow>;
 
 const EMPTY_ARTICLE: EditorForm = {
   _kind: 'blog', title: '', slug: '', summary: '', body: '', cover_image_url: '',
@@ -101,20 +112,14 @@ const EMPTY_ARTICLE: EditorForm = {
 const EMPTY_EVENT: EditorForm = {
   _kind: 'event', title: '', creator: '', description: '', date: '', time: '',
   address: '', target_date: '', background_image_url: '', is_published: true,
+  ends_at: null, capacity: null, registration_opens_at: null, registration_closes_at: null,
+  location_type: 'onsite', venue_name: '', map_url: '',
+  price: null, early_bird_price: null, early_bird_until: null, price_note: '',
+  _online_url: '', _attendee_info: '',
 };
 
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-
-// target_date is stored as a UTC ISO string. <input type="datetime-local">
-// wants local wall-clock time — slicing the ISO string showed UTC, so every
-// open-and-save moved the event 7 hours earlier (Bangkok is UTC+7).
-function isoToLocalInput(iso?: string | null) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return '';
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-}
 
 type FilterKey = 'all' | 'articles' | 'events';
 
@@ -165,6 +170,14 @@ const ContentEditor: React.FC<{
 
   const isEditingExisting = !!initial?.id;
   const isEvent = form._kind === 'event';
+
+  useEffect(() => {
+    if (!initial?.id || initial._kind !== 'event') return;
+    supabase.from('event_private_details').select('online_url, attendee_info').eq('event_id', initial.id).maybeSingle()
+      .then(({ data }) => {
+        if (data) setForm(f => ({ ...f, _online_url: data.online_url, _attendee_info: data.attendee_info }));
+      });
+  }, [initial?.id, initial?._kind]);
   const guide = TYPE_GUIDE[form._kind] || TYPE_GUIDE.blog;
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
@@ -218,7 +231,7 @@ const ContentEditor: React.FC<{
   };
 
   const canSave = isEvent
-    ? !!form.title && !!form.date
+    ? !!form.title && !!form.date && !!form.target_date
     : !!form.title && !!form.slug && !!form.summary;
 
   return (
@@ -309,43 +322,7 @@ const ContentEditor: React.FC<{
                   onChange={e => set('description', e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1">วันที่ (แสดงผล) *</label>
-                  <input
-                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
-                    placeholder="เช่น 2 ต.ค. 2569"
-                    value={form.date || ''}
-                    onChange={e => set('date', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1">เวลา</label>
-                  <input
-                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
-                    placeholder="เช่น 13:00 น."
-                    value={form.time || ''}
-                    onChange={e => set('time', e.target.value)}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-white/40 font-medium block mb-1">สถานที่</label>
-                <input
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
-                  value={form.address || ''}
-                  onChange={e => set('address', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-white/40 font-medium block mb-1">วัน-เวลาจริงสำหรับนับถอยหลัง (ISO, เช่น 2026-10-02T13:00:00+07:00)</label>
-                <input
-                  type="datetime-local"
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
-                  value={isoToLocalInput(form.target_date)}
-                  onChange={e => set('target_date', e.target.value ? new Date(e.target.value).toISOString() : '')}
-                />
-              </div>
+              <EventFormFields form={form} set={set} />
               <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">ภาพพื้นหลัง</label>
                 {form.background_image_url && (
@@ -517,6 +494,9 @@ const AdminArticles: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
+  // event_id → { requested, confirmed } for the list's "ผู้สมัคร" button.
+  const [regCounts, setRegCounts] = useState<Record<string, { requested: number; confirmed: number }>>({});
+  const [registrantsOf, setRegistrantsOf] = useState<EventRow | null>(null);
 
   const flash = (text: string, ok = true) => {
     setMsg({ text, ok });
@@ -524,10 +504,17 @@ const AdminArticles: React.FC = () => {
   };
 
   const load = useCallback(async () => {
-    const [{ data: articleData }, { data: eventData }] = await Promise.all([
+    const [{ data: articleData }, { data: eventData }, { data: regData }] = await Promise.all([
       supabase.from('articles').select('*').order('sort_order'),
       supabase.from('events').select('*').order('target_date', { ascending: false }),
+      supabase.from('event_registrations').select('event_id, status').in('status', ['requested', 'confirmed']),
     ]);
+    const rc: Record<string, { requested: number; confirmed: number }> = {};
+    for (const r of regData || []) {
+      const c = (rc[r.event_id] ??= { requested: 0, confirmed: 0 });
+      if (r.status === 'requested') c.requested++; else c.confirmed++;
+    }
+    setRegCounts(rc);
     const articleRows: ContentRow[] = ((articleData as unknown as Article[]) || [])
       .map(a => ({ _kind: 'article' as const, ...a }));
     const eventRows: ContentRow[] = ((eventData as unknown as EventRow[]) || [])
@@ -552,6 +539,9 @@ const AdminArticles: React.FC = () => {
   const handleSave = async (form: EditorForm): Promise<string | null> => {
     if (form._kind === 'event') {
       if (!form.title || !form.date) return 'กรอกชื่อกิจกรรมและวันที่';
+      const invalid = validateEventForm(form);
+      if (invalid) return invalid;
+      const isOnline = form.location_type === 'online';
       const payload = {
         title: form.title.trim(),
         creator: (form.creator ?? '').trim(),
@@ -562,11 +552,29 @@ const AdminArticles: React.FC = () => {
         target_date: form.target_date ?? '',
         background_image_url: form.background_image_url ?? '',
         is_published: form.is_published ?? true,
+        ends_at: form.ends_at || null,
+        capacity: form.capacity ?? null,
+        registration_opens_at: form.registration_opens_at || null,
+        registration_closes_at: form.registration_closes_at || null,
+        location_type: isOnline ? 'online' : 'onsite',
+        venue_name: isOnline ? '' : (form.venue_name ?? '').trim(),
+        map_url: isOnline ? '' : (form.map_url ?? '').trim(),
+        price: form.price ?? null,
+        early_bird_price: form.price == null ? null : form.early_bird_price ?? null,
+        early_bird_until: form.price == null ? null : form.early_bird_until || null,
+        price_note: (form.price_note ?? '').trim(),
       };
-      const { error } = form.id
-        ? await supabase.from('events').update(payload).eq('id', form.id)
-        : await supabase.from('events').insert([payload]);
-      if (error) return 'บันทึกไม่สำเร็จ: ' + error.message;
+      const { data: saved, error } = form.id
+        ? await supabase.from('events').update(payload).eq('id', form.id).select('id').single()
+        : await supabase.from('events').insert([payload]).select('id').single();
+      if (error || !saved) return 'บันทึกไม่สำเร็จ: ' + (error?.message ?? 'ไม่พบกิจกรรม');
+      const { error: privErr } = await supabase.from('event_private_details').upsert({
+        event_id: saved.id,
+        online_url: isOnline ? (form._online_url ?? '').trim() : '',
+        attendee_info: (form._attendee_info ?? '').trim(),
+        updated_at: new Date().toISOString(),
+      });
+      if (privErr) return 'บันทึกกิจกรรมแล้ว แต่บันทึกลิงก์/ข้อมูลผู้เข้าร่วมไม่สำเร็จ: ' + privErr.message;
       flash(form.id ? 'อัปเดตกิจกรรมเรียบร้อย' : 'สร้างกิจกรรมใหม่เรียบร้อย');
     } else {
       // Save button is disabled until title+slug are filled (see canSave in
@@ -695,12 +703,26 @@ const AdminArticles: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         {row._kind === 'article' && row.body && (
                           <a href={`/articles/${row.slug}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"
                             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
+                        )}
+                        {row._kind === 'event' && (
+                          <button onClick={() => setRegistrantsOf(row)}
+                            aria-label="ดูผู้สมัคร"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors">
+                            <Users className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">ผู้สมัคร</span>
+                            <span className="font-mono">{regCounts[row.id]?.confirmed ?? 0}{row.capacity != null ? `/${row.capacity}` : ''}</span>
+                            {(regCounts[row.id]?.requested ?? 0) > 0 && (
+                              <span className="px-1.5 bg-[#D4A843] text-black text-[10px]" title="รอยืนยัน">
+                                +{regCounts[row.id].requested}
+                              </span>
+                            )}
+                          </button>
                         )}
                         {row._kind === 'event' && row.is_published && (
                           <a href={`/event/${row.id}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"
@@ -731,6 +753,16 @@ const AdminArticles: React.FC = () => {
             </table>
           </div>
       </AdminLayout>
+
+      {registrantsOf && (
+        <EventRegistrantsPanel
+          eventId={registrantsOf.id}
+          eventTitle={registrantsOf.title}
+          capacity={registrantsOf.capacity}
+          onClose={() => setRegistrantsOf(null)}
+          onChanged={load}
+        />
+      )}
 
       {editing !== false && (
         <ContentEditor

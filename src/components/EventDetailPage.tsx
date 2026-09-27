@@ -10,8 +10,9 @@ import { EventLocation } from './EventLocation';
 import { EventRegistration } from './EventRegistration';
 import { AuthSheet } from './AuthSheet';
 import { SEOHead } from './SEOHead';
-import { RotatingBadge } from './RotatingBadge';
-interface Event {
+import { EventTicketInfo } from './EventTicketInfo';
+import { registrationWindow, type EventTimingAndPrice } from '@/lib/events';
+interface Event extends EventTimingAndPrice {
   id: string;
   title: string;
   creator: string;
@@ -21,11 +22,15 @@ interface Event {
   address: string;
   background_image_url: string;
   target_date: string;
+  location_type: string;
+  venue_name: string;
+  map_url: string;
+  price_note: string;
 }
 export const EventDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [confirmed, setConfirmed] = useState(0);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -33,7 +38,6 @@ export const EventDetailPage: React.FC = () => {
   
   useEffect(() => {
     fetchEvent();
-    checkRegistration();
   }, [id]);
   
   const fetchEvent = async () => {
@@ -47,40 +51,16 @@ export const EventDetailPage: React.FC = () => {
     } else if (!data) {
       setNotFound(true);
     } else {
-      setEvent(data);
+      setEvent(data as Event);
+      fetchConfirmed(data.id);
     }
     setLoading(false);
   };
 
-  const checkRegistration = async () => {
-    if (!id) return;
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return;
-
-    const { data } = await supabase
-      .from('event_registrations')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('event_id', id)
-      .maybeSingle();
-    
-    setIsRegistered(!!data);
-  };
-  const handleGetDirections = () => {
-    // Here you would typically open a maps application or navigate to directions
-    console.log('Opening directions');
-    window.open('https://maps.google.com', '_blank');
-  };
-
-  const isEventLive = () => {
-    if (!event) return false;
-    const now = new Date().getTime();
-    const target = new Date(event.target_date).getTime();
-    const distance = target - now;
-    const oneHour = 1000 * 60 * 60;
-    // Match EventCountdown logic: show from 1 hour before to 1 hour after
-    return distance >= -oneHour && distance <= oneHour;
+  // Seats taken = admin-confirmed requests (count only; who registered is private).
+  const fetchConfirmed = async (eventId: string) => {
+    const { data } = await supabase.rpc('event_confirmed_counts', { _event_ids: [eventId] });
+    setConfirmed(data?.[0]?.confirmed ?? 0);
   };
 
   if (loading) {
@@ -134,7 +114,7 @@ export const EventDetailPage: React.FC = () => {
         </div>
         
         <aside className="flex w-[540px] flex-col justify-start items-start fixed h-screen box-border right-0 top-0 bg-white overflow-y-auto max-lg:relative max-lg:w-full max-lg:h-auto max-lg:right-auto max-lg:top-0 max-lg:overflow-y-visible">
-          <div className="flex w-full flex-col items-start gap-10 relative p-10 pb-24 max-lg:w-full max-lg:px-4 max-lg:py-6 max-lg:pb-6 max-lg:gap-8 animate-fade-in [animation-delay:200ms]">
+          <div className="flex w-full flex-col items-start gap-10 relative p-10 pb-56 max-lg:w-full max-lg:px-4 max-lg:py-6 max-lg:pb-6 max-lg:gap-8 animate-fade-in [animation-delay:200ms]">
             <div className="flex flex-col items-start gap-4 self-stretch relative">
               <EventMeta date={event.date} time={event.time} />
               <EventHeader title={event.title} creator={event.creator} />
@@ -142,18 +122,26 @@ export const EventDetailPage: React.FC = () => {
             
             <EventDescription description={event.description} />
             
-            <EventLocation address={event.address} onGetDirections={handleGetDirections} />
+            <EventTicketInfo event={event} confirmed={confirmed} />
+
+            <EventLocation
+              address={event.address}
+              venueName={event.venue_name}
+              mapUrl={event.map_url}
+              isOnline={event.location_type === 'online'}
+            />
           </div>
           
           <div className="fixed bottom-0 right-0 w-[540px] bg-white py-6 border-t border-border max-lg:relative max-lg:w-full max-lg:py-6 max-lg:border-t-0">
             <div className="px-10 max-lg:px-4">
-            <EventRegistration 
+            <EventRegistration
               eventId={event.id}
-              onRegister={checkRegistration} 
-              isRegistered={isRegistered}
+              eventTitle={event.title}
+              eventDate={[event.date, event.time].filter(Boolean).join(' ')}
+              window={registrationWindow(event, confirmed)}
+              onChanged={() => fetchConfirmed(event.id)}
               onAuthRequired={() => setIsAuthOpen(true)}
-              targetDate={new Date(event.target_date)}
-              className="animate-fade-in [animation-delay:400ms]" 
+              className="animate-fade-in [animation-delay:400ms]"
             />
             </div>
           </div>
