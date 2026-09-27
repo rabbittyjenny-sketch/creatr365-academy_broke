@@ -87,9 +87,11 @@ interface StudentDetail {
 }
 
 const money = (n: number | null) => (n == null ? '-' : `${n.toLocaleString('th-TH')} ฿`);
+// Characters that change the meaning of a PostgREST .or() filter string.
+const orSafe = (q: string) => q.replace(/[,()*\\]/g, ' ').trim();
 const dateTh = (iso: string) => new Date(iso).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
 
-const STATUS_LABEL: Record<string, string> = { paid: 'ซื้อแล้ว', free: 'คอร์สฟรี', active: 'ใช้งานอยู่', pending: 'รอชำระเงิน' };
+const STATUS_LABEL: Record<string, string> = { paid: 'ซื้อแล้ว', free: 'คอร์สฟรี', active: 'ใช้งานอยู่', pending: 'ค้างชำระ (ยังไม่จ่าย)', abandoned: 'ยกเลิก/ไม่ชำระ' };
 
 const AdminStudents: React.FC = () => {
   const navigate = useNavigate();
@@ -118,7 +120,7 @@ const AdminStudents: React.FC = () => {
     const { data, error: err } = await supabase
       .from('user_accounts')
       .select('student_id,email,line_user_id,registered_at,is_active')
-      .or(`student_id.ilike.%${q}%,email.ilike.%${q}%`)
+      .or(`student_id.ilike.%${orSafe(q)}%,email.ilike.%${orSafe(q)}%`)
       .order('registered_at', { ascending: false })
       .limit(25);
     setSearching(false);
@@ -303,7 +305,8 @@ const AdminStudents: React.FC = () => {
     (detail?.downloads ?? []).filter(d => d.kind === 'toolbox').sort((a, b) => b.at.localeCompare(a.at)),
     [detail]);
 
-  const totalPaid = detail?.enrollments.reduce((sum, e) => sum + (e.amount_paid || 0), 0) ?? 0;
+  // Only completed payments — a "pending" row is an abandoned checkout.
+  const totalPaid = detail?.enrollments.filter(e => e.status === 'paid').reduce((sum, e) => sum + (Number(e.amount_paid) || 0), 0) ?? 0;
 
   return (
     <AdminLayout title="ตรวจสอบกิจกรรมนักเรียน" eyebrow="Student Audit" onSignOut={() => fullSignOut().then(() => navigate('/auth'))}>
@@ -444,7 +447,7 @@ const AdminStudents: React.FC = () => {
                       <span className="shrink-0 font-mono text-xs w-20 text-right">{money(e.amount_paid)}</span>
                       {e.promo_code && (
                         <span className="shrink-0 font-mono text-[10px] text-white/40">
-                          {e.promo_code}{e.discount_value ? ` -${e.discount_value}${e.discount_type === 'percent' ? '%' : '฿'}` : ''}
+                          {e.promo_code}{e.discount_type === 'free' ? ' ฟรี 100%' : e.discount_value ? ` -${e.discount_value}${e.discount_type === 'percent' ? '%' : '฿'}` : ''}
                         </span>
                       )}
                       <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(e.created_at)}</span>

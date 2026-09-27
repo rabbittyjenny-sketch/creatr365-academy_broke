@@ -36,8 +36,6 @@ import ArticleDetail from "./pages/ArticleDetail";
 import DiagnosticQuiz from "./pages/DiagnosticQuiz";
 import Discover from "./pages/Discover";
 import MyEvents from "./pages/MyEvents";
-import CreateEvent from "./pages/CreateEvent";
-import EditEvent from "./pages/EditEvent";
 import { EventDetailPage } from "./components/EventDetailPage";
 import NotFound from "./pages/NotFound";
 
@@ -87,8 +85,12 @@ const App = () => (
         <Route path="/events" element={<Discover />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/my-events" element={<MyEvents />} />
-        <Route path="/create-event" element={<CreateEvent />} />
-        <Route path="/edit-event/:id" element={<EditEvent />} />
+        {/* Events are official workshops, created only in the admin content
+            page. These old template routes let any logged-in user publish
+            straight onto /events; they now land on the admin page, whose
+            guard sends non-admins home. */}
+        <Route path="/create-event" element={<Navigate to="/admin/articles" replace />} />
+        <Route path="/edit-event/:id" element={<Navigate to="/admin/articles" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

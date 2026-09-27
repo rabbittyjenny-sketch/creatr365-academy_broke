@@ -37,7 +37,7 @@
     --input: 0 0% 90%;
     --ring: 0 0% 20%;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
     /* Brand color palette — refined */
     --google-blue: 217 89% 61%;
@@ -800,6 +800,8 @@ h4:hover::after, h5:hover::after, h6:hover::after,
    a component explicitly opts in with these classes.
    ───────────────────────────────────────────────────────────────────── */
 .sharp-card {
+  position: relative;
+  isolation: isolate;
   border-radius: 0;
   transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
 }
@@ -818,9 +820,114 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 
 .sharp-tile { border-radius: 0 !important; }
 
+.admin-console-surface,
+.admin-console-surface *,
+.admin-modal-surface,
+.admin-modal-surface * {
+  --radius: 0.125rem;
+}
+.admin-console-surface button,
+.admin-console-surface input,
+.admin-console-surface textarea,
+.admin-console-surface select,
+.admin-console-surface [role="dialog"],
+.admin-console-surface [class*="rounded-"]:not(.animate-spin),
+.admin-modal-surface button,
+.admin-modal-surface input,
+.admin-modal-surface textarea,
+.admin-modal-surface select,
+.admin-modal-surface [role="dialog"],
+.admin-modal-surface [class*="rounded-"]:not(.animate-spin) {
+  border-radius: 2px !important;
+}
+
+/* Editorial motion layer inspired by Polecat's hard-edged, oversized
+   navigation cards: text arrives first, then panels answer with a small
+   directional shift and a thin animated edge. */
+.page-cinematic {
+  animation: pageCinematicIn .72s cubic-bezier(.16,1,.3,1) backwards;
+}
+.stage-page {
+  position: relative;
+  isolation: isolate;
+  /* clip, not hidden: hidden turns this into a scroll container, which
+     breaks every position:sticky descendant (Discover's date calendar). */
+  overflow-x: clip;
+}
+.stage-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 72%);
+  opacity: .45;
+}
+.sharp-card,
+.motion-panel {
+  will-change: transform;
+}
+.sharp-card::after,
+.motion-panel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--hover-accent, currentColor);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .42s cubic-bezier(.16,1,.3,1);
+}
+.sharp-card:hover::after,
+.motion-panel:hover::after {
+  transform: scaleX(1);
+}
+.motion-arrow {
+  transition: transform .28s cubic-bezier(.16,1,.3,1);
+}
+.group:hover .motion-arrow {
+  transform: translate(2px, -2px);
+}
+.stagger-in > * {
+  animation: stageItemIn .68s cubic-bezier(.16,1,.3,1) backwards;
+}
+.stagger-in > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-in > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-in > *:nth-child(4) { animation-delay: 240ms; }
+.stagger-in > *:nth-child(5) { animation-delay: 320ms; }
+
+/* Both animations above use fill-mode `backwards`, not `both`: with `both`
+   the last frame stays applied after the animation ends, and even an
+   identity transform makes the element the containing block for
+   position:fixed children — Discover's navbar and BROWSE badge then
+   scrolled away with the page. `backwards` hides the element during its
+   delay, then drops the animation, leaving the untransformed base style. */
+@keyframes pageCinematicIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes stageItemIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sharp-card, .sharp-btn { transition: none !important; }
   .sharp-card:hover, .sharp-btn:hover, .sharp-card:active, .sharp-btn:active { transform: none !important; }
+  .page-cinematic,
+  .stagger-in > * {
+    animation: none !important;
+  }
+  .sharp-card::after,
+  .motion-panel::after {
+    transition: none !important;
+  }
 }
 
 .pulse-dot { position: relative; }

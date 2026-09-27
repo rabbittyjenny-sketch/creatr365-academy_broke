@@ -43,14 +43,26 @@ const LEARNING_TYPES = [
   { value:'online',  label:'Online (VOD)' },
   { value:'hybrid',  label:'Hybrid' },
 ];
+// Availability badge on the course card — NOT a visibility switch. Whether a
+// course is shown at all is decided only by is_active (the เผยแพร่/Hidden
+// toggle). "Draft (Hidden)" and "Archived" used to be offered here but no page
+// ever read them, so a "Draft" course with the switch on still went public.
 const STATUS_OPTIONS = [
-  { value:'now_open',    label:'Now Open ●' },
-  { value:'free',        label:'Free (เรียนฟรี) ●' },
-  { value:'coming_soon', label:'Coming Soon' },
-  { value:'fully_booked',label:'Fully Booked' },
-  { value:'draft',       label:'Draft (Hidden)' },
-  { value:'archived',    label:'Archived' },
+  { value:'now_open',    label:'Now Open — เปิดรับสมัคร' },
+  { value:'free',        label:'Free — เรียนฟรี' },
+  { value:'coming_soon', label:'Coming Soon — ยังไม่เปิดขาย' },
+  { value:'fully_booked',label:'Fully Booked — ปิดรับสมัคร' },
 ];
+// Must match what create-checkout understands (and the DB CHECK constraint).
+const PROMO_TYPES = [
+  { value:'percent', label:'เปอร์เซ็นต์ (%)' },
+  { value:'amount',  label:'จำนวนเงิน (฿)' },
+  { value:'free',    label:'ฟรี 100%' },
+];
+const promoLabel = (p:{discount_type:string; discount_value:number}) =>
+  p.discount_type === 'free' ? 'ฟรี 100%'
+  : p.discount_type === 'percent' ? `${p.discount_value}% off`
+  : `${p.discount_value}฿ off`;
 const LEVEL_OPTIONS = ['STARTER','DEVELOPING','COMPETENT','PROFICIENT','MASTER'];
 // resource_type is free text in the DB — these are just quick-pick presets.
 // Type any other value (e.g. "cheatsheet", "template") to add a new kind
@@ -108,6 +120,12 @@ const AdminCourses = () => {
   const [editingPromo,  setEditingPromo]  = useState<Partial<PromoCode>|null>(null);
   const [isNewPromo,    setIsNewPromo]    = useState(false);
   const [uploading,     setUploading]     = useState(false);
+  // Module/resource edits live in local state until saved. Tracking which
+  // rows changed lets the main "บันทึกหลักสูตร" persist them too — before,
+  // it saved only the course fields and silently dropped every module edit.
+  const [dirtyModules,   setDirtyModules]   = useState<Set<string>>(new Set());
+  const [dirtyResources, setDirtyResources] = useState<Set<string>>(new Set());
+  const [baseline,      setBaseline]      = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -128,19 +146,38 @@ const AdminCourses = () => {
   const fetchModules  = async (cid:string) => { if (!cid) { setModules([]); return; } const { data } = await supabase.from('course_modules').select('*').eq('course_id',cid).order('sort_order'); setModules((data as unknown as ModuleRow[])||[]); };
   const fetchResources = async (cid:string) => { if (!cid) { setResources([]); return; } const { data } = await supabase.from('course_resources').select('*').eq('course_id',cid).order('sort_order'); setResources((data as unknown as ResourceRow[])||[]); };
 
-  const startEdit = (c:CourseRow) => {
+  const snapshot = (c:CourseRow|null, f:string, d:string, k:string) => JSON.stringify([c,f,d,k]);
+
+  const openCourse = (c:CourseRow, keepTab = false) => {
     const course = { ...c, gallery_image_urls:c.gallery_image_urls||[], kpi_notes:c.kpi_notes||[], deliverables:c.deliverables||[], features:c.features||[] };
-    setEditingCourse(course);
-    setFeaturesText(course.features.join('\n'));
-    setDeliverablesText(course.deliverables.join('\n'));
-    setKpiText(course.kpi_notes.map(k=>`${k.label}|${k.value}${k.note?'|'+k.note:''}`).join('\n'));
-    setIsNew(false); setSubTab('info'); fetchModules(c.id); fetchResources(c.id);
+    const f = course.features.join('\n');
+    const d = course.deliverables.join('\n');
+    const k = course.kpi_notes.map(x=>`${x.label}|${x.value}${x.note?'|'+x.note:''}`).join('\n');
+    setEditingCourse(course); setFeaturesText(f); setDeliverablesText(d); setKpiText(k);
+    setBaseline(snapshot(course,f,d,k));
+    setIsNew(false); if (!keepTab) setSubTab('info');
+    setDirtyModules(new Set()); setDirtyResources(new Set());
+    fetchModules(c.id); fetchResources(c.id);
   };
+  const startEdit = (c:CourseRow) => openCourse(c);
 
   const startNew = () => {
-    setEditingCourse(emptyCourse(courses.length+1));
+    const c = emptyCourse(courses.length+1);
+    setEditingCourse(c);
     setFeaturesText(''); setDeliverablesText(''); setKpiText('');
+    setBaseline(snapshot(c,'','',''));
     setModules([]); setResources([]); setIsNew(true); setSubTab('info');
+    setDirtyModules(new Set()); setDirtyResources(new Set());
+  };
+
+  const hasUnsaved = () =>
+    !!editingCourse && (
+      snapshot(editingCourse,featuresText,deliverablesText,kpiText) !== baseline
+      || dirtyModules.size > 0 || dirtyResources.size > 0
+    );
+  const closeEditor = () => {
+    if (hasUnsaved() && !confirm('มีการแก้ไขที่ยังไม่ได้บันทึก — ปิดโดยไม่บันทึก?')) return;
+    setEditingCourse(null);
   };
 
   const parseKpi = (text:string) => text.split('\n').map(l=>l.trim()).filter(Boolean).map(line => {
@@ -166,17 +203,38 @@ const AdminCourses = () => {
       outcome_goal:editingCourse.outcome_goal, bloom_level:editingCourse.bloom_level,
     };
     if (!payload.slug || !payload.title) { toast({ title:'กรุณากรอก Slug และ Title', variant:'destructive' }); return; }
-    let error;
-    if (isNew) ({ error } = await supabase.from('courses').insert(payload as any));
-    else       ({ error } = await supabase.from('courses').update(payload as any).eq('id',editingCourse.id));
-    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
-    else { toast({ title:'บันทึกสำเร็จ ✓' }); setEditingCourse(null); fetchCourses(); }
+    const { data: saved, error } = isNew
+      ? await supabase.from('courses').insert(payload as any).select('*').single()
+      : await supabase.from('courses').update(payload as any).eq('id',editingCourse.id).select('*').single();
+    if (error) {
+      toast({ title:'บันทึกไม่สำเร็จ', description: error.code === '23505' ? 'Slug นี้มีหลักสูตรอื่นใช้แล้ว' : error.message, variant:'destructive' });
+      return;
+    }
+
+    // Persist module/resource edits made in this session too.
+    const moduleErrs = (await Promise.all(modules.filter(m=>dirtyModules.has(m.id)).map(persistModule))).filter(Boolean);
+    const resourceErrs = (await Promise.all(resources.filter(r=>dirtyResources.has(r.id)).map(persistResource))).filter(Boolean);
+    const errs = [...moduleErrs, ...resourceErrs];
+    if (errs.length) toast({ title:'บันทึกหลักสูตรแล้ว แต่บางรายการไม่สำเร็จ', description: errs.join(' · '), variant:'destructive' });
+    else toast({ title: isNew ? 'สร้างหลักสูตรแล้ว — เพิ่มโมดูลและเอกสารต่อได้เลย' : 'บันทึกสำเร็จ ✓' });
+
+    // Stay in the editor: a brand-new course needs its id before modules
+    // and resources can be attached, which used to mean close → reopen.
+    openCourse(saved as unknown as CourseRow, true);
+    fetchCourses();
   };
 
-  const handleDelete = async (id:string) => {
-    if (!confirm('ต้องการลบหลักสูตรนี้?')) return;
-    const { error } = await supabase.from('courses').delete().eq('id',id);
-    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+  const handleDelete = async (c:CourseRow) => {
+    // course_enrollments → courses is ON DELETE RESTRICT, so a course anyone
+    // has bought can't be deleted; say so plainly instead of a raw FK error.
+    const { count } = await supabase.from('course_enrollments').select('id', { count:'exact', head:true }).eq('course_id', c.id);
+    if ((count || 0) > 0) {
+      toast({ title:'ลบไม่ได้ — มีผู้เรียนลงทะเบียนแล้ว', description:`${count} คน · ใช้สวิตช์ "ซ่อน (Hidden)" แทนเพื่อเอาออกจากหน้าเว็บ โดยไม่กระทบสิทธิ์ของผู้เรียนเดิม`, variant:'destructive' });
+      return;
+    }
+    if (!confirm(`ลบหลักสูตร "${c.title}" ถาวร? โมดูล เอกสาร และข้อมูลที่ผูกกับหลักสูตรนี้จะถูกลบทั้งหมด`)) return;
+    const { error } = await supabase.from('courses').delete().eq('id',c.id);
+    if (error) toast({ title:'ลบไม่สำเร็จ', description:error.message, variant:'destructive' });
     else { toast({ title:'ลบสำเร็จ' }); fetchCourses(); }
   };
 
@@ -208,14 +266,25 @@ const AdminCourses = () => {
     if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
     else fetchModules(editingCourse.id);
   };
-  const updateModule = (m:ModuleRow, patch:Partial<ModuleRow>) => setModules(modules.map(x=>x.id===m.id?{...x,...patch}:x));
-  const saveModule   = async (m:ModuleRow) => {
+  const updateModule = (m:ModuleRow, patch:Partial<ModuleRow>) => {
+    setModules(modules.map(x=>x.id===m.id?{...x,...patch}:x));
+    setDirtyModules(prev => new Set(prev).add(m.id));
+  };
+  // Returns an error message, or null.
+  const persistModule = async (m:ModuleRow): Promise<string|null> => {
     const { error } = await supabase.from('course_modules').update({ code:m.code, name:m.name, summary:m.summary, duration_label:m.duration_label, vod_url:m.vod_url, has_quiz:m.has_quiz, has_assignment:m.has_assignment, sort_order:m.sort_order, onsite_unlock_code:m.onsite_unlock_code||null, onsite_session_label:m.onsite_session_label||null } as any).eq('id',m.id);
-    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    if (error) return `${m.code}: ${error.message}`;
+    setDirtyModules(prev => { const n = new Set(prev); n.delete(m.id); return n; });
+    return null;
+  };
+  const saveModule   = async (m:ModuleRow) => {
+    const err = await persistModule(m);
+    if (err) toast({ title:'บันทึกโมดูลไม่สำเร็จ', description:err, variant:'destructive' });
     else toast({ title:'บันทึกโมดูล ✓' });
   };
   const deleteModule = async (id:string) => {
-    if (!confirm('ลบโมดูลนี้?')) return;
+    // module_progress → course_modules is ON DELETE CASCADE.
+    if (!confirm('ลบโมดูลนี้? ความคืบหน้าของผู้เรียนทุกคนในโมดูลนี้จะถูกลบไปด้วย และกู้คืนไม่ได้')) return;
     const { error } = await supabase.from('course_modules').delete().eq('id',id);
     if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
     else if (editingCourse) fetchModules(editingCourse.id);
@@ -255,12 +324,21 @@ const AdminCourses = () => {
     if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
     else fetchResources(editingCourse.id);
   };
-  const updateResource = (r:ResourceRow, patch:Partial<ResourceRow>) => setResources(resources.map(x=>x.id===r.id?{...x,...patch}:x));
-  const saveResource = async (r:ResourceRow) => {
+  const updateResource = (r:ResourceRow, patch:Partial<ResourceRow>) => {
+    setResources(resources.map(x=>x.id===r.id?{...x,...patch}:x));
+    setDirtyResources(prev => new Set(prev).add(r.id));
+  };
+  const persistResource = async (r:ResourceRow): Promise<string|null> => {
     const { error } = await supabase.from('course_resources').update({
       title:r.title, resource_type:r.resource_type, sort_order:r.sort_order, is_active:r.is_active,
     } as any).eq('id',r.id);
-    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    if (error) return `${r.title}: ${error.message}`;
+    setDirtyResources(prev => { const n = new Set(prev); n.delete(r.id); return n; });
+    return null;
+  };
+  const saveResource = async (r:ResourceRow) => {
+    const err = await persistResource(r);
+    if (err) toast({ title:'บันทึกเอกสารไม่สำเร็จ', description:err, variant:'destructive' });
     else toast({ title:'บันทึกเอกสาร ✓' });
   };
   const replaceResourceFile = async (r:ResourceRow, e:React.ChangeEvent<HTMLInputElement>) => {
@@ -292,11 +370,15 @@ const AdminCourses = () => {
   const startNewPromo   = () => { setEditingPromo({ code:'', course_id:'', discount_type:'percent', discount_value:0, max_uses:1, is_active:true }); setIsNewPromo(true); };
   const handleSavePromo = async () => {
     if (!editingPromo || !editingPromo.code || !editingPromo.course_id) { toast({ title:'กรุณากรอกรหัสและเลือกหลักสูตร', variant:'destructive' }); return; }
-    const payload = { code:editingPromo.code!.toUpperCase(), course_id:editingPromo.course_id!, discount_type:editingPromo.discount_type||'percent', discount_value:editingPromo.discount_value||0, max_uses:editingPromo.max_uses||1, is_active:editingPromo.is_active??true };
+    const type = editingPromo.discount_type || 'percent';
+    const value = type === 'free' ? 0 : (editingPromo.discount_value || 0);
+    if (type !== 'free' && value <= 0) { toast({ title:'กรุณากรอกมูลค่าส่วนลดมากกว่า 0', variant:'destructive' }); return; }
+    if (type === 'percent' && value > 100) { toast({ title:'ส่วนลดเปอร์เซ็นต์ต้องไม่เกิน 100', variant:'destructive' }); return; }
+    const payload = { code:editingPromo.code!.toUpperCase().trim(), course_id:editingPromo.course_id!, discount_type:type, discount_value:value, max_uses:editingPromo.max_uses||1, is_active:editingPromo.is_active??true };
     let error;
     if (isNewPromo) ({ error } = await supabase.from('promo_codes').insert(payload as any));
     else ({ error } = await supabase.from('promo_codes').update(payload as any).eq('id',editingPromo.id));
-    if (error) toast({ title:'Error', description:error.message, variant:'destructive' });
+    if (error) toast({ title:'บันทึกโปรโมชั่นไม่สำเร็จ', description: error.code === '23505' ? 'รหัสนี้มีอยู่แล้ว' : error.message, variant:'destructive' });
     else { toast({ title:'บันทึกโปรโมชั่น ✓' }); setEditingPromo(null); fetchPromos(); }
   };
   const handleDeletePromo = async (id:string) => {
@@ -385,7 +467,7 @@ const AdminCourses = () => {
                       <button onClick={()=>startEdit(c)} className="p-2 rounded-lg text-white/20 hover:text-white transition-all">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={()=>handleDelete(c.id)} className="p-2 rounded-lg text-white/20 hover:text-[#CC0033] transition-all">
+                      <button onClick={()=>handleDelete(c)} aria-label="ลบหลักสูตร" className="p-2 rounded-lg text-white/20 hover:text-[#CC0033] transition-all">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -426,13 +508,14 @@ const AdminCourses = () => {
                   </Field>
                   <Field label="ประเภทส่วนลด">
                     <select className={inp} value={editingPromo.discount_type||'percent'} onChange={e=>setEditingPromo({...editingPromo,discount_type:e.target.value})}>
-                      <option value="percent">เปอร์เซ็นต์ (%)</option>
-                      <option value="fixed">จำนวนเงิน (฿)</option>
+                      {PROMO_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </Field>
-                  <Field label="มูลค่าส่วนลด">
-                    <input type="number" className={inp} value={editingPromo.discount_value||0} onChange={e=>setEditingPromo({...editingPromo,discount_value:parseFloat(e.target.value)||0})} />
-                  </Field>
+                  {editingPromo.discount_type !== 'free' && (
+                    <Field label={editingPromo.discount_type==='amount' ? 'มูลค่าส่วนลด (บาท)' : 'มูลค่าส่วนลด (%) — ไม่เกิน 100'}>
+                      <input type="number" min={0} max={editingPromo.discount_type==='percent'?100:undefined} className={inp} value={editingPromo.discount_value||0} onChange={e=>setEditingPromo({...editingPromo,discount_value:parseFloat(e.target.value)||0})} />
+                    </Field>
+                  )}
                   <Field label="จำนวนสิทธิ์สูงสุด">
                     <input type="number" className={inp} value={editingPromo.max_uses||1} onChange={e=>setEditingPromo({...editingPromo,max_uses:parseInt(e.target.value)||1})} />
                   </Field>
@@ -459,7 +542,7 @@ const AdminCourses = () => {
                 <div key={p.id} className="flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 bg-[#0D0D0D]">
                   <code className="bg-white/8 text-white font-bold text-xs tracking-wider flex-shrink-0 px-2 py-1 rounded-md">{p.code}</code>
                   <div className="flex-1 text-white/60 text-xs truncate">{courses.find(c=>c.id===p.course_id)?.title||'—'}</div>
-                  <span className="text-white/60 text-sm font-semibold">{p.discount_value}{p.discount_type==='percent'?'%':'฿'} off</span>
+                  <span className="text-white/60 text-sm font-semibold">{promoLabel(p)}</span>
                   <span className="text-white/30 text-xs">{p.used_count}/{p.max_uses} ใช้แล้ว</span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${p.is_active?'bg-[#34A853]/15 text-[#34A853]':'bg-white/8 text-white/50'}`}>{p.is_active?'เปิดใช้งาน':'ปิด'}</span>
                   <div className="flex gap-1">
@@ -475,7 +558,7 @@ const AdminCourses = () => {
 
       {/* ══ COURSE EDITOR OVERLAY ════════════════════════ */}
       {ec && (
-        <div className="fixed inset-0 z-50 flex" style={{ background:'rgba(0,0,0,0.85)' }}>
+        <div className="admin-modal-surface fixed inset-0 z-50 flex" style={{ background:'rgba(0,0,0,0.85)' }}>
           <div className="ml-auto w-full max-w-3xl bg-[#0D0D0D] border-l border-white/8 flex flex-col h-full overflow-hidden">
 
             {/* Editor header */}
@@ -490,7 +573,7 @@ const AdminCourses = () => {
                   style={{ background:'#CC0033' }}>
                   <Save className="w-3.5 h-3.5" /> บันทึก
                 </button>
-                <button onClick={()=>setEditingCourse(null)} className="p-2 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
+                <button onClick={closeEditor} aria-label="ปิด" className="p-2 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -554,7 +637,7 @@ const AdminCourses = () => {
                         {LEARNING_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
                       </select>
                     </Field>
-                    <Field label="สถานะ">
+                    <Field label="ป้ายสถานะการรับสมัคร" hint="แสดงเป็นป้ายบนการ์ดเท่านั้น — การซ่อน/แสดงคอร์สใช้สวิตช์ด้านล่าง">
                       <select className={inp} value={ec.status||'now_open'} onChange={e=>setEditingCourse({...ec,status:e.target.value})}>
                         {STATUS_OPTIONS.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
                       </select>
@@ -680,7 +763,7 @@ const AdminCourses = () => {
                     <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl text-white/20 text-sm">
                       ยังไม่มีโมดูล — กด "+ เพิ่มโมดูล" เพื่อเริ่ม
                     </div>
-                  ) : modules.sort((a,b)=>a.sort_order-b.sort_order).map((m, idx) => (
+                  ) : [...modules].sort((a,b)=>a.sort_order-b.sort_order).map((m, idx) => (
                     <div key={m.id} className="border border-white/8 rounded-xl bg-[#111] overflow-hidden">
                       {/* Module header */}
                       <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5">
@@ -772,7 +855,7 @@ const AdminCourses = () => {
                     <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl text-white/20 text-sm">
                       ยังไม่มีเอกสาร — กด "แนบเอกสาร" เพื่ออัปโหลดคู่มือ (PDF ฯลฯ)
                     </div>
-                  ) : resources.sort((a,b)=>a.sort_order-b.sort_order).map((r, idx) => (
+                  ) : [...resources].sort((a,b)=>a.sort_order-b.sort_order).map((r, idx) => (
                     <div key={r.id} className="border border-white/8 rounded-xl bg-[#111] overflow-hidden">
                       <div className="flex items-center gap-3 px-4 py-3">
                         <div className="flex flex-col gap-0.5">
@@ -833,7 +916,7 @@ const AdminCourses = () => {
                     ) : promos.filter(p=>p.course_id===ec.id).map(p=>(
                       <div key={p.id} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
                         <code className="bg-white/8 text-white font-bold text-xs px-1.5 py-0.5 rounded">{p.code}</code>
-                        <span className="text-white/30 text-xs">{p.discount_value}{p.discount_type==='percent'?'%':'฿'} off</span>
+                        <span className="text-white/30 text-xs">{promoLabel(p)}</span>
                         <span className="text-white/20 text-xs">{p.used_count}/{p.max_uses}</span>
                       </div>
                     ))}
@@ -844,7 +927,10 @@ const AdminCourses = () => {
 
             {/* Sticky footer save */}
             <div className="border-t border-white/8 px-6 py-4 flex justify-between items-center flex-shrink-0 bg-[#0D0D0D]">
-              <p className="text-white/20 text-xs">{isNew?'สร้างหลักสูตรใหม่':'แก้ไข: '+(ec.title||'—')}</p>
+              <p className="text-white/20 text-xs">
+                {isNew?'สร้างหลักสูตรใหม่':'แก้ไข: '+(ec.title||'—')}
+                {hasUnsaved() && <span className="ml-2 text-[#D4A843]">● มีการแก้ไขที่ยังไม่ได้บันทึก</span>}
+              </p>
               <button onClick={handleSave}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90"
                 style={{ background:'#CC0033' }}>

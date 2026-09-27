@@ -156,6 +156,9 @@ const Discover = () => {
       const { data, error } = await supabase
         .from('events')
         .select('id, title, date, time, background_image_url, target_date, address')
+        // Explicit, not just RLS: admins can read drafts, and an admin
+        // browsing /events should see exactly what visitors see.
+        .eq('is_published', true)
         .order('target_date', { ascending: true });
 
       if (error) throw error;
@@ -194,13 +197,15 @@ const Discover = () => {
       behavior: 'smooth'
     });
   };
-  return <div className="min-h-screen bg-white">
+  return <div className="page-cinematic stage-page min-h-screen bg-white">
       <SEOHead 
         title="กิจกรรมและเวิร์กช็อป - Creatr365"
         description="ดูเวิร์กช็อปและกิจกรรมของ Creatr365 ที่กำลังเปิดรับสมัคร ค้นหาตามวันที่ที่คุณสะดวก"
         keywords="กิจกรรม, เวิร์กช็อป, Creatr365, live commerce event"
       />
-      <div className="animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+      {/* `backwards`, not `both`: a transform kept after the fade ends would
+          stop the fixed navbar inside from staying fixed. */}
+      <div className="animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'backwards' }}>
         <Navbar />
       </div>
       
@@ -274,7 +279,7 @@ const Discover = () => {
             </div>
 
             {/* Event Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:col-start-2 gap-5">
+            <div className="stagger-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:col-start-2 gap-5">
               {loading ? (
                 <div className="col-span-full text-center py-12">กำลังโหลดกิจกรรม...</div>
               ) : filteredEvents.length === 0 ? (

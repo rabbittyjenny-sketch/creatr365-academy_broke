@@ -94,7 +94,7 @@ const Articles: React.FC = () => {
       />
       <CourseNavbar />
 
-      <section className="pt-28 pb-20 px-4 bg-background">
+      <section className="page-cinematic stage-page pt-28 pb-20 px-4 bg-background">
         <div className="max-w-6xl mx-auto">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
@@ -128,7 +128,7 @@ const Articles: React.FC = () => {
                         ยังไม่มีเนื้อหาในหมวดนี้ — กลับมาดูใหม่เร็ว ๆ นี้
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="stagger-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {groupItems.map(a => renderCard(a, group.accent))}
                       </div>
                     )}

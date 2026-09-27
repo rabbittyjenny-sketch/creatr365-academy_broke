@@ -76,6 +76,7 @@ export type Database = {
           id: string
           module_id: string | null
           note: string | null
+          review_note: string | null
           reviewed_at: string | null
           reviewer_id: string | null
           rubric_id: string | null
@@ -91,6 +92,7 @@ export type Database = {
           id?: string
           module_id?: string | null
           note?: string | null
+          review_note?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
           rubric_id?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           id?: string
           module_id?: string | null
           note?: string | null
+          review_note?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
           rubric_id?: string | null
@@ -654,6 +657,7 @@ export type Database = {
           date: string
           description: string
           id: string
+          is_published: boolean
           target_date: string
           time: string
           title: string
@@ -666,6 +670,7 @@ export type Database = {
           date: string
           description?: string
           id?: string
+          is_published?: boolean
           target_date?: string
           time?: string
           title: string
@@ -678,6 +683,7 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          is_published?: boolean
           target_date?: string
           time?: string
           title?: string
@@ -994,6 +1000,136 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_events: {
+        Row: {
+          amount_final: number | null
+          course_id: string | null
+          created_at: string
+          detail: Json
+          discount_amount: number | null
+          enrollment_id: string | null
+          event: string
+          id: string
+          price_original: number | null
+          promo_code_id: string | null
+          stripe_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_final?: number | null
+          course_id?: string | null
+          created_at?: string
+          detail?: Json
+          discount_amount?: number | null
+          enrollment_id?: string | null
+          event: string
+          id?: string
+          price_original?: number | null
+          promo_code_id?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_final?: number | null
+          course_id?: string | null
+          created_at?: string
+          detail?: Json
+          discount_amount?: number | null
+          enrollment_id?: string | null
+          event?: string
+          id?: string
+          price_original?: number | null
+          promo_code_id?: string | null
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_events_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_events_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "course_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_events_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          correct: number | null
+          course_id: string | null
+          created_at: string
+          id: string
+          lesson_code: string | null
+          module_id: string | null
+          passed: boolean | null
+          qg: string | null
+          quiz_type: string
+          score_pct: number | null
+          student_id: string
+          total: number | null
+          user_id: string | null
+        }
+        Insert: {
+          correct?: number | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          lesson_code?: string | null
+          module_id?: string | null
+          passed?: boolean | null
+          qg?: string | null
+          quiz_type: string
+          score_pct?: number | null
+          student_id: string
+          total?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          correct?: number | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          lesson_code?: string | null
+          module_id?: string | null
+          passed?: boolean | null
+          qg?: string | null
+          quiz_type?: string
+          score_pct?: number | null
+          student_id?: string
+          total?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -1423,6 +1559,7 @@ export type Database = {
         Args: { _email?: string; _line_user_id: string; _student_id?: string }
         Returns: string
       }
+      linked_user_ids: { Args: { _uid: string }; Returns: string[] }
       lms_touch_lesson_state: {
         Args: {
           _course_slug: string
@@ -1433,6 +1570,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      my_linked_user_ids: { Args: never; Returns: string[] }
       normalize_master_student_id: {
         Args: { _student_id: string }
         Returns: string

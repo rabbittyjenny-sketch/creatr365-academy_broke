@@ -20,6 +20,7 @@ export const EventsCarousel = () => {
       const { data, error } = await supabase
         .from('events')
         .select('id, title, background_image_url, address, date, time')
+        .eq('is_published', true)
         .order('target_date', { ascending: false })
         .limit(10);
 
