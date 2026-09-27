@@ -134,7 +134,7 @@ export const EventDetailPage: React.FC = () => {
         </div>
         
         <aside className="flex w-[540px] flex-col justify-start items-start fixed h-screen box-border right-0 top-0 bg-white overflow-y-auto max-lg:relative max-lg:w-full max-lg:h-auto max-lg:right-auto max-lg:top-0 max-lg:overflow-y-visible">
-          <div className="flex w-full flex-col items-start gap-10 relative p-10 pb-24 max-lg:w-full max-lg:px-4 max-lg:py-6 max-lg:pb-6 max-lg:gap-8 opacity-0 animate-fade-in [animation-delay:200ms]">
+          <div className="flex w-full flex-col items-start gap-10 relative p-10 pb-24 max-lg:w-full max-lg:px-4 max-lg:py-6 max-lg:pb-6 max-lg:gap-8 animate-fade-in [animation-delay:200ms]">
             <div className="flex flex-col items-start gap-4 self-stretch relative">
               <EventMeta date={event.date} time={event.time} />
               <EventHeader title={event.title} creator={event.creator} />
@@ -153,7 +153,7 @@ export const EventDetailPage: React.FC = () => {
               isRegistered={isRegistered}
               onAuthRequired={() => setIsAuthOpen(true)}
               targetDate={new Date(event.target_date)}
-              className="opacity-0 animate-fade-in [animation-delay:400ms]" 
+              className="animate-fade-in [animation-delay:400ms]" 
             />
             </div>
           </div>
