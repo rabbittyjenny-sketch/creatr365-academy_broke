@@ -89,7 +89,7 @@ const AiLab: React.FC = () => {
               embedded iframe for every visitor even though the admin can
               see it logged into Vercel. A link always works regardless. */}
           <a
-            href="https://host-compass-main.vercel.app/"
+            href="https://live-host-tracking.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="sharp-card section-accent group mt-6 flex items-center justify-between gap-4 p-6 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
