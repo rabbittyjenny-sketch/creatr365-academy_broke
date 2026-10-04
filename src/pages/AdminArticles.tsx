@@ -4,7 +4,10 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
 import { resolveContentType, sanitizeFileName } from '@/lib/uploadFile';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users, BarChart3, Link2 } from 'lucide-react';
+import { parseYouTubeId, youTubeThumb } from '@/lib/youtube';
+import { LiveNoteStatsPanel } from '@/components/admin/LiveNoteStatsPanel';
+import { LiveNoteLinkMenu } from '@/components/admin/LiveNoteLinkMenu';
 import { EventFormFields } from '@/components/admin/EventFormFields';
 import { validateEventForm } from '@/lib/events';
 import { EventRegistrantsPanel } from '@/components/admin/EventRegistrantsPanel';
@@ -14,7 +17,10 @@ interface Article {
   cover_image_url: string | null; kind: string; author: string | null;
   tags: string[] | null; meta_description: string | null; target_url: string;
   is_active: boolean; sort_order: number; created_at: string;
+  video_url: string | null; related_course_id: string | null; duration_label: string | null;
 }
+
+interface CourseOption { id: string; title: string; is_active: boolean }
 
 interface EventRow {
   id: string; title: string; description: string; date: string; time: string;
@@ -27,16 +33,19 @@ interface EventRow {
   price_note: string;
 }
 
-type ContentKind = 'blog' | 'video' | 'news' | 'update' | 'tool' | 'community' | 'quiz' | 'event';
+type ContentKind = 'blog' | 'video' | 'live_note' | 'news' | 'update' | 'tool' | 'community' | 'quiz' | 'event';
 type ContentRow = ({ _kind: 'article' } & Article) | ({ _kind: 'event' } & EventRow);
 
 // The article kinds this page already managed, plus 'event' — one type
 // selector covering everywhere content can display: Community (via the
 // kind → GROUPS mapping in Articles.tsx), and now Events too, instead of
 // a second, disconnected admin page for events.
-const ARTICLE_KINDS: Exclude<ContentKind, 'event'>[] = ['blog', 'video', 'news', 'update', 'tool', 'community', 'quiz'];
+// 'live_note' = Live Notes on /courses (full knowledge clips, not courses).
+// 'video' = activity / atmosphere / news clips on Community.
+const ARTICLE_KINDS: Exclude<ContentKind, 'event'>[] = ['live_note', 'blog', 'video', 'news', 'update', 'tool', 'community', 'quiz'];
+const isClipKind = (k: ContentKind) => k === 'video' || k === 'live_note';
 const TYPE_LABEL: Record<ContentKind, string> = {
-  blog: 'บทความ', video: 'วิดีโอ', news: 'ข่าวสาร', update: 'อัปเดต',
+  blog: 'บทความ', video: 'คลิปกิจกรรม', live_note: 'Live Notes', news: 'ข่าวสาร', update: 'อัปเดต',
   tool: 'เครื่องมือ', community: 'คอมมูนิตี้', quiz: 'แบบทดสอบ', event: 'กิจกรรม',
 };
 
@@ -53,10 +62,16 @@ const TYPE_GUIDE: Record<ContentKind, {
     required: 'ชื่อเรื่อง, Slug, สรุปย่อ, เนื้อหา HTML',
   },
   video: {
-    target: 'แสดงในหน้า Community > หมวดคลิปความรู้',
-    url: '/articles/[slug] หรือ external URL',
-    media: 'แนะนำรูป thumbnail 16:9 ชื่อไฟล์: video-[slug]-thumb.jpg',
-    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, URL หรือเนื้อหา HTML',
+    target: 'แสดงในหน้า Community > หมวดคลิปกิจกรรม (คลิปบรรยากาศ กิจกรรม ข่าว) เล่นในเว็บ ไม่ต้องล็อกอิน',
+    url: 'เปิดเป็นหน้าต่างเล่นคลิปในหน้า /articles',
+    media: 'ไม่ใส่รูปปกได้ ระบบใช้ภาพจาก YouTube ให้อัตโนมัติ',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, YouTube URL',
+  },
+  live_note: {
+    target: 'แสดงในหน้าหลักสูตร (/courses) ส่วน Live Notes ท้ายหน้า ต้องล็อกอินก่อนดู และเก็บสถิติผู้ชม',
+    url: '/courses?note=[slug]&src=[แพลตฟอร์ม] ใช้ปุ่ม "ลิงก์" ในตารางคัดลอก',
+    media: 'ไม่ใส่รูปปกได้ ระบบใช้ภาพจาก YouTube ให้อัตโนมัติ ถ้าใส่เอง แนะนำ 16:10',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, YouTube URL (ตั้งเป็น Unlisted ได้) หลักสูตรที่เกี่ยวข้องไม่บังคับแต่แนะนำ',
   },
   news: {
     target: 'แสดงในหน้า Community > หมวดข่าวกิจกรรม',
@@ -107,8 +122,9 @@ type EditorForm = { _kind: ContentKind; id?: string; created_at?: string; _onlin
 const EMPTY_ARTICLE: EditorForm = {
   _kind: 'blog', title: '', slug: '', summary: '', body: '', cover_image_url: '',
   author: 'CREATR365 Team', tags: [], meta_description: '', target_url: '',
-  is_active: true, sort_order: 0,
+  is_active: true, sort_order: 0, video_url: '', related_course_id: null, duration_label: '',
 };
+const EMPTY_LIVE_NOTE: EditorForm = { ...EMPTY_ARTICLE, _kind: 'live_note', kind: 'live_note' };
 const EMPTY_EVENT: EditorForm = {
   _kind: 'event', title: '', creator: '', description: '', date: '', time: '',
   address: '', target_date: '', background_image_url: '', is_published: true,
@@ -121,7 +137,7 @@ const EMPTY_EVENT: EditorForm = {
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-type FilterKey = 'all' | 'articles' | 'events';
+type FilterKey = 'all' | 'articles' | 'live_notes' | 'events';
 
 // A loaded row's `_kind` is the table it came from ('article' | 'event'),
 // but the editor's `_kind` is the content type — for articles that's the
@@ -157,10 +173,11 @@ const PublishToggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; 
 /* ─── Editor modal ─────────────────────────────────────── */
 const ContentEditor: React.FC<{
   initial: EditorForm | null;
+  courses: CourseOption[];
   /** Resolves to an error message, or null on success. */
   onSave: (data: EditorForm) => Promise<string | null>;
   onClose: () => void;
-}> = ({ initial, onSave, onClose }) => {
+}> = ({ initial, courses, onSave, onClose }) => {
   const [form, setForm] = useState<EditorForm>(initial ?? EMPTY_ARTICLE);
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -230,9 +247,11 @@ const ContentEditor: React.FC<{
     setSaving(false);
   };
 
+  const isClip = isClipKind(form._kind);
+  const videoId = parseYouTubeId(form.video_url);
   const canSave = isEvent
     ? !!form.title && !!form.date && !!form.target_date
-    : !!form.title && !!form.slug && !!form.summary;
+    : !!form.title && !!form.slug && !!form.summary && (!isClip || !!videoId);
 
   return (
     <div className="admin-modal-surface fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
@@ -370,7 +389,9 @@ const ContentEditor: React.FC<{
                   value={form.slug || ''}
                   onChange={e => set('slug', slugify(e.target.value))}
                 />
-                <p className="text-white/20 text-xs mt-1">URL: /articles/{form.slug || 'slug'}</p>
+                <p className="text-white/20 text-xs mt-1">
+                  URL: {form._kind === 'live_note' ? `/courses?note=${form.slug || 'slug'}` : `/articles/${form.slug || 'slug'}`}
+                </p>
               </div>
               <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">ผู้เขียน</label>
@@ -390,9 +411,60 @@ const ContentEditor: React.FC<{
                   onChange={e => set('summary', e.target.value)}
                 />
               </div>
+              {isClip && (
+                <div className="border border-white/10 p-4 space-y-3">
+                  <div>
+                    <label htmlFor="clip-url" className="text-xs text-white/40 font-medium block mb-1">YouTube URL *</label>
+                    <input
+                      id="clip-url"
+                      className="w-full bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
+                      placeholder="https://www.youtube.com/watch?v=... หรือ https://youtu.be/..."
+                      value={form.video_url || ''}
+                      onChange={e => set('video_url', e.target.value.trim())}
+                    />
+                    {form.video_url && !videoId && (
+                      <p className="text-xs text-[#FF6B7F] mt-1">อ่านลิงก์นี้ไม่ได้ ใช้ลิงก์จากปุ่มแชร์ของ YouTube</p>
+                    )}
+                    {videoId && (
+                      <div className="mt-2 flex items-center gap-3">
+                        <img src={form.cover_image_url || youTubeThumb(videoId)} alt="" className="w-28 aspect-video object-cover border border-white/10" />
+                        <p className="text-xs text-white/40">คลิปจะเล่นในเว็บ ไม่พาผู้ชมออกไป YouTube</p>
+                      </div>
+                    )}
+                  </div>
+                  {form._kind === 'live_note' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="clip-course" className="text-xs text-white/40 font-medium block mb-1">หลักสูตรที่ชวนไปต่อเมื่อดูจบ</label>
+                        <select
+                          id="clip-course"
+                          className="w-full bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
+                          value={form.related_course_id || ''}
+                          onChange={e => set('related_course_id', e.target.value || null)}
+                        >
+                          <option value="">ไม่ผูกหลักสูตร</option>
+                          {courses.map(c => (
+                            <option key={c.id} value={c.id}>{c.title}{c.is_active ? '' : ' (ยังไม่เปิดแสดง)'}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="clip-duration" className="text-xs text-white/40 font-medium block mb-1">ความยาวคลิป</label>
+                        <input
+                          id="clip-duration"
+                          className="w-full bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
+                          placeholder="เช่น 12 นาที"
+                          value={form.duration_label || ''}
+                          onChange={e => set('duration_label', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">
-                  เนื้อหาเต็ม (HTML) — ใส่เนื้อหาเต็มที่นี่
+                  {isClip ? 'รายละเอียดใต้คลิป (HTML, ไม่บังคับ)' : 'เนื้อหาเต็ม (HTML) — ใส่เนื้อหาเต็มที่นี่'}
                 </label>
                 <textarea
                   className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-[#D4A843]/50 placeholder-white/15 resize-y"
@@ -403,7 +475,7 @@ const ContentEditor: React.FC<{
                 />
                 <p className="text-white/20 text-xs mt-1">รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img</p>
               </div>
-              <div>
+              {!isClip && <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">External URL (ถ้าลิ้งค์ไปภายนอก)</label>
                 <input
                   className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
@@ -411,7 +483,7 @@ const ContentEditor: React.FC<{
                   value={form.target_url || ''}
                   onChange={e => set('target_url', e.target.value)}
                 />
-              </div>
+              </div>}
               <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">รูปปก</label>
                 {form.cover_image_url && (
@@ -497,6 +569,10 @@ const AdminArticles: React.FC = () => {
   // event_id → { requested, confirmed } for the list's "ผู้สมัคร" button.
   const [regCounts, setRegCounts] = useState<Record<string, { requested: number; confirmed: number }>>({});
   const [registrantsOf, setRegistrantsOf] = useState<EventRow | null>(null);
+  const [courses, setCourses] = useState<CourseOption[]>([]);
+  // article_id → unique viewers (Live Notes)
+  const [viewers, setViewers] = useState<Record<string, number>>({});
+  const [statsOf, setStatsOf] = useState<Article | null>(null);
 
   const flash = (text: string, ok = true) => {
     setMsg({ text, ok });
@@ -504,11 +580,19 @@ const AdminArticles: React.FC = () => {
   };
 
   const load = useCallback(async () => {
-    const [{ data: articleData }, { data: eventData }, { data: regData }] = await Promise.all([
+    const [{ data: articleData }, { data: eventData }, { data: regData }, { data: courseData }, { data: viewData }] = await Promise.all([
       supabase.from('articles').select('*').order('sort_order'),
       supabase.from('events').select('*').order('target_date', { ascending: false }),
       supabase.from('event_registrations').select('event_id, status').in('status', ['requested', 'confirmed']),
+      supabase.from('courses').select('id,title,is_active').order('sort_order'),
+      supabase.from('content_views').select('article_id,user_id'),
     ]);
+    setCourses((courseData as unknown as CourseOption[]) || []);
+    const uniq: Record<string, Set<string>> = {};
+    for (const v of (viewData as unknown as { article_id: string; user_id: string }[]) || []) {
+      (uniq[v.article_id] ??= new Set()).add(v.user_id);
+    }
+    setViewers(Object.fromEntries(Object.entries(uniq).map(([k, set]) => [k, set.size])));
     const rc: Record<string, { requested: number; confirmed: number }> = {};
     for (const r of regData || []) {
       const c = (rc[r.event_id] ??= { requested: 0, confirmed: 0 });
@@ -591,11 +675,15 @@ const AdminArticles: React.FC = () => {
         author: form.author ?? null,
         tags: form.tags ?? null,
         meta_description: form.meta_description ?? null,
-        target_url: form.target_url || '/',
+        target_url: form._kind === 'live_note' ? `/courses?note=${form.slug}` : (form.target_url || '/'),
         is_active: form.is_active ?? true,
         sort_order: form.sort_order ?? 0,
         kind: form._kind,
+        video_url: isClipKind(form._kind) ? (form.video_url || null) : null,
+        related_course_id: form._kind === 'live_note' ? (form.related_course_id || null) : null,
+        duration_label: form._kind === 'live_note' ? ((form.duration_label || '').trim() || null) : null,
       };
+      if (isClipKind(form._kind) && !parseYouTubeId(payload.video_url)) return 'ใส่ YouTube URL ให้ถูกต้อง';
       const { error } = form.id
         ? await supabase.from('articles').update(payload).eq('id', form.id)
         : await supabase.from('articles').insert([payload]);
@@ -630,13 +718,18 @@ const AdminArticles: React.FC = () => {
   };
 
   const isPublished = (row: ContentRow) => row._kind === 'event' ? row.is_published : row.is_active;
+  const isLiveNoteRow = (r: ContentRow) => r._kind === 'article' && r.kind === 'live_note';
   const counts = {
     all: rows.length,
-    articles: rows.filter(r => r._kind === 'article').length,
+    articles: rows.filter(r => r._kind === 'article' && !isLiveNoteRow(r)).length,
+    live_notes: rows.filter(isLiveNoteRow).length,
     events: rows.filter(r => r._kind === 'event').length,
   };
   const visibleRows = rows.filter(r =>
-    filter === 'all' ? true : filter === 'events' ? r._kind === 'event' : r._kind === 'article');
+    filter === 'all' ? true
+      : filter === 'events' ? r._kind === 'event'
+      : filter === 'live_notes' ? isLiveNoteRow(r)
+      : r._kind === 'article' && !isLiveNoteRow(r));
 
   return (
     <>
@@ -645,7 +738,7 @@ const AdminArticles: React.FC = () => {
         onSignOut={handleSignOut}
         actions={
           <button
-            onClick={() => setEditing(filter === 'events' ? EMPTY_EVENT : EMPTY_ARTICLE)}
+            onClick={() => setEditing(filter === 'events' ? EMPTY_EVENT : filter === 'live_notes' ? EMPTY_LIVE_NOTE : EMPTY_ARTICLE)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#D4A843] text-black hover:opacity-90 transition-opacity"
           >
             <Plus className="w-4 h-4" /> สร้างเนื้อหาใหม่
@@ -659,7 +752,7 @@ const AdminArticles: React.FC = () => {
           )}
 
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="กรองประเภทเนื้อหา">
-            {([['all', 'ทั้งหมด'], ['articles', 'บทความ / ข่าว / คลิป'], ['events', 'กิจกรรม']] as const).map(([k, l]) => (
+            {([['all', 'ทั้งหมด'], ['live_notes', 'Live Notes (หน้าหลักสูตร)'], ['articles', 'Community: บทความ / ข่าว / คลิปกิจกรรม'], ['events', 'กิจกรรม']] as const).map(([k, l]) => (
               <button key={k} role="tab" aria-selected={filter === k} onClick={() => setFilter(k)}
                 className={`px-4 py-2 text-xs font-semibold border transition-colors ${filter === k
                   ? 'bg-[#D4A843] text-black border-[#D4A843]'
@@ -689,7 +782,9 @@ const AdminArticles: React.FC = () => {
                     <td className="px-5 py-4">
                       <p className="text-white font-medium text-sm line-clamp-1">{row.title}</p>
                       <p className="text-white/30 text-xs mt-0.5 font-mono">
-                        {row._kind === 'article' ? `/articles/${row.slug}` : `กิจกรรม · ${row.date || 'ยังไม่ระบุวันที่'}`}
+                        {row._kind === 'article'
+                          ? (row.kind === 'live_note' ? `/courses?note=${row.slug}` : `/articles/${row.slug}`)
+                          : `กิจกรรม · ${row.date || 'ยังไม่ระบุวันที่'}`}
                       </p>
                     </td>
                     <td className="px-4 py-4 hidden md:table-cell">
@@ -704,7 +799,22 @@ const AdminArticles: React.FC = () => {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap items-center justify-end gap-2">
-                        {row._kind === 'article' && row.body && (
+                        {row._kind === 'article' && row.kind === 'live_note' && (
+                          <>
+                            <button onClick={() => setStatsOf(row)}
+                              aria-label="ดูสถิติผู้ชม"
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border border-white/10 text-white/60 hover:text-white hover:border-white/30 transition-colors">
+                              <BarChart3 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">ผู้ชม</span>
+                              <span className="font-mono">{viewers[row.id] ?? 0}</span>
+                            </button>
+                            <LiveNoteLinkMenu slug={row.slug} disabled={!row.is_active}>
+                              <Link2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">ลิงก์</span>
+                            </LiveNoteLinkMenu>
+                          </>
+                        )}
+                        {row._kind === 'article' && row.kind !== 'live_note' && row.body && (
                           <a href={`/articles/${row.slug}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"
                             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/8 transition-all">
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -764,9 +874,14 @@ const AdminArticles: React.FC = () => {
         />
       )}
 
+      {statsOf && (
+        <LiveNoteStatsPanel articleId={statsOf.id} title={statsOf.title} onClose={() => setStatsOf(null)} />
+      )}
+
       {editing !== false && (
         <ContentEditor
           initial={editing}
+          courses={courses}
           onSave={handleSave}
           onClose={() => setEditing(false)}
         />

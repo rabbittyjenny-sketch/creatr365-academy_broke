@@ -27,6 +27,13 @@ and the person running that session asked for it to never happen again.
    (e.g. a second QG→PPACT mapping file when `RADAR_DIMS` /
    `src/lib/ppact.ts` already are that mapping) — duplicated sources of
    truth are what caused most of the confusion documented below.
+6. **Before building or changing a feature, trace the existing equivalent
+   end-to-end ("360°") and plug into it.** Example from 2026-10-04: Toolbox
+   Premium was first built with its own download path on /toolbox; the
+   owner pointed out bought course files already live in Dashboard ›
+   เอกสาร — bought Toolbox files now go there too. Check Dashboard, Admin
+   (payments/students), consent dialogs, refund policy and copy elsewhere
+   before adding a parallel piece.
 
 ## The 3 repos, how they relate
 
@@ -103,6 +110,46 @@ belongs in the Mandatory Knowledge Gate (a completely separate, account-
 level system), not as a new QG feeding the Diagnostic Quiz radar. The
 change was reverted. Lesson: an abandoned PR's proposal is not truth; check
 the current BIBLE's actual lesson table before retagging any QG.
+
+## Live Notes / Toolbox Premium / profile — current state (2026-10-04)
+
+Full reference: README §41. Deploy/test checklist: `CHANGELOG_2026-10-04.md`.
+**Status: code done, NOT pushed, migrations NOT applied, edge functions NOT
+deployed** (migrations dry-run with BEGIN…ROLLBACK on prod passed). Verify
+before assuming any of this is live.
+
+Do not regress:
+- **Live Notes ≠ courses.** `articles.kind = 'live_note'`, shown only at the
+  bottom of `/courses`. No enrollment, lessons or quiz; never call them
+  หลักสูตร/บทเรียน. Community clips are `kind = 'video'` ("คลิปกิจกรรม").
+- Course cards / `AdminCourses.tsx` were deliberately untouched; `/courses`
+  only gained pagination (6/page) and `<LiveNotesSection/>`.
+- Clips play in-site (`LiveNotePlayerDialog`); never link out to YouTube.
+- `content_views` is written only via `log_live_note_view()` (SECURITY
+  DEFINER, no client insert/update policy). Demographics come from
+  `profiles` via DB trigger/RPC — never ask for them again on another page.
+- `profiles` is the single source for real names (TH/EN, for the two
+  certificate versions), gender, age range, occupation, province. Name
+  fields lock once a `completion_records` row exists (trigger) — admin edits.
+- **Bought Toolbox Premium files live in Dashboard › เอกสาร** (same pattern
+  as `course_resources`). /toolbox only sells; no re-download button there.
+- The `toolbox-files` storage policy is the real lock (free: signed-in +
+  published; paid: `toolbox_purchases.status = 'paid'`, survives hiding).
+  Never revert it to "readable when signed in" or make the bucket public.
+- Toolbox payment mirrors courses (inline THB `price_data`, `purchase_events`
+  audit). The toolbox branch in `stripe-webhook` must stay before the course
+  branch (keyed on `metadata.kind`).
+- Post-login return goes through `src/lib/authRedirect.ts` (email, LINE LIFF,
+  email-confirm link). Don't hardcode `/dashboard` after login/sign-up.
+- Downloads: `createSignedUrl(path, 60, { download })` + `location.assign`;
+  `window.open` after an await is blocked in the LINE in-app browser.
+- **One accent per region.** `index.css` recolors every p/span/a/button on
+  hover (`.site-hover-scope`) and gives every h1–h6 a hover underline; an
+  undeclared block falls back to red and clashes with its own colored
+  labels. Follow the sharp-card system (commit `19ac127`, Explore/Discover/
+  AiLab): `className="section-accent"` + `--hover-accent`/`--section-accent`
+  set to one color — also on `DialogContent` (portals sit outside the hover
+  scope but h1–h6 rules still apply). Admin keeps `#D4A843` (README §30.3).
 
 ## Document authority — check timestamps, this changes
 

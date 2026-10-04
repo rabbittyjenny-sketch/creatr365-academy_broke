@@ -20,6 +20,19 @@ export default {
         sans: ['Overpass', 'IBM Plex Sans Thai', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // Section wayfinding accents (brand "System B"), as tokens instead of
+        // hex literals. Same values Explore.tsx already uses per tile; new
+        // code should use these (bg-section-toolbox, text-section-notes...).
+        // `notes` (Live Notes) has its own name so it can diverge from
+        // Toolbox later without a find-and-replace.
+        section: {
+          courses: "#C0A060",
+          toolbox: "#4A7FB5",
+          notes: "#4A7FB5",
+          ailab: "#6AAA7A",
+          creator: "#B87333",
+          events: "#C0567A",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

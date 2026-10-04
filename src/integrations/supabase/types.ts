@@ -20,10 +20,12 @@ export type Database = {
           body: string | null
           cover_image_url: string | null
           created_at: string
+          duration_label: string | null
           id: string
           is_active: boolean
           kind: string
           meta_description: string | null
+          related_course_id: string | null
           slug: string
           sort_order: number
           summary: string
@@ -31,16 +33,19 @@ export type Database = {
           target_url: string
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           author?: string | null
           body?: string | null
           cover_image_url?: string | null
           created_at?: string
+          duration_label?: string | null
           id?: string
           is_active?: boolean
           kind?: string
           meta_description?: string | null
+          related_course_id?: string | null
           slug: string
           sort_order?: number
           summary?: string
@@ -48,16 +53,19 @@ export type Database = {
           target_url?: string
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           author?: string | null
           body?: string | null
           cover_image_url?: string | null
           created_at?: string
+          duration_label?: string | null
           id?: string
           is_active?: boolean
           kind?: string
           meta_description?: string | null
+          related_course_id?: string | null
           slug?: string
           sort_order?: number
           summary?: string
@@ -65,6 +73,7 @@ export type Database = {
           target_url?: string
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -175,6 +184,62 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_views: {
+        Row: {
+          age_range: string | null
+          article_id: string
+          completed: boolean
+          gender: string | null
+          id: string
+          last_seen_at: string
+          max_progress_pct: number
+          occupation: string | null
+          province: string | null
+          source: string | null
+          started_at: string
+          user_id: string
+          view_session: string
+        }
+        Insert: {
+          age_range?: string | null
+          article_id: string
+          completed?: boolean
+          gender?: string | null
+          id?: string
+          last_seen_at?: string
+          max_progress_pct?: number
+          occupation?: string | null
+          province?: string | null
+          source?: string | null
+          started_at?: string
+          user_id: string
+          view_session: string
+        }
+        Update: {
+          age_range?: string | null
+          article_id?: string
+          completed?: boolean
+          gender?: string | null
+          id?: string
+          last_seen_at?: string
+          max_progress_pct?: number
+          occupation?: string | null
+          province?: string | null
+          source?: string | null
+          started_at?: string
+          user_id?: string
+          view_session?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_views_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
             referencedColumns: ["id"]
           },
         ]
@@ -1011,10 +1076,15 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           display_name: string | null
+          first_name_en: string | null
+          first_name_th: string | null
           gender: string | null
           id: string
+          last_name_en: string | null
+          last_name_th: string | null
           line_user_id: string | null
           occupation: string | null
+          province: string | null
           updated_at: string
           user_id: string
         }
@@ -1024,10 +1094,15 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           display_name?: string | null
+          first_name_en?: string | null
+          first_name_th?: string | null
           gender?: string | null
           id?: string
+          last_name_en?: string | null
+          last_name_th?: string | null
           line_user_id?: string | null
           occupation?: string | null
+          province?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1037,10 +1112,15 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           display_name?: string | null
+          first_name_en?: string | null
+          first_name_th?: string | null
           gender?: string | null
           id?: string
+          last_name_en?: string | null
+          last_name_th?: string | null
           line_user_id?: string | null
           occupation?: string | null
+          province?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1103,6 +1183,8 @@ export type Database = {
           price_original: number | null
           promo_code_id: string | null
           stripe_session_id: string | null
+          toolbox_asset_id: string | null
+          toolbox_purchase_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -1117,6 +1199,8 @@ export type Database = {
           price_original?: number | null
           promo_code_id?: string | null
           stripe_session_id?: string | null
+          toolbox_asset_id?: string | null
+          toolbox_purchase_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -1131,6 +1215,8 @@ export type Database = {
           price_original?: number | null
           promo_code_id?: string | null
           stripe_session_id?: string | null
+          toolbox_asset_id?: string | null
+          toolbox_purchase_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -1434,6 +1520,10 @@ export type Database = {
           file_type: string | null
           id: string
           is_active: boolean
+          paid_details: string | null
+          price_thb: number | null
+          pricing_type: string
+          promo_price_thb: number | null
           sort_order: number
           title: string
           updated_at: string
@@ -1449,6 +1539,10 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_active?: boolean
+          paid_details?: string | null
+          price_thb?: number | null
+          pricing_type?: string
+          promo_price_thb?: number | null
           sort_order?: number
           title: string
           updated_at?: string
@@ -1464,6 +1558,10 @@ export type Database = {
           file_type?: string | null
           id?: string
           is_active?: boolean
+          paid_details?: string | null
+          price_thb?: number | null
+          pricing_type?: string
+          promo_price_thb?: number | null
           sort_order?: number
           title?: string
           updated_at?: string
@@ -1479,6 +1577,7 @@ export type Database = {
           gender: string | null
           id: string
           occupation: string | null
+          province: string | null
           student_id: string | null
           user_id: string
         }
@@ -1490,6 +1589,7 @@ export type Database = {
           gender?: string | null
           id?: string
           occupation?: string | null
+          province?: string | null
           student_id?: string | null
           user_id: string
         }
@@ -1501,12 +1601,57 @@ export type Database = {
           gender?: string | null
           id?: string
           occupation?: string | null
+          province?: string | null
           student_id?: string | null
           user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "toolbox_downloads_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "toolbox_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toolbox_purchases: {
+        Row: {
+          amount_thb: number
+          asset_id: string
+          created_at: string
+          id: string
+          paid_at: string | null
+          receipt_email: string | null
+          status: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_thb: number
+          asset_id: string
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          receipt_email?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_thb?: number
+          asset_id?: string
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          receipt_email?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toolbox_purchases_asset_id_fkey"
             columns: ["asset_id"]
             isOneToOne: false
             referencedRelation: "toolbox_assets"
@@ -1668,6 +1813,15 @@ export type Database = {
         Returns: undefined
       }
       my_linked_user_ids: { Args: never; Returns: string[] }
+      log_live_note_view: {
+        Args: {
+          _article_id: string
+          _progress_pct?: number
+          _source?: string
+          _view_session: string
+        }
+        Returns: undefined
+      }
       normalize_master_student_id: {
         Args: { _student_id: string }
         Returns: string

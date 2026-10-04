@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { currentPath, rememberPostAuthTarget } from '@/lib/authRedirect';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthErrorMessage, isValidPassword, PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth';
 interface AuthSheetProps {
@@ -60,11 +61,14 @@ export const AuthSheet: React.FC<AuthSheetProps> = ({ isOpen, onClose }) => {
           throw new Error(PASSWORD_REQUIREMENTS_TEXT);
         }
 
+        rememberPostAuthTarget(currentPath());
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin
+            // Return to the page the sheet was opened from (course / event
+            // detail) after confirming the email, not the home page.
+            emailRedirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(currentPath())}`
           }
         });
         

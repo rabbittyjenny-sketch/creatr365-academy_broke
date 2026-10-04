@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { ArrowRight, Monitor, Users, Layers } from 'lucide-react';
+import { ArrowRight, Monitor, Users, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 import { tierLabel } from '@/lib/courseTag';
+import { LiveNotesSection } from '@/components/live-notes/LiveNotesSection';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
+
+// 6 = two full rows of the 3-column desktop grid. The page number lives in
+// the URL (?page=2) so back/forward and shared links land on the same page.
+const PAGE_SIZE = 6;
 
 interface CourseRow {
   id: string;
@@ -60,6 +66,17 @@ const STATUS_META: Record<string, { label: string; className: string } | null> =
 const Courses: React.FC = () => {
   useDarkPage();
   const [courses, setCourses] = useState<CourseRow[]>([]);
+  const [params, setParams] = useSearchParams();
+  const gridTopRef = useRef<HTMLDivElement>(null);
+  const pageCount = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
+  const page = Math.min(pageCount, Math.max(1, parseInt(params.get('page') || '1', 10) || 1));
+  const pagedCourses = courses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const goToPage = (n: number) => {
+    const next = new URLSearchParams(params);
+    if (n <= 1) next.delete('page'); else next.set('page', String(n));
+    setParams(next);
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Shows every course an admin has published (is_active = true) — that flag
   // is the one and only publish switch. There used to also be a hardcoded
@@ -96,8 +113,8 @@ const Courses: React.FC = () => {
               card claims at least 280px and the row just wraps more of them
               as the viewport grows, the same pattern most catalog-style
               sites (Coursera, Udemy) use for exactly this reason. */}
-          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-            {courses.map((course) => {
+          <div ref={gridTopRef} className="scroll-mt-28 grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            {pagedCourses.map((course) => {
               const learning = LEARNING_META[course.learning_type] || LEARNING_META.offline;
               const status = STATUS_META[course.status as keyof typeof STATUS_META];
               const LearnIcon = learning.Icon;
@@ -197,8 +214,53 @@ const Courses: React.FC = () => {
               );
             })}
           </div>
+
+          {pageCount > 1 && (
+            <Pagination className="mt-10">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationLink
+                    size="default"
+                    href={`?page=${Math.max(1, page - 1)}`}
+                    aria-label="หน้าก่อนหน้า"
+                    aria-disabled={page === 1}
+                    className={`rounded-none gap-1 pl-2.5 ${page === 1 ? 'pointer-events-none opacity-40' : ''}`}
+                    onClick={e => { e.preventDefault(); if (page > 1) goToPage(page - 1); }}
+                  >
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" /> ก่อนหน้า
+                  </PaginationLink>
+                </PaginationItem>
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map(n => (
+                  <PaginationItem key={n}>
+                    <PaginationLink
+                      href={`?page=${n}`}
+                      isActive={n === page}
+                      aria-label={`หน้า ${n}`}
+                      className="rounded-none"
+                      onClick={e => { e.preventDefault(); goToPage(n); }}
+                    >
+                      {n}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationLink
+                    size="default"
+                    href={`?page=${Math.min(pageCount, page + 1)}`}
+                    aria-label="หน้าถัดไป"
+                    aria-disabled={page === pageCount}
+                    className={`rounded-none gap-1 pr-2.5 ${page === pageCount ? 'pointer-events-none opacity-40' : ''}`}
+                    onClick={e => { e.preventDefault(); if (page < pageCount) goToPage(page + 1); }}
+                  >
+                    ถัดไป <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  </PaginationLink>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </section>
+      <LiveNotesSection />
       <Footer />
     </>
   );

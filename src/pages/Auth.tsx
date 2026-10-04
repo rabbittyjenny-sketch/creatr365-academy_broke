@@ -8,6 +8,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { getAuthErrorMessage, isValidPassword, PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth';
 import { useLiff } from '@/hooks/useLiff';
+import { isSafePath, peekPostAuthTarget, rememberPostAuthTarget, clearPostAuthTarget } from '@/lib/authRedirect';
 
 import logoCreatr from '@/assets/logo-creatr365.png';
 
@@ -16,7 +17,12 @@ const LIFF_CONFIGURED = !!import.meta.env.VITE_LINE_LIFF_ID;
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(() => {
+    // People arriving from a Live Notes promo link are mostly new — open on
+    // sign-up. Everyone else lands on log-in as before.
+    const r = new URLSearchParams(window.location.search).get('redirect') || '';
+    return !r.startsWith('/courses?note=');
+  });
   const [loading, setLoading] = useState(false);
   const [liffLoading, setLiffLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,19 +30,24 @@ const Auth = () => {
   const { toast } = useToast();  // ← FIX: was missing destructure
   // Same-site paths only. `?redirect=//evil.com` or `/\evil.com` would
   // otherwise send a freshly signed-in user off-site (GHSA-wrjc-x8rr-h8h6).
+  // Falls back to the target remembered in localStorage (see
+  // lib/authRedirect.ts) when the query string was lost on the way — e.g. a
+  // LIFF login round-trip or an email confirmation link opened later.
   const rawRedirect = new URLSearchParams(location.search).get('redirect') || '';
-  const redirectTo = /^\/(?![/\\])/.test(rawRedirect) ? rawRedirect : '/dashboard';
+  const redirectTo = isSafePath(rawRedirect) ? rawRedirect : (peekPostAuthTarget() ?? '/dashboard');
+  const isLiveNoteLink = redirectTo.startsWith('/courses?note=');
 
   // FIX: call useLiff hook properly (was using liff as bare global)
   const liff = useLiff();
 
   // Redirect if already logged in
   useEffect(() => {
+    const go = () => { clearPostAuthTarget(); navigate(redirectTo, { replace: true }); };
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate(redirectTo, { replace: true });
+      if (session) go();
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate(redirectTo, { replace: true });
+      if (session) go();
     });
     return () => subscription.unsubscribe();
   }, [navigate, redirectTo]);
@@ -105,9 +116,13 @@ const Auth = () => {
         // navigate handled by onAuthStateChange
       } else {
         if (!isValidPassword(password)) throw new Error(PASSWORD_REQUIREMENTS_TEXT);
+        rememberPostAuthTarget(redirectTo);
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
+          // Carry the return target through the confirmation email. If this
+          // exact URL isn't in Supabase's redirect allow-list, Supabase falls
+          // back to the Site URL and the localStorage copy takes over.
+          options: { emailRedirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectTo)}` },
         });
         if (error) throw error;
         toast({ title: 'สมัครสมาชิกสำเร็จ', description: 'กรุณาตรวจสอบอีเมลและกดยืนยันก่อนเข้าสู่ระบบ' });
@@ -143,7 +158,9 @@ const Auth = () => {
                 {isLogin ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                {isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
+                {isLiveNoteLink
+                  ? 'สมัครฟรีหรือเข้าสู่ระบบ แล้วระบบจะพากลับไปที่คลิปที่คุณเลือกทันที'
+                  : isLogin ? 'เข้าสู่ระบบเพื่อเริ่มเรียน' : 'สร้างบัญชีเพื่อเริ่มต้นกับ Creatr365'}
               </p>
             </div>
 
@@ -170,7 +187,7 @@ const Auth = () => {
                 ) : liff.ready && !liff.loggedIn ? (
                   <button
                     type="button"
-                    onClick={() => liff.login()}
+                    onClick={() => { rememberPostAuthTarget(redirectTo); liff.login(); }}
                     className="sharp-btn w-full h-12 rounded-none border border-foreground font-medium flex items-center justify-center gap-3 bg-[#06C755] hover:bg-[#05b34d] text-white transition-colors"
                   >
                     <LineIcon />

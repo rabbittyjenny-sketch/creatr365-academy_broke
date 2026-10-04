@@ -6,15 +6,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { ArrowRight, Newspaper, Wrench, Users, ClipboardCheck, Rss, ExternalLink, PlayCircle } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+import { LiveNotePlayerDialog, type PlayableClip } from '@/components/live-notes/LiveNotePlayerDialog';
+import { parseYouTubeId, youTubeThumb } from '@/lib/youtube';
 
 interface ArticleRow {
   id:string; slug:string; title:string; summary:string;
   cover_image_url:string|null; kind:string; target_url:string;
   body:string|null; author:string|null; tags:string[]|null; created_at:string;
+  video_url:string|null;
 }
 
 const KIND_META: Record<string,{ label:string; Icon:React.FC<{className?:string}> }> = {
-  video:     { label:'คลิปความรู้', Icon:PlayCircle },
+  video:     { label:'คลิปกิจกรรม', Icon:PlayCircle },
   blog:      { label:'บทความ',      Icon:Rss },
   news:      { label:'ข่าวกิจกรรม', Icon:Newspaper },
   update:    { label:'ข่าวกิจกรรม', Icon:Newspaper },
@@ -29,7 +32,9 @@ const KIND_META: Record<string,{ label:string; Icon:React.FC<{className?:string}
 // Explore.tsx/Toolbox.tsx already use) so this page reads as part of the
 // same site rather than a bolted-on forum layout.
 const GROUPS: { label:string; accent:string; kinds:string[] }[] = [
-  { label:'คลิปความรู้', accent:'#4A7FB5', kinds:['video'] },
+  // Activity / atmosphere / news clips. Knowledge clips live on /courses as
+  // Live Notes (kind 'live_note') and never show here.
+  { label:'คลิปกิจกรรม', accent:'#4A7FB5', kinds:['video'] },
   { label:'บทความ',      accent:'#C0A060', kinds:['blog', 'tool'] },
   { label:'ข่าวกิจกรรม', accent:'#B87333', kinds:['news', 'update', 'community', 'quiz'] },
 ];
@@ -38,6 +43,7 @@ const Articles: React.FC = () => {
   useDarkPage();
   const [items, setItems] = useState<ArticleRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playing, setPlaying] = useState<PlayableClip | null>(null);
 
   useEffect(() => {
     supabase.from('articles').select('*').eq('is_active',true).order('sort_order')
@@ -47,14 +53,16 @@ const Articles: React.FC = () => {
   const renderCard = (a: ArticleRow, accent: string) => {
     const meta = KIND_META[a.kind] || KIND_META.news;
     const Icon = meta.Icon;
+    const videoId = a.kind === 'video' ? parseYouTubeId(a.video_url) : null;
     const isInternal = !!a.body || a.target_url.startsWith('/');
     const href = isInternal ? `/articles/${a.slug}` : a.target_url;
+    const cover = a.cover_image_url || (videoId ? youTubeThumb(videoId) : null);
 
     const CardContent = (
       <div className="group sharp-card border border-border bg-card overflow-hidden h-full flex flex-col transition-all duration-300 hover:-translate-y-0.5">
-        {a.cover_image_url && (
+        {cover && (
           <div className="aspect-video overflow-hidden bg-muted">
-            <img src={a.cover_image_url} alt={a.title}
+            <img src={cover} alt={a.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           </div>
         )}
@@ -64,13 +72,13 @@ const Articles: React.FC = () => {
               style={{ background:accent+'18', color:accent, border:`1px solid ${accent}40` }}>
               <Icon className="w-2.5 h-2.5" /> {meta.label}
             </span>
-            {!isInternal && <ExternalLink className="w-3 h-3 text-muted-foreground/40" />}
+            {!isInternal && !videoId && <ExternalLink className="w-3 h-3 text-muted-foreground/40" />}
           </div>
           <h3 className="font-bold text-sm leading-tight mb-1.5 line-clamp-2">{a.title}</h3>
           <p className="text-muted-foreground text-xs leading-relaxed mb-3 flex-1 line-clamp-3">{a.summary}</p>
           <div className="mt-auto pt-2.5 border-t border-border/60 flex items-center justify-between">
             <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-1.5 transition-all" style={{ color:accent }}>
-              {isInternal ? 'อ่านต่อ' : 'ดูเพิ่มเติม'}
+              {videoId ? 'ดูคลิป' : isInternal ? 'อ่านต่อ' : 'ดูเพิ่มเติม'}
               <ArrowRight className="w-3 h-3" />
             </span>
             {a.author && <span className="text-muted-foreground/50 text-[10px]">{a.author}</span>}
@@ -78,6 +86,15 @@ const Articles: React.FC = () => {
         </div>
       </div>
     );
+
+    // Clips play inside the site — no login needed for Community clips.
+    if (videoId) {
+      return (
+        <button key={a.id} type="button" className="text-left w-full" onClick={() => setPlaying({ ...a, related_course: null })}>
+          {CardContent}
+        </button>
+      );
+    }
 
     return isInternal ? (
       <Link key={a.id} to={href}>{CardContent}</Link>
@@ -90,7 +107,7 @@ const Articles: React.FC = () => {
     <>
       <SEOHead
         title="Community — CREATR365"
-        description="คลิปความรู้ บทความ และข่าวกิจกรรมของ Creatr365"
+        description="คลิปกิจกรรม บทความ และข่าวสารของ Creatr365"
       />
       <CourseNavbar />
 
@@ -106,7 +123,7 @@ const Articles: React.FC = () => {
 
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-3" data-accent="red">Community</h1>
           <p className="text-muted-foreground text-base md:text-lg mb-12 max-w-xl">
-            พื้นที่รวมคลิปความรู้ บทความ และข่าวกิจกรรมของ Creatr365 — อัปเดตให้ทันทุกความเคลื่อนไหว
+            พื้นที่รวมคลิปกิจกรรม บทความ และข่าวสารของ Creatr365 — อัปเดตให้ทันทุกความเคลื่อนไหว
           </p>
 
           {loading ? (
@@ -141,6 +158,7 @@ const Articles: React.FC = () => {
       </section>
 
       <Footer />
+      <LiveNotePlayerDialog clip={playing} onClose={() => setPlaying(null)} label="คลิปกิจกรรม" />
     </>
   );
 };

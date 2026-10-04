@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { Footer } from '@/components/Footer';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { isCurrentUserAdmin } from '@/lib/admin';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award, UserCog } from 'lucide-react';
+import { Star, ExternalLink, BookOpen, CheckCircle2, Circle, Download, FileText, Loader2, ShieldCheck, LayoutGrid, GraduationCap, FolderOpen, Award, UserCog, Package } from 'lucide-react';
 import { tierLabel } from '@/lib/courseTag';
 import { DownloadConsentDialog } from '@/components/DownloadConsentDialog';
+import { ToolboxDownloadConsentDialog } from '@/components/ToolboxDownloadConsentDialog';
+import { useToast } from '@/hooks/use-toast';
+import { missingProfileFields, type ProfileIdentity } from '@/lib/profileFields';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
 
@@ -25,6 +28,13 @@ interface ProgressRow { module_id: string; status: string; score: number | null 
 interface ResourceRow {
   id: string; course_id: string; resource_type: string; title: string;
   file_path: string; file_name: string | null;
+}
+
+// A Toolbox Premium file this user bought (toolbox_purchases status = paid).
+// Shown in "เอกสาร" next to course materials — the Toolbox page only sells.
+interface PremiumFileRow {
+  purchase_id: string; asset_id: string; title: string;
+  file_path: string; file_name: string | null; file_type: string | null;
 }
 interface CompletionRecordRow {
   id: string; course_id: string; record_code: string; issued_at: string;
@@ -52,6 +62,7 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
 const resourceLabel = (type: string) => RESOURCE_TYPE_LABELS[type] || `เอกสารประกอบการเรียน (${type})`;
 
 type SectionKey = 'overview' | 'courses' | 'resources' | 'certificates';
+const SECTION_KEYS: SectionKey[] = ['overview', 'courses', 'resources', 'certificates'];
 
 async function ensureStudentId(email: string): Promise<string | null> {
   const { data, error } = await supabase.rpc('ensure_master_student_account', { _email: email });
@@ -62,8 +73,10 @@ async function ensureStudentId(email: string): Promise<string | null> {
 const Dashboard: React.FC = () => {
   useDarkPage();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
-  const [profile, setProfile] = useState<{ display_name?: string; line_user_id?: string } | null>(null);
+  const [profile, setProfile] = useState<({ display_name?: string; line_user_id?: string } & ProfileIdentity) | null>(null);
   const [studentId, setStudentId] = useState<string | null>(null);
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
@@ -77,10 +90,18 @@ const Dashboard: React.FC = () => {
   // downloads of the same file skip the consent dialog (still logged every time).
   const [consentedResourceIds, setConsentedResourceIds] = useState<Set<string>>(new Set());
   const [pendingResource, setPendingResource] = useState<ResourceRow | null>(null);
+  const [premiumFiles, setPremiumFiles] = useState<PremiumFileRow[]>([]);
+  const [consentedToolboxIds, setConsentedToolboxIds] = useState<Set<string>>(new Set());
+  const [pendingPremium, setPendingPremium] = useState<PremiumFileRow | null>(null);
+  const [justBoughtAssetId, setJustBoughtAssetId] = useState<string | null>(null);
   const [openCourse, setOpenCourse] = useState<string | null>(null);
   // Which course's "เข้าเรียน" button is currently fetching a handoff token
   const [enteringLmsSlug, setEnteringLmsSlug] = useState<string | null>(null);
-  const [section, setSection] = useState<SectionKey>('overview');
+  // ?section=resources deep-links a tab (used by the Toolbox Premium checkout return).
+  const [section, setSection] = useState<SectionKey>(() => {
+    const q = new URLSearchParams(window.location.search).get('section') as SectionKey | null;
+    return q && SECTION_KEYS.includes(q) ? q : 'overview';
+  });
   // Separate from the student dashboard below — an admin gets a link out to
   // the dedicated Admin Console (its own layout/routes), never a second
   // copy of admin controls rendered here.
@@ -91,6 +112,52 @@ const Dashboard: React.FC = () => {
   // still null), even for students who do have one.
   const [loading, setLoading] = useState(true);
 
+  const loadPremiumFiles = async (uid: string) => {
+    const [{ data: buys }, { data: tbLogs }] = await Promise.all([
+      supabase.from('toolbox_purchases')
+        .select('id,asset_id,paid_at,toolbox_assets(title,file_path,file_name,file_type)')
+        .eq('user_id', uid).eq('status', 'paid').order('paid_at', { ascending: false }),
+      supabase.from('toolbox_downloads').select('asset_id').eq('user_id', uid).eq('consented', true),
+    ]);
+    type BuyRow = { id: string; asset_id: string; toolbox_assets: { title: string; file_path: string; file_name: string | null; file_type: string | null } | null };
+    setPremiumFiles(((buys as unknown as BuyRow[]) || [])
+      .filter(b => b.toolbox_assets)
+      .map(b => ({
+        purchase_id: b.id, asset_id: b.asset_id, title: b.toolbox_assets!.title,
+        file_path: b.toolbox_assets!.file_path, file_name: b.toolbox_assets!.file_name, file_type: b.toolbox_assets!.file_type,
+      })));
+    setConsentedToolboxIds(new Set(((tbLogs as { asset_id: string }[] | null) || []).map(l => l.asset_id)));
+  };
+
+  // Back from Stripe (toolbox-checkout success_url): confirm the payment —
+  // the webhook usually got there first; verify covers a late one — then
+  // show the file in "เอกสาร".
+  useEffect(() => {
+    const purchaseId = searchParams.get('toolbox_purchase');
+    if (!purchaseId || !user) return;
+    (async () => {
+      let paid = false;
+      for (let attempt = 0; attempt < 4 && !paid; attempt++) {
+        const { data } = await supabase.functions.invoke('toolbox-checkout', { body: { action: 'verify', purchaseId } });
+        paid = data?.status === 'paid';
+        if (!paid) await new Promise(r => setTimeout(r, 2000));
+      }
+      await loadPremiumFiles(user.id);
+      if (paid) {
+        const { data: row } = await supabase.from('toolbox_purchases').select('asset_id').eq('id', purchaseId).maybeSingle();
+        setJustBoughtAssetId(row?.asset_id ?? null);
+        toast({ title: 'ชำระเงินสำเร็จ', description: 'ไฟล์อยู่ในเมนู "เอกสาร" แล้ว ดาวน์โหลดได้ทุกเมื่อ' });
+      } else {
+        toast({ title: 'กำลังยืนยันการชำระเงิน', description: 'ไฟล์จะขึ้นในเมนู "เอกสาร" ภายใน 1-2 นาที ถ้ายังไม่ขึ้นให้รีเฟรชหรือติดต่อทีมงาน' });
+      }
+      setSection('resources');
+      const next = new URLSearchParams(searchParams);
+      next.delete('toolbox_purchase');
+      setSearchParams(next, { replace: true });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const load = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { navigate('/auth'); return; }
@@ -99,7 +166,7 @@ const Dashboard: React.FC = () => {
     isCurrentUserAdmin(session.user.id).then(setIsAdmin);
 
     const [{ data: prof }, { data: cs }, { data: en }] = await Promise.all([
-      supabase.from('profiles').select('display_name,line_user_id').eq('user_id', session.user.id).maybeSingle(),
+      supabase.from('profiles').select('line_user_id,display_name,first_name_th,last_name_th,first_name_en,last_name_en,gender,age_range,occupation,province').eq('user_id', session.user.id).maybeSingle(),
       supabase.from('courses').select('id,slug,tag,title,subtitle,color,learning_type,level').eq('is_active', true).order('sort_order'),
       supabase.from('course_enrollments').select('id,course_id,status').eq('user_id', session.user.id),
     ]);
@@ -108,6 +175,7 @@ const Dashboard: React.FC = () => {
     setCourses((cs as any) || []);
     const enRows: EnrollmentRow[] = (en as any) || [];
     setEnrollments(enRows);
+    loadPremiumFiles(session.user.id);
 
     // Resolve the one shared Master Key. Never synthesize a second key in the browser.
     let sid: string | null = null;
@@ -179,15 +247,16 @@ const Dashboard: React.FC = () => {
     if (!user) return;
     setDownloadingId(r.id);
     try {
+      // `download` + same-tab navigation instead of window.open: a new tab
+      // opened after an await is blocked in the LINE in-app browser and iOS.
       const { data, error } = await supabase.storage
         .from('course-resources')
-        .createSignedUrl(r.file_path, 60);
+        .createSignedUrl(r.file_path, 60, { download: r.file_name || true });
       if (error || !data?.signedUrl) {
         console.error('createSignedUrl failed', error);
         alert('ดาวน์โหลดไม่สำเร็จ ลองใหม่อีกครั้ง');
         return;
       }
-      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
 
       const { error: logError } = await supabase.from('resource_download_logs').insert({
         user_id: user.id,
@@ -197,9 +266,43 @@ const Dashboard: React.FC = () => {
       });
       if (logError) console.error('resource_download_logs insert failed', logError);
       else setConsentedResourceIds(prev => new Set(prev).add(r.id));
+      window.location.assign(data.signedUrl);
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  // Toolbox Premium files — same flow as course materials above: signed URL
+  // on click (the toolbox-files storage policy only signs it for a buyer),
+  // consent once, every download logged (toolbox_downloads; demographics are
+  // filled by the database).
+  const downloadPremium = async (f: PremiumFileRow) => {
+    if (!user) return;
+    setDownloadingId(f.purchase_id);
+    try {
+      const { data, error } = await supabase.storage
+        .from('toolbox-files')
+        .createSignedUrl(f.file_path, 60, { download: f.file_name || true });
+      if (error || !data?.signedUrl) {
+        console.error('createSignedUrl failed', error);
+        alert('ดาวน์โหลดไม่สำเร็จ ลองใหม่อีกครั้ง');
+        return;
+      }
+      const { error: logError } = await supabase.from('toolbox_downloads').insert({
+        asset_id: f.asset_id, user_id: user.id, student_id: studentId, consented: true,
+      });
+      if (logError) console.error('toolbox_downloads insert failed', logError);
+      else setConsentedToolboxIds(prev => new Set(prev).add(f.asset_id));
+      await supabase.rpc('increment_toolbox_download', { _asset_id: f.asset_id });
+      window.location.assign(data.signedUrl);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadPremium = (f: PremiumFileRow) => {
+    if (consentedToolboxIds.has(f.asset_id)) downloadPremium(f);
+    else setPendingPremium(f);
   };
 
   const handleDownloadResource = (r: ResourceRow) => {
@@ -280,7 +383,7 @@ const Dashboard: React.FC = () => {
     [courses, enrolledIds],
   );
 
-  const totalResourceCount = resources.length;
+  const totalResourceCount = resources.length + premiumFiles.length;
 
   // Courses where every module is completed — backs both the "ใบบันทึกการเรียนจบ"
   // stat tile and the completion-records section's list. Per the Completion
@@ -420,6 +523,20 @@ const Dashboard: React.FC = () => {
           <div className="flex-1 min-w-0">
             {section === 'overview' && (
               <div className="space-y-6">
+                {/* Profile completion — names are needed for certificates,
+                    the rest feeds statistics silently (see lib/profileFields). */}
+                {profile && missingProfileFields(profile).length > 0 && (
+                  <Link
+                    to="/profile"
+                    className="sharp-card block border border-border bg-card p-4"
+                    data-accent="red"
+                  >
+                    <p className="text-sm font-bold">กรอกโปรไฟล์ให้ครบ</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      ยังขาด: {missingProfileFields(profile).join(', ')} — ชื่อจริงไทยและอังกฤษใช้ออกใบประกาศเมื่อเรียนจบหลักสูตร
+                    </p>
+                  </Link>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {statsData.map(stat => (
                     <div key={stat.label} className="sharp-card border border-border bg-card p-4" data-accent={stat.accent}>
@@ -569,7 +686,7 @@ const Dashboard: React.FC = () => {
             )}
 
             {section === 'resources' && (
-              enrolledCourses.length === 0 ? (
+              enrolledCourses.length === 0 && premiumFiles.length === 0 ? (
                 <div className="border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                   ยังไม่มีคอร์สที่ลงทะเบียน —{' '}
                   <Link to="/courses" className="underline hover-shift" data-accent="red">เลือกคอร์ส</Link>
@@ -605,6 +722,37 @@ const Dashboard: React.FC = () => {
                       </div>
                     );
                   })}
+
+                  {premiumFiles.length > 0 && (
+                    <div className="sharp-card border border-border bg-card p-4">
+                      <p className="text-xs font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
+                        Toolbox Premium ที่ซื้อแล้ว
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mb-3">ดาวน์โหลดซ้ำได้ทุกเมื่อจากที่นี่</p>
+                      <div className="flex flex-wrap gap-2">
+                        {premiumFiles.map(f => (
+                          <button
+                            key={f.purchase_id}
+                            onClick={() => handleDownloadPremium(f)}
+                            disabled={downloadingId === f.purchase_id}
+                            className={`sharp-btn flex items-center gap-1.5 text-[11px] px-3 py-1.5 border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50 ${
+                              justBoughtAssetId === f.asset_id ? 'border-foreground text-foreground' : 'border-border'}`}
+                          >
+                            {downloadingId === f.purchase_id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <Download className="w-3 h-3" />}
+                            <FileText className="w-3 h-3" />
+                            {f.title}
+                            {f.file_type && <span className="text-[9px] font-bold uppercase opacity-60">{f.file_type}</span>}
+                            {justBoughtAssetId === f.asset_id && (
+                              <span className="text-[9px] font-bold px-1 bg-foreground text-background">ใหม่</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             )}
@@ -701,6 +849,18 @@ const Dashboard: React.FC = () => {
         </div>
       </main>
       <Footer />
+
+      <ToolboxDownloadConsentDialog
+        open={pendingPremium !== null}
+        assetTitle={pendingPremium?.title || ''}
+        isPremium
+        onConfirm={() => {
+          const f = pendingPremium;
+          setPendingPremium(null);
+          if (f) downloadPremium(f);
+        }}
+        onCancel={() => setPendingPremium(null)}
+      />
 
       <DownloadConsentDialog
         open={pendingResource !== null}

@@ -32,6 +32,36 @@ serve(async (req) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+
+    // Toolbox Premium (created by toolbox-checkout). Course sessions never
+    // carry metadata.kind, so the course branch below is unaffected.
+    if (session.metadata?.kind === "toolbox") {
+      const purchaseId = session.metadata.toolbox_purchase_id;
+      if (purchaseId && session.payment_status === "paid") {
+        const { data: tp } = await supabaseAdmin
+          .from("toolbox_purchases")
+          .update({ status: "paid", paid_at: new Date().toISOString(), stripe_session_id: session.id })
+          .eq("id", purchaseId)
+          .neq("status", "paid")
+          .select("user_id, asset_id, amount_thb")
+          .maybeSingle();
+        if (tp) {
+          await supabaseAdmin.from("purchase_events").insert({
+            user_id: tp.user_id,
+            toolbox_asset_id: tp.asset_id,
+            toolbox_purchase_id: purchaseId,
+            event: "webhook_paid",
+            stripe_session_id: session.id,
+            amount_final: tp.amount_thb,
+          });
+        }
+      }
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const enrollmentId = session.metadata?.enrollment_id;
     const promoCodeId = session.metadata?.promo_code_id;
 

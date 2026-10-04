@@ -9,7 +9,7 @@
  *  3. supabase.auth.verifyOtp(token_hash) → session สร้างทันที (login แล้ว)
  *  4. User กรอก email (บังคับ — คือกุญแจรวม Master Key) + Master Key เดิม (ถ้ามี, ไม่บังคับ)
  *  5. Link identity ผ่าน RPC กลาง เพื่อไม่ให้ LINE/web แตก Key
- *  6. Redirect → /dashboard
+ *  6. Redirect → remembered target (lib/authRedirect.ts) or /dashboard
  *
  * ต้องตั้งค่าใน Vercel:
  *   VITE_LINE_LIFF_ID = LIFF App ID จาก LINE Developers Console
@@ -24,6 +24,7 @@ import { CourseNavbar } from "@/components/CourseNavbar";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { takePostAuthTarget } from "@/lib/authRedirect";
 import logoCreatr from "@/assets/logo-creatr365.png";
 
 const LIFF_ID = import.meta.env.VITE_LINE_LIFF_ID as string;
@@ -122,7 +123,10 @@ const Register = () => {
         description: `Master Key ของคุณคือ ${masterKey || "พร้อมใช้งานแล้ว"}`,
       });
       setStep("success");
-      setTimeout(() => navigate("/dashboard"), 1500);
+      // Back to where they were headed (e.g. a Live Notes clip) if a target
+      // was remembered before the LINE login; otherwise the Dashboard.
+      const target = takePostAuthTarget() ?? "/dashboard";
+      setTimeout(() => navigate(target), 1500);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       toast({ title: "เกิดข้อผิดพลาด", description: msg, variant: "destructive" });

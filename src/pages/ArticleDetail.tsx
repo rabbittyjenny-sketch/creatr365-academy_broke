@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +31,7 @@ const ArticleDetail: React.FC = () => {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -47,10 +48,12 @@ const ArticleDetail: React.FC = () => {
       .maybeSingle()
       .then(({ data }) => {
         if (!data) setNotFound(true);
+        // Live Notes have no article page: they play on /courses (login-gated, tracked).
+        else if ((data as unknown as Article).kind === 'live_note') { navigate(`/courses?note=${encodeURIComponent(slug)}`, { replace: true }); return; }
         else setArticle(data as unknown as Article);
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, navigate]);
 
   if (loading) return (
     <div className="bg-[#080808] min-h-screen flex items-center justify-center">

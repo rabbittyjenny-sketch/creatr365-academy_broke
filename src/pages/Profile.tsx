@@ -6,7 +6,11 @@ import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
-import { Loader2, Check, User, Upload } from 'lucide-react';
+import { Loader2, Check, User, Upload, Lock } from 'lucide-react';
+import {
+  GENDERS, AGE_RANGES, OCCUPATIONS, OCCUPATION_OTHER, PROVINCES, PROVINCE_ABROAD,
+  isThaiName, isEnglishName, missingProfileFields,
+} from '@/lib/profileFields';
 
 /**
  * Student-facing account page.
@@ -15,10 +19,13 @@ import { Loader2, Check, User, Upload } from 'lucide-react';
  * - Avatar, display name, email — the baseline every mainstream account
  *   page carries (GitHub, Google, Discord all show exactly these three
  *   before anything else).
- * - Date of birth, gender/age range/occupation — DOB is new; the other
- *   three already existed as a one-time marketing-survey capture gating a
- *   free Toolbox download (see Toolbox.tsx) and are now also editable here
- *   so a student isn't stuck with whatever they picked once in a popup.
+ * - Real names in Thai and English — printed on the Thai / English
+ *   certificates. Locked once a completion record exists (DB trigger
+ *   lock_certificate_names); after that only an admin can change them.
+ * - Gender, age range, occupation, province — required, and the ONLY place
+ *   they are collected. Live Notes / Toolbox statistics copy them from
+ *   profiles on the database side; no other page asks for them again.
+ *   Date of birth stays optional (statistics use age range).
  * - A member ID, shown under a plain, student-facing label ("รหัสสมาชิก"),
  *   never as "Master Key" — that term is internal/back-office only. This
  *   is the same identifier already used everywhere else (student_id), just
@@ -37,8 +44,6 @@ import { Loader2, Check, User, Upload } from 'lucide-react';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const isSyntheticEmail = (email: string) => /^line_.+@line\.creatr365\.com$/i.test(email);
-const GENDERS = ['หญิง', 'ชาย', 'อื่น ๆ'];
-const AGE_RANGES = ['ต่ำกว่า 18', '18-24', '25-34', '35-44', '45-54', '55+'];
 
 const Profile: React.FC = () => {
   useDarkPage();
@@ -57,7 +62,14 @@ const Profile: React.FC = () => {
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const [ageRange, setAgeRange] = useState('');
-  const [occupation, setOccupation] = useState('');
+  const [occupationChoice, setOccupationChoice] = useState('');
+  const [occupationOther, setOccupationOther] = useState('');
+  const [province, setProvince] = useState('');
+  const [firstNameTh, setFirstNameTh] = useState('');
+  const [lastNameTh, setLastNameTh] = useState('');
+  const [firstNameEn, setFirstNameEn] = useState('');
+  const [lastNameEn, setLastNameEn] = useState('');
+  const [namesLocked, setNamesLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -71,19 +83,32 @@ const Profile: React.FC = () => {
       setCurrentEmail(email);
       setEmailInput(isSyntheticEmail(email) ? '' : email);
 
-      const [{ data: prof }, { data: acct }] = await Promise.all([
+      const [{ data: prof }, { data: acct }, { count: certCount }] = await Promise.all([
         supabase.from('profiles')
-          .select('display_name,avatar_url,date_of_birth,gender,age_range,occupation')
+          .select('display_name,avatar_url,date_of_birth,gender,age_range,occupation,province,first_name_th,last_name_th,first_name_en,last_name_en')
           .eq('user_id', session.user.id).maybeSingle(),
         supabase.from('user_accounts').select('student_id,registered_at').eq('email', email.toLowerCase()).maybeSingle(),
+        supabase.from('completion_records').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id),
       ]);
-      const p = prof as { display_name: string | null; avatar_url: string | null; date_of_birth: string | null; gender: string | null; age_range: string | null; occupation: string | null } | null;
+      const p = prof as {
+        display_name: string | null; avatar_url: string | null; date_of_birth: string | null;
+        gender: string | null; age_range: string | null; occupation: string | null; province: string | null;
+        first_name_th: string | null; last_name_th: string | null; first_name_en: string | null; last_name_en: string | null;
+      } | null;
       setDisplayName(p?.display_name || '');
       setAvatarUrl(p?.avatar_url || null);
       setDob(p?.date_of_birth || '');
       setGender(p?.gender || '');
       setAgeRange(p?.age_range || '');
-      setOccupation(p?.occupation || '');
+      const occ = p?.occupation || '';
+      if ((OCCUPATIONS as readonly string[]).includes(occ)) setOccupationChoice(occ);
+      else if (occ) { setOccupationChoice(OCCUPATION_OTHER); setOccupationOther(occ); }
+      setProvince(p?.province || '');
+      setFirstNameTh(p?.first_name_th || '');
+      setLastNameTh(p?.last_name_th || '');
+      setFirstNameEn(p?.first_name_en || '');
+      setLastNameEn(p?.last_name_en || '');
+      setNamesLocked((certCount ?? 0) > 0);
       const acctRow = acct as { student_id: string; registered_at: string } | null;
       setStudentId(acctRow?.student_id ?? null);
       setRegisteredAt(acctRow?.registered_at ?? null);
@@ -130,18 +155,43 @@ const Profile: React.FC = () => {
       return;
     }
 
+    const occupation = occupationChoice === OCCUPATION_OTHER ? occupationOther.trim() : occupationChoice;
+    const missing = missingProfileFields({
+      display_name: displayName, first_name_th: firstNameTh, last_name_th: lastNameTh,
+      first_name_en: firstNameEn, last_name_en: lastNameEn,
+      gender, age_range: ageRange, occupation, province,
+    });
+    if (missing.length) {
+      setError('กรุณากรอกให้ครบและถูกต้อง: ' + missing.join(', '));
+      return;
+    }
+
     setSaving(true);
     try {
-      const { error: profErr } = await supabase.from('profiles')
-        .update({
-          display_name: displayName.trim() || null,
-          date_of_birth: dob || null,
-          gender: gender || null,
-          age_range: ageRange || null,
-          occupation: occupation.trim() || null,
-        })
-        .eq('user_id', userId);
-      if (profErr) throw profErr;
+      const update: Record<string, string | null> = {
+        display_name: displayName.trim() || null,
+        date_of_birth: dob || null,
+        gender: gender || null,
+        age_range: ageRange || null,
+        occupation: occupation || null,
+        province: province || null,
+      };
+      // Locked names are left out entirely, so saving other fields never
+      // trips the database lock.
+      if (!namesLocked) {
+        update.first_name_th = firstNameTh.trim();
+        update.last_name_th = lastNameTh.trim();
+        update.first_name_en = firstNameEn.trim();
+        update.last_name_en = lastNameEn.trim();
+      }
+      const { error: profErr } = await supabase.from('profiles').update(update).eq('user_id', userId);
+      if (profErr) {
+        if (profErr.message.includes('CERT_NAME_LOCKED')) {
+          setNamesLocked(true);
+          throw new Error('ชื่อนี้ใช้ออกใบประกาศแล้ว กรุณาติดต่อทีมงานเพื่อแก้ไข');
+        }
+        throw profErr;
+      }
 
       if (emailChanged) {
         const { error: emailErr } = await supabase.auth.updateUser({ email: trimmedEmail });
@@ -241,7 +291,9 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="profile-name" className={fieldLabel}>ชื่อที่แสดง</label>
+            <label htmlFor="profile-name" className={fieldLabel}>
+              ชื่อที่แสดงในระบบ <span className="text-destructive">*</span>
+            </label>
             <input
               id="profile-name"
               value={displayName}
@@ -261,12 +313,57 @@ const Profile: React.FC = () => {
           </div>
         </div>
 
+        {/* Certificate names */}
+        <div className="space-y-4 sharp-card border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">ชื่อสำหรับใบประกาศ</p>
+            {namesLocked && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                <Lock className="w-3 h-3" aria-hidden="true" /> ล็อกแล้ว
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
+            {namesLocked
+              ? 'ชื่อนี้ใช้ออกใบประกาศแล้ว หากต้องแก้ไขกรุณาติดต่อทีมงาน'
+              : 'ใช้พิมพ์บนใบประกาศฉบับภาษาไทยและภาษาอังกฤษ กรอกตามบัตรประชาชนหรือพาสปอร์ต เมื่อออกใบประกาศแล้วจะแก้เองไม่ได้'}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {([
+              ['profile-fn-th', 'ชื่อจริง (ไทย)', firstNameTh, setFirstNameTh, 'สมชาย', isThaiName, 'ใช้อักษรไทย'],
+              ['profile-ln-th', 'นามสกุล (ไทย)', lastNameTh, setLastNameTh, 'ใจดี', isThaiName, 'ใช้อักษรไทย'],
+              ['profile-fn-en', 'First name (English)', firstNameEn, setFirstNameEn, 'Somchai', isEnglishName, 'ใช้อักษรอังกฤษ'],
+              ['profile-ln-en', 'Last name (English)', lastNameEn, setLastNameEn, 'Jaidee', isEnglishName, 'ใช้อักษรอังกฤษ'],
+            ] as const).map(([id, label, value, setter, ph, valid, hint]) => {
+              const invalid = !!value.trim() && !valid(value);
+              return (
+                <div key={id}>
+                  <label htmlFor={id} className={fieldLabel}>
+                    {label} <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id={id}
+                    value={value}
+                    onChange={e => setter(e.target.value)}
+                    placeholder={ph}
+                    disabled={namesLocked}
+                    aria-invalid={invalid}
+                    className={`${fieldInput} disabled:opacity-60 ${invalid ? 'border-destructive' : ''}`}
+                  />
+                  {invalid && <p className="text-[11px] text-destructive mt-1">{hint}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Personal info */}
         <div className="space-y-4 sharp-card border border-border bg-card p-5">
           <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">ข้อมูลส่วนตัว</p>
 
           <div>
-            <label htmlFor="profile-dob" className={fieldLabel}>วันเกิด</label>
+            <label htmlFor="profile-dob" className={fieldLabel}>วันเกิด (ไม่บังคับ)</label>
             <input
               id="profile-dob"
               type="date"
@@ -278,7 +375,7 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label className={fieldLabel}>เพศ</label>
+            <label className={fieldLabel}>เพศ <span className="text-destructive">*</span></label>
             <div className="flex gap-2">
               {GENDERS.map(g => (
                 <button key={g} onClick={() => setGender(g)} className={`${chipBtn(gender === g)} flex-1`}>{g}</button>
@@ -287,7 +384,7 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label className={fieldLabel}>ช่วงอายุ</label>
+            <label className={fieldLabel}>ช่วงอายุ <span className="text-destructive">*</span></label>
             <div className="flex flex-wrap gap-2">
               {AGE_RANGES.map(a => (
                 <button key={a} onClick={() => setAgeRange(a)} className={chipBtn(ageRange === a)}>{a}</button>
@@ -296,14 +393,40 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="profile-occupation" className={fieldLabel}>อาชีพ</label>
-            <input
+            <label htmlFor="profile-occupation" className={fieldLabel}>อาชีพ <span className="text-destructive">*</span></label>
+            <select
               id="profile-occupation"
-              value={occupation}
-              onChange={e => setOccupation(e.target.value)}
-              placeholder="เช่น ครีเอเตอร์, นักการตลาด, ฟรีแลนซ์"
+              value={occupationChoice}
+              onChange={e => setOccupationChoice(e.target.value)}
               className={fieldInput}
-            />
+            >
+              <option value="">เลือกอาชีพ</option>
+              {OCCUPATIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              <option value={OCCUPATION_OTHER}>อื่น ๆ (ระบุเอง)</option>
+            </select>
+            {occupationChoice === OCCUPATION_OTHER && (
+              <input
+                aria-label="ระบุอาชีพ"
+                value={occupationOther}
+                onChange={e => setOccupationOther(e.target.value)}
+                placeholder="ระบุอาชีพของคุณ"
+                className={`${fieldInput} mt-2`}
+              />
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="profile-province" className={fieldLabel}>จังหวัด <span className="text-destructive">*</span></label>
+            <select
+              id="profile-province"
+              value={province}
+              onChange={e => setProvince(e.target.value)}
+              className={fieldInput}
+            >
+              <option value="">เลือกจังหวัด</option>
+              {PROVINCES.map(pv => <option key={pv} value={pv}>{pv}</option>)}
+              <option value={PROVINCE_ABROAD}>{PROVINCE_ABROAD}</option>
+            </select>
           </div>
         </div>
 

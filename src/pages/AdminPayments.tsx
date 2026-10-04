@@ -13,6 +13,16 @@ interface Row {
   courses?: { title: string } | null;
 }
 
+// Toolbox Premium purchases share this page (same statuses, same Stripe
+// flow) so all money is reviewed in one place. Buyers get the file in
+// Dashboard › เอกสาร; this is the admin's record of it.
+type Source = 'courses' | 'toolbox';
+interface ToolboxRow {
+  id: string; user_id: string; status: string; amount_thb: number;
+  stripe_session_id: string | null; created_at: string; receipt_email: string | null;
+  toolbox_assets?: { title: string } | null;
+}
+
 // "abandoned" = an unpaid checkout that create-checkout closed when the
 // learner started a new one (kept for the audit trail, never revenue).
 const FILTER_TH = { all: 'ทั้งหมด', paid: 'ชำระแล้ว', free: 'ฟรี', pending: 'ค้างชำระ', abandoned: 'ยกเลิก/ไม่ชำระ' } as const;
@@ -21,11 +31,37 @@ const AdminPayments = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [rows, setRows] = useState<Row[]>([]);
+  const [source, setSource] = useState<Source>('courses');
   const [filter, setFilter] = useState<keyof typeof FILTER_TH>('all');
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     // Auth + admin role are enforced centrally by <RequireAdmin> in App.tsx.
+    if (source === 'toolbox') {
+      let tq = supabase.from('toolbox_purchases').select('*, toolbox_assets(title)').order('created_at', { ascending: false });
+      if (filter !== 'all') tq = tq.eq('status', filter);
+      const { data, error } = await tq;
+      if (error) toast({ title: 'โหลดรายการไม่สำเร็จ', description: error.message, variant: 'destructive' });
+      const tRows = (data as unknown as ToolboxRow[]) || [];
+      const uids = [...new Set(tRows.map(r => r.user_id))];
+      const names: Record<string, string> = {};
+      if (uids.length) {
+        const { data: profs } = await supabase.from('profiles')
+          .select('user_id,display_name,first_name_th,last_name_th').in('user_id', uids);
+        for (const p of profs || []) {
+          const full = [p.first_name_th, p.last_name_th].filter(Boolean).join(' ');
+          names[p.user_id] = full || p.display_name || '-';
+        }
+      }
+      // Same shape as the course table so one renderer serves both.
+      setRows(tRows.map(r => ({
+        id: r.id, user_id: r.user_id, course_id: '', status: r.status, amount_paid: r.amount_thb,
+        full_name: names[r.user_id] || null, phone: r.receipt_email, stripe_session_id: r.stripe_session_id,
+        created_at: r.created_at, courses: { title: r.toolbox_assets?.title || 'ไฟล์ Toolbox' },
+      })));
+      setLoading(false);
+      return;
+    }
     let q = supabase.from('course_enrollments').select('*, courses(title)').order('created_at',{ascending:false});
     if (filter !== 'all') q = q.eq('status', filter);
     const { data, error } = await q;
@@ -42,14 +78,20 @@ const AdminPayments = () => {
     document.documentElement.classList.add('dark');
     return () => document.documentElement.classList.remove('dark');
   }, []);
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [filter, source]);
 
   if (loading) return <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">Loading...</div>;
 
   return (
     <AdminLayout title="รายการการชำระเงิน" onSignOut={() => fullSignOut().then(() => navigate('/auth'))}>
+        <div className="flex gap-2 mb-3 flex-wrap">
+          {([['courses','หลักสูตร'],['toolbox','Toolbox Premium']] as const).map(([k,l])=>(
+            <Button key={k} size="sm" variant={source===k?'default':'outline'}
+              onClick={()=>{ setSource(k); if (k==='toolbox' && filter==='free') setFilter('all'); }}>{l}</Button>
+          ))}
+        </div>
         <div className="flex gap-2 mb-4 flex-wrap">
-          {(['all','paid','free','pending','abandoned'] as const).map(f=>(
+          {(source === 'toolbox' ? (['all','paid','pending','abandoned'] as const) : (['all','paid','free','pending','abandoned'] as const)).map(f=>(
             <Button key={f} size="sm" variant={filter===f?'default':'outline'} onClick={()=>setFilter(f)}>{FILTER_TH[f]}</Button>
           ))}
         </div>
@@ -63,8 +105,8 @@ const AdminPayments = () => {
             <thead className="bg-muted/50 text-xs">
               <tr>
                 <th className="text-left p-3">วันที่</th>
-                <th className="text-left p-3">หลักสูตร</th>
-                <th className="text-left p-3">ผู้สมัคร</th>
+                <th className="text-left p-3">{source === 'toolbox' ? 'ไฟล์' : 'หลักสูตร'}</th>
+                <th className="text-left p-3">{source === 'toolbox' ? 'ผู้ซื้อ' : 'ผู้สมัคร'}</th>
                 <th className="text-left p-3">ยอด</th>
                 <th className="text-left p-3">สถานะ</th>
                 <th className="text-left p-3">Stripe</th>

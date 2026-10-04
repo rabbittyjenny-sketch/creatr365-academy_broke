@@ -76,6 +76,14 @@ interface DownloadEvent {
   at: string;
 }
 
+interface ToolboxPurchaseDetail {
+  id: string;
+  title: string;
+  status: string;
+  amount_thb: number;
+  at: string;
+}
+
 interface StudentDetail {
   studentId: string;
   registeredAt: string | null;
@@ -84,6 +92,7 @@ interface StudentDetail {
   enrollments: EnrollmentDetail[];
   progress: CourseProgress[];
   downloads: DownloadEvent[];
+  toolboxPurchases: ToolboxPurchaseDetail[];
 }
 
 const money = (n: number | null) => (n == null ? '-' : `${n.toLocaleString('th-TH')} ฿`);
@@ -171,12 +180,12 @@ const AdminStudents: React.FC = () => {
 
       const ids = [...userIds];
       if (ids.length === 0) {
-        setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: [], enrollments: [], progress: [], downloads: [] });
+        setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: [], enrollments: [], progress: [], downloads: [], toolboxPurchases: [] });
         return;
       }
 
       // 2. Everything tied to those identities, in parallel.
-      const [{ data: enRows }, { data: resLogs }, { data: tbLogs }] = await Promise.all([
+      const [{ data: enRows }, { data: resLogs }, { data: tbLogs }, { data: tbBuys }] = await Promise.all([
         supabase.from('course_enrollments')
           .select('id,course_id,status,amount_paid,created_at,promo_code_id,courses(title),promo_codes(code,discount_type,discount_value)')
           .in('user_id', ids).order('created_at', { ascending: false }),
@@ -186,6 +195,9 @@ const AdminStudents: React.FC = () => {
         supabase.from('toolbox_downloads')
           .select('id,downloaded_at,toolbox_assets(title)')
           .in('user_id', ids).order('downloaded_at', { ascending: false }),
+        supabase.from('toolbox_purchases')
+          .select('id,status,amount_thb,created_at,paid_at,toolbox_assets(title)')
+          .in('user_id', ids).neq('status', 'abandoned').order('created_at', { ascending: false }),
       ]);
 
       type EnrollmentRow = {
@@ -283,7 +295,13 @@ const AdminStudents: React.FC = () => {
         })),
       ].sort((a, b) => b.at.localeCompare(a.at));
 
-      setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: ids, enrollments, progress, downloads });
+      type ToolboxBuyRow = { id: string; status: string; amount_thb: number; created_at: string; paid_at: string | null; toolbox_assets: { title: string } | null };
+      const toolboxPurchases: ToolboxPurchaseDetail[] = ((tbBuys as ToolboxBuyRow[] | null) || []).map(b => ({
+        id: b.id, title: b.toolbox_assets?.title || 'ไฟล์ Toolbox', status: b.status,
+        amount_thb: b.amount_thb, at: b.paid_at || b.created_at,
+      }));
+
+      setDetail({ studentId, registeredAt: earliestRegistered, displayName, userIds: ids, enrollments, progress, downloads, toolboxPurchases });
     } catch (e) {
       setError('โหลดข้อมูลไม่สำเร็จ: ' + (e instanceof Error ? e.message : 'unknown'));
     } finally {
@@ -475,7 +493,26 @@ const AdminStudents: React.FC = () => {
             </div>
 
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลด Toolbox (ฟรี)</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">การซื้อ Toolbox Premium</h2>
+              {(detail.toolboxPurchases ?? []).length === 0 ? (
+                <p className="text-sm text-white/40 mb-5">ยังไม่มีการซื้อ</p>
+              ) : (
+                <div className="rounded-md border border-white/10 divide-y divide-white/5 mb-5">
+                  {(detail?.toolboxPurchases ?? []).map(b => (
+                    <div key={b.id} className="px-3 py-2 flex items-center gap-3 text-sm">
+                      <span className="flex-1 min-w-0 truncate">{b.title}</span>
+                      <span className="shrink-0 text-xs font-mono">{money(b.amount_thb)}</span>
+                      <span className={`shrink-0 text-[10px] px-2 py-0.5 border ${b.status === 'paid'
+                        ? 'border-[#34A853]/30 text-[#34A853]' : 'border-[#D4A843]/30 text-[#D4A843]'}`}>
+                        {b.status === 'paid' ? 'ชำระแล้ว' : 'ค้างชำระ'}
+                      </span>
+                      <span className="shrink-0 font-mono text-xs text-white/50 w-36 text-right">{dateTh(b.at)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/50 mb-1.5">ประวัติการดาวน์โหลด Toolbox (ฟรีและ Premium)</h2>
               {toolboxLog.length === 0 ? (
                 <p className="text-sm text-white/40">ไม่มีประวัติการดาวน์โหลด</p>
               ) : (

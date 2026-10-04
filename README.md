@@ -335,6 +335,8 @@ Dashboard ต้องรู้ว่า user คือใคร
 
 # 9. STUDENT DASHBOARD
 
+> **อัปเดต 4 ต.ค. 2569:** Dashboard › เอกสาร แสดงไฟล์ Toolbox Premium ที่ซื้อแล้ว (`toolbox_purchases`) ข้างเอกสารคอร์ส และรองรับ `?section=resources` — ดู §41
+
 Route:
 
 `/dashboard`
@@ -747,6 +749,8 @@ Admin ต้องจัดการข้อมูลจริงใน Supabas
 
 # 20. ARTICLES
 
+> **อัปเดต 4 ต.ค. 2569:** `articles.kind` มีความหมายแยกกัน — `video` = คลิปกิจกรรมในหน้า Community, `live_note` = Live Notes ที่แสดงใน `/courses` เท่านั้น (ไม่ขึ้นใน `/articles`, เปิด `/articles/<slug>` ของ live_note จะถูกพาไป `/courses?note=`) · policy อ่านสาธารณะ = `is_active = true` — ดู §41
+
 Main routes:
 
 ```text
@@ -788,6 +792,8 @@ Supabase: articles
 ---
 
 # 21. STRIPE
+
+> **อัปเดต 4 ต.ค. 2569:** Stripe ขาย Toolbox Premium ด้วย (`toolbox-checkout` + branch `metadata.kind = 'toolbox'` ใน `stripe-webhook`) ใช้ pattern เดียวกับคอร์ส, log ลง `purchase_events` ชุดเดิม — flow คอร์สไม่เปลี่ยน ดู §41
 
 Stripe เป็นระบบเดิมที่มีอยู่แล้ว
 
@@ -1119,6 +1125,8 @@ EXPLORE (nav)
 ---
 
 ## 30.1 Toolbox — บังคับ login ก่อนโหลด (เป็นการตัดสินใจเชิงธุรกิจ ไม่ใช่บั๊ก)
+
+> **อัปเดต 4 ต.ค. 2569 (แทนที่บางส่วนของหัวข้อนี้):** ป๊อปอัปถามเพศ/อายุ/อาชีพใน Toolbox **ถูกถอดแล้ว** — ข้อมูลประชากรมาจาก `/profile` แหล่งเดียว และ trigger เติมให้ `toolbox_downloads` เอง · Toolbox มีทั้งแจกฟรีและ Premium · policy `toolbox-files` เปลี่ยนเป็นแบบเช็คการซื้อ · กฎ "บังคับ login" ยังอยู่เหมือนเดิม — ดู §41
 
 Toolbox = คลังไฟล์ฟรี (เทมเพลต/เอกสาร/รูปภาพ) route `/toolbox`, จัดการที่ `/admin/toolbox`
 
@@ -1567,6 +1575,8 @@ Query ตาราง `courses` ทั้งหมด (14 คอร์ส) พ�
 
 ## 39.2 หน้า `/profile` — ใหม่
 
+> **อัปเดต 4 ต.ค. 2569:** เจ้าของระบบสั่งเพิ่มชื่อ-นามสกุลไทย/อังกฤษ (ใช้ออกใบประกาศ) และจังหวัด เป็นฟิลด์บังคับ · อาชีพเปลี่ยนเป็นรายการให้เลือก · ข้อห้ามเรื่องเบอร์โทร/เลขบัตร/ที่อยู่ละเอียดยังใช้อยู่ — ดู §41
+
 ตรวจสอบก่อนแล้ว (grep ทั้ง `src/pages/`) ว่าไม่เคยมีหน้า profile ผู้ใช้แยกมาก่อน — มีแค่ header เล็กๆ ใน Dashboard ที่โชว์ชื่อ/Master Key เฉยๆ แก้ไขอะไรไม่ได้
 
 อ้างอิงจาก pattern ของระบบบัญชีผู้ใช้จริงที่มีเอกสารสาธารณะตรวจสอบได้ (Udemy account/profile settings — support.udemy.com): มีชื่อ, รูป, headline/bio ให้แก้ และ**ต้องมีอีเมลเสมอ**เป็นข้อมูลหลักของบัญชี — เอาเฉพาะ pattern "ต้องมีอีเมล" กับ "แก้ชื่อที่แสดงได้" มาใช้ ไม่เอาทั้งหมดของ Udemy เพราะโปรเจกต์นี้ไม่ใช่ marketplace ผู้สอน
@@ -1633,6 +1643,92 @@ Query ตาราง `courses` ทั้งหมด (14 คอร์ส) พ�
 * ยืนยัน migration ใหม่ apply เข้า production จริงแล้ว (query `information_schema.columns`/`pg_policies` เห็นคอลัมน์ + policy ใหม่จริง) และรัน `get_advisors` (security) เทียบก่อน/หลัง apply — ไม่มี finding ใหม่จากการเปลี่ยนแปลงรอบนี้ (finding ที่มีทั้งหมดเป็นของเดิมก่อนหน้า เช่น `search_path` ของฟังก์ชันอื่น ที่ไม่ได้อยู่ใน scope รอบนี้)
 
 **ยังไม่ได้ทำ (นอกขอบเขตที่รายงาน):** ไม่ได้ไล่แก้ path/contentType ของบัคเก็ตอื่นที่ไม่มีหลักฐานว่ามีปัญหา (เช่น `articles`/`profiles` avatar ถ้ามี) — README นี้ยังไม่พบโค้ด upload อื่นนอกเหนือ 6 จุดที่ระบุ (ยืนยันด้วย grep `.storage.from(` และ `type="file"` ทั้ง `src/` แล้ว) ถ้าพบจุดอัปโหลดอื่นภายหลัง ให้ใช้ helper `src/lib/uploadFile.ts` เดียวกันนี้ ไม่ต้องเขียนใหม่
+
+---
+
+# 41. LIVE NOTES + TOOLBOX PREMIUM + โปรไฟล์ชื่อจริง (4 ต.ค. 2569)
+
+> สถานะ ณ วันที่เขียน: **โค้ดเขียนเสร็จ ยังไม่ได้ push / migration ยังไม่ได้ apply กับ production / edge function ยังไม่ได้ deploy**
+> migration ทั้ง 3 ไฟล์ทดลองรันบน production แบบ `BEGIN … ROLLBACK` ผ่านแล้ว (ไม่มีอะไรค้าง) — ก่อนเชื่อว่าระบบนี้ทำงานจริง ให้ตรวจว่า apply แล้วหรือยัง (บทเรียนจาก §30.2)
+> ขั้นตอนขึ้นระบบ + รายการทดสอบ: `CHANGELOG_2026-10-04.md` · งานที่เหลือ: `Creatr365_TODO_Master.md` › PHASE 4
+
+## 41.1 ภาพรวมระบบหลังรอบนี้
+
+```text
+/courses
+  ├─ หลักสูตร (ตาราง courses — ของเดิม ไม่แตะ) แสดงหน้าละ 6, เลขหน้าใน ?page=
+  └─ Live Notes (articles.kind = 'live_note') การ์ดเลื่อนแนวนอนท้ายหน้า
+        กดการ์ด → ยังไม่ login → /auth (อีเมลหรือ LINE) → กลับมาเล่นคลิปเดิม
+                 → login แล้ว → เล่นในเว็บ (YouTube embed) → ดูจบ → การ์ดชวนไปหลักสูตรที่ผูกไว้
+        ทุกการเล่น → rpc log_live_note_view → content_views (สถิติ เห็นเฉพาะแอดมิน)
+
+/articles (COMMUNITY)
+  └─ คลิปกิจกรรม (articles.kind = 'video') บรรยากาศ/ข่าว/กิจกรรม เล่นในเว็บ ไม่ต้อง login ไม่เก็บสถิติ
+
+/toolbox
+  ├─ แจกฟรี  → login → ยอมรับเงื่อนไข (ครั้งแรก) → ดาวน์โหลดที่หน้านี้
+  └─ Premium → login → "ซื้อ" → Stripe (toolbox-checkout) → กลับมาที่ /dashboard?section=resources
+                ไฟล์อยู่ใน Dashboard › เอกสาร ข้างเอกสารคอร์ส ดาวน์โหลดซ้ำได้ที่นั่นเท่านั้น
+
+/profile  ชื่อ-นามสกุล ไทย/อังกฤษ (ใช้ออกใบประกาศ 2 ภาษา), เพศ, ช่วงอายุ, อาชีพ, จังหวัด
+          = แหล่งข้อมูลประชากรแหล่งเดียวของทั้งระบบ
+```
+
+## 41.2 Data model ใหม่/ที่เปลี่ยน
+
+| ตาราง / ส่วน | อะไร | migration |
+|---|---|---|
+| `profiles` | + `first_name_th/last_name_th/first_name_en/last_name_en/province` · trigger `lock_certificate_names` ล็อกชื่อเมื่อมี `completion_records` (แก้ได้เฉพาะแอดมิน) | `20261004100000_profile_identity_fields.sql` |
+| `toolbox_downloads` | + `province` · trigger `fill_download_demographics` เติมเพศ/อายุ/อาชีพ/จังหวัดจาก `profiles` เสมอ (ทับค่าที่ client ส่ง) | 〃 |
+| `articles` | + `video_url`, `related_course_id`, `duration_label` · kind ใหม่ `live_note` · policy อ่านสาธารณะเปลี่ยนเป็น `is_active = true` (เดิม `true` ทำให้ฉบับร่างหลุด) | `20261004100100_live_notes.sql` |
+| `content_views` | log การดู Live Notes (1 แถว/การเปิด player) + snapshot ประชากร · **ไม่มี insert/update policy** เขียนผ่าน `log_live_note_view()` (SECURITY DEFINER) เท่านั้น · อ่านได้เฉพาะแอดมิน | 〃 |
+| `toolbox_assets` | + `pricing_type` (`free`/`paid`), `price_thb`, `promo_price_thb`, `paid_details` + check constraint ราคา · policy ใหม่ให้ผู้ซื้อเห็นไฟล์ที่ซื้อแม้ถูกซ่อน | `20261004100200_toolbox_premium.sql` |
+| `toolbox_purchases` | สิทธิ์การซื้อ (`pending/paid/abandoned`) · 1 paid ต่อคนต่อไฟล์ · `asset_id ON DELETE RESTRICT` (ไฟล์ที่ขายแล้วลบไม่ได้ ให้ซ่อนแทน) | 〃 |
+| `purchase_events` | + `toolbox_asset_id`, `toolbox_purchase_id` + event `already_purchased` — audit log ชุดเดียวกับคอร์ส | 〃 |
+| `storage.objects` (`toolbox-files`) | policy เดิม "อ่านได้ทุกคนที่ login" → **ฟรี: login + ไฟล์เผยแพร่อยู่ · Premium: ต้องมี `toolbox_purchases.status='paid'`** | 〃 |
+
+Edge functions: `toolbox-checkout` (ใหม่: `create` / `verify`) · `stripe-webhook` (เพิ่ม branch `metadata.kind === 'toolbox'` ไว้ **ก่อน** branch คอร์ส)
+
+## 41.3 ไฟล์หลักฝั่งหน้าเว็บ (single source ของแต่ละเรื่อง)
+
+| เรื่อง | ไฟล์ |
+|---|---|
+| ตัวเลือกโปรไฟล์ (จังหวัด 77 + ต่างประเทศ, อาชีพ, ช่วงอายุ), validate ชื่อ, เช็คความครบ | `src/lib/profileFields.ts` |
+| กลับหน้าเดิมหลัง login (ทุกช่องทาง: อีเมล / LINE LIFF / ลิงก์ยืนยันอีเมล) | `src/lib/authRedirect.ts` |
+| อ่าน YouTube URL, ภาพปก, โหลด IFrame API | `src/lib/youtube.ts` |
+| เครื่องเล่นคลิปในเว็บ (Live Notes + คลิปกิจกรรม) | `src/components/live-notes/LiveNotePlayerDialog.tsx` |
+| ส่วน Live Notes ในหน้าหลักสูตร + deep link | `src/components/live-notes/LiveNotesSection.tsx` |
+| Admin: Live Notes (แท็บใน "เนื้อหา"), สถิติ, ลิงก์โปรโมท | `AdminArticles.tsx`, `components/admin/LiveNoteStatsPanel.tsx`, `components/admin/LiveNoteLinkMenu.tsx` |
+| Admin: สวิตช์ แจกฟรี/Premium | `AdminToolbox.tsx` |
+| Admin: ยอดขาย Toolbox / ประวัติซื้อรายคน | `AdminPayments.tsx` (แท็บ Toolbox Premium), `AdminStudents.tsx` |
+| สีประจำส่วนเป็น token | `tailwind.config.ts` › `colors.section.*` (`courses/toolbox/notes/ailab/creator/events`) |
+
+ลิงก์โปรโมท: `/courses?note=<slug>&src=<tiktok|facebook|instagram|youtube|line>` — `src` ถูกบันทึกเป็นแหล่งที่มาใน `content_views.source` (คัดลอกได้จากปุ่ม "ลิงก์" ใน Admin)
+
+## 41.4 กฎ — ห้ามทำ และเพราะอะไร
+
+1. **Live Notes ไม่ใช่หลักสูตร** — ห้ามเก็บใน `courses`, ห้ามเพิ่ม enrollment/บทเรียน/ข้อสอบ, ห้ามใช้คำว่า "หลักสูตร/บทเรียน" เรียกคลิป · หลักสูตร = มีบทเรียนแยก + ข้อสอบ (ฟรีหรือเสียเงินก็ได้) — เจ้าของระบบกำหนดให้สองอย่างนี้แยกกันชัด
+2. **ห้ามแสดง Live Notes ในหน้า Community** และห้ามเรียกคลิปใน Community ว่า "คลิปความรู้" (Community = คลิปกิจกรรม) — กันสับสนในอนาคต
+3. **ห้ามแก้การ์ดหลักสูตร / `AdminCourses.tsx`** เพื่องาน Live Notes — รอบนี้แตะ `Courses.tsx` แค่การแบ่งหน้า (slice) กับต่อ `<LiveNotesSection/>` ท้ายหน้า
+4. **ห้ามลิงก์ออกไป YouTube** — เล่นผ่าน `LiveNotePlayerDialog` (host `youtube-nocookie`, `playsinline` เพื่อ iOS/LINE) · คลิป Live Notes ตั้งเป็น Unlisted ได้ (การบังคับ login เป็นการกั้นแบบอ่อน คนที่ได้ลิงก์ YouTube ตรงยังดูนอกระบบได้ — รู้แล้ว ยอมรับแล้ว)
+5. **ห้ามให้ client เขียน `content_views` ตรง และห้ามถามข้อมูลประชากรซ้ำในหน้าไหนอีก** — ข้อมูลประชากรมาจาก `profiles` ผ่าน trigger/RPC ฝั่งฐานข้อมูลเท่านั้น (ป้องกันข้อมูลถูกปลอม + ผู้ใช้ไม่ต้องกรอกซ้ำ) · ป๊อปอัปถามเพศ/อายุ/อาชีพใน Toolbox ถูกถอดแล้วโดยตั้งใจ
+6. **ไฟล์ Premium ที่ซื้อแล้ว "บ้าน" คือ Dashboard › เอกสาร** (pattern เดียวกับ `course_resources`) — ห้ามเพิ่มปุ่มดาวน์โหลดซ้ำในหน้า Toolbox; การ์ดที่ซื้อแล้วพาไปแดชบอร์ด
+7. **Storage policy คือตัวล็อกจริง ไม่ใช่ปุ่มบนหน้าเว็บ** — ห้ามย้อนกลับไปเป็น "อ่านได้ทุกคนที่ login", ห้ามทำ `toolbox-files` เป็น public, ห้ามทำให้การซ่อนไฟล์ตัดสิทธิ์ผู้ซื้อ
+8. **การชำระเงิน Toolbox เลียนแบบคอร์ส** (pending → Stripe Checkout + `price_data` THB inline → webhook/verify → `purchase_events`) — ไม่ใช้ `stripe_price_id` เพราะคอร์สก็ไม่ใช้ · ห้ามย้าย branch toolbox ใน webhook ไปไว้หลัง branch คอร์ส
+9. **หลัง login ใช้ `authRedirect.ts` เสมอ** — ห้าม hardcode `navigate('/dashboard')` ในจุด login/สมัครใหม่ (ทำให้คนที่มาจากคลิปโปรโมทหลุด)
+10. **ดาวน์โหลดไฟล์ใช้ `createSignedUrl(path, 60, { download })` + `window.location.assign`** — ห้ามใช้ `window.open` หลัง `await` (LINE in-app browser และ iOS บล็อก) · แก้ปุ่มเอกสารคอร์สใน Dashboard ให้เป็นแบบนี้ด้วยแล้ว
+11. **ชื่อจริงล็อกหลังมีใบบันทึกการเรียนจบ** — อย่าลบ trigger เพื่อแก้ปัญหา "แก้ชื่อไม่ได้"; ให้แอดมินแก้แทน
+12. **สีและ hover: 1 พื้นที่ = 1 สี accent** — มาตรฐานล่าสุดคือระบบ sharp-card (commit `19ac127`, 21 ก.ย. 2569: มุมเหลี่ยม + เงาแข็งตอน hover) ที่ Explore/Discover/AiLab ใช้: ทุก block ใส่ class `section-accent` + `style={{'--hover-accent': X, '--section-accent': X}}` สีเดียวกัน เพราะ CSS กลางของเว็บ (`index.css`) ทำให้ทุก `p/span/a/button` ใน `.site-hover-scope` เปลี่ยนสีตอน hover และทุก `h1–h6` มีเส้นใต้วิ่ง — ถ้า block ไหนไม่ประกาศสี จะ fallback เป็นแดง แล้วไปปนกับป้าย/ปุ่มสีอื่นในพื้นที่เดียวกัน (อาการ "ตัวอักษรเปลี่ยนฟ้าแต่เส้นใต้แดง") · Dialog อยู่ใน portal นอก `.site-hover-scope` แต่ h1–h6 ยังโดน hover กลาง จึงต้องใส่ `section-accent` ที่ `DialogContent` ด้วย
+    * สีที่ใช้: Toolbox + Live Notes + คลิปกิจกรรม = `#4A7FB5` · หน้าหลักสูตร/Dashboard/Community = แดงตาม `data-accent="red"` เดิม (ไม่แตะ) · Admin = `#D4A843` (§30.3 สีทองสองค่าตั้งใจ ห้ามรวม) · อ้างอิง System A/B ใน `creatr365-content-system/references/visual_system.md`
+    * ปุ่มดาวน์โหลด Toolbox = ฟ้า `#4A7FB5` ตัวอักษรดำ (contrast 4.62:1 ผ่าน AA; ตัวขาวได้ 4.2 ไม่ผ่านที่ 11px)
+    * ตรวจจริงด้วย headless browser (ข้อมูล mock): hover หัวข้อ/การ์ด/เส้นบนการ์ดใน Live Notes และ Toolbox ได้ `rgb(74,127,181)` ทุกจุด, การ์ดหลักสูตรเดิมยังเป็นแดงตามหน้า
+
+## 41.5 ทดสอบแล้ว / ยังไม่ได้ทดสอบ
+
+* ✅ `npx tsc --noEmit` สะอาด · `vite build` ผ่าน · migration ทั้ง 3 ไฟล์ dry-run (`BEGIN…ROLLBACK`) บน production ผ่าน รวม policy storage และการ query `toolbox_assets` ในบทบาท `authenticated` (ไม่มี policy recursion)
+* ✅ `src/integrations/supabase/types.ts` แก้มือให้ตรง migration (ตาราง/คอลัมน์/RPC ใหม่) — **ต้องรัน `supabase gen types` หลัง apply แล้ว diff เทียบ**
+* ⏳ `Production verification pending`: กดใช้งานจริงในเบราว์เซอร์และแอป LINE, YouTube IFrame API บนมือถือ, Stripe ชำระจริง/บัตรทดสอบ, webhook toolbox, การพากลับหลังยืนยันอีเมล (ขึ้นกับ Redirect URL allow-list ของ Supabase)
+* ⏳ ลิงก์ "LINE OA (ล็อกอินอัตโนมัติ)" ใช้ได้เมื่อ Endpoint URL ของ LIFF = root ของเว็บ — `UNKNOWN / VERIFY`
 
 ---
 

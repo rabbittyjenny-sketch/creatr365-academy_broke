@@ -82,7 +82,7 @@ const Explore: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">Toolbox</h2>
-                <p className="text-xs text-muted-foreground max-w-xs">เทมเพลต ไฟล์ และของฟรีให้โหลดไปใช้งานได้ทันที</p>
+                <p className="text-xs text-muted-foreground max-w-xs">เทมเพลตและไฟล์พร้อมใช้ มีทั้งแจกฟรีและ Premium</p>
               </div>
               <span className="absolute right-4 bottom-4 w-8 h-8 grid place-items-center bg-[#4A7FB5] text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
                 <ArrowUpRight className="motion-arrow w-3.5 h-3.5" aria-hidden="true" />

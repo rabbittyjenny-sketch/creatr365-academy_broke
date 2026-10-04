@@ -10,6 +10,17 @@ interface ToolboxAsset {
   id: string; title: string; description: string; category: string;
   cover_image_url: string | null; file_path: string; file_name: string | null;
   file_type: string | null; sort_order: number; is_active: boolean; download_count: number;
+  pricing_type: 'free' | 'paid'; price_thb: number | null; promo_price_thb: number | null; paid_details: string | null;
+}
+
+/** Returns an error message, or null when the pricing fields are valid. */
+function pricingError(f: Partial<ToolboxAsset>): string | null {
+  if (f.pricing_type !== 'paid') return null;
+  if (!f.price_thb || f.price_thb <= 0) return 'Premium ต้องมีราคามากกว่า 0 บาท';
+  if (f.promo_price_thb != null && (f.promo_price_thb <= 0 || f.promo_price_thb >= f.price_thb)) {
+    return 'ราคาโปรโมชันต้องมากกว่า 0 และน้อยกว่าราคาปกติ';
+  }
+  return null;
 }
 
 const CATEGORY_PRESETS = [
@@ -22,6 +33,7 @@ const CATEGORY_PRESETS = [
 const EMPTY: Partial<ToolboxAsset> = {
   title: '', description: '', category: 'downloadable', cover_image_url: '',
   file_path: '', file_name: '', file_type: '', sort_order: 0, is_active: true,
+  pricing_type: 'free', price_thb: null, promo_price_thb: null, paid_details: '',
 };
 
 /* ─── Editor modal ─────────────────────────────────────── */
@@ -160,7 +172,73 @@ const AssetEditor: React.FC<{
                 <input type="file" className="hidden" onChange={uploadFile} disabled={uploadingFile} />
               </label>
             </div>
-            <p className="text-white/20 text-xs mt-1">ไฟล์นี้อยู่ใน private bucket — ผู้ใช้ต้องล็อกอินก่อนจึงจะโหลดได้</p>
+            <p className="text-white/20 text-xs mt-1">ไฟล์อยู่ใน private bucket ผู้ใช้ต้องล็อกอินก่อน และถ้าเป็น Premium ต้องชำระเงินก่อนจึงจะโหลดได้</p>
+          </div>
+
+          {/* Free / Premium — the one switch that decides who can download.
+              Enforced by the toolbox-files storage policy, not just this UI. */}
+          <div className="border border-white/10 p-4 space-y-3">
+            <div>
+              <p className="text-xs text-white/40 font-medium mb-2">รูปแบบการให้ดาวน์โหลด</p>
+              <div className="inline-flex border border-white/10" role="group" aria-label="รูปแบบการให้ดาวน์โหลด">
+                {([['free', 'แจกฟรี'], ['paid', 'Premium (ชำระเงิน)']] as const).map(([v, l]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={form.pricing_type === v}
+                    onClick={() => set('pricing_type', v)}
+                    className={`px-4 py-2 text-xs font-semibold transition-colors ${form.pricing_type === v
+                      ? (v === 'paid' ? 'bg-[#D4A843] text-[#0D0D0D]' : 'bg-white/15 text-white')
+                      : 'text-white/40 hover:text-white'}`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+              <p className="text-white/25 text-xs mt-1.5">
+                {form.pricing_type === 'paid'
+                  ? 'ขายผ่าน Stripe เมื่อชำระแล้ว ไฟล์จะเข้าไปอยู่ในแดชบอร์ดผู้ซื้อ เมนู "เอกสาร" (ที่เดียวกับเอกสารหลักสูตร) ผู้ซื้อยังโหลดได้แม้ภายหลังจะซ่อนไฟล์นี้จาก Toolbox'
+                  : 'ผู้ใช้ต้องล็อกอินก่อนจึงจะโหลดได้'}
+              </p>
+            </div>
+
+            {form.pricing_type === 'paid' && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-white/40 font-medium block mb-1">ราคาปกติ (บาท) *</label>
+                    <input
+                      type="number" min={1} inputMode="numeric"
+                      className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
+                      value={form.price_thb ?? ''}
+                      onChange={e => set('price_thb', e.target.value === '' ? null : Math.round(Number(e.target.value)))}
+                      placeholder="290"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 font-medium block mb-1">ราคาโปรโมชัน (บาท)</label>
+                    <input
+                      type="number" min={1} inputMode="numeric"
+                      className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50"
+                      value={form.promo_price_thb ?? ''}
+                      onChange={e => set('promo_price_thb', e.target.value === '' ? null : Math.round(Number(e.target.value)))}
+                      placeholder="ไม่บังคับ"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-white/40 font-medium block mb-1">รายละเอียดที่ผู้ซื้อเห็นก่อนชำระเงิน</label>
+                  <textarea
+                    rows={3}
+                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 resize-none"
+                    value={form.paid_details || ''}
+                    onChange={e => set('paid_details', e.target.value)}
+                    placeholder={'เช่น ไฟล์ Canva 12 หน้า + PDF คู่มือ\nใช้ได้ในธุรกิจของคุณเอง ห้ามขายต่อ'}
+                  />
+                </div>
+                {pricingError(form) && <p className="text-xs text-[#FF6B7F]">{pricingError(form)}</p>}
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -191,7 +269,7 @@ const AssetEditor: React.FC<{
           <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-white/40 hover:text-white transition-colors">ยกเลิก</button>
           <button
             onClick={handleSave}
-            disabled={saving || !form.title || !form.file_path}
+            disabled={saving || !form.title || !form.file_path || !!pricingError(form)}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold bg-[#D4A843] text-black disabled:opacity-40 hover:opacity-90 transition-opacity"
           >
             <Save className="w-4 h-4" />
@@ -228,11 +306,19 @@ const AdminToolbox: React.FC = () => {
 
   const handleSave = async (form: Partial<ToolboxAsset>) => {
     if (!form.title || !form.file_path) return;
+    const pErr = pricingError(form);
+    if (pErr) { flash(pErr, false); return; }
+    const isPaid = form.pricing_type === 'paid';
     const payload = {
       title: form.title, description: form.description ?? '', category: form.category || 'downloadable',
       cover_image_url: form.cover_image_url || null, file_path: form.file_path,
       file_name: form.file_name || null, file_type: form.file_type || null,
       sort_order: form.sort_order ?? 0, is_active: form.is_active ?? true,
+      // Free items never keep stale price fields around.
+      pricing_type: isPaid ? 'paid' : 'free',
+      price_thb: isPaid ? form.price_thb ?? null : null,
+      promo_price_thb: isPaid ? form.promo_price_thb ?? null : null,
+      paid_details: isPaid ? (form.paid_details || '').trim() || null : null,
     };
     const { error } = form.id
       ? await supabase.from('toolbox_assets').update(payload).eq('id', form.id)
@@ -252,7 +338,13 @@ const AdminToolbox: React.FC = () => {
   const handleDelete = async (a: ToolboxAsset) => {
     if (!confirm(`ลบ "${a.title}"? ประวัติการดาวน์โหลดของไฟล์นี้จะถูกลบไปด้วย — ถ้าแค่ต้องการซ่อน ให้ใช้ปุ่มซ่อนแทน`)) return;
     const { error } = await supabase.from('toolbox_assets').delete().eq('id', a.id);
-    if (error) { flash('ลบไม่สำเร็จ: ' + error.message, false); return; }
+    if (error) {
+      // toolbox_purchases.asset_id is ON DELETE RESTRICT: sold files keep their purchase records.
+      flash(error.code === '23503'
+        ? 'ลบไม่ได้เพราะมีผู้ซื้อไฟล์นี้แล้ว ใช้ปุ่มซ่อนแทน (ผู้ที่ซื้อแล้วจะยังมีประวัติการซื้อ)'
+        : 'ลบไม่สำเร็จ: ' + error.message, false);
+      return;
+    }
     await supabase.storage.from('toolbox-files').remove([a.file_path]); // best-effort cleanup
     load();
   };
@@ -287,6 +379,7 @@ const AdminToolbox: React.FC = () => {
                 <tr className="bg-[#111] border-b border-white/8">
                   <th className="text-left px-5 py-3 text-white/30 text-xs font-semibold tracking-widest uppercase">ชื่อ</th>
                   <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden md:table-cell">หมวดหมู่</th>
+                  <th className="text-left px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden sm:table-cell">รูปแบบ</th>
                   <th className="text-center px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden sm:table-cell">ยอดโหลด</th>
                   <th className="text-center px-4 py-3 text-white/30 text-xs font-semibold uppercase hidden sm:table-cell">สถานะ</th>
                   <th className="text-right px-5 py-3 text-white/30 text-xs font-semibold uppercase">Actions</th>
@@ -312,6 +405,15 @@ const AdminToolbox: React.FC = () => {
                     </td>
                     <td className="px-4 py-4 hidden md:table-cell">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/8 text-white/50 uppercase">{a.category}</span>
+                    </td>
+                    <td className="px-4 py-4 hidden sm:table-cell">
+                      {a.pricing_type === 'paid' ? (
+                        <span className="text-xs font-semibold text-[#D4A843]">
+                          Premium ฿{(a.promo_price_thb ?? a.price_thb ?? 0).toLocaleString('th-TH')}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-white/40">แจกฟรี</span>
+                      )}
                     </td>
                     <td className="px-4 py-4 text-center hidden sm:table-cell">
                       <span className="inline-flex items-center gap-1 text-xs text-white/50">
@@ -339,7 +441,7 @@ const AdminToolbox: React.FC = () => {
                   </tr>
                 ))}
                 {assets.length === 0 && (
-                  <tr><td colSpan={5} className="text-center py-12 text-white/20">ยังไม่มีไฟล์ — กด "+ เพิ่มไฟล์ใหม่" เพื่อเริ่ม</td></tr>
+                  <tr><td colSpan={6} className="text-center py-12 text-white/20">ยังไม่มีไฟล์ — กด "+ เพิ่มไฟล์ใหม่" เพื่อเริ่ม</td></tr>
                 )}
               </tbody>
             </table>
