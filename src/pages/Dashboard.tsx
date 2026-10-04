@@ -11,6 +11,7 @@ import { tierLabel } from '@/lib/courseTag';
 import { DownloadConsentDialog } from '@/components/DownloadConsentDialog';
 import { ToolboxDownloadConsentDialog } from '@/components/ToolboxDownloadConsentDialog';
 import { useToast } from '@/hooks/use-toast';
+import { REG_STATUS_TH, type RegistrationStatus } from '@/lib/events';
 import { missingProfileFields, type ProfileIdentity } from '@/lib/profileFields';
 
 const LMS_URL = 'https://6course-quiz.vercel.app';
@@ -91,6 +92,9 @@ const Dashboard: React.FC = () => {
   const [consentedResourceIds, setConsentedResourceIds] = useState<Set<string>>(new Set());
   const [pendingResource, setPendingResource] = useState<ResourceRow | null>(null);
   const [premiumFiles, setPremiumFiles] = useState<PremiumFileRow[]>([]);
+  // Upcoming events this learner asked to join (requested/confirmed). The
+  // full page with meeting links is /my-events; this is the entry point.
+  const [myEvents, setMyEvents] = useState<{ status: RegistrationStatus; id: string; title: string; date: string; time: string }[]>([]);
   const [consentedToolboxIds, setConsentedToolboxIds] = useState<Set<string>>(new Set());
   const [pendingPremium, setPendingPremium] = useState<PremiumFileRow | null>(null);
   const [justBoughtAssetId, setJustBoughtAssetId] = useState<string | null>(null);
@@ -176,6 +180,17 @@ const Dashboard: React.FC = () => {
     const enRows: EnrollmentRow[] = (en as any) || [];
     setEnrollments(enRows);
     loadPremiumFiles(session.user.id);
+    supabase.from('event_registrations')
+      .select('status, events (id, title, date, time, target_date)')
+      .eq('user_id', session.user.id)
+      .in('status', ['requested', 'confirmed'])
+      .then(({ data }) => {
+        type R = { status: RegistrationStatus; events: { id: string; title: string; date: string; time: string; target_date: string } | null };
+        const now = Date.now();
+        setMyEvents(((data as unknown as R[]) || [])
+          .filter(r => r.events && new Date(r.events.target_date).getTime() > now - 3600_000)
+          .map(r => ({ status: r.status, id: r.events!.id, title: r.events!.title, date: r.events!.date, time: r.events!.time })));
+      });
 
     // Resolve the one shared Master Key. Never synthesize a second key in the browser.
     let sid: string | null = null;
@@ -523,6 +538,26 @@ const Dashboard: React.FC = () => {
           <div className="flex-1 min-w-0">
             {section === 'overview' && (
               <div className="space-y-6">
+                {myEvents.length > 0 && (
+                  <div className="sharp-card border border-border bg-card p-4" data-accent="red">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <p className="text-sm font-bold">กิจกรรมของฉัน</p>
+                      <Link to="/my-events" className="text-xs underline hover-shift">ดูทั้งหมด / ลิงก์เข้าร่วม</Link>
+                    </div>
+                    <ul className="space-y-2">
+                      {myEvents.map(ev => (
+                        <li key={ev.id}>
+                          <Link to={`/event/${ev.id}`} className="flex items-center justify-between gap-3 text-sm">
+                            <span className="min-w-0 truncate">{ev.title}</span>
+                            <span className="shrink-0 text-[11px] text-muted-foreground">
+                              {[ev.date, ev.time].filter(Boolean).join(' ')} · {REG_STATUS_TH[ev.status]}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {/* Profile completion — names are needed for certificates,
                     the rest feeds statistics silently (see lib/profileFields). */}
                 {profile && missingProfileFields(profile).length > 0 && (

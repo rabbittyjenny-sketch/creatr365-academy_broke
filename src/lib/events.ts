@@ -8,6 +8,24 @@
 /** LINE OA chat link — requests are finalised (and paid) with a real admin there. */
 export const LINE_CONTACT_URL = 'https://lin.ee/9Mw97Rc';
 
+/**
+ * LINE ID of the Official Account (the "@xxxx" shown in LINE Official
+ * Account Manager). When set (Vercel env VITE_LINE_OA_ID), registration uses
+ * LINE's URL scheme `https://line.me/R/oaMessage/{ID}/?{text}`, which opens
+ * the OA chat with the request text already typed in — no copy/paste.
+ * On desktop the same URL is shown as a QR code: scanning it carries the
+ * text to the phone, so the person never has to reopen the event on mobile.
+ * Unset → falls back to the old copy + lin.ee flow.
+ */
+export const LINE_OA_ID = (import.meta.env.VITE_LINE_OA_ID as string | undefined)?.trim() || '';
+
+export const lineOaMessageUrl = (text: string) =>
+  LINE_OA_ID ? `https://line.me/R/oaMessage/${encodeURIComponent(LINE_OA_ID)}/?${encodeURIComponent(text)}` : '';
+
+/** Phones/tablets open line.me/R links in the LINE app; desktops need the QR. */
+export const isMobileDevice = () =>
+  typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Line\//i.test(navigator.userAgent);
+
 export type RegistrationStatus = 'requested' | 'confirmed' | 'rejected' | 'cancelled';
 
 export const REG_STATUS_TH: Record<RegistrationStatus, string> = {

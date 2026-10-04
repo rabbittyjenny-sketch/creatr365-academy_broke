@@ -483,6 +483,11 @@ const ContentEditor: React.FC<{
                   value={form.target_url || ''}
                   onChange={e => set('target_url', e.target.value)}
                 />
+                {parseYouTubeId(form.target_url) && (
+                  <p className="text-xs text-[#D4A843] mt-1">
+                    ลิงก์นี้เป็น YouTube — หน้า Community จะเล่นในเว็บให้ แต่ถ้าเป็นคลิป แนะนำเลือกประเภท "คลิปกิจกรรม" เพื่อให้อยู่ในแถวคลิป
+                  </p>
+                )}
               </div>}
               <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">รูปปก</label>

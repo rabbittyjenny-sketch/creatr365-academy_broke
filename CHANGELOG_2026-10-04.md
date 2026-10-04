@@ -90,3 +90,13 @@ Toolbox
 5. ตรวจด้วย headless browser (mock data): การ์ด Live Notes 9 ใบได้สี gold→blue→green→copper→navy→purple→red→teal→gold, hover หัวข้อ/เส้นใต้ตรงสีการ์ด, กลุ่ม Community ตรงสีกลุ่ม, หัวข้อ dialog ไม่เปลี่ยนสี · `tsc` สะอาด · `vite build` ผ่าน
 
 ไฟล์รอบนี้: `stripe-webhook/index.ts`, `src/lib/accentPalette.ts` (ใหม่), `src/components/clips/ClipCarousel.tsx` (ใหม่), `src/lib/youtube.ts`, `LiveNotesSection.tsx`, `LiveNotePlayerDialog.tsx`, `Articles.tsx`, `index.css`, `CreatorTools.tsx`, `Enroll.tsx`, `Contact.tsx`, `ResetPassword.tsx`, `Register.tsx`, `RefundPolicy.tsx`, `Privacy.tsx`, `Terms.tsx`, `ArticleDetail.tsx`, `Profile.tsx`, เอกสาร README §41 / CLAUDE.md / TODO
+
+---
+
+## รอบ 3 (4 ต.ค. 2569 ช่วงค่ำ)
+
+1. **คลิปใน Community เด้งไป YouTube:** คลิป "clip promote" ถูกบันทึกเป็นประเภท `community` และใส่ลิงก์ไว้ในช่อง External URL (`target_url`) ไม่ใช่ช่อง YouTube URL → หน้า Community ตอนนี้เล่นในเว็บทุกการ์ดที่ลิงก์เป็น YouTube ไม่ว่าเก็บไว้ช่องไหน · Admin เตือนเมื่อใส่ลิงก์ YouTube ในช่อง External URL
+2. **หน้า Events แสดงกิจกรรมซ้ำ:** ไม่ใช่ข้อมูลซ้ำ — แถบเลื่อนอัตโนมัติ (`EventsCarousel`) คัดลอกรายการ 2 รอบเพื่อให้วนต่อเนื่อง ซึ่งเห็นซ้ำเมื่อมีกิจกรรมน้อย → เลื่อนอัตโนมัติเฉพาะเมื่อมีตั้งแต่ 3 กิจกรรม น้อยกว่านั้นแสดงครั้งเดียว
+3. **ส่งข้อความหาแอดมินทาง LINE จากคอมพิวเตอร์:** ใช้ LINE URL scheme `line.me/R/oaMessage/{LINE ID}/?{ข้อความ}` เปิดแชตพร้อมข้อความที่กรอกไว้ · บนคอมพิวเตอร์แสดง QR ของลิงก์นี้ สแกนด้วยมือถือแล้วข้อความตามไปด้วย ไม่ต้องเปิดกิจกรรมซ้ำบนมือถือ · **ต้องตั้ง Vercel env `VITE_LINE_OA_ID` = LINE ID ของ OA (@xxxx)** ถ้ายังไม่ตั้ง ระบบใช้วิธีคัดลอกแบบเดิม · เพิ่ม dependency `qrcode.react`
+4. **แดชบอร์ด:** การ์ด "กิจกรรมของฉัน" (รอยืนยัน/ยืนยันแล้ว ที่ยังไม่จบ) ลิงก์ไปหน้ากิจกรรม และ `/my-events` (หน้าที่แสดงลิงก์เข้าร่วมหลังยืนยัน) — เดิม `/my-events` มีลิงก์แค่ใน footer
+5. ตรวจด้วย headless browser: คลิกการ์ดคลิปประเภท community เปิดหน้าต่างเล่นในเว็บ (URL ไม่เปลี่ยน) · กิจกรรม 2 รายการแสดงอย่างละ 1 การ์ด · `tsc` สะอาด · build ผ่าน

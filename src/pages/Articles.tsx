@@ -55,7 +55,9 @@ const Articles: React.FC = () => {
   const renderCard = (a: ArticleRow, accent: string) => {
     const meta = KIND_META[a.kind] || KIND_META.news;
     const Icon = meta.Icon;
-    const videoId = a.kind === 'video' ? parseYouTubeId(a.video_url) : null;
+    // Any card whose link is YouTube plays in-site — including clips saved
+    // under another type with the link in "External URL" (target_url).
+    const videoId = parseYouTubeId(a.video_url) ?? parseYouTubeId(a.target_url);
     const isInternal = !!a.body || a.target_url.startsWith('/');
     const href = isInternal ? `/articles/${a.slug}` : a.target_url;
     const cover = a.cover_image_url || (videoId ? youTubeThumb(videoId) : null);
@@ -92,7 +94,7 @@ const Articles: React.FC = () => {
     // Clips play inside the site — no login needed for Community clips.
     if (videoId) {
       return (
-        <button key={a.id} type="button" className="text-left w-full" onClick={() => setPlaying({ ...a, related_course: null })}>
+        <button key={a.id} type="button" className="text-left w-full" onClick={() => setPlaying({ ...a, video_url: a.video_url || a.target_url, related_course: null })}>
           {CardContent}
         </button>
       );
