@@ -5,15 +5,15 @@ import { Mail, Globe } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 
 const LINE_QR_URL = 'https://ik.imagekit.io/ideas365logo/L_926gxgxq_BW-1.png?updatedAt=1774500421226';
-const LINE_ICON_URL = '/images/icon-line-w.png';
+const LINE_ICON_URL = '/images/icon-Line-glass.png';
 
 // Icon files live at /public/images/<name> — drop each PNG in there with
 // these exact names and the button picks it up automatically.
 const SOCIAL_LINKS = [
-  { name: 'Instagram', href: 'https://www.instagram.com/creatr365/', icon: '/images/icon-ig-w.png' },
-  { name: 'Facebook', href: 'https://www.facebook.com/creatr365/', icon: '/images/icon-fb-w.png' },
-  { name: 'YouTube', href: 'https://www.youtube.com/@Creatr365-Family', icon: '/images/icon-yt-w.png' },
-  { name: 'TikTok', href: 'https://www.tiktok.com/@creatr365', icon: '/images/icon-tt-w.png' },
+  { name: 'Instagram', href: 'https://www.instagram.com/creatr365/', icon: '/images/icon-IG-glass.png' },
+  { name: 'Facebook', href: 'https://www.facebook.com/creatr365/', icon: '/images/icon-FB-glass.png' },
+  { name: 'YouTube', href: 'https://www.youtube.com/@Creatr365-Family', icon: '/images/icon-YT-glass.png' },
+  { name: 'TikTok', href: 'https://www.tiktok.com/@creatr365', icon: '/images/icon-TT-glass.png' },
 ] as const;
 
 const Contact: React.FC = () => {
