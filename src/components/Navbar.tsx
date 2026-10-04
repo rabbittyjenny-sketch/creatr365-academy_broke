@@ -64,12 +64,12 @@ export const Navbar: React.FC = () => {
         transition: 'background 0.4s ease, backdrop-filter 0.4s ease, border-color 0.4s ease',
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="nav-shell h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
           <img
             src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png"
             alt="Creatr365"
-            className="h-7 w-auto"
+            className="nav-logo w-auto"
           />
         </Link>
 
@@ -133,7 +133,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile drawer — always white background for readability */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
+          <div className="nav-shell py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}

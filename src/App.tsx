@@ -58,6 +58,9 @@ const App = () => (
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/auth" element={<Auth />} />
+        {/* LIFF deep links: with Endpoint URL = …/auth, liff.line.me/{id}/courses?note=x
+            lands on /auth/courses?note=x — Auth signs in, then returns to /courses?note=x */}
+        <Route path="/auth/*" element={<Auth />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/contact" element={<Contact />} />

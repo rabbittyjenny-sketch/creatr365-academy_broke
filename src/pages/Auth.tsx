@@ -34,7 +34,19 @@ const Auth = () => {
   // lib/authRedirect.ts) when the query string was lost on the way — e.g. a
   // LIFF login round-trip or an email confirmation link opened later.
   const rawRedirect = new URLSearchParams(location.search).get('redirect') || '';
-  const redirectTo = isSafePath(rawRedirect) ? rawRedirect : (peekPostAuthTarget() ?? '/dashboard');
+  // LIFF URL path (liff.line.me/{id}/courses?note=x) arrives as
+  // /auth/courses?note=x — the LIFF Endpoint URL is …/auth and LINE appends
+  // the extra path to it. Everything after /auth is where to go next.
+  const liffPathTarget = (() => {
+    if (!location.pathname.startsWith('/auth/')) return '';
+    const q = new URLSearchParams(location.search);
+    [...q.keys()].filter(k => k.startsWith('liff.')).forEach(k => q.delete(k));
+    const qs = q.toString();
+    return `${location.pathname.slice('/auth'.length)}${qs ? `?${qs}` : ''}`;
+  })();
+  const redirectTo = isSafePath(rawRedirect) ? rawRedirect
+    : isSafePath(liffPathTarget) ? liffPathTarget
+    : (peekPostAuthTarget() ?? '/dashboard');
   const isLiveNoteLink = redirectTo.startsWith('/courses?note=');
 
   // FIX: call useLiff hook properly (was using liff as bare global)
@@ -42,6 +54,11 @@ const Auth = () => {
 
   // Redirect if already logged in
   useEffect(() => {
+    // While LIFF still has to move us to the secondary redirect URL
+    // (?liff.state=…), changing the URL would break the LIFF hand-off — wait
+    // for liff.init() first (LINE Developers: "Process URL changes after
+    // liff.init() completes").
+    if (new URLSearchParams(location.search).has('liff.state') && !liff.ready) return;
     const go = () => { clearPostAuthTarget(); navigate(redirectTo, { replace: true }); };
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) go();
@@ -50,7 +67,7 @@ const Auth = () => {
       if (session) go();
     });
     return () => subscription.unsubscribe();
-  }, [navigate, redirectTo]);
+  }, [navigate, redirectTo, liff.ready, location.search]);
 
   // Auto sign-in when LIFF is ready
   useEffect(() => {

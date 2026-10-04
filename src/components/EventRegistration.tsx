@@ -57,7 +57,7 @@ async function copyText(text: string) {
   }
 }
 
-const inputCls = 'w-full border border-[#1A1A1A] bg-white px-3 py-2.5 text-[15px] text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#FA76FF]';
+const inputCls = 'w-full border border-[#1A1A1A] bg-white px-3 py-2.5 text-[15px] text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#C0567A]';
 
 export const EventRegistration: React.FC<Props> = ({
   eventId, eventTitle, eventDate, window: regWindow, onChanged, onAuthRequired, className = '',
@@ -165,7 +165,7 @@ export const EventRegistration: React.FC<Props> = ({
       <button onClick={onClick} disabled={disabled}
         className={`flex h-[50px] justify-center items-center gap-2.5 border relative px-2.5 py-3.5 border-solid transition-all duration-300 ease-in-out w-[calc(100%-50px)] z-10 ${disabled
           ? 'bg-gray-400 border-gray-400 cursor-not-allowed w-full'
-          : 'bg-[#1A1A1A] border-[#1A1A1A] group-hover:w-full group-hover:bg-[#FA76FF] group-hover:border-[#FA76FF]'}`}>
+          : 'bg-[#1A1A1A] border-[#1A1A1A] group-hover:w-full group-hover:bg-[#C0567A] group-hover:border-[#C0567A]'}`}>
         <span className={`text-white text-[13px] font-normal uppercase relative transition-colors duration-300 ${!disabled && 'group-hover:text-black'}`}>
           {label}
         </span>
@@ -188,7 +188,7 @@ export const EventRegistration: React.FC<Props> = ({
     body = (
       <div className="flex flex-col gap-2 w-full">
         <p className="text-[13px] text-[#1A1A1A]">
-          <span className="inline-block px-2 py-0.5 mr-2 bg-[#FA76FF] text-black text-[11px] uppercase">{REG_STATUS_TH.requested}</span>
+          <span className="inline-block px-2 py-0.5 mr-2 bg-[#C0567A] text-black text-[11px] uppercase">{REG_STATUS_TH.requested}</span>
           แอดมินจะยืนยันหลังคุยรายละเอียดทาง LINE
         </p>
         {primary('ส่งข้อความหาแอดมินทาง LINE', () => { setCopied(false); setLineOpen(true); })}
@@ -205,7 +205,7 @@ export const EventRegistration: React.FC<Props> = ({
           <span className="inline-block px-2 py-0.5 mr-2 bg-[#34A853] text-black text-[11px] uppercase">{REG_STATUS_TH.confirmed}</span>
           คุณได้รับการยืนยันที่นั่งแล้ว
         </p>
-        <Link to="/my-events" className="h-[50px] flex items-center justify-center bg-[#1A1A1A] text-white text-[13px] uppercase hover:bg-[#FA76FF] hover:text-black transition-colors">
+        <Link to="/my-events" className="h-[50px] flex items-center justify-center bg-[#1A1A1A] text-white text-[13px] uppercase hover:bg-[#C0567A] hover:text-black transition-colors">
           ดูรายละเอียดใน กิจกรรมของฉัน
         </Link>
       </div>
@@ -253,7 +253,7 @@ export const EventRegistration: React.FC<Props> = ({
             </label>
             {formError && <p className="text-[13px] text-red-600" role="alert">{formError}</p>}
             <button type="submit" disabled={saving}
-              className="h-[50px] bg-[#1A1A1A] text-white text-[13px] uppercase hover:bg-[#FA76FF] hover:text-black transition-colors disabled:opacity-50">
+              className="h-[50px] bg-[#1A1A1A] text-white text-[13px] uppercase hover:bg-[#C0567A] hover:text-black transition-colors disabled:opacity-50">
               {saving ? 'กำลังส่ง...' : mine?.status === 'requested' ? 'บันทึกการแก้ไข' : 'ส่งคำขอเข้าร่วม'}
             </button>
           </form>

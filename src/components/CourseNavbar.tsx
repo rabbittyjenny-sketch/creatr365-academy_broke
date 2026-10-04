@@ -37,19 +37,19 @@ export const CourseNavbar: React.FC = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="nav-shell h-16 flex items-center justify-between">
         <Link to="/" onClick={close} className="flex items-center gap-2">
           {/* Two logo variants, one per theme — swapped by pure CSS (.dark ancestor)
               so it never races with the page's own dark-mode toggle effect. */}
           <img
             src="https://ik.imagekit.io/ideas365logo/w-logo-side.png?updatedAt=1781551068906"
             alt="Creatr365"
-            className="navbar-logo-dark h-7 w-auto"
+            className="navbar-logo-dark nav-logo w-auto"
           />
           <img
             src="https://ik.imagekit.io/ideas365logo/C365-Logo1_1%20(2).png?updatedAt=1781349328070"
             alt="Creatr365"
-            className="navbar-logo-light h-12 w-auto"
+            className="navbar-logo-light nav-logo w-auto"
           />
         </Link>
 
@@ -92,7 +92,7 @@ export const CourseNavbar: React.FC = () => {
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden border-t border-border bg-background">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
+          <div className="nav-shell py-4 flex flex-col gap-1 text-[15px] font-medium tracking-[0.04em]">
             {MAIN_NAV.map((item) => (
               <Link
                 key={item.to}

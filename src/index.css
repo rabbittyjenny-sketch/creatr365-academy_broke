@@ -956,3 +956,21 @@ h4:hover::after, h5:hover::after, h6:hover::after,
 :is([role="dialog"], [role="alertdialog"]) :is(h1, h2, h3, h4, h5, h6)::after {
   display: none;
 }
+
+
+/* ── Navbar shell (Navbar + CourseNavbar share it) ──────────────────────────
+   Wider than page content (max-w-6xl) so the logo sits near the left edge on
+   large screens instead of drifting toward the middle; padding grows with
+   the screen. One logo height for every page and theme (was h-12 on light
+   course pages, h-7 elsewhere). */
+.nav-shell {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px)  { .nav-shell { padding-inline: 1.5rem; } }
+@media (min-width: 1024px) { .nav-shell { padding-inline: 2.5rem; } }
+@media (min-width: 1440px) { .nav-shell { padding-inline: 3.5rem; } }
+.nav-logo { height: 2rem; }
+@media (min-width: 1024px) { .nav-logo { height: 2.25rem; } }

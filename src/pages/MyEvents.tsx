@@ -36,7 +36,7 @@ interface Entry {
 }
 
 const STATUS_STYLE: Record<RegistrationStatus, string> = {
-  requested: 'bg-[#FA76FF] text-black',
+  requested: 'bg-[#C0567A] text-black',
   confirmed: 'bg-[#34A853] text-black',
   rejected: 'bg-[#1A1A1A] text-white',
   cancelled: 'bg-white text-[#1A1A1A]/60',
