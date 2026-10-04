@@ -34,13 +34,17 @@ export const EventsCarousel = () => {
 
   if (events.length === 0) return null;
 
-  // Duplicate the events array exactly twice for seamless loop
-  const multipliedEvents = [...events, ...events];
+  // The marquee needs the list twice for a seamless loop — but with only 1–2
+  // events the copy is on screen at the same time and reads as duplicates.
+  // Each card is 40vw (65vw on phones), so the row only overflows the screen
+  // from 3 events up; below that, show each event once without scrolling.
+  const marquee = events.length >= 3;
+  const multipliedEvents = marquee ? [...events, ...events] : events;
 
   return (
     <div className="w-full overflow-hidden py-12 pb-20 md:pb-24 bg-background">
       <div className="relative overflow-hidden">
-        <div className="flex gap-px w-max animate-scroll-left-fast will-change-[transform]">
+        <div className={marquee ? 'flex gap-px w-max animate-scroll-left-fast will-change-[transform]' : 'flex gap-px justify-center overflow-x-auto snap-x'}>
           {multipliedEvents.map((event, index) => (
             <div
               key={`${event.id}-${index}`}

@@ -1709,6 +1709,8 @@ Edge functions: `toolbox-checkout` (ใหม่: `create` / `verify`) · `strip
 
 **เพิ่มสินค้าที่ต้องจ่ายเงินชนิดใหม่ในอนาคต** (เช่น workshop เสียเงิน): ใช้ pattern เดียวกับคอร์ส/Toolbox — ตารางสิทธิ์ของตัวเอง (`<x>_purchases`: pending → paid/abandoned) · edge function สร้าง Checkout ใส่ `metadata.kind = '<x>'` · เพิ่ม branch ใน `stripe-webhook` ก่อน branch คอร์ส · log ทุกขั้นลง `purchase_events` (เพิ่มคอลัมน์ FK) · ของที่ซื้อแล้วไปแสดงใน Dashboard · เพิ่มแท็บใน Admin › การชำระเงิน · **อย่ารวมทุกอย่างไว้ใน `create-checkout` ตัวเดียว** (ฟังก์ชันคอร์สมีโปรโค้ด/ที่นั่ง/ปลดล็อกบทเรียนที่ไม่เกี่ยวกับสินค้าอื่น การรวมทำให้แก้ของใหม่แล้วกระทบการจ่ายเงินคอร์สที่ทำงานดีอยู่)
 
+**กิจกรรม (Events) — สถานะปัจจุบัน:** เมนู EVENTS และการ์ด Events ใน Explore ไปหน้าเดียวกัน (`/events`) · สมัครบนเว็บ (`event_registrations`: requested → confirmed/rejected/cancelled) · ผู้ที่ได้รับการยืนยันเห็นลิงก์เข้าร่วมใน `/my-events` (RLS ให้เห็นเฉพาะคนที่ confirmed) และมีการ์ด "กิจกรรมของฉัน" ใน Dashboard · ข้อความถึงแอดมินใช้ `line.me/R/oaMessage` (ต้องตั้ง `VITE_LINE_OA_ID`) + QR บนคอมพิวเตอร์ · แถบเลื่อนอัตโนมัติเลื่อนเฉพาะเมื่อมี ≥3 กิจกรรม
+
 ลิงก์โปรโมท: `/courses?note=<slug>&src=<tiktok|facebook|instagram|youtube|line>` — `src` ถูกบันทึกเป็นแหล่งที่มาใน `content_views.source` (คัดลอกได้จากปุ่ม "ลิงก์" ใน Admin)
 
 ## 41.4 กฎ — ห้ามทำ และเพราะอะไร

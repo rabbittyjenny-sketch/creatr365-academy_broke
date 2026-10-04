@@ -1,3 +1,4 @@
+import { QRCodeSVG } from 'qrcode.react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '@supabase/supabase-js';
@@ -5,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  LINE_CONTACT_URL, REG_STATUS_TH, WINDOW_TH, lineRequestMessage,
+  LINE_CONTACT_URL, REG_STATUS_TH, WINDOW_TH, lineRequestMessage, lineOaMessageUrl, isMobileDevice,
   type RegistrationStatus, type RegistrationWindow,
 } from '@/lib/events';
 
@@ -145,6 +146,10 @@ export const EventRegistration: React.FC<Props> = ({
 
   const lineMessage = lineRequestMessage(eventTitle, eventDate, mine ?? form);
 
+  // Prefilled-chat link (needs VITE_LINE_OA_ID); '' = old copy/paste flow.
+  const oaUrl = lineOaMessageUrl(lineMessage);
+  const onMobile = isMobileDevice();
+
   const copyAndOpenLine = async () => {
     setCopied(await copyText(lineMessage));
     window.open(LINE_CONTACT_URL, '_blank', 'noopener,noreferrer');
@@ -260,14 +265,31 @@ export const EventRegistration: React.FC<Props> = ({
           <DialogHeader>
             <DialogTitle>บันทึกคำขอแล้ว — ขั้นต่อไป: ส่งข้อความหาแอดมิน</DialogTitle>
             <DialogDescription className="text-[#1A1A1A]/60">
-              กดปุ่มด้านล่างเพื่อคัดลอกข้อความและเปิด LINE แล้ว <b>วางข้อความในแชต</b> แอดมินจะยืนยันที่นั่งให้หลังคุยรายละเอียด
+              {oaUrl
+                ? (onMobile
+                    ? <>กดปุ่มด้านล่าง แชต LINE กับแอดมินจะเปิดพร้อมข้อความนี้ให้แล้ว <b>กดส่งได้เลย</b></>
+                    : <>สแกน QR ด้วยกล้องหรือ LINE บนมือถือ แชตจะเปิดพร้อมข้อความนี้ให้แล้ว <b>กดส่งได้เลย</b> ไม่ต้องคัดลอก</>)
+                : <>กดปุ่มด้านล่างเพื่อคัดลอกข้อความและเปิด LINE แล้ว <b>วางข้อความในแชต</b> แอดมินจะยืนยันที่นั่งให้หลังคุยรายละเอียด</>}
             </DialogDescription>
           </DialogHeader>
+          {oaUrl && !onMobile && (
+            <div className="flex flex-col items-center gap-2 py-2">
+              <QRCodeSVG value={oaUrl} size={184} level="M" marginSize={2} aria-label="QR เปิดแชต LINE พร้อมข้อความ" />
+              <span className="text-[12px] text-[#1A1A1A]/60">ข้อความด้านล่างจะไปอยู่ในช่องพิมพ์ของ LINE อัตโนมัติ</span>
+            </div>
+          )}
           <pre className="whitespace-pre-wrap border border-[#1A1A1A]/20 bg-[#F5F5F5] p-3 text-[13px] font-sans">{lineMessage}</pre>
-          <button onClick={copyAndOpenLine}
-            className="h-[50px] bg-[#06C755] text-white text-[13px] uppercase hover:opacity-90 transition-opacity">
-            คัดลอกข้อความ + เปิด LINE
-          </button>
+          {oaUrl ? (
+            <a href={oaUrl} target="_blank" rel="noopener noreferrer"
+              className="h-[50px] flex items-center justify-center bg-[#06C755] text-white text-[13px] uppercase hover:opacity-90 transition-opacity">
+              {onMobile ? 'เปิดแชต LINE พร้อมข้อความ' : 'เปิด LINE บนเครื่องนี้'}
+            </a>
+          ) : (
+            <button onClick={copyAndOpenLine}
+              className="h-[50px] bg-[#06C755] text-white text-[13px] uppercase hover:opacity-90 transition-opacity">
+              คัดลอกข้อความ + เปิด LINE
+            </button>
+          )}
           {copied && <p className="text-[13px] text-[#1A1A1A]" role="status">คัดลอกแล้ว — วางในแชต LINE ได้เลย</p>}
           <button onClick={async () => setCopied(await copyText(lineMessage))}
             className="h-[42px] border border-[#1A1A1A] text-[12px] uppercase hover:bg-[#1A1A1A] hover:text-white transition-colors">
