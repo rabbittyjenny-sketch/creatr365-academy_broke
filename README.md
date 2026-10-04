@@ -1648,7 +1648,9 @@ Query ตาราง `courses` ทั้งหมด (14 คอร์ส) พ�
 
 # 41. LIVE NOTES + TOOLBOX PREMIUM + โปรไฟล์ชื่อจริง (4 ต.ค. 2569)
 
-> สถานะ ณ วันที่เขียน: **โค้ดเขียนเสร็จ ยังไม่ได้ push / migration ยังไม่ได้ apply กับ production / edge function ยังไม่ได้ deploy**
+> **อัปเดตสถานะ (4 ต.ค. 2569 รอบ 2):** push แล้ว (`01343e1`) · migration ทั้ง 3 ไฟล์ apply บน production แล้ว · deploy `toolbox-checkout` (v1) และ `stripe-webhook` (v7) แล้ว — สาเหตุที่ "ซื้อ Premium แล้วเข้า Stripe ไม่ได้" คือ `toolbox-checkout` ยังไม่เคยถูก deploy
+> ⚠️ **repo ตามหลัง production สำหรับ edge functions:** `stripe-webhook` ที่ deploy อยู่ (v6) มี `checkout.session.expired` + log `purchase_events` ซึ่งไฟล์ใน repo ไม่มี — v7 สร้างจากโค้ดที่ deploy จริง + branch Toolbox แล้ว sync กลับเข้า repo · **ก่อน deploy function ใดก็ตาม ให้ดึงโค้ดที่ deploy อยู่มาเทียบก่อน** (Supabase MCP `get_edge_function` หรือ Dashboard) ไม่งั้นจะถอยฟีเจอร์ของ production
+> สถานะเดิม ณ วันที่เขียน: **โค้ดเขียนเสร็จ ยังไม่ได้ push / migration ยังไม่ได้ apply กับ production / edge function ยังไม่ได้ deploy**
 > migration ทั้ง 3 ไฟล์ทดลองรันบน production แบบ `BEGIN … ROLLBACK` ผ่านแล้ว (ไม่มีอะไรค้าง) — ก่อนเชื่อว่าระบบนี้ทำงานจริง ให้ตรวจว่า apply แล้วหรือยัง (บทเรียนจาก §30.2)
 > ขั้นตอนขึ้นระบบ + รายการทดสอบ: `CHANGELOG_2026-10-04.md` · งานที่เหลือ: `Creatr365_TODO_Master.md` › PHASE 4
 
@@ -1703,6 +1705,10 @@ Edge functions: `toolbox-checkout` (ใหม่: `create` / `verify`) · `strip
 | Admin: ยอดขาย Toolbox / ประวัติซื้อรายคน | `AdminPayments.tsx` (แท็บ Toolbox Premium), `AdminStudents.tsx` |
 | สีประจำส่วนเป็น token | `tailwind.config.ts` › `colors.section.*` (`courses/toolbox/notes/ailab/creator/events`) |
 
+แถวการ์ดคลิป (Live Notes และคลิปกิจกรรม) ใช้คอมโพเนนต์เดียวกัน `src/components/clips/ClipCarousel.tsx` · คลิป YouTube Shorts (9:16) เปิดเป็นเครื่องเล่นแนวตั้งข้างรายละเอียด ไม่บีบเป็นแถบบางในกรอบ 16:9
+
+**เพิ่มสินค้าที่ต้องจ่ายเงินชนิดใหม่ในอนาคต** (เช่น workshop เสียเงิน): ใช้ pattern เดียวกับคอร์ส/Toolbox — ตารางสิทธิ์ของตัวเอง (`<x>_purchases`: pending → paid/abandoned) · edge function สร้าง Checkout ใส่ `metadata.kind = '<x>'` · เพิ่ม branch ใน `stripe-webhook` ก่อน branch คอร์ส · log ทุกขั้นลง `purchase_events` (เพิ่มคอลัมน์ FK) · ของที่ซื้อแล้วไปแสดงใน Dashboard · เพิ่มแท็บใน Admin › การชำระเงิน · **อย่ารวมทุกอย่างไว้ใน `create-checkout` ตัวเดียว** (ฟังก์ชันคอร์สมีโปรโค้ด/ที่นั่ง/ปลดล็อกบทเรียนที่ไม่เกี่ยวกับสินค้าอื่น การรวมทำให้แก้ของใหม่แล้วกระทบการจ่ายเงินคอร์สที่ทำงานดีอยู่)
+
 ลิงก์โปรโมท: `/courses?note=<slug>&src=<tiktok|facebook|instagram|youtube|line>` — `src` ถูกบันทึกเป็นแหล่งที่มาใน `content_views.source` (คัดลอกได้จากปุ่ม "ลิงก์" ใน Admin)
 
 ## 41.4 กฎ — ห้ามทำ และเพราะอะไร
@@ -1718,8 +1724,11 @@ Edge functions: `toolbox-checkout` (ใหม่: `create` / `verify`) · `strip
 9. **หลัง login ใช้ `authRedirect.ts` เสมอ** — ห้าม hardcode `navigate('/dashboard')` ในจุด login/สมัครใหม่ (ทำให้คนที่มาจากคลิปโปรโมทหลุด)
 10. **ดาวน์โหลดไฟล์ใช้ `createSignedUrl(path, 60, { download })` + `window.location.assign`** — ห้ามใช้ `window.open` หลัง `await` (LINE in-app browser และ iOS บล็อก) · แก้ปุ่มเอกสารคอร์สใน Dashboard ให้เป็นแบบนี้ด้วยแล้ว
 11. **ชื่อจริงล็อกหลังมีใบบันทึกการเรียนจบ** — อย่าลบ trigger เพื่อแก้ปัญหา "แก้ชื่อไม่ได้"; ให้แอดมินแก้แทน
-12. **สีและ hover: 1 พื้นที่ = 1 สี accent** — มาตรฐานล่าสุดคือระบบ sharp-card (commit `19ac127`, 21 ก.ย. 2569: มุมเหลี่ยม + เงาแข็งตอน hover) ที่ Explore/Discover/AiLab ใช้: ทุก block ใส่ class `section-accent` + `style={{'--hover-accent': X, '--section-accent': X}}` สีเดียวกัน เพราะ CSS กลางของเว็บ (`index.css`) ทำให้ทุก `p/span/a/button` ใน `.site-hover-scope` เปลี่ยนสีตอน hover และทุก `h1–h6` มีเส้นใต้วิ่ง — ถ้า block ไหนไม่ประกาศสี จะ fallback เป็นแดง แล้วไปปนกับป้าย/ปุ่มสีอื่นในพื้นที่เดียวกัน (อาการ "ตัวอักษรเปลี่ยนฟ้าแต่เส้นใต้แดง") · Dialog อยู่ใน portal นอก `.site-hover-scope` แต่ h1–h6 ยังโดน hover กลาง จึงต้องใส่ `section-accent` ที่ `DialogContent` ด้วย
-    * สีที่ใช้: Toolbox + Live Notes + คลิปกิจกรรม = `#4A7FB5` · หน้าหลักสูตร/Dashboard/Community = แดงตาม `data-accent="red"` เดิม (ไม่แตะ) · Admin = `#D4A843` (§30.3 สีทองสองค่าตั้งใจ ห้ามรวม) · อ้างอิง System A/B ใน `creatr365-content-system/references/visual_system.md`
+12. **สีและ hover: 1 พื้นที่ = 1 สี accent (สีของหน้าเมนูนั้น ๆ ไม่ใช่สีตามประเภทเนื้อหา)** — มาตรฐานล่าสุดคือระบบ sharp-card (commit `19ac127`, 21 ก.ย. 2569: มุมเหลี่ยม + เงาแข็งตอน hover) ที่ Explore/Discover/AiLab ใช้: ทุก block ใส่ class `section-accent` + `style={{'--hover-accent': X, '--section-accent': X}}` สีเดียวกัน เพราะ CSS กลางของเว็บ (`index.css`) ทำให้ทุก `p/span/a/button` ใน `.site-hover-scope` เปลี่ยนสีตอน hover และทุก `h1–h6` มีเส้นใต้วิ่ง — ถ้า block ไหนไม่ประกาศสี จะ fallback เป็นแดง แล้วไปปนกับป้าย/ปุ่มสีอื่นในพื้นที่เดียวกัน (อาการ "ตัวอักษรเปลี่ยนฟ้าแต่เส้นใต้แดง") · Dialog อยู่ใน portal นอก `.site-hover-scope` แต่ h1–h6 ยังโดน hover กลาง จึงต้องใส่ `section-accent` ที่ `DialogContent` ด้วย
+    * สีที่ใช้: Toolbox = `#4A7FB5` · หน้าหลักสูตร/Dashboard/โปรไฟล์/สมัคร/ติดต่อ = แดงตาม `data-accent="red"` · Community = สีของแต่ละกลุ่ม (คลิปกิจกรรมฟ้า, บทความทอง, ข่าวทองแดง) · Creator Tools = `#B87333` · หน้า Legal + บทความเดี่ยว = ทอง brand `#C0A060` · Admin = `#D4A843` (§30.3 สีทองสองค่าตั้งใจ ห้ามรวม — และห้ามใช้ `#D4A843` ในหน้าสาธารณะ) · อ้างอิง System A/B ใน `creatr365-content-system/references/visual_system.md`
+    * **ข้อยกเว้นเดียวที่เจ้าของอนุญาต:** การ์ด Live Notes ใต้หลักสูตร **ไล่สี System B วน 8 สีตามลำดับการ์ด** (`src/lib/accentPalette.ts` › `rotatingAccent`) — ตัว section/หัวข้อ Live Notes ยังเป็นแดงตามหน้าหลักสูตร · หน้าต่างเล่นคลิปใช้สีของการ์ดที่กดเปิด · สีที่ contrast ต่ำบนพื้นมืด (navy/purple/red/teal) ใช้ hex จริงกับเส้นขอบ/ปุ่ม แต่ข้อความใช้ tint สว่างขึ้นให้ถึง 4.5:1
+    * ห้ามใช้ `data-accent="blue|yellow|green"` (สี Google เดิม นอก brand) — เปลี่ยนเป็นแดงหมดแล้วใน Enroll/Contact/ResetPassword/Register
+    * หัวข้อในหน้าต่าง (dialog/sheet) **ไม่มี hover** (`index.css` ท้ายไฟล์) — เดิมเป็นแดง+เส้นใต้แดงเพราะ portal อยู่นอก `.site-hover-scope`
     * ปุ่มดาวน์โหลด Toolbox = ฟ้า `#4A7FB5` ตัวอักษรดำ (contrast 4.62:1 ผ่าน AA; ตัวขาวได้ 4.2 ไม่ผ่านที่ 11px)
     * ตรวจจริงด้วย headless browser (ข้อมูล mock): hover หัวข้อ/การ์ด/เส้นบนการ์ดใน Live Notes และ Toolbox ได้ `rgb(74,127,181)` ทุกจุด, การ์ดหลักสูตรเดิมยังเป็นแดงตามหน้า
 

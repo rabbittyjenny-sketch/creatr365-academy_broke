@@ -114,9 +114,10 @@ the current BIBLE's actual lesson table before retagging any QG.
 ## Live Notes / Toolbox Premium / profile — current state (2026-10-04)
 
 Full reference: README §41. Deploy/test checklist: `CHANGELOG_2026-10-04.md`.
-**Status: code done, NOT pushed, migrations NOT applied, edge functions NOT
-deployed** (migrations dry-run with BEGIN…ROLLBACK on prod passed). Verify
-before assuming any of this is live.
+Status (2026-10-04, round 2): pushed, migrations applied, `toolbox-checkout`
+v1 + `stripe-webhook` v7 deployed. **Edge functions in the repo can lag
+production** (stripe-webhook did) — fetch the deployed source and diff before
+any redeploy, or you will silently remove live behaviour.
 
 Do not regress:
 - **Live Notes ≠ courses.** `articles.kind = 'live_note'`, shown only at the
@@ -150,6 +151,9 @@ Do not regress:
   AiLab): `className="section-accent"` + `--hover-accent`/`--section-accent`
   set to one color — also on `DialogContent` (portals sit outside the hover
   scope but h1–h6 rules still apply). Admin keeps `#D4A843` (README §30.3).
+  Color = the page/menu's color, not the content type. Only exception: Live
+  Notes cards rotate System B (`lib/accentPalette.ts`). Dialog titles have no
+  hover (index.css). Never use `data-accent="blue|yellow|green"`.
 
 ## Document authority — check timestamps, this changes
 

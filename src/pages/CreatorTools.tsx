@@ -19,7 +19,7 @@ const CreatorTools: React.FC = () => {
       <SEOHead title="Creator Tools - Creatr365" description="Creator Tools กำลังจัดเตรียม — utility สำหรับสมาชิก Creatr365" />
       <CourseNavbar />
 
-      <section className="pt-28 pb-24 px-4 bg-background min-h-[70vh]">
+      <section className="section-accent pt-28 pb-24 px-4 bg-background min-h-[70vh]" style={{ '--hover-accent': '#B87333', '--section-accent': '#B87333' } as React.CSSProperties}>
         {/* Same fix as AiLab.tsx: banner gets the section's full width, not
             the narrower max-w-3xl reading column below it. */}
         <div className="max-w-6xl mx-auto mb-8">
@@ -48,9 +48,9 @@ const CreatorTools: React.FC = () => {
             <Wrench className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
             <p className="text-muted-foreground">
               ระหว่างรอ ลองดู{' '}
-              <Link to="/toolbox" className="underline hover-shift" data-accent="red">Toolbox</Link>{' '}
+              <Link to="/toolbox" className="underline hover-shift">Toolbox</Link>{' '}
               หรือ{' '}
-              <Link to="/courses" className="underline hover-shift" data-accent="red">Courses</Link>{' '}
+              <Link to="/courses" className="underline hover-shift">Courses</Link>{' '}
               ก่อนได้ค่ะ
             </p>
           </div>

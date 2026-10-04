@@ -44,10 +44,10 @@ const Terms: React.FC = () => {
     <>
       <SEOHead title="ข้อกำหนดการใช้บริการ — CREATR365" description="ข้อกำหนดและเงื่อนไขการใช้บริการของ Creatr365 — A Creative House for the Future of Live Commerce" />
       <CourseNavbar />
-      <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
+      <main className="section-accent bg-[#080808] min-h-screen pt-24 pb-24 px-6" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
         <div className="max-w-3xl mx-auto">
           <div className="mb-12">
-            <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Legal</span>
+            <span className="text-xs font-bold tracking-[0.3em] text-[#C0A060] uppercase">Legal</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">ข้อกำหนดการใช้บริการ</h1>
             <p className="text-white/40 text-sm">Terms of Service — อัปเดตล่าสุด กันยายน 2569</p>
           </div>
@@ -55,7 +55,7 @@ const Terms: React.FC = () => {
             {CLAUSES.map((c) => (
               <div key={c.num} className="rounded-2xl border border-white/8 bg-[#111] p-6">
                 <div className="flex items-start gap-4">
-                  <span className="text-xs font-mono text-[#D4A843]/60 mt-0.5 flex-shrink-0">{c.num}</span>
+                  <span className="text-xs font-mono text-[#C0A060]/60 mt-0.5 flex-shrink-0">{c.num}</span>
                   <div>
                     <h2 className="text-white font-semibold text-base mb-0.5">{c.th}</h2>
                     <p className="text-white/30 text-xs mb-3">{c.en}</p>

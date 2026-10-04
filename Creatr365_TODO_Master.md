@@ -641,7 +641,8 @@ join auth.users u on u.id = ur.user_id;
 ภาพรวม + กฎห้ามทำ: `README.md` §41 · ขั้นตอนขึ้นระบบ + รายการทดสอบ: `CHANGELOG_2026-10-04.md`
 
 ### 🔴 ต้องทำก่อนเปิดใช้
-- [P4-01] Apply migration 3 ไฟล์ `20261004100000/100100/100200` + deploy `toolbox-checkout`, `stripe-webhook` (ยังไม่ได้ทำ — โค้ดเขียนเสร็จแต่ยังไม่ขึ้น production)
+- [P4-01] ✅ (4 ต.ค. รอบ 2) migration apply แล้ว · deploy `toolbox-checkout` v1 + `stripe-webhook` v7 แล้ว — เหลือทดสอบซื้อจริงด้วยบัตรทดสอบ
+- [P4-07] เทียบโค้ด edge functions ที่ deploy อยู่กับ repo ทุกตัว (`create-checkout`, `verify-payment`, ฯลฯ) แล้ว sync เข้า repo — พบแล้วว่า `stripe-webhook` ใน repo ตามหลัง production
 - [P4-02] เพิ่ม Redirect URL `https://c365.ideas365.space/**` ใน Supabase Auth (ไม่งั้นลิงก์ยืนยันอีเมลพาคนกลับคลิปไม่ได้ เหลือแค่ fallback ในเบราว์เซอร์เดิม)
 - [P4-03] ทดสอบตามรายการใน CHANGELOG ทั้งเบราว์เซอร์ มือถือ และแอป LINE + ชำระด้วยบัตรทดสอบ Stripe
 - [P4-04] `supabase gen types` แล้ว diff กับ `types.ts` ที่แก้มือ
@@ -653,4 +654,4 @@ join auth.users u on u.id = ur.user_id;
 ### 🟢 ข้อจำกัดที่รู้แล้ว (ยังไม่ต้องแก้)
 - ลิงก์ Live Notes ที่แชร์บนโซเชียลจะขึ้น preview แบบทั่วไปของเว็บ ไม่ใช่ชื่อ/ภาพของคลิปนั้น — เว็บเป็น SPA และ crawler ของโซเชียลไม่รัน JS (เกี่ยวกับงาน SSG ที่ค้างไว้ใน `CHANGELOG_2026-09-23.md` ข้อ 2)
 - การบังคับ login ดู Live Notes เป็นการกั้นแบบอ่อน: ถ้ามีคนได้ลิงก์ YouTube ตรงยังดูนอกระบบได้ (ยอมรับแล้วสำหรับคลิปฟรีที่ใช้ดึงคน; ถ้าต้องกันจริงต้องย้ายไปผู้ให้บริการวิดีโอที่จำกัดโดเมนได้)
-- README §30.6 (ไม่มี audit trail การจ่ายเงิน) ล้าสมัยบางส่วน: ตอนนี้มี `purchase_events` แล้ว และ `create-checkout` ของคอร์ส log ทุกขั้น แต่ branch คอร์สใน `stripe-webhook` ยังไม่ log `webhook_paid` (branch Toolbox log แล้ว) — ถ้าจะปิดช่องนี้ให้เพิ่ม log ใน branch คอร์สแบบเดียวกัน
+- README §30.6 (ไม่มี audit trail การจ่ายเงิน) ล้าสมัยแล้ว: production มี `purchase_events` ครบทั้ง checkout, webhook_paid และ checkout_expired ของคอร์ส (ข้อความรอบแรกที่บอกว่า webhook คอร์สไม่ log เป็นการอ่านจากไฟล์ใน repo ที่ล้าสมัย — แก้แล้ว)

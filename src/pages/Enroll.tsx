@@ -108,7 +108,7 @@ const Enroll: React.FC = () => {
         <CourseNavbar />
         <div className="pt-28 px-4 text-center">
           <h1 className="text-3xl font-bold mb-4">ไม่พบหลักสูตร</h1>
-          <Link to="/courses" data-accent="green" className="nav-link text-primary">กลับไปดูหลักสูตรทั้งหมด</Link>
+          <Link to="/courses" data-accent="red" className="nav-link text-primary">กลับไปดูหลักสูตรทั้งหมด</Link>
         </div>
       </>
     );
@@ -162,15 +162,15 @@ const Enroll: React.FC = () => {
 
       <section className="pt-28 pb-16 px-4 bg-background min-h-screen">
         <div className="max-w-lg mx-auto">
-          <Link to={`/course/${course.slug}`} data-accent="green" className="inline-flex items-center gap-1 text-muted-foreground text-sm mb-8 transition-colors">
+          <Link to={`/course/${course.slug}`} data-accent="red" className="inline-flex items-center gap-1 text-muted-foreground text-sm mb-8 transition-colors">
             <ArrowLeft className="w-4 h-4" /> กลับไปรายละเอียดหลักสูตร
           </Link>
 
           <div className={`h-2 rounded-t-2xl ${colors.bg}`} />
           <div className="rounded-b-2xl border border-t-0 border-border bg-card p-8">
             <span className={`text-xs tracking-widest uppercase ${colors.text} font-medium`}>{course.tag}</span>
-            <h1 className="text-2xl font-bold mt-1 mb-1" data-accent="green">{course.title}</h1>
-            <p className="text-muted-foreground text-sm mb-2" data-accent="green">{course.subtitle} · {course.duration}</p>
+            <h1 className="text-2xl font-bold mt-1 mb-1" data-accent="red">{course.title}</h1>
+            <p className="text-muted-foreground text-sm mb-2" data-accent="red">{course.subtitle} · {course.duration}</p>
             <p className="text-xs text-muted-foreground mb-4">{LEARNING_LABELS[course.learning_type] || course.learning_type}</p>
             <p className={`text-2xl font-bold ${colors.text} mb-6`}>{isFreeCourse ? 'ฟรี' : course.price}</p>
 
@@ -212,7 +212,7 @@ const Enroll: React.FC = () => {
                     className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm font-mono" placeholder="EARLYBIRD" />
                 </div>
                 <button type="submit" disabled={loading}
-                  data-accent="green"
+                  data-accent="red"
                   className="btn-brand w-full py-3 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> กำลังดำเนินการ...</> : 'ยืนยันสมัครเรียน'}
                 </button>

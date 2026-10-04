@@ -83,10 +83,10 @@ const Privacy: React.FC = () => {
     <>
       <SEOHead title="นโยบายความเป็นส่วนตัว (PDPA) — CREATR365" description="นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคลตาม พ.ร.บ. PDPA ของ CREATR365" />
       <CourseNavbar />
-      <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
+      <main className="section-accent bg-[#080808] min-h-screen pt-24 pb-24 px-6" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
         <div className="max-w-3xl mx-auto">
           <div className="mb-12">
-            <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Legal</span>
+            <span className="text-xs font-bold tracking-[0.3em] text-[#C0A060] uppercase">Legal</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">นโยบายความเป็นส่วนตัว</h1>
             <p className="text-white/40 text-sm">Privacy Policy & PDPA Notice — อัปเดตล่าสุด มิถุนายน 2568</p>
           </div>
@@ -95,7 +95,7 @@ const Privacy: React.FC = () => {
             {SECTIONS.map((s) => (
               <div key={s.num} className="rounded-2xl border border-white/8 bg-[#111] p-6">
                 <div className="flex items-start gap-4 mb-4">
-                  <span className="text-xs font-mono text-[#D4A843]/60 mt-1">{s.num}</span>
+                  <span className="text-xs font-mono text-[#C0A060]/60 mt-1">{s.num}</span>
                   <div>
                     <h2 className="text-white font-semibold text-base">{s.th}</h2>
                     <p className="text-white/30 text-xs">{s.en}</p>

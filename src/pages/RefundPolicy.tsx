@@ -14,23 +14,23 @@ const RefundPolicy: React.FC = () => {
     <>
       <SEOHead title="นโยบายการคืนเงิน — CREATR365" description="นโยบายการคืนเงิน การเปลี่ยนคอร์ส และการยกเลิกของ CREATR365" />
       <CourseNavbar />
-      <main className="bg-[#080808] min-h-screen pt-24 pb-24 px-6">
+      <main className="section-accent bg-[#080808] min-h-screen pt-24 pb-24 px-6" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
         <div className="max-w-3xl mx-auto">
           <Link to="/" className="inline-flex items-center gap-1.5 text-white/40 text-sm mb-8">
             <ArrowLeft className="w-4 h-4" /> กลับหน้าแรก
           </Link>
           <div className="mb-6">
-            <span className="text-xs font-bold tracking-[0.3em] text-[#D4A843] uppercase">Legal</span>
+            <span className="text-xs font-bold tracking-[0.3em] text-[#C0A060] uppercase">Legal</span>
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-3 mb-2">นโยบายการคืนเงิน และการยกเลิก</h1>
             <p className="text-white/40 text-sm">Refund, Exchange & Cancellation Policy — อัปเดตล่าสุด กันยายน 2569</p>
           </div>
           <p className="text-white/45 text-sm leading-relaxed mb-10">
-            นโยบายนี้ใช้กับการซื้อคอร์สเรียนทุกประเภทบนแพลตฟอร์ม CREATR365 ทั้งรูปแบบออนไลน์ (Online) และรูปแบบเรียนในสถานที่ (Offline / Onsite) เงื่อนไขเกี่ยวกับบัญชีผู้ใช้ การใช้งานเนื้อหา และการโอนสิทธิ์ เป็นไปตาม<Link to="/terms" className="text-[#D4A843] underline underline-offset-2">ข้อกำหนดการใช้บริการ</Link>
+            นโยบายนี้ใช้กับการซื้อคอร์สเรียนทุกประเภทบนแพลตฟอร์ม CREATR365 ทั้งรูปแบบออนไลน์ (Online) และรูปแบบเรียนในสถานที่ (Offline / Onsite) เงื่อนไขเกี่ยวกับบัญชีผู้ใช้ การใช้งานเนื้อหา และการโอนสิทธิ์ เป็นไปตาม<Link to="/terms" className="text-[#C0A060] underline underline-offset-2">ข้อกำหนดการใช้บริการ</Link>
           </p>
 
           {/* Quick Summary */}
-          <div className="rounded-2xl border border-[#D4A843]/25 bg-[#D4A843]/05 p-6 mb-8">
-            <p className="text-[#D4A843] font-semibold text-sm mb-3">สรุปหลักสำคัญ</p>
+          <div className="rounded-2xl border border-[#C0A060]/25 bg-[#C0A060]/05 p-6 mb-8">
+            <p className="text-[#C0A060] font-semibold text-sm mb-3">สรุปหลักสำคัญ</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: 'แจ้งขอคืนเงินได้ภายใน', value: '7 วัน', sub: 'นับจากวันชำระเงิน' },
@@ -38,7 +38,7 @@ const RefundPolicy: React.FC = () => {
                 { label: 'ดำเนินการคืนเงินภายใน', value: '7–15 วัน', sub: 'ทำการ' },
               ].map(s => (
                 <div key={s.label} className="text-center">
-                  <p className="text-3xl font-black text-[#D4A843]">{s.value}</p>
+                  <p className="text-3xl font-black text-[#C0A060]">{s.value}</p>
                   <p className="text-white/70 text-xs mt-1">{s.label}</p>
                   <p className="text-white/30 text-xs">{s.sub}</p>
                 </div>
@@ -50,7 +50,7 @@ const RefundPolicy: React.FC = () => {
             {/* 01 Eligibility - Online */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">01</span> เงื่อนไขการคืนเงิน — คอร์สเรียนออนไลน์
+                <span className="text-xs font-mono text-[#C0A060]/60">01</span> เงื่อนไขการคืนเงิน — คอร์สเรียนออนไลน์
               </h2>
               <div className="space-y-2 mb-5">
                 {[
@@ -86,7 +86,7 @@ const RefundPolicy: React.FC = () => {
             {/* 02 Course Swap - Online */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">02</span> การเปลี่ยนคอร์สเรียน — คอร์สเรียนออนไลน์
+                <span className="text-xs font-mono text-[#C0A060]/60">02</span> การเปลี่ยนคอร์สเรียน — คอร์สเรียนออนไลน์
               </h2>
               <div className="space-y-2">
                 {[
@@ -106,7 +106,7 @@ const RefundPolicy: React.FC = () => {
             {/* 03 Offline / Onsite cancellation table */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">03</span> การยกเลิก — คอร์สเรียนออฟไลน์ (Onsite)
+                <span className="text-xs font-mono text-[#C0A060]/60">03</span> การยกเลิก — คอร์สเรียนออฟไลน์ (Onsite)
               </h2>
               <div className="overflow-hidden rounded-xl border border-white/8">
                 <table className="w-full text-sm">
@@ -135,7 +135,7 @@ const RefundPolicy: React.FC = () => {
             {/* 04 How to request */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-5 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">04</span> ขั้นตอนการขอคืนเงิน / เปลี่ยนคอร์ส
+                <span className="text-xs font-mono text-[#C0A060]/60">04</span> ขั้นตอนการขอคืนเงิน / เปลี่ยนคอร์ส
               </h2>
               <div className="space-y-5">
                 {[
@@ -144,7 +144,7 @@ const RefundPolicy: React.FC = () => {
                   { title: 'ดำเนินการคืนเงิน', desc: 'หากเข้าเงื่อนไข เงินจะถูกคืนผ่านช่องทางเดียวกับที่ชำระ ภายใน 7–15 วันทำการ' },
                 ].map((step, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <span className="w-6 h-6 rounded-full bg-[#D4A843]/15 text-[#D4A843] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                    <span className="w-6 h-6 rounded-full bg-[#C0A060]/15 text-[#C0A060] text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                     <div>
                       <p className="text-white/80 text-sm font-medium mb-0.5">{step.title}</p>
                       <p className="text-white/45 text-sm leading-relaxed">{step.desc}</p>
@@ -157,7 +157,7 @@ const RefundPolicy: React.FC = () => {
             {/* 05 Refund method & timeline */}
             <div className="rounded-2xl border border-white/8 bg-[#111] p-6">
               <h2 className="text-white font-semibold text-base mb-4 flex items-center gap-2">
-                <span className="text-xs font-mono text-[#D4A843]/60">05</span> วิธีการและระยะเวลาคืนเงิน
+                <span className="text-xs font-mono text-[#C0A060]/60">05</span> วิธีการและระยะเวลาคืนเงิน
               </h2>
               <div className="space-y-2 mb-5">
                 {[
@@ -193,7 +193,7 @@ const RefundPolicy: React.FC = () => {
 
           <div className="mt-8 p-5 rounded-2xl bg-[#111] border border-white/8">
             <p className="text-white/60 text-sm mb-1 font-medium">ต้องการขอคืนเงินหรือเปลี่ยนคอร์ส?</p>
-            <p className="text-white/40 text-xs">ติดต่อ <a href="mailto:c365-support@ideas365.space" className="text-[#D4A843]">c365-support@ideas365.space</a> พร้อมแนบ Order ID ของท่าน</p>
+            <p className="text-white/40 text-xs">ติดต่อ <a href="mailto:c365-support@ideas365.space" className="text-[#C0A060]">c365-support@ideas365.space</a> พร้อมแนบ Order ID ของท่าน</p>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/45 pt-8 border-t border-white/8">

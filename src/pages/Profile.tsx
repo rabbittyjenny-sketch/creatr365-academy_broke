@@ -246,7 +246,7 @@ const Profile: React.FC = () => {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingAvatar}
-              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#C0A060] text-[#0D0D0D] flex items-center justify-center border-2 border-background disabled:opacity-50"
+              className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center border-2 border-background disabled:opacity-50"
               aria-label="เปลี่ยนรูปโปรไฟล์"
             >
               {uploadingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -451,7 +451,7 @@ const Profile: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="sharp-btn w-full inline-flex items-center justify-center gap-1.5 text-sm font-bold tracking-wide px-4 py-3 bg-[#C0A060] text-[#0D0D0D] disabled:opacity-50"
+          className="btn-brand sharp-btn w-full inline-flex items-center justify-center gap-1.5 text-sm font-bold tracking-wide px-4 py-3 disabled:opacity-50"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           บันทึกข้อมูล

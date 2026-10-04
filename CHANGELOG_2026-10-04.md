@@ -77,3 +77,16 @@ Toolbox
 ## เรื่องที่เจ้าของระบบต้องตัดสินใจ
 
 - หน้า `RefundPolicy.tsx` ยังพูดถึงเฉพาะคอร์ส ควรเพิ่มว่าไฟล์ Toolbox Premium ขอคืนเงินไม่ได้หลังดาวน์โหลด ให้ตรงกับหน้าต่างยืนยันที่ระบบแสดงแล้ว (ยังไม่ได้แก้ เพราะเป็นข้อความเชิงนโยบาย)
+
+
+---
+
+## รอบ 2 (4 ต.ค. 2569 ช่วงบ่าย) — หลัง push `01343e1`
+
+1. **Toolbox Premium เข้า Stripe ไม่ได้ — แก้แล้ว:** สาเหตุคือ `toolbox-checkout` ไม่เคยถูก deploy (ไม่มี `purchase_events` ของ Toolbox สักแถว = ฟังก์ชันไม่เคยรัน) → deploy แล้ว (v1) · `stripe-webhook` deploy v7 โดยสร้างจาก **โค้ดที่ deploy จริง (v6)** + branch Toolbox (+ จัดการ `checkout.session.expired` ของ Toolbox) — ไฟล์ใน repo เดิมตามหลัง production จึงไม่ใช้ไฟล์ repo ตรง ๆ
+2. **Live Notes ไล่สี System B** วน 8 สีตามลำดับการ์ด (`src/lib/accentPalette.ts`), หัวข้อ section ตามหน้าหลักสูตร (แดง), หน้าต่างเล่นคลิปใช้สีของการ์ดที่เปิด
+3. **คลิปกิจกรรมใน Community** ใช้แถวการ์ดเดียวกับ Live Notes (`src/components/clips/ClipCarousel.tsx`) ไม่มีส่วนชวนไปหลักสูตร · เครื่องเล่นรองรับคลิปแนวตั้ง (Shorts) เป็น 9:16 ข้างรายละเอียด
+4. **ไล่แก้สีปนทั้งเว็บ:** หัวข้อใน dialog ไม่มี hover แล้ว (เดิมแดง+เส้นใต้แดง) · Community แต่ละกลุ่มประกาศสีของกลุ่ม · Creator Tools ทั้งหน้าเป็นทองแดง (ลิงก์เดิมบังคับแดง) · สี Google เดิม (`data-accent` blue/yellow/green) ใน Enroll/Contact/ResetPassword/Register → แดง · หน้า Legal + บทความเดี่ยวเลิกใช้ทอง Admin `#D4A843` → ทอง brand `#C0A060` และปุ่มเป็นเหลี่ยม · ปุ่มบันทึกโปรไฟล์เป็น `btn-brand` เหมือนหน้า login
+5. ตรวจด้วย headless browser (mock data): การ์ด Live Notes 9 ใบได้สี gold→blue→green→copper→navy→purple→red→teal→gold, hover หัวข้อ/เส้นใต้ตรงสีการ์ด, กลุ่ม Community ตรงสีกลุ่ม, หัวข้อ dialog ไม่เปลี่ยนสี · `tsc` สะอาด · `vite build` ผ่าน
+
+ไฟล์รอบนี้: `stripe-webhook/index.ts`, `src/lib/accentPalette.ts` (ใหม่), `src/components/clips/ClipCarousel.tsx` (ใหม่), `src/lib/youtube.ts`, `LiveNotesSection.tsx`, `LiveNotePlayerDialog.tsx`, `Articles.tsx`, `index.css`, `CreatorTools.tsx`, `Enroll.tsx`, `Contact.tsx`, `ResetPassword.tsx`, `Register.tsx`, `RefundPolicy.tsx`, `Privacy.tsx`, `Terms.tsx`, `ArticleDetail.tsx`, `Profile.tsx`, เอกสาร README §41 / CLAUDE.md / TODO
