@@ -142,8 +142,11 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
   }, [clip, videoId, track, source, replayKey, mountEl]);
 
   const course = clip?.related_course ?? null;
-  // Shorts are 9:16: a 16:9 frame would pillarbox them into a thin strip, so
-  // vertical clips get a tall player beside the text (stacked on phones).
+  // The dialog is sized to the video's own shape so the video fills its full
+  // width with no black bars, capped by screen height so it is always fully
+  // visible; details sit underneath (scroll inside the dialog).
+  //   Shorts 9:16  → narrow tall dialog, video up to 78vh high
+  //   16:9         → wide dialog, video up to 70vh high
   const vertical = isYouTubeShorts(clip?.video_url);
   const ctaStyle = { background: accent.fill, color: accent.on };
 
@@ -153,15 +156,20 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
           hover still applies — section-accent keeps the title's hover line
           the same color as everything else here. */}
       <DialogContent
-        className={`section-accent ${vertical ? 'max-w-3xl' : 'max-w-4xl'} w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] p-0 gap-0 overflow-hidden rounded-none sm:rounded-none border-border border-t-4 bg-card max-h-[94vh] overflow-y-auto`}
-        style={{ ...accentVars(accent), borderTopColor: accent.fill }}
+        className={`section-accent max-w-none p-0 gap-0 overflow-hidden rounded-none sm:rounded-none border-border border-t-4 bg-card max-h-[94vh] overflow-y-auto`}
+        style={{
+          ...accentVars(accent),
+          borderTopColor: accent.fill,
+          width: vertical
+            ? 'min(calc(100vw - 1rem), calc(78vh * 9 / 16))'
+            : 'min(calc(100vw - 1rem), 1100px, calc(70vh * 16 / 9))',
+        }}
       >
         <div className="h-11 px-4 flex items-center border-b border-border">
           <span className="text-xs font-semibold" style={{ color: accent.text }}>{label}</span>
         </div>
 
-        <div className={vertical ? 'md:flex md:items-start' : ''}>
-        <div className={`relative bg-black ${vertical ? 'aspect-[9/16] w-full max-w-[min(100%,calc(78vh*9/16))] mx-auto md:mx-0 md:w-[min(360px,calc(78vh*9/16))] md:shrink-0' : 'aspect-video'}`}>
+        <div className={`relative bg-black w-full ${vertical ? 'aspect-[9/16]' : 'aspect-video'}`}>
           {!videoId ? (
             <div className="absolute inset-0 grid place-items-center text-sm text-white/60 px-6 text-center">
               ลิงก์วิดีโอของคลิปนี้ไม่ถูกต้อง แจ้งทีมงานให้ตรวจสอบได้
@@ -216,7 +224,7 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
           )}
         </div>
 
-        <div className="p-5 sm:p-6 space-y-4 min-w-0 md:flex-1">
+        <div className="p-5 sm:p-6 space-y-4">
           <div>
             <DialogTitle className="text-xl font-bold leading-snug">{clip?.title}</DialogTitle>
             {clip?.duration_label && (
@@ -246,7 +254,6 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
               <ArrowRight className="motion-arrow w-4 h-4 shrink-0" style={{ color: accent.text }} aria-hidden="true" />
             </Link>
           )}
-        </div>
         </div>
       </DialogContent>
     </Dialog>

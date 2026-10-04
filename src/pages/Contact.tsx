@@ -101,9 +101,9 @@ const Contact: React.FC = () => {
                   rel="noopener noreferrer"
                   aria-label={s.name}
                   title={s.name}
-                  className="w-14 h-14 rounded-full bg-foreground/8 hover:bg-foreground/15 flex items-center justify-center transition-colors hover-shift"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-foreground/8 hover:bg-foreground/15 flex items-center justify-center transition-colors hover-shift"
                 >
-                  <img src={s.icon} alt={s.name} className="w-6 h-6 object-contain" />
+                  <img src={s.icon} alt={s.name} className="w-9 h-9 md:w-11 md:h-11 object-contain" />
                 </a>
               ))}
             </div>

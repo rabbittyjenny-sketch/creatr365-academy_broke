@@ -34,7 +34,7 @@ export const EventTicketInfo: React.FC<{
             )}
             <span className="font-medium">{formatTHB(p.current ?? 0)}</span>
             {p.earlyActive && (
-              <span className="block text-[11px] uppercase text-[#FA76FF]">
+              <span className="block text-[11px] uppercase text-[#C0567A]">
                 Early Bird{p.earlyUntil ? ` ถึง ${formatThaiDateTime(p.earlyUntil)}` : ''}
               </span>
             )}
