@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
+// NOTE (2026-10-04): this file is the version that was actually DEPLOYED
+// (v6: checkout.session.expired + purchase_events logging) plus the Toolbox
+// Premium branch. The repo copy had fallen behind production before this —
+// always compare with the deployed function before redeploying.
+
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
   apiVersion: "2025-08-27.basil",
 });
@@ -30,38 +35,80 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+  // Append-only purchase audit (see create-checkout). Never throws.
+  const logPurchase = async (row: Record<string, unknown>) => {
+    try {
+      const { error } = await supabaseAdmin.from("purchase_events").insert(row);
+      if (error) console.error("purchase_events insert failed:", error.message);
+    } catch (e) { console.error("purchase_events insert threw:", e); }
+  };
 
-    // Toolbox Premium (created by toolbox-checkout). Course sessions never
-    // carry metadata.kind, so the course branch below is unaffected.
-    if (session.metadata?.kind === "toolbox") {
-      const purchaseId = session.metadata.toolbox_purchase_id;
-      if (purchaseId && session.payment_status === "paid") {
-        const { data: tp } = await supabaseAdmin
-          .from("toolbox_purchases")
-          .update({ status: "paid", paid_at: new Date().toISOString(), stripe_session_id: session.id })
-          .eq("id", purchaseId)
-          .neq("status", "paid")
-          .select("user_id, asset_id, amount_thb")
-          .maybeSingle();
-        if (tp) {
-          await supabaseAdmin.from("purchase_events").insert({
-            user_id: tp.user_id,
-            toolbox_asset_id: tp.asset_id,
-            toolbox_purchase_id: purchaseId,
-            event: "webhook_paid",
-            stripe_session_id: session.id,
-            amount_final: tp.amount_thb,
-          });
-        }
+  const session = (event.type === "checkout.session.completed" || event.type === "checkout.session.expired")
+    ? event.data.object as Stripe.Checkout.Session
+    : null;
+
+  // ── Toolbox Premium (created by toolbox-checkout) ─────────────────────
+  // Course sessions never carry metadata.kind, so the course branches below
+  // are unaffected. Kept first so a toolbox session can never be mistaken
+  // for a course one.
+  if (session && session.metadata?.kind === "toolbox") {
+    const purchaseId = session.metadata.toolbox_purchase_id;
+    if (purchaseId && event.type === "checkout.session.completed" && session.payment_status === "paid") {
+      const { data: tp } = await supabaseAdmin
+        .from("toolbox_purchases")
+        .update({ status: "paid", paid_at: new Date().toISOString(), stripe_session_id: session.id })
+        .eq("id", purchaseId)
+        .neq("status", "paid")
+        .select("user_id, asset_id, amount_thb")
+        .maybeSingle();
+      if (tp) {
+        await logPurchase({
+          user_id: tp.user_id, toolbox_asset_id: tp.asset_id, toolbox_purchase_id: purchaseId,
+          event: "webhook_paid", stripe_session_id: session.id, amount_final: tp.amount_thb,
+          detail: { payment_status: session.payment_status, event_id: event.id },
+        });
       }
-      return new Response(JSON.stringify({ received: true }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
+    }
+    if (purchaseId && event.type === "checkout.session.expired") {
+      const { data: tp } = await supabaseAdmin
+        .from("toolbox_purchases")
+        .update({ status: "abandoned" })
+        .eq("id", purchaseId)
+        .eq("status", "pending")
+        .select("user_id, asset_id")
+        .maybeSingle();
+      await logPurchase({
+        user_id: tp?.user_id ?? null, toolbox_asset_id: tp?.asset_id ?? session.metadata.toolbox_asset_id ?? null,
+        toolbox_purchase_id: purchaseId, stripe_session_id: session.id, event: "checkout_expired",
       });
     }
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  }
 
+  // Stripe sends this when an unpaid Checkout Session times out (24h by
+  // default). Only delivered if the event is enabled on the webhook endpoint
+  // in the Stripe Dashboard; harmless otherwise.
+  if (event.type === "checkout.session.expired" && session) {
+    const enrollmentId = session.metadata?.enrollment_id;
+    if (enrollmentId) {
+      const { data: enr } = await supabaseAdmin
+        .from("course_enrollments")
+        .update({ status: "abandoned" })
+        .eq("id", enrollmentId)
+        .eq("status", "pending")
+        .select("user_id, course_id")
+        .maybeSingle();
+      await logPurchase({
+        user_id: enr?.user_id ?? null, course_id: enr?.course_id ?? session.metadata?.course_id ?? null,
+        enrollment_id: enrollmentId, stripe_session_id: session.id, event: "checkout_expired",
+      });
+    }
+  }
+
+  if (event.type === "checkout.session.completed" && session) {
     const enrollmentId = session.metadata?.enrollment_id;
     const promoCodeId = session.metadata?.promo_code_id;
 
@@ -92,6 +139,14 @@ serve(async (req) => {
             );
         }
       }
+
+      await logPurchase({
+        user_id: enr?.user_id ?? null, course_id: enr?.course_id ?? session.metadata?.course_id ?? null,
+        enrollment_id: enrollmentId, stripe_session_id: session.id, event: "webhook_paid",
+        promo_code_id: promoCodeId || null,
+        amount_final: typeof session.amount_total === "number" ? session.amount_total / 100 : null,
+        detail: { payment_status: session.payment_status, event_id: event.id },
+      });
 
       // Increment promo usage
       if (promoCodeId) {

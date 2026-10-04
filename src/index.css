@@ -942,3 +942,17 @@ h4:hover::after, h5:hover::after, h6:hover::after,
   0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.55); }
   50%      { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
 }
+
+
+/* ── Dialog / sheet titles: no hover recolor or underline ──────────────────
+   Dialogs render in portals outside .site-hover-scope, so the global h1–h6
+   hover (color + animated underline) fell back to red there — e.g. the title
+   of the download-consent dialog turned red with a red underline on hover.
+   Titles in dialogs are not links, so they get no hover effect at all.
+   (README §41.4 rule 12) */
+:is([role="dialog"], [role="alertdialog"]) :is(h1, h2, h3, h4, h5, h6):hover {
+  color: inherit;
+}
+:is([role="dialog"], [role="alertdialog"]) :is(h1, h2, h3, h4, h5, h6)::after {
+  display: none;
+}

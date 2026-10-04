@@ -31,16 +31,16 @@ const Contact: React.FC = () => {
 
       <section className="page-shell pt-28 pb-16 px-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="section-title mb-4" data-accent="blue">ติดต่อสอบถาม</h1>
-          <p className="section-subtitle mb-12" data-accent="blue">สนใจหลักสูตรหรือมีคำถาม? ติดต่อเราได้เลยค่ะ</p>
+          <h1 className="section-title mb-4" data-accent="red">ติดต่อสอบถาม</h1>
+          <p className="section-subtitle mb-12" data-accent="red">สนใจหลักสูตรหรือมีคำถาม? ติดต่อเราได้เลยค่ะ</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* LINE Official */}
-            <div className="card-water surface-card p-8 text-center" data-accent="green">
+            <div className="card-water surface-card p-8 text-center" data-accent="red">
               <div className="w-12 h-12 rounded-xl bg-foreground/5 flex items-center justify-center mx-auto mb-4">
                 <img src={LINE_ICON_URL} alt="LINE" className="w-6 h-6 object-contain" />
               </div>
-              <h2 className="text-xl font-bold mb-4 hover-shift" data-accent="green">LINE Official</h2>
+              <h2 className="text-xl font-bold mb-4 hover-shift" data-accent="red">LINE Official</h2>
               <img src={LINE_QR_URL} alt="LINE QR Code" className="w-36 h-36 mx-auto rounded-lg mb-4" />
               <a href="https://lin.ee/9Mw97Rc" target="_blank" rel="noopener noreferrer" className="btn-outline">
                 เพิ่มเพื่อน
@@ -49,7 +49,7 @@ const Contact: React.FC = () => {
 
             {/* Other contacts */}
             <div className="space-y-6">
-              <div className="card-water surface-card p-6" data-accent="blue">
+              <div className="card-water surface-card p-6" data-accent="red">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-foreground/70" />
@@ -67,7 +67,7 @@ const Contact: React.FC = () => {
               {/* Yellow, not red — red is already the page's/site's default
                   accent (nav active state, heading-hover), so a second red
                   card right under the blue Email one read as repetitive. */}
-              <div className="card-water surface-card p-6" data-accent="yellow">
+              <div className="card-water surface-card p-6" data-accent="red">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
                     <Globe className="w-5 h-5 text-foreground/70" />

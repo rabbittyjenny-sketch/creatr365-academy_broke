@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { loadYouTubeApi, parseYouTubeId, type YTPlayer } from '@/lib/youtube';
+import { loadYouTubeApi, parseYouTubeId, isYouTubeShorts, type YTPlayer } from '@/lib/youtube';
+import { accentVars, COMMUNITY_CLIPS_ACCENT, type Accent } from '@/lib/accentPalette';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 
 export interface RelatedCourse {
@@ -32,6 +33,8 @@ interface Props {
   track?: boolean;
   /** Promo source from the link (?src=tiktok) — stored with the view. */
   source?: string | null;
+  /** Color of the card that opened this clip; the dialog keeps it. */
+  accent?: Accent;
 }
 
 const MILESTONES = [25, 50, 75, 90, 100];
@@ -52,7 +55,7 @@ const newSessionId = () =>
  * demographics itself. If the IFrame API is blocked, falls back to a plain
  * embed so the clip still plays (just without progress logging).
  */
-export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, track = false, source = null }) => {
+export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, track = false, source = null, accent = COMMUNITY_CLIPS_ACCENT }) => {
   // Callback-ref state (not useRef): the dialog content mounts through a
   // portal one render later, and the player must be created after that.
   const [mountEl, setMountEl] = useState<HTMLDivElement | null>(null);
@@ -139,6 +142,10 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
   }, [clip, videoId, track, source, replayKey, mountEl]);
 
   const course = clip?.related_course ?? null;
+  // Shorts are 9:16: a 16:9 frame would pillarbox them into a thin strip, so
+  // vertical clips get a tall player beside the text (stacked on phones).
+  const vertical = isYouTubeShorts(clip?.video_url);
+  const ctaStyle = { background: accent.fill, color: accent.on };
 
   return (
     <Dialog open={!!clip} onOpenChange={o => { if (!o) onClose(); }}>
@@ -146,14 +153,15 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
           hover still applies — section-accent keeps the title's hover line
           the same color as everything else here. */}
       <DialogContent
-        className="section-accent max-w-4xl w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] p-0 gap-0 overflow-hidden rounded-none sm:rounded-none border-border bg-card max-h-[94vh] overflow-y-auto"
-        style={{ '--hover-accent': '#4A7FB5', '--section-accent': '#4A7FB5' } as React.CSSProperties}
+        className={`section-accent ${vertical ? 'max-w-3xl' : 'max-w-4xl'} w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] p-0 gap-0 overflow-hidden rounded-none sm:rounded-none border-border border-t-4 bg-card max-h-[94vh] overflow-y-auto`}
+        style={{ ...accentVars(accent), borderTopColor: accent.fill }}
       >
         <div className="h-11 px-4 flex items-center border-b border-border">
-          <span className="text-xs font-semibold text-section-notes">{label}</span>
+          <span className="text-xs font-semibold" style={{ color: accent.text }}>{label}</span>
         </div>
 
-        <div className="relative aspect-video bg-black">
+        <div className={vertical ? 'md:flex md:items-start' : ''}>
+        <div className={`relative bg-black ${vertical ? 'aspect-[9/16] w-full max-w-[min(100%,calc(78vh*9/16))] mx-auto md:mx-0 md:w-[min(360px,calc(78vh*9/16))] md:shrink-0' : 'aspect-video'}`}>
           {!videoId ? (
             <div className="absolute inset-0 grid place-items-center text-sm text-white/60 px-6 text-center">
               ลิงก์วิดีโอของคลิปนี้ไม่ถูกต้อง แจ้งทีมงานให้ตรวจสอบได้
@@ -182,7 +190,8 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
                       <Link
                         to={`/course/${course.slug}`}
                         onClick={onClose}
-                        className="sharp-btn inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold bg-section-notes text-[#0D0D0D]"
+                        className="sharp-btn inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold"
+                        style={ctaStyle}
                       >
                         ดูหลักสูตร <ArrowRight className="w-4 h-4" aria-hidden="true" />
                       </Link>
@@ -207,7 +216,7 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
           )}
         </div>
 
-        <div className="p-5 sm:p-6 space-y-4">
+        <div className="p-5 sm:p-6 space-y-4 min-w-0 md:flex-1">
           <div>
             <DialogTitle className="text-xl font-bold leading-snug">{clip?.title}</DialogTitle>
             {clip?.duration_label && (
@@ -234,9 +243,10 @@ export const LiveNotePlayerDialog: React.FC<Props> = ({ clip, onClose, label, tr
                 <p className="text-xs text-muted-foreground">หลักสูตรที่เกี่ยวข้อง</p>
                 <p className="text-sm font-bold truncate">{course.title}</p>
               </div>
-              <ArrowRight className="motion-arrow w-4 h-4 text-section-notes shrink-0" aria-hidden="true" />
+              <ArrowRight className="motion-arrow w-4 h-4 shrink-0" style={{ color: accent.text }} aria-hidden="true" />
             </Link>
           )}
+        </div>
         </div>
       </DialogContent>
     </Dialog>

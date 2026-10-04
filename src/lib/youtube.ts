@@ -30,6 +30,9 @@ export function parseYouTubeId(input: string | null | undefined): string | null 
 
 export const youTubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
+/** YouTube Shorts are vertical (9:16) — the player sizes itself to match. */
+export const isYouTubeShorts = (input: string | null | undefined) => /youtube\.com\/shorts\//i.test(input ?? '');
+
 /* ── IFrame Player API (loaded once, on first use) ───────────────────── */
 
 type YTPlayerState = -1 | 0 | 1 | 2 | 3 | 5;

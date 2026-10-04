@@ -146,7 +146,7 @@ const Register = () => {
             <Link to="/" className="inline-block mb-6">
               <img src={logoCreatr} alt="Creatr365" className="h-12 w-auto mx-auto" />
             </Link>
-            <h2 className="text-2xl font-bold" data-accent="green">สมัครสมาชิก Creatr365</h2>
+            <h2 className="text-2xl font-bold" data-accent="red">สมัครสมาชิก Creatr365</h2>
             <p className="mt-2 text-sm text-muted-foreground">เข้าสู่ระบบด้วยบัญชี LINE ของคุณ</p>
           </div>
 
@@ -242,7 +242,7 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={step === "saving"}
-                  data-accent="green"
+                  data-accent="red"
                   className="btn-brand w-full h-12 rounded-lg font-medium disabled:opacity-50"
                 >
                   {step === "saving" ? "กำลังบันทึก..." : "เริ่มต้นใช้งาน"}
@@ -251,7 +251,7 @@ const Register = () => {
 
               <p className="text-center text-sm text-muted-foreground">
                 มีบัญชีอยู่แล้ว?{" "}
-                <Link to="/auth" data-accent="green" className="underline">เข้าสู่ระบบ</Link>
+                <Link to="/auth" data-accent="red" className="underline">เข้าสู่ระบบ</Link>
               </p>
             </>
           )}

@@ -8,6 +8,8 @@ import { ArrowRight, Newspaper, Wrench, Users, ClipboardCheck, Rss, ExternalLink
 import { Footer } from '@/components/Footer';
 import { LiveNotePlayerDialog, type PlayableClip } from '@/components/live-notes/LiveNotePlayerDialog';
 import { parseYouTubeId, youTubeThumb } from '@/lib/youtube';
+import { ClipCarousel } from '@/components/clips/ClipCarousel';
+import { COMMUNITY_CLIPS_ACCENT } from '@/lib/accentPalette';
 
 interface ArticleRow {
   id:string; slug:string; title:string; summary:string;
@@ -134,19 +136,44 @@ const Articles: React.FC = () => {
             <div className="space-y-12">
               {GROUPS.map(group => {
                 const groupItems = items.filter(i => group.kinds.includes(i.kind));
+                const isClips = group.kinds.includes('video');
+                // Clips with a YouTube link play in-site in the same card row as
+                // Live Notes (minus the course link); anything else keeps the grid.
+                const clipItems = isClips ? groupItems.filter(i => parseYouTubeId(i.video_url)) : [];
+                const gridItems = isClips ? groupItems.filter(i => !parseYouTubeId(i.video_url)) : groupItems;
+                const groupHeader = (
+                  <div className="flex items-center gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: group.accent }} aria-hidden="true" />
+                    <h2 className="text-lg font-bold tracking-tight">{group.label}</h2>
+                  </div>
+                );
                 return (
-                  <div key={group.label}>
-                    <div className="flex items-center gap-3 mb-5">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: group.accent }} aria-hidden="true" />
-                      <h2 className="text-lg font-bold tracking-tight">{group.label}</h2>
-                    </div>
-                    {groupItems.length === 0 ? (
+                  // One color per group (section-accent): hover text, heading
+                  // underline and card top lines follow the group's dot color
+                  // instead of falling back to the site-wide red.
+                  <div
+                    key={group.label}
+                    className="section-accent"
+                    style={{ '--hover-accent': group.accent, '--section-accent': group.accent } as React.CSSProperties}
+                  >
+                    {clipItems.length > 0 ? (
+                      <ClipCarousel
+                        items={clipItems}
+                        accentFor={() => COMMUNITY_CLIPS_ACCENT}
+                        onOpen={a => setPlaying({ ...a, related_course: null })}
+                        ctaLabel="ดูคลิป"
+                        header={groupHeader}
+                      />
+                    ) : (
+                      <div className="mb-5">{groupHeader}</div>
+                    )}
+                    {clipItems.length > 0 && gridItems.length === 0 ? null : groupItems.length === 0 ? (
                       <div className="sharp-tile border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                         ยังไม่มีเนื้อหาในหมวดนี้ — กลับมาดูใหม่เร็ว ๆ นี้
                       </div>
                     ) : (
                       <div className="stagger-in grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupItems.map(a => renderCard(a, group.accent))}
+                        {gridItems.map(a => renderCard(a, group.accent))}
                       </div>
                     )}
                   </div>

@@ -57,7 +57,7 @@ const ArticleDetail: React.FC = () => {
 
   if (loading) return (
     <div className="bg-[#080808] min-h-screen flex items-center justify-center">
-      <div className="w-6 h-6 rounded-full border-2 border-[#D4A843]/40 border-t-[#D4A843] animate-spin" />
+      <div className="w-6 h-6 rounded-full border-2 border-[#C0A060]/40 border-t-[#C0A060] animate-spin" />
     </div>
   );
 
@@ -66,7 +66,7 @@ const ArticleDetail: React.FC = () => {
       <CourseNavbar />
       <div className="bg-[#080808] min-h-screen flex flex-col items-center justify-center px-6">
         <p className="text-white/40 text-sm mb-4">ไม่พบบทความนี้</p>
-        <Link to="/articles" className="text-[#D4A843] text-sm hover:opacity-80">← กลับไปหน้าบทความ</Link>
+        <Link to="/articles" className="text-[#C0A060] text-sm hover:opacity-80">← กลับไปหน้าบทความ</Link>
       </div>
     </>
   );
@@ -84,7 +84,7 @@ const ArticleDetail: React.FC = () => {
       />
       <CourseNavbar />
 
-      <main className="bg-[#080808] min-h-screen pt-24 pb-24">
+      <main className="section-accent bg-[#080808] min-h-screen pt-24 pb-24" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
         {/* Hero */}
         {article.cover_image_url && (
           <div className="relative w-full max-h-[480px] overflow-hidden">
@@ -101,7 +101,7 @@ const ArticleDetail: React.FC = () => {
 
           {/* Meta */}
           <div className="flex flex-wrap items-center gap-3 mb-5">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#D4A843]/15 text-[#D4A843] border border-[#D4A843]/25">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#C0A060]/15 text-[#C0A060] border border-[#C0A060]/25">
               {kindLabel}
             </span>
             <span className="flex items-center gap-1 text-white/30 text-xs">
@@ -131,7 +131,7 @@ const ArticleDetail: React.FC = () => {
                 href={article.target_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-[#D4A843] hover:opacity-90 transition-opacity"
+                className="sharp-btn inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-[#0D0D0D] bg-[#C0A060]"
               >
                 อ่านบทความต้นฉบับ
               </a>
@@ -152,7 +152,7 @@ const ArticleDetail: React.FC = () => {
 
           {/* Footer nav */}
           <div className="mt-12 flex justify-between items-center">
-            <Link to="/articles" className="text-[#D4A843] text-sm hover:opacity-80 transition-opacity flex items-center gap-2">
+            <Link to="/articles" className="text-[#C0A060] text-sm hover:opacity-80 transition-opacity flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" /> บทความทั้งหมด
             </Link>
             <Link to="/courses" className="text-white/30 text-sm hover:text-white/60 transition-colors">
