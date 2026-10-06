@@ -1071,6 +1071,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          names_confirmed_at: string | null
           age_range: string | null
           avatar_url: string | null
           created_at: string
@@ -1089,6 +1090,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          names_confirmed_at?: string | null
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string
@@ -1107,6 +1109,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          names_confirmed_at?: string | null
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string

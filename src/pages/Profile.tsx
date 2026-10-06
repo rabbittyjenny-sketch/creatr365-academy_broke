@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { sanitizeFileName, resolveContentType } from '@/lib/uploadFile';
 import { Loader2, Check, User, Upload, Lock } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   GENDERS, AGE_RANGES, OCCUPATIONS, OCCUPATION_OTHER, PROVINCES, PROVINCE_ABROAD,
   isThaiName, isEnglishName, missingProfileFields,
@@ -20,8 +21,10 @@ import {
  *   page carries (GitHub, Google, Discord all show exactly these three
  *   before anything else).
  * - Real names in Thai and English — printed on the Thai / English
- *   certificates. Locked once a completion record exists (DB trigger
- *   lock_certificate_names); after that only an admin can change them.
+ *   certificates and course-completion confirmations. Editable until the
+ *   learner confirms them once in a dialog (ยืนยัน / แก้ไข); confirming sets
+ *   profiles.names_confirmed_at and the DB trigger lock_certificate_names
+ *   then lets only an admin change them.
  * - Gender, age range, occupation, province — required, and the ONLY place
  *   they are collected. Live Notes / Toolbox statistics copy them from
  *   profiles on the database side; no other page asks for them again.
@@ -70,6 +73,8 @@ const Profile: React.FC = () => {
   const [firstNameEn, setFirstNameEn] = useState('');
   const [lastNameEn, setLastNameEn] = useState('');
   const [namesLocked, setNamesLocked] = useState(false);
+  // Shown before the first save that contains the names.
+  const [confirmNamesOpen, setConfirmNamesOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -83,17 +88,17 @@ const Profile: React.FC = () => {
       setCurrentEmail(email);
       setEmailInput(isSyntheticEmail(email) ? '' : email);
 
-      const [{ data: prof }, { data: acct }, { count: certCount }] = await Promise.all([
+      const [{ data: prof }, { data: acct }] = await Promise.all([
         supabase.from('profiles')
-          .select('display_name,avatar_url,date_of_birth,gender,age_range,occupation,province,first_name_th,last_name_th,first_name_en,last_name_en')
+          .select('display_name,avatar_url,date_of_birth,gender,age_range,occupation,province,first_name_th,last_name_th,first_name_en,last_name_en,names_confirmed_at')
           .eq('user_id', session.user.id).maybeSingle(),
         supabase.from('user_accounts').select('student_id,registered_at').eq('email', email.toLowerCase()).maybeSingle(),
-        supabase.from('completion_records').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id),
       ]);
       const p = prof as {
         display_name: string | null; avatar_url: string | null; date_of_birth: string | null;
         gender: string | null; age_range: string | null; occupation: string | null; province: string | null;
         first_name_th: string | null; last_name_th: string | null; first_name_en: string | null; last_name_en: string | null;
+        names_confirmed_at: string | null;
       } | null;
       setDisplayName(p?.display_name || '');
       setAvatarUrl(p?.avatar_url || null);
@@ -108,7 +113,7 @@ const Profile: React.FC = () => {
       setLastNameTh(p?.last_name_th || '');
       setFirstNameEn(p?.first_name_en || '');
       setLastNameEn(p?.last_name_en || '');
-      setNamesLocked((certCount ?? 0) > 0);
+      setNamesLocked(!!p?.names_confirmed_at);
       const acctRow = acct as { student_id: string; registered_at: string } | null;
       setStudentId(acctRow?.student_id ?? null);
       setRegisteredAt(acctRow?.registered_at ?? null);
@@ -140,7 +145,8 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  // confirmNames: the learner pressed ยืนยัน in the names dialog.
+  const handleSave = async (confirmNames = false) => {
     if (!userId) return;
     setError(null);
     setSavedMessage(null);
@@ -166,6 +172,13 @@ const Profile: React.FC = () => {
       return;
     }
 
+    // First time the names are saved: ask the learner to double-check them.
+    if (!namesLocked && !confirmNames) {
+      setConfirmNamesOpen(true);
+      return;
+    }
+    setConfirmNamesOpen(false);
+
     setSaving(true);
     try {
       const update: Record<string, string | null> = {
@@ -183,12 +196,16 @@ const Profile: React.FC = () => {
         update.last_name_th = lastNameTh.trim();
         update.first_name_en = firstNameEn.trim();
         update.last_name_en = lastNameEn.trim();
+        update.names_confirmed_at = new Date().toISOString();
       }
       const { error: profErr } = await supabase.from('profiles').update(update).eq('user_id', userId);
       if (profErr) {
         if (profErr.message.includes('CERT_NAME_LOCKED')) {
           setNamesLocked(true);
-          throw new Error('ชื่อนี้ใช้ออกใบประกาศแล้ว กรุณาติดต่อทีมงานเพื่อแก้ไข');
+          throw new Error('ยืนยันชื่อไปแล้ว หากต้องการแก้ไขกรุณาติดต่อแอดมิน');
+        }
+        if (profErr.message.includes('CERT_NAME_INCOMPLETE')) {
+          throw new Error('กรุณากรอกชื่อ-นามสกุลทั้งภาษาไทยและภาษาอังกฤษให้ครบ');
         }
         throw profErr;
       }
@@ -325,8 +342,8 @@ const Profile: React.FC = () => {
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed -mt-2">
             {namesLocked
-              ? 'ชื่อนี้ใช้ออกใบประกาศแล้ว หากต้องแก้ไขกรุณาติดต่อทีมงาน'
-              : 'ใช้พิมพ์บนใบประกาศฉบับภาษาไทยและภาษาอังกฤษ กรอกตามบัตรประชาชนหรือพาสปอร์ต เมื่อออกใบประกาศแล้วจะแก้เองไม่ได้'}
+              ? 'ยืนยันชื่อแล้ว หากต้องการแก้ไขกรุณาติดต่อแอดมิน'
+              : 'เพื่อการออกใบประกาศนียบัตร รวมถึงข้อความยืนยันการเรียนจบหลักสูตร แนะนำให้ใส่ชื่อและนามสกุลที่ตรงกับข้อมูลจริงของคุณ (ภาษาไทยและภาษาอังกฤษ)'}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -449,7 +466,7 @@ const Profile: React.FC = () => {
         )}
 
         <button
-          onClick={handleSave}
+          onClick={() => handleSave()}
           disabled={saving}
           className="btn-brand sharp-btn w-full inline-flex items-center justify-center gap-1.5 text-sm font-bold tracking-wide px-4 py-3 disabled:opacity-50"
         >
@@ -460,6 +477,41 @@ const Profile: React.FC = () => {
         <Link to="/dashboard" className="inline-block text-sm underline">กลับไปหน้า Dashboard</Link>
       </main>
       <Footer />
+      {/* Confirm certificate names before the first save that includes them */}
+      <Dialog open={confirmNamesOpen} onOpenChange={setConfirmNamesOpen}>
+        <DialogContent className="max-w-md rounded-none sm:rounded-none">
+          <DialogHeader>
+            <DialogTitle>ยืนยันข้อมูลถูกต้อง</DialogTitle>
+            <DialogDescription>
+              ชื่อนี้จะใช้ออกใบประกาศนียบัตรและข้อความยืนยันการเรียนจบหลักสูตร
+              หากต้องการแก้ไขชื่อหลังจากกดยืนยัน คุณต้องติดต่อแอดมิน
+            </DialogDescription>
+          </DialogHeader>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm border border-border p-4">
+            <dt className="text-muted-foreground">ภาษาไทย</dt>
+            <dd className="font-semibold">{firstNameTh.trim()} {lastNameTh.trim()}</dd>
+            <dt className="text-muted-foreground">English</dt>
+            <dd className="font-semibold">{firstNameEn.trim()} {lastNameEn.trim()}</dd>
+          </dl>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmNamesOpen(false)}
+              className="sharp-btn flex-1 border border-border px-4 py-3 text-sm font-semibold"
+            >
+              แก้ไข
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSave(true)}
+              disabled={saving}
+              className="btn-brand sharp-btn flex-1 px-4 py-3 text-sm font-bold disabled:opacity-50"
+            >
+              ยืนยัน
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

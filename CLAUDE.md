@@ -131,7 +131,8 @@ Do not regress:
   `profiles` via DB trigger/RPC — never ask for them again on another page.
 - `profiles` is the single source for real names (TH/EN, for the two
   certificate versions), gender, age range, occupation, province. Name
-  fields lock once a `completion_records` row exists (trigger) — admin edits.
+  fields lock once the learner confirms them (`names_confirmed_at`, confirm
+  dialog in Profile; trigger `lock_certificate_names`) — then admin edits.
 - **Bought Toolbox Premium files live in Dashboard › เอกสาร** (same pattern
   as `course_resources`). /toolbox only sells; no re-download button there.
 - The `toolbox-files` storage policy is the real lock (free: signed-in +
