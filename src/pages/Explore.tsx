@@ -10,8 +10,9 @@ import { ArrowUpRight, Calendar, GraduationCap, Package, Sparkles, Wrench } from
  * /explore — the ecosystem landing page. Replaces "EXPLORE = /courses" with
  * four destinations (Courses / Toolbox / AI Lab / Creator Tools) as giant,
  * whole-card tiles. Courses stays the largest/primary tile (business
- * anchor); AI Lab and Creator Tools are real routes but honestly labelled
- * "Coming soon" until there's real content behind them — no dropdown, no
+ * anchor); AI Lab now has its first live tool, while Creator Tools is a real
+ * route still honestly labelled "Coming soon" until there's real content
+ * behind it — no dropdown, no
  * nested interactive elements inside a tile (one <Link> per tile, DOM order
  * matches the visual priority so keyboard/tab order stays meaningful).
  *
@@ -64,7 +65,7 @@ const Explore: React.FC = () => {
               </div>
               <div className="relative z-10">
                 <h2 className="text-3xl md:text-5xl font-bold leading-[0.95] mb-3">Courses</h2>
-                <p className="text-sm text-muted-foreground max-w-xs">เส้นทางเรียนรู้ที่เป็นลำดับ — ฟรีและชำระเงิน พร้อม progress ของคุณ</p>
+                <p className="text-sm text-muted-foreground max-w-xs">Creatr365 คอร์สเรียนเพื่อการเป็น Live Commerce Creator/Host ที่มีคุณภาพเพื่ออาชีพที่สร้างรายได้และมีมาตรฐานในระดับสากลยอมรับ </p>
               </div>
               <span className="absolute right-4 bottom-4 md:right-6 md:bottom-6 w-9 h-9 grid place-items-center bg-[#C0A060] text-[#0D0D0D] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
                 <ArrowUpRight className="motion-arrow w-4 h-4" aria-hidden="true" />
@@ -82,7 +83,7 @@ const Explore: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">Toolbox</h2>
-                <p className="text-xs text-muted-foreground max-w-xs">เทมเพลตและไฟล์พร้อมใช้ มีทั้งแจกฟรีและ Premium</p>
+                <p className="text-xs text-muted-foreground max-w-xs">Template - Document File's Room </p>
               </div>
               <span className="absolute right-4 bottom-4 w-8 h-8 grid place-items-center bg-[#4A7FB5] text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
                 <ArrowUpRight className="motion-arrow w-3.5 h-3.5" aria-hidden="true" />
@@ -108,7 +109,7 @@ const Explore: React.FC = () => {
               </div>
               <div className="relative z-10">
                 <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">AI Lab</h2>
-                <p className="text-xs text-muted-foreground max-w-xs">Coming soon — กำลังคัดเลือกเครื่องมือ AI ที่ใช้งานได้จริงสำหรับ creator</p>
+                <p className="text-xs text-muted-foreground max-w-xs">เครื่องมือเฉพาะที่ Creatr365 พัฒนาขึ้น(Phase1) สำหรับ creator live e-commerce  — Let's Go! </p>
               </div>
             </Link>
 
@@ -133,7 +134,7 @@ const Explore: React.FC = () => {
               <div>
                 <span className="text-[10px] font-bold tracking-widest text-[#C0567A] block">05 / EVENTS</span>
                 <h2 className="text-xl md:text-2xl font-bold leading-[0.95] mt-1">Events</h2>
-                <p className="text-xs text-muted-foreground mt-1">เวิร์กช็อปและกิจกรรมที่เปิดรับสมัครตอนนี้</p>
+                <p className="text-xs text-muted-foreground mt-1">Live Class & WorkShop กิจกรรมสำหรับชาว creatr365 </p>
               </div>
               <Calendar className="w-6 h-6 text-[#C0567A] shrink-0" aria-hidden="true" />
             </Link>
