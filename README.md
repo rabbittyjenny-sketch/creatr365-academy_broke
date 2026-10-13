@@ -1110,7 +1110,7 @@ EXPLORE (nav)
    |
    +--> Courses tile        --> /courses          (ของเดิม ไม่เปลี่ยน ไม่ได้ย้าย)
    +--> Toolbox tile        --> /toolbox           (ใหม่)
-   +--> AI Lab tile         --> /ai-lab            (Coming soon, ใหม่)
+   +--> AI Lab tile         --> /ai-lab            (ใหม่ — มีเครื่องมือแรกแล้ว: Host Compass ลิงก์ไปเว็บภายนอก)
    +--> Creator Tools tile  --> /creator-tools     (Coming soon, ใหม่)
 ```
 
