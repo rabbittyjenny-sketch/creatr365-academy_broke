@@ -871,22 +871,414 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════
-          §10  Brand Concept
-          BG: Team-behind1.png เต็มหน้า 100vh ไม่ filter ไม่ overlay
+          §10  BRAND PHILOSOPHY / OUR ORIGIN
+          The existing promo portrait becomes a living presence;
+          narrative reveals in sequence when this scene enters view.
       ══════════════════════════════════════ */}
-      <section className="c365-scene" data-scene="10" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-        {/* BG เต็มหน้า ไม่มี overlay */}
-        <div className="c365-scene-bg-reveal">
-<img
-          className="c365-motion-bg-slow" src="/images/Team-behind1.png"
-          alt=""
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }}
-        />
-</div>
+      <section
+        className="c365-scene c365-origin-section"
+        data-scene="10"
+        style={{
+          position: 'relative',
+          minHeight: '100vh',
+          overflow: 'hidden',
+          isolation: 'isolate',
+          background: '#080808',
+          color: '#fff',
+          padding: 'clamp(76px,8vw,116px) clamp(20px,6vw,84px) clamp(70px,8vw,110px)',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div aria-hidden="true" className="c365-origin-ambient" />
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '860px', margin: '0 auto', padding: 'clamp(60px,8vw,100px) clamp(20px,4vw,48px)', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          {/* §10 content area — รูป Team-behind1.png คือตัวเนื้อหาเอง ตาม spec page 10 */}
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1320, margin: '0 auto' }}>
+          <header className="c365-origin-header">
+            <p
+              data-aos="fade-in"
+              style={{
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                color: 'rgba(255,255,255,.46)',
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: '.34em',
+                textTransform: 'uppercase',
+              }}
+            >
+              <span style={{ color: RED }}>10</span>
+              <span style={{ width: 38, height: 1, background: 'rgba(255,255,255,.24)' }} />
+              BRAND PHILOSOPHY / OUR ORIGIN
+            </p>
+
+            <h2
+              data-aos="fade-up"
+              data-aos-delay="100"
+              className="c365-h-nodefault c365-origin-brand"
+              style={{
+                margin: 'clamp(20px,3vw,34px) 0 0',
+                color: '#fff',
+                fontSize: 'clamp(2.8rem,6.7vw,6.7rem)',
+                lineHeight: '.9',
+                fontWeight: 900,
+                letterSpacing: '-.065em',
+              }}
+            >
+              Creatr365
+              <span
+                style={{
+                  display: 'inline-block',
+                  marginLeft: 'clamp(8px,1.2vw,18px)',
+                  color: 'rgba(255,255,255,.42)',
+                  fontSize: 'clamp(.9rem,1.5vw,1.45rem)',
+                  fontWeight: 600,
+                  letterSpacing: '.01em',
+                  verticalAlign: 'middle',
+                }}
+              >
+                (ครีเอท-สามหกห้า)
+              </span>
+            </h2>
+
+            <p
+              data-aos="fade-up"
+              data-aos-delay="180"
+              style={{
+                margin: '16px 0 0',
+                maxWidth: 760,
+                color: 'rgba(255,255,255,.62)',
+                fontSize: 'clamp(11px,1.25vw,15px)',
+                fontWeight: 700,
+                letterSpacing: '.13em',
+                lineHeight: 1.7,
+                textTransform: 'none',
+              }}
+            >
+              A Creative House for the Future of Live Commerce
+            </p>
+          </header>
+
+          <div className="c365-origin-grid">
+            {/* Photo enters as a reveal, giving this brand story a human presence. */}
+            <div className="c365-origin-photo-stage" style={{ gridArea: 'photo' }}>
+              <div aria-hidden="true" className="c365-origin-photo-number">365</div>
+              <div aria-hidden="true" className="c365-origin-photo-frame" />
+              <div className="c365-origin-photo-reveal">
+                <img
+                  src="/images/section9promote.jpg"
+                  alt="Creatr365 brand story"
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: 'min(68vh, 760px)',
+                    objectFit: 'contain',
+                    objectPosition: 'center bottom',
+                    filter: 'drop-shadow(0 28px 55px rgba(0,0,0,.48))',
+                  }}
+                />
+              </div>
+              <p className="c365-origin-photo-caption">
+                CREATR365 <span>— BUILT FROM REAL EXPERIENCE</span>
+              </p>
+            </div>
+
+            <div className="c365-origin-story" style={{ gridArea: 'story' }}>
+              <p
+                data-aos="fade-up"
+                style={{
+                  margin: 0,
+                  color: 'rgba(255,255,255,.48)',
+                  fontSize: 'clamp(14px,1.45vw,18px)',
+                  lineHeight: 1.8,
+                }}
+              >
+                ระบบนี้ไม่ได้เกิดจากการอยากมีคอร์ส
+              </p>
+
+              <h3
+                data-aos="fade-up"
+                data-aos-delay="100"
+                className="c365-origin-thesis"
+                style={{
+                  margin: '10px 0 0',
+                  color: '#fff',
+                  fontSize: 'clamp(1.8rem,3.4vw,3.5rem)',
+                  lineHeight: 1.08,
+                  fontWeight: 850,
+                  letterSpacing: '-.04em',
+                }}
+              >
+                แต่เกิดจากการเห็น
+                <br />
+                <span className="c365-origin-kinetic">ช่องว่างในตลาด</span>
+              </h3>
+
+              <p
+                data-aos="fade-up"
+                data-aos-delay="180"
+                className="c365-origin-belief"
+                style={{
+                  margin: 'clamp(20px,2.5vw,30px) 0 0',
+                  color: 'rgba(255,255,255,.76)',
+                  fontSize: 'clamp(16px,1.75vw,22px)',
+                  lineHeight: 1.65,
+                  fontWeight: 600,
+                }}
+              >
+                ที่โฮสต์จำนวนมาก “ไลฟ์ได้” แต่ยังไม่ถูกมองว่า{' '}
+                <span className="c365-origin-speaking-word">“ไลฟ์เป็น”</span>
+              </p>
+
+              <div
+                data-aos="fade-up"
+                data-aos-delay="240"
+                style={{
+                  marginTop: 'clamp(24px,3vw,36px)',
+                  paddingLeft: 18,
+                  borderLeft: '1px solid rgba(255,255,255,.22)',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: 'rgba(255,255,255,.68)',
+                    fontSize: 'clamp(13px,1.2vw,16px)',
+                    lineHeight: 1.9,
+                  }}
+                >
+                  ทุกเนื้อหา เครื่องมือ และ Framework ใน Creatr365
+                  <br className="c365-origin-desktop-break" />
+                  {' '}ถูกพัฒนาจากประสบการณ์ตรงในการทำงานจริงกับโฮสต์และแบรนด์
+                </p>
+              </div>
+
+              <p
+                data-aos="fade-up"
+                data-aos-delay="320"
+                className="c365-origin-not-copied"
+                style={{
+                  margin: 'clamp(18px,2vw,26px) 0 0',
+                  color: '#fff',
+                  fontSize: 'clamp(14px,1.4vw,18px)',
+                  fontWeight: 800,
+                  lineHeight: 1.6,
+                }}
+              >
+                ไม่ได้คัดลอกจากคอร์สใด
+              </p>
+
+              <div
+                data-aos="fade-up"
+                data-aos-delay="360"
+                style={{
+                  marginTop: 'clamp(30px,4vw,48px)',
+                  paddingTop: 'clamp(20px,2.4vw,28px)',
+                  borderTop: '1px solid rgba(255,255,255,.15)',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: 'rgba(255,255,255,.46)',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: '.2em',
+                  }}
+                >
+                  เป้าหมายของเราชัดเจน:
+                </p>
+
+                <div className="c365-origin-goals">
+                  <p data-aos="fade-up" data-aos-delay="80">สร้างโฮสต์ที่มีมาตรฐาน</p>
+                  <p data-aos="fade-up" data-aos-delay="160">วัดผลได้</p>
+                  <p data-aos="fade-up" data-aos-delay="240">และแบรนด์อยากร่วมงานระยะยาว</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <style>{`
+          .c365-origin-section { --origin-red: #CC0033; }
+          .c365-origin-ambient {
+            position: absolute;
+            z-index: 0;
+            inset: 0;
+            pointer-events: none;
+            background:
+              radial-gradient(ellipse at 78% 43%, rgba(204,0,51,.14), transparent 38%),
+              linear-gradient(135deg, rgba(255,255,255,.018), transparent 48%);
+          }
+          .c365-origin-header { position: relative; z-index: 2; }
+          .c365-origin-grid {
+            display: grid;
+            grid-template-columns: minmax(0,1fr) minmax(310px,.76fr);
+            grid-template-areas: "story photo";
+            align-items: center;
+            gap: clamp(34px,5.5vw,88px);
+            margin-top: clamp(42px,6vw,78px);
+          }
+          .c365-origin-story { min-width: 0; }
+          .c365-origin-thesis { max-width: 680px; }
+          .c365-origin-kinetic { display: inline-block; transform-origin: left center; }
+          [data-scene="10"].is-visible .c365-origin-kinetic {
+            animation: c365OriginWordIn 900ms cubic-bezier(.16,1,.3,1) 160ms both;
+          }
+          .c365-origin-speaking-word {
+            color: #fff;
+            display: inline-block;
+            position: relative;
+            white-space: nowrap;
+          }
+          .c365-origin-speaking-word::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px;
+            height: 2px;
+            background: var(--origin-red);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform .72s cubic-bezier(.16,1,.3,1) .4s;
+          }
+          [data-scene="10"].is-visible .c365-origin-speaking-word::after { transform: scaleX(1); }
+          .c365-origin-photo-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            min-height: 460px;
+            isolation: isolate;
+          }
+          .c365-origin-photo-number {
+            position: absolute;
+            z-index: -1;
+            left: -8%;
+            bottom: 4%;
+            color: rgba(255,255,255,.035);
+            font-size: clamp(7rem,19vw,18rem);
+            font-weight: 900;
+            line-height: .75;
+            letter-spacing: -.09em;
+            user-select: none;
+          }
+          .c365-origin-photo-frame {
+            position: absolute;
+            top: 5%;
+            right: 4%;
+            bottom: 7%;
+            left: 7%;
+            border: 1px solid rgba(255,255,255,.2);
+            transform: rotate(3deg) scale(.96);
+            opacity: .2;
+            transition: transform 1.2s cubic-bezier(.16,1,.3,1), opacity 1s ease;
+          }
+          [data-scene="10"].is-visible .c365-origin-photo-frame {
+            transform: rotate(1deg) scale(1);
+            opacity: .7;
+          }
+          .c365-origin-photo-reveal {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            opacity: .15;
+            clip-path: inset(8% 0 0 16%);
+            transform: translate3d(28px,18px,0) scale(.965);
+            filter: saturate(.82);
+            transition:
+              clip-path 1.1s cubic-bezier(.16,1,.3,1),
+              opacity .9s ease,
+              transform 1.2s cubic-bezier(.16,1,.3,1),
+              filter 1.2s ease;
+          }
+          [data-scene="10"].is-visible .c365-origin-photo-reveal {
+            opacity: 1;
+            clip-path: inset(0);
+            transform: translate3d(0,0,0) scale(1);
+            filter: saturate(1);
+          }
+          .c365-origin-photo-caption {
+            position: absolute;
+            z-index: 2;
+            right: 0;
+            bottom: 0;
+            margin: 0;
+            color: rgba(255,255,255,.72);
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: .18em;
+            text-align: right;
+          }
+          .c365-origin-photo-caption span { color: rgba(255,255,255,.35); }
+          .c365-origin-not-copied { position: relative; padding-left: 16px; }
+          .c365-origin-not-copied::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: .28em;
+            bottom: .28em;
+            width: 2px;
+            background: var(--origin-red);
+          }
+          .c365-origin-goals { display: grid; gap: 7px; margin-top: 14px; }
+          .c365-origin-goals p {
+            position: relative;
+            margin: 0;
+            padding-left: 16px;
+            color: #fff;
+            font-size: clamp(16px,1.7vw,21px);
+            font-weight: 800;
+            line-height: 1.55;
+          }
+          .c365-origin-goals p::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: .68em;
+            width: 5px;
+            height: 5px;
+            background: var(--origin-red);
+          }
+          @keyframes c365OriginWordIn {
+            0% { opacity: 0; transform: translate3d(0,16px,0) scale(.94); filter: blur(8px); }
+            68% { opacity: 1; transform: translate3d(0,-2px,0) scale(1.015); filter: blur(0); }
+            100% { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
+          }
+          @media (max-width: 760px) {
+            .c365-origin-grid {
+              grid-template-columns: minmax(0,1fr);
+              grid-template-areas: "photo" "story";
+              gap: 28px;
+              margin-top: 32px;
+            }
+            .c365-origin-photo-stage { min-height: 0; padding: 8px 8px 28px; }
+            .c365-origin-photo-reveal { max-width: 520px; margin: 0 auto; }
+            .c365-origin-photo-reveal img { height: min(56vh,560px) !important; }
+            .c365-origin-photo-number { left: 0; bottom: 15%; font-size: 44vw; }
+            .c365-origin-photo-caption { bottom: 4px; right: 8px; }
+            .c365-origin-brand span { display: block !important; margin: 10px 0 0 !important; }
+            .c365-origin-desktop-break { display: none; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            [data-scene="10"].is-visible .c365-origin-kinetic,
+            [data-scene="10"].is-visible .c365-origin-photo-frame,
+            [data-scene="10"].is-visible .c365-origin-photo-reveal,
+            [data-scene="10"].is-visible .c365-origin-speaking-word::after {
+              animation: none !important;
+              transition: none !important;
+              filter: none !important;
+            }
+            .c365-origin-photo-frame { opacity: .7; transform: none; }
+            .c365-origin-photo-reveal { clip-path: none; opacity: 1; transform: none; filter: none; }
+            .c365-origin-kinetic { opacity: 1; transform: none; filter: none; }
+            .c365-origin-speaking-word::after { transform: scaleX(1); }
+          }
+        `}</style>
       </section>
 
       {/* ══════════════════════════════════════
