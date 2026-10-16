@@ -5,7 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { PageBanner } from '@/components/PageBanner';
-import { Sparkles, ExternalLink } from 'lucide-react';
+import { Sparkles, ArrowUpRight } from 'lucide-react';
 
 /**
  * /ai-lab — home of Creatr365's AI tools. Only tools that actually exist are
@@ -14,13 +14,9 @@ import { Sparkles, ExternalLink } from 'lucide-react';
  * category tiles. Green (#6AAA7A) matches this tile's slot in Explore.tsx's
  * System B wayfinding rotation.
  *
- * Host Compass is currently a link-out card to its own deployment
- * (live-host-tracking.vercel.app): a standalone client-side app that keeps
- * its history in the visitor's browser (no login, no Supabase). It opens in a
- * new tab rather than an iframe — an embed would depend on that deployment's
- * framing headers and on third-party storage staying available (Safari / the
- * LINE in-app browser partition or block it), which can't be verified from
- * this repo. Moving it fully in-site means porting its source into this repo.
+ * Host Compass opens inside this site at /ai-lab/host-compass
+ * (src/pages/HostCompass.tsx — an iframe onto the static build in
+ * public/host-compass-app/).
  */
 const AiLab: React.FC = () => {
   useDarkPage();
@@ -65,28 +61,29 @@ const AiLab: React.FC = () => {
             </p>
           </div>
 
-          {/* Host Compass — opens its own deployment in a new tab (see the
-              file comment above for why this is not an iframe). */}
-          <a
-            href="https://live-host-tracking.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sharp-card section-accent group mt-6 flex items-center justify-between gap-4 p-6 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
+          {/* Host Compass — opens inside the site (internal route, same tab). */}
+          <Link
+            to="/ai-lab/host-compass"
+            className="sharp-card section-accent group mt-6 flex flex-col sm:flex-row sm:items-center gap-5 p-4 sm:p-5 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
             style={{ '--hover-accent': '#6AAA7A', '--section-accent': '#6AAA7A' } as React.CSSProperties}
           >
-            <div>
+            <img
+              src="/images/pro-AI-tech.png"
+              alt="Host Compass"
+              className="w-full sm:w-52 shrink-0 aspect-square object-cover"
+            />
+            <div className="flex-1">
               <span className="text-[10px] font-bold tracking-widest text-[#6AAA7A] flex items-center gap-1.5 mb-2">
                 <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[#6AAA7A] inline-block" aria-hidden="true" />
                 กำลังทดสอบ
               </span>
               <div className="font-bold text-lg">Host Compass</div>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
-               นำตัวเลขสรุปหลังการไลฟ์มาใช้ เพื่อเป็นแนวทางและการพัฒนาการไลฟ์ในครั้งต่อไป
+                นำตัวเลขสรุปหลังการไลฟ์มาใช้ เพื่อเป็นแนวทางและการพัฒนาการไลฟ์ในครั้งต่อไป
               </p>
-              <span className="text-[11px] text-muted-foreground mt-2 block">เปิดในแท็บใหม่</span>
             </div>
-            <ExternalLink className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
-          </a>
+            <ArrowUpRight className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
+          </Link>
         </div>
       </section>
 
