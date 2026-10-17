@@ -870,7 +870,8 @@ export default function Home() {
         </div>
       </section>
 
-§10  BRAND PHILOSOPHY / OUR ORIGIN
+      {/* ══════════════════════════════════════
+          §10  BRAND PHILOSOPHY / OUR ORIGIN
           The existing promo portrait becomes a living presence;
           narrative reveals in sequence when this scene enters view.
       ══════════════════════════════════════ */}
@@ -1304,7 +1305,6 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════
-                {/* ══════════════════════════════════════
           §11  JOURNEY / FINAL CHAPTER
           Cinematic chapter frame — image remains the hero,
           typography and CTA act as editorial overlays.
