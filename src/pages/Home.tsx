@@ -870,8 +870,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════
-          §10  BRAND PHILOSOPHY / OUR ORIGIN
+§10  BRAND PHILOSOPHY / OUR ORIGIN
           The existing promo portrait becomes a living presence;
           narrative reveals in sequence when this scene enters view.
       ══════════════════════════════════════ */}
@@ -885,7 +884,7 @@ export default function Home() {
           isolation: 'isolate',
           background: '#080808',
           color: '#fff',
-          padding: 'clamp(76px,8vw,116px) clamp(20px,6vw,84px) clamp(70px,8vw,110px)',
+          padding: 'clamp(64px,7vw,96px) clamp(20px,6vw,84px) clamp(64px,7vw,90px)',
           boxSizing: 'border-box',
         }}
       >
@@ -912,40 +911,23 @@ export default function Home() {
               BRAND PHILOSOPHY / OUR ORIGIN
             </p>
 
-            <h2
-              data-aos="fade-up"
-              data-aos-delay="100"
-              className="c365-h-nodefault c365-origin-brand"
-              style={{
-                margin: 'clamp(20px,3vw,34px) 0 0',
-                color: '#fff',
-                fontSize: 'clamp(2.8rem,6.7vw,6.7rem)',
-                lineHeight: '.9',
-                fontWeight: 900,
-                letterSpacing: '-.065em',
-              }}
-            >
-              Creatr365
-              <span
-                style={{
-                  display: 'inline-block',
-                  marginLeft: 'clamp(8px,1.2vw,18px)',
-                  color: 'rgba(255,255,255,.42)',
-                  fontSize: 'clamp(.9rem,1.5vw,1.45rem)',
-                  fontWeight: 600,
-                  letterSpacing: '.01em',
-                  verticalAlign: 'middle',
-                }}
-              >
-                (ครีเอท-สามหกห้า)
-              </span>
-            </h2>
+            <div data-aos="fade-up" data-aos-delay="100" className="c365-origin-brand-lockup">
+              <h2 className="c365-h-nodefault c365-origin-brand">
+                <img
+                  src="/images/logoCreatr365/white_logo_side.png"
+                  alt="Creatr365"
+                  className="c365-origin-logo"
+                  decoding="async"
+                />
+              </h2>
+              <p className="c365-origin-reading">(ครีเอท-สามหกห้า)</p>
+            </div>
 
             <p
               data-aos="fade-up"
               data-aos-delay="180"
               style={{
-                margin: '16px 0 0',
+                margin: '12px 0 0',
                 maxWidth: 760,
                 color: 'rgba(255,255,255,.62)',
                 fontSize: 'clamp(11px,1.25vw,15px)',
@@ -980,9 +962,13 @@ export default function Home() {
                   }}
                 />
               </div>
-              <p className="c365-origin-photo-caption">
-                CREATR365 <span>— BUILT FROM REAL EXPERIENCE</span>
-              </p>
+              <img
+                className="c365-origin-photo-caption"
+                src="/images/logoCreatr365/white_concept_center.png"
+                alt="Be a creator not a consumer"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
 
             <div className="c365-origin-story" style={{ gridArea: 'story' }}>
@@ -992,7 +978,7 @@ export default function Home() {
                   margin: 0,
                   color: 'rgba(255,255,255,.48)',
                   fontSize: 'clamp(14px,1.45vw,18px)',
-                  lineHeight: 1.8,
+                  lineHeight: 1.68,
                 }}
               >
                 ระบบนี้ไม่ได้เกิดจากการอยากมีคอร์ส
@@ -1006,7 +992,7 @@ export default function Home() {
                   margin: '10px 0 0',
                   color: '#fff',
                   fontSize: 'clamp(1.8rem,3.4vw,3.5rem)',
-                  lineHeight: 1.08,
+                  lineHeight: 1.04,
                   fontWeight: 850,
                   letterSpacing: '-.04em',
                 }}
@@ -1021,10 +1007,10 @@ export default function Home() {
                 data-aos-delay="180"
                 className="c365-origin-belief"
                 style={{
-                  margin: 'clamp(20px,2.5vw,30px) 0 0',
+                  margin: 'clamp(16px,2vw,24px) 0 0',
                   color: 'rgba(255,255,255,.76)',
                   fontSize: 'clamp(16px,1.75vw,22px)',
-                  lineHeight: 1.65,
+                  lineHeight: 1.52,
                   fontWeight: 600,
                 }}
               >
@@ -1046,7 +1032,7 @@ export default function Home() {
                     margin: 0,
                     color: 'rgba(255,255,255,.68)',
                     fontSize: 'clamp(13px,1.2vw,16px)',
-                    lineHeight: 1.9,
+                    lineHeight: 1.72,
                   }}
                 >
                   ทุกเนื้อหา เครื่องมือ และ Framework ใน Creatr365
@@ -1060,11 +1046,11 @@ export default function Home() {
                 data-aos-delay="320"
                 className="c365-origin-not-copied"
                 style={{
-                  margin: 'clamp(18px,2vw,26px) 0 0',
+                  margin: 'clamp(14px,1.6vw,20px) 0 0',
                   color: '#fff',
                   fontSize: 'clamp(14px,1.4vw,18px)',
                   fontWeight: 800,
-                  lineHeight: 1.6,
+                  lineHeight: 1.5,
                 }}
               >
                 ไม่ได้คัดลอกจากคอร์สใด
@@ -1074,8 +1060,8 @@ export default function Home() {
                 data-aos="fade-up"
                 data-aos-delay="360"
                 style={{
-                  marginTop: 'clamp(30px,4vw,48px)',
-                  paddingTop: 'clamp(20px,2.4vw,28px)',
+                  marginTop: 'clamp(22px,2.8vw,34px)',
+                  paddingTop: 'clamp(16px,1.8vw,22px)',
                   borderTop: '1px solid rgba(255,255,255,.15)',
                 }}
               >
@@ -1113,13 +1099,31 @@ export default function Home() {
               linear-gradient(135deg, rgba(255,255,255,.018), transparent 48%);
           }
           .c365-origin-header { position: relative; z-index: 2; }
+          .c365-origin-brand-lockup { display: inline-block; max-width: 100%; }
+          .c365-origin-brand { margin: 0; line-height: 1; width: fit-content; max-width: 100%; }
+          .c365-origin-logo {
+            display: block;
+            width: clamp(190px,21vw,300px);
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            object-position: left center;
+          }
+          .c365-origin-reading {
+            margin: 7px 0 0;
+            color: rgba(255,255,255,.55);
+            font-size: clamp(10px,.85vw,12px);
+            font-weight: 600;
+            letter-spacing: .08em;
+            line-height: 1.35;
+          }
           .c365-origin-grid {
             display: grid;
-            grid-template-columns: minmax(0,1fr) minmax(310px,.76fr);
+            grid-template-columns: minmax(0,1fr) minmax(0,.76fr);
             grid-template-areas: "story photo";
             align-items: center;
-            gap: clamp(34px,5.5vw,88px);
-            margin-top: clamp(42px,6vw,78px);
+            gap: clamp(30px,4.6vw,72px);
+            margin-top: clamp(32px,4.5vw,58px);
           }
           .c365-origin-story { min-width: 0; }
           .c365-origin-thesis { max-width: 680px; }
@@ -1205,16 +1209,17 @@ export default function Home() {
           .c365-origin-photo-caption {
             position: absolute;
             z-index: 2;
-            right: 0;
-            bottom: 0;
-            margin: 0;
-            color: rgba(255,255,255,.72);
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: .18em;
-            text-align: right;
+            right: clamp(6px,1vw,14px);
+            bottom: clamp(4px,.7vw,10px);
+            display: block;
+            width: clamp(132px,13vw,188px);
+            max-width: 44%;
+            max-height: 104px;
+            height: auto;
+            object-fit: contain;
+            object-position: right bottom;
+            filter: drop-shadow(0 4px 14px rgba(0,0,0,.45));
           }
-          .c365-origin-photo-caption span { color: rgba(255,255,255,.35); }
           .c365-origin-not-copied { position: relative; padding-left: 16px; }
           .c365-origin-not-copied::before {
             content: '';
@@ -1225,7 +1230,7 @@ export default function Home() {
             width: 2px;
             background: var(--origin-red);
           }
-          .c365-origin-goals { display: grid; gap: 7px; margin-top: 14px; }
+          .c365-origin-goals { display: grid; gap: 5px; margin-top: 10px; }
           .c365-origin-goals p {
             position: relative;
             margin: 0;
@@ -1233,7 +1238,7 @@ export default function Home() {
             color: #fff;
             font-size: clamp(16px,1.7vw,21px);
             font-weight: 800;
-            line-height: 1.55;
+            line-height: 1.45;
           }
           .c365-origin-goals p::before {
             content: '';
@@ -1249,20 +1254,37 @@ export default function Home() {
             68% { opacity: 1; transform: translate3d(0,-2px,0) scale(1.015); filter: blur(0); }
             100% { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
           }
-          @media (max-width: 760px) {
+          @media (max-width: 900px) {
             .c365-origin-grid {
               grid-template-columns: minmax(0,1fr);
               grid-template-areas: "photo" "story";
-              gap: 28px;
-              margin-top: 32px;
+              gap: 26px;
+              margin-top: 30px;
             }
-            .c365-origin-photo-stage { min-height: 0; padding: 8px 8px 28px; }
+            .c365-origin-photo-stage {
+              min-height: 0;
+              padding: 8px 8px 30px;
+              width: 100%;
+              max-width: 620px;
+              margin: 0 auto;
+            }
             .c365-origin-photo-reveal { max-width: 520px; margin: 0 auto; }
-            .c365-origin-photo-reveal img { height: min(56vh,560px) !important; }
-            .c365-origin-photo-number { left: 0; bottom: 15%; font-size: 44vw; }
-            .c365-origin-photo-caption { bottom: 4px; right: 8px; }
-            .c365-origin-brand span { display: block !important; margin: 10px 0 0 !important; }
+            .c365-origin-photo-reveal img { height: min(55vh,560px) !important; }
+            .c365-origin-photo-number { left: 0; bottom: 15%; font-size: 36vw; }
+            .c365-origin-photo-caption {
+              width: clamp(116px,22vw,160px);
+              max-width: 38%;
+              max-height: 82px;
+              bottom: 4px;
+              right: 8px;
+            }
+            .c365-origin-logo { width: min(64vw,260px); }
             .c365-origin-desktop-break { display: none; }
+          }
+          @media (max-width: 480px) {
+            .c365-origin-photo-reveal img { height: min(48vh,430px) !important; }
+            .c365-origin-photo-caption { width: 124px; max-width: 38%; max-height: 68px; }
+            .c365-origin-goals p { font-size: 16px; }
           }
           @media (prefers-reduced-motion: reduce) {
             [data-scene="10"].is-visible .c365-origin-kinetic,
@@ -1282,6 +1304,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════
+                {/* ══════════════════════════════════════
           §11  JOURNEY / FINAL CHAPTER
           Cinematic chapter frame — image remains the hero,
           typography and CTA act as editorial overlays.
