@@ -1,148 +1,99 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { CourseNavbar } from '@/components/CourseNavbar';
 import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
-import { ArrowUpRight, Calendar, GraduationCap, Package, Sparkles, Wrench } from 'lucide-react';
 
 /**
- * /explore — the ecosystem landing page. Replaces "EXPLORE = /courses" with
- * four destinations (Courses / Toolbox / AI Lab / Creator Tools) as giant,
- * whole-card tiles. Courses stays the largest/primary tile (business
- * anchor); AI Lab now has its first live tool, while Creator Tools is a real
- * route still honestly labelled "Coming soon" until there's real content
- * behind it — no dropdown, no
- * nested interactive elements inside a tile (one <Link> per tile, DOM order
- * matches the visual priority so keyboard/tab order stays meaningful).
- *
- * Colors follow the brand system's "System B" (document/wayfinding) palette:
- * dark base, gold (#C0A060) as the one primary brand accent, and a rotating
- * per-tile wayfinding accent (gold → blue → green → copper, in DOM order) —
- * used only as a thin top border + tag + icon color, never a full-bleed
- * fill, per that system's rules.
+ * Explore — video desk scene with 5 clickable post-its.
+ * Background: public/videos/Exploer-Submenu.mp4 (muted, looping, inline).
+ * Each post-it is a transparent <Link> laid over the paper in the video:
+ * no added text, icon, emoji, border or effect — the paper IS the button.
+ * Positions are % of the video frame (reference frame 1344x768), so they stay
+ * aligned at every size as long as the video keeps that aspect ratio.
+ * All styles scoped to .explore-desk-*.
  */
+const DESK_VIDEO = '/videos/Exploer-Submenu.mp4';
+
+type Hotspot = { key: string; href: string; label: string; l: number; t: number; w: number; h: number };
+
+const HOTSPOTS: Hotspot[] = [
+  { key: 'courses',       href: '/courses',       label: 'Courses',       l: 40.0, t: 18.5, w: 8.6,  h: 14.6 },
+  { key: 'creator-tools', href: '/creator-tools', label: 'Creator Tools', l: 38.8, t: 35.9, w: 9.2,  h: 15.7 },
+  { key: 'events',        href: '/events',        label: 'Events',        l: 40.8, t: 56.8, w: 8.3,  h: 14.2 },
+  { key: 'toolbox',       href: '/toolbox',       label: 'Toolbox',       l: 84.5, t: 10.7, w: 10.1, h: 16.9 },
+  { key: 'ai-lab',        href: '/ai-lab',        label: 'AI Lab',        l: 85.0, t: 30.2, w: 10.6, h: 16.4 },
+];
+
 const Explore: React.FC = () => {
   useDarkPage();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Respect "reduce motion": keep the clip on screen but paused on its first frame.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      videoRef.current?.pause();
+    }
+  }, []);
+
   return (
     <>
       <SEOHead
         title="Explore - Creatr365"
-        description="เลือกเส้นทางของคุณ: เรียนรู้กับ Courses, หยิบของจาก Toolbox, ทดลอง AI Lab หรือใช้ Creator Tools"
+        description="เลือกเส้นทางของคุณ: Courses, Toolbox, AI Lab, Creator Tools และ Events ของ Creatr365"
       />
       <CourseNavbar />
 
-      <section className="page-cinematic stage-page pt-28 pb-20 px-4 bg-background">
-        <div className="max-w-6xl mx-auto">
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase mb-6">
-            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-foreground" aria-current="page">Explore</span>
+      <main className="explore-desk-view">
+        <h1 className="explore-desk-sr">Explore Creatr365</h1>
+        <div className="explore-desk-stage">
+          <video
+            ref={videoRef}
+            className="explore-desk-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            tabIndex={-1}
+          >
+            <source src={DESK_VIDEO} type="video/mp4" />
+          </video>
+
+          <nav className="explore-desk-nav" aria-label="Explore">
+            {HOTSPOTS.map((h) => (
+              <Link
+                key={h.key}
+                to={h.href}
+                aria-label={h.label}
+                className="explore-desk-hit"
+                style={{ left: `${h.l}%`, top: `${h.t}%`, width: `${h.w}%`, height: `${h.h}%` }}
+              />
+            ))}
           </nav>
-
-          {/* Editorial hero */}
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4" data-accent="red">
-            เลือกเส้นทางที่ตรงกับงานของคุณ
-          </h1>
-          <p className="text-muted-foreground text-base md:text-lg mb-10 max-w-xl">
-            ไม่ใช่แค่หัวข้อที่น่าสนใจ — เรียนรู้เป็นลำดับ หยิบของไปใช้ทันที ทดลอง AI หรือใช้เครื่องมือของ Creatr365
-          </p>
-
-          {/* 5 tiles — DOM order: Courses, Toolbox, AI Lab, Creator Tools, Events.
-              Bottom row now holds two half-width tiles instead of one
-              full-width Creator Tools tile, to make room for Events without
-              disturbing the Courses/Toolbox/AI Lab layout above it. */}
-          <div className="stagger-in grid grid-cols-1 md:grid-cols-2 md:grid-rows-[220px_220px_160px] gap-3">
-            <Link
-              to="/courses"
-              className="sharp-card sharp-tile section-accent md:col-start-1 md:row-start-1 md:row-span-2 relative flex flex-col justify-between p-6 md:p-8 bg-card text-foreground border border-border border-t-4 border-t-[#C0A060] overflow-hidden group"
-              style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}
-            >
-              <div className="flex items-start justify-between relative z-10">
-                <span className="text-[10px] font-bold tracking-widest text-[#C0A060]">01 / COURSES</span>
-                <GraduationCap className="w-5 h-5 text-[#C0A060]" aria-hidden="true" />
-              </div>
-              <div className="relative z-10">
-                <h2 className="text-3xl md:text-5xl font-bold leading-[0.95] mb-3">Courses</h2>
-                <p className="text-sm text-muted-foreground max-w-xs">Creatr365 คอร์สเรียนเพื่อการเป็น Live Commerce Creator/Host ที่มีคุณภาพเพื่ออาชีพที่สร้างรายได้และมีมาตรฐานในระดับสากลยอมรับ </p>
-              </div>
-              <span className="absolute right-4 bottom-4 md:right-6 md:bottom-6 w-9 h-9 grid place-items-center bg-[#C0A060] text-[#0D0D0D] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
-                <ArrowUpRight className="motion-arrow w-4 h-4" aria-hidden="true" />
-              </span>
-            </Link>
-
-            <Link
-              to="/toolbox"
-              className="sharp-card sharp-tile section-accent md:col-start-2 md:row-start-1 relative flex flex-col justify-between p-6 bg-card border border-border border-t-4 border-t-[#4A7FB5] overflow-hidden group"
-              style={{ '--hover-accent': '#4A7FB5', '--section-accent': '#4A7FB5' } as React.CSSProperties}
-            >
-              <div className="flex items-start justify-between">
-                <span className="text-[10px] font-bold tracking-widest text-[#4A7FB5]">02 / TOOLBOX</span>
-                <Package className="w-5 h-5 text-[#4A7FB5]" aria-hidden="true" />
-              </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">Toolbox</h2>
-                <p className="text-xs text-muted-foreground max-w-xs">Template - Document File's Room </p>
-              </div>
-              <span className="absolute right-4 bottom-4 w-8 h-8 grid place-items-center bg-[#4A7FB5] text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">
-                <ArrowUpRight className="motion-arrow w-3.5 h-3.5" aria-hidden="true" />
-              </span>
-            </Link>
-
-            <Link
-              to="/ai-lab"
-              className="sharp-card sharp-tile section-accent md:col-start-2 md:row-start-2 relative flex flex-col justify-between p-6 bg-card text-foreground border border-border border-t-4 border-t-[#6AAA7A] overflow-hidden group"
-              style={{
-                backgroundImage: 'radial-gradient(rgba(240,236,228,.07) 1px, transparent 1px)',
-                backgroundSize: '11px 11px',
-                '--hover-accent': '#6AAA7A',
-                '--section-accent': '#6AAA7A',
-              } as React.CSSProperties}
-            >
-              <div className="flex items-start justify-between relative z-10">
-                <span className="text-[10px] font-bold tracking-widest text-[#6AAA7A] inline-flex items-center gap-1.5">
-                  <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[#6AAA7A] inline-block" aria-hidden="true" />
-                  03 / AI LAB
-                </span>
-                <Sparkles className="w-5 h-5 text-[#6AAA7A]" aria-hidden="true" />
-              </div>
-              <div className="relative z-10">
-                <h2 className="text-2xl md:text-3xl font-bold leading-[0.95] mb-2">AI Lab</h2>
-                <p className="text-xs text-muted-foreground max-w-xs">เครื่องมือเฉพาะที่ Creatr365 พัฒนาขึ้น(Phase1) สำหรับ creator live e-commerce  — Let's Go! </p>
-              </div>
-            </Link>
-
-            <Link
-              to="/creator-tools"
-              className="sharp-card sharp-tile section-accent md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#B87333] overflow-hidden group"
-              style={{ '--hover-accent': '#B87333', '--section-accent': '#B87333' } as React.CSSProperties}
-            >
-              <div>
-                <span className="text-[10px] font-bold tracking-widest text-[#B87333] block">04 / CREATOR TOOLS</span>
-                <h2 className="text-xl md:text-2xl font-bold leading-[0.95] mt-1">Creator Tools</h2>
-                <p className="text-xs text-muted-foreground mt-1">Coming soon — utility ที่ Creatr365 กำลังจัดเตรียมสำหรับสมาชิก</p>
-              </div>
-              <Wrench className="w-6 h-6 text-[#B87333] shrink-0" aria-hidden="true" />
-            </Link>
-
-            <Link
-              to="/events"
-              className="sharp-card sharp-tile section-accent md:row-start-3 relative flex items-center justify-between p-6 bg-card border border-border border-t-4 border-t-[#C0567A] overflow-hidden group"
-              style={{ '--hover-accent': '#C0567A', '--section-accent': '#C0567A' } as React.CSSProperties}
-            >
-              <div>
-                <span className="text-[10px] font-bold tracking-widest text-[#C0567A] block">05 / EVENTS</span>
-                <h2 className="text-xl md:text-2xl font-bold leading-[0.95] mt-1">Events</h2>
-                <p className="text-xs text-muted-foreground mt-1">Live Class & WorkShop กิจกรรมสำหรับชาว creatr365 </p>
-              </div>
-              <Calendar className="w-6 h-6 text-[#C0567A] shrink-0" aria-hidden="true" />
-            </Link>
-          </div>
         </div>
-      </section>
+      </main>
 
       <Footer />
+
+      <style>{`
+        .explore-desk-view { position: relative; width: 100%; overflow: hidden; background: #15110d; }
+        .explore-desk-stage { position: relative; width: 100%; aspect-ratio: 1344 / 768; background: #15110d; }
+        .explore-desk-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+        .explore-desk-nav { position: absolute; inset: 0; }
+        .explore-desk-hit { position: absolute; display: block; background: transparent; -webkit-tap-highlight-color: transparent; }
+        .explore-desk-hit:focus-visible { outline: 2px dashed #fff; outline-offset: 3px; }
+        .explore-desk-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+        /* Phones: show the two post-it columns (x≈39–94%) by enlarging the frame and centring it on x≈67%. */
+        @media (max-width: 767px) {
+          .explore-desk-view { height: calc(175vw / 1.75); }
+          .explore-desk-stage { width: 175vw; left: -67.25vw; }
+        }
+
+      `}</style>
     </>
   );
 };
