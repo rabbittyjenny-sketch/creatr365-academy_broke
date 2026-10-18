@@ -10,164 +10,20 @@ import { ArrowRight } from 'lucide-react';
 const RED = '#CC0033';
 const BADGE = '/images/be-a-creator-live.png'; // existing asset, unchanged
 const LOGO = '/images/w-logo-side.png'; // real "Creatr365." logo asset — confirmed by direct viewing, and named explicitly by the user
-const PHOTOS = {
-  host: '/images/hero-host1.webp',
-  beauty: '/images/hero-beauty1.webp',
-  food: '/images/hero-food1.webp',
-  fashion: '/images/hero-fashion1.webp',
-} as const;
-
-/* ════════════════════════════════════════════════════════
-   FLOAT ITEM CONFIG
-   Position/size come from the approved design; depth/rot/phase
-   drive the idle sine-wave float; ex/ey/er/delay/dur drive the
-   one-time "fly into place" entrance.
-
-   delay/dur are the reference build's own numbers × 2.3 — the
-   reference file was re-checked line-by-line against its actual
-   engine script (not just the DOM), and delay/dur here already
-   matched it exactly; "too fast" was a request to go slower than
-   the reference itself, not a bug in matching it, so every value
-   is stretched by the same factor to keep the original cascade/
-   timing relationships intact, just unfolding over ~2.3x longer. */
-type FloatKind = 'photo-host' | 'photo-beauty' | 'photo-food' | 'photo-fashion' | 'tag-standard' | 'tag-bubble' | 'tag-torn' | 'tag-host';
-
-interface FloatConfig {
-  kind: FloatKind;
-  left: string; top: string; width: string;
-  depth: number; rot: number; phase: number;
-  ex: number; ey: number; er: number; delay: number; dur: number;
-}
-
-const FLOAT_ITEMS: FloatConfig[] = [
-  { kind: 'photo-host',    left: '27.8%', top: '49.5%', width: '17.5%', depth: 1.1, rot: -3, phase: 0.4, ex: -70, ey: -540, er: 340,  delay: 2025, dur: 4255 },
-  { kind: 'photo-beauty',  left: '47.4%', top: '46.5%', width: '18.2%', depth: 1.5, rot: 5,  phase: 1.9, ex: 90,  ey: -500, er: -300, delay: 1470, dur: 4025 },
-  { kind: 'photo-food',    left: '64.3%', top: '19.7%', width: '17.6%', depth: 2,   rot: -2, phase: 3.4, ex: 60,  ey: -460, er: -320, delay: 505,  dur: 3680 },
-  { kind: 'photo-fashion', left: '80%',   top: '42.9%', width: '17.6%', depth: 1.3, rot: 4,  phase: 4.7, ex: -40, ey: -420, er: 260,  delay: 965,  dur: 3565 },
-  { kind: 'tag-standard',  left: '88.9%', top: '6.1%',  width: '11.5%', depth: 1.6, rot: 6,  phase: 2.2, ex: 40,  ey: -380, er: 300,  delay: 0,    dur: 3220 },
-  { kind: 'tag-bubble',    left: '86.5%', top: '80.8%', width: '13.5%', depth: 1.2, rot: -5, phase: 1.1, ex: 50,  ey: -360, er: -260, delay: 1290, dur: 3335 },
-  { kind: 'tag-torn',      left: '57.5%', top: '21.2%', width: '9.5%',  depth: 1.7, rot: -6, phase: 2.6, ex: 30,  ey: -300, er: -220, delay: 230,  dur: 2990 },
-  { kind: 'tag-host',      left: '69%',   top: '66.7%', width: '12.8%', depth: 1.4, rot: -3, phase: 0.6, ex: -20, ey: -340, er: 240,  delay: 1105, dur: 3450 },
-];
-
-/* ════════════════════════════════════════════════════════
-   MOTION HOOK
-   Pointer-parallax + idle float + one-time entrance, applied
-   directly to refs every frame (no React state in the loop —
-   same approach the reference build used, so it stays smooth).
-   Fully self-contained: nothing here reads or writes the
-   useParallax/useAOS/useSceneReveal hooks used by the rest of
-   Home.tsx, so it cannot affect any other section.
-════════════════════════════════════════════════════════ */
-function useFloatMotion(containerRef: React.RefObject<HTMLDivElement>, itemRefs: React.MutableRefObject<(HTMLDivElement | null)[]>) {
-  useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const state = FLOAT_ITEMS.map((c) => ({ ...c, x: 0, y: 0, r: c.rot, s: 1, op: 0, vx: 0, vy: 0, vr: 0, hov: 0, over: 0 }));
-
-    if (reduce) {
-      state.forEach((_, i) => {
-        const el = itemRefs.current[i];
-        if (el) { el.style.opacity = '1'; el.style.transform = 'none'; }
-      });
-      return;
-    }
-
-    let px = 0, py = 0, tpx = 0, tpy = 0;
-    const startTime = performance.now();
-    const root = containerRef.current;
-
-    const setFromPoint = (cx: number, cy: number) => {
-      if (!root) return;
-      const r = root.getBoundingClientRect();
-      tpx = Math.max(-1, Math.min(1, (cx - (r.left + r.width / 2)) / (r.width / 2)));
-      tpy = Math.max(-1, Math.min(1, (cy - (r.top + r.height / 2)) / (r.height / 2)));
-    };
-    const onMove = (e: PointerEvent) => setFromPoint(e.clientX, e.clientY);
-    const onTouch = (e: TouchEvent) => { const t = e.touches[0]; if (t) setFromPoint(t.clientX, t.clientY); };
-    const onLeave = () => { tpx = 0; tpy = 0; };
-
-    window.addEventListener('pointermove', onMove, { passive: true });
-    window.addEventListener('touchmove', onTouch, { passive: true });
-    window.addEventListener('blur', onLeave);
-    root?.addEventListener('pointerleave', onLeave);
-
-    const cleanups: Array<() => void> = [];
-    itemRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const enter = () => { state[i].over = 1; };
-      const leave = () => { state[i].over = 0; };
-      el.addEventListener('pointerenter', enter);
-      el.addEventListener('pointerleave', leave);
-      cleanups.push(() => { el.removeEventListener('pointerenter', enter); el.removeEventListener('pointerleave', leave); });
-    });
-
-    let raf = 0;
-    const loop = (now: number) => {
-      raf = requestAnimationFrame(loop);
-      const t = now / 1000;
-      const width = root?.clientWidth ?? 1000;
-      const narrow = width < 640 ? 0.5 : width < 900 ? 0.75 : 1;
-      const strength = 1.1; // matches the reference file's own default motionStrength
-      const k = strength * narrow;
-      px += (tpx - px) * 0.07;
-      py += (tpy - py) * 0.07;
-      const elapsed = now - startTime;
-
-      state.forEach((it, i) => {
-        const el = itemRefs.current[i];
-        if (!el) return;
-        const d = it.depth;
-        const dx = Math.cos(t * 0.42 + it.phase * 1.3) * 4.5 * d;
-        const dy = Math.sin(t * 0.58 + it.phase) * 7 * d;
-        const dr = Math.sin(t * 0.33 + it.phase * 0.8) * 1.4 * d;
-        it.hov += (it.over - it.hov) * 0.12;
-
-        const localT = elapsed - it.delay;
-        let ease = 1, targetOp = 0;
-        if (localT <= 0) { ease = 1; targetOp = 0; }
-        else if (localT >= it.dur) { ease = 0; targetOp = 1; }
-        else { const p = localT / it.dur; ease = Math.pow(1 - p, 3); targetOp = Math.min(1, localT / 220); }
-        it.op += (targetOp - it.op) * 0.2;
-
-        const exO = it.ex * ease * narrow;
-        const eyO = it.ey * ease * narrow;
-        const erO = it.er * ease * narrow;
-
-        const tx = (px * 30 * d + dx) * k + exO;
-        const ty = (py * 20 * d + dy) * k - it.hov * 16 + eyO;
-        const tr = it.rot + (px * 5.2 * d + dr) * k + it.hov * Math.sign(it.rot || 1) * 2 + erO;
-
-        it.vx = (it.vx + (tx - it.x) * 0.085) * 0.84;
-        it.vy = (it.vy + (ty - it.y) * 0.085) * 0.84;
-        it.vr = (it.vr + (tr - it.r) * 0.07) * 0.86;
-        it.x += it.vx; it.y += it.vy; it.r += it.vr;
-        it.s = 1 + it.hov * 0.045;
-
-        el.style.transform = `translate3d(${it.x.toFixed(2)}px,${it.y.toFixed(2)}px,0) rotate(${it.r.toFixed(2)}deg) scale(${it.s.toFixed(4)})`;
-        el.style.opacity = it.op.toFixed(3);
-      });
-    };
-    raf = requestAnimationFrame(loop);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('touchmove', onTouch);
-      window.removeEventListener('blur', onLeave);
-      root?.removeEventListener('pointerleave', onLeave);
-      cleanups.forEach((fn) => fn());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-}
+const CLIP = '/videos/golive-clip.mp4'; // public/videos/golive-clip.mp4 — hero background clip
 
 /* ════════════════════════════════════════════════════════
    HERO SECTION
 ════════════════════════════════════════════════════════ */
 export function HeroSection() {
-  const scatterRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  useFloatMotion(scatterRef, itemRefs);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Background clip: respect "reduce motion" — keep it on screen, paused on frame 1.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      videoRef.current?.pause();
+    }
+  }, []);
 
   // Left-column entrance (headline lines + CTA block): fade/rise in,
   // staggered — driven by one boolean flip so each element's own
@@ -188,19 +44,17 @@ export function HeroSection() {
     transition: `transform 1s cubic-bezier(.16,1,.3,1) ${delayMs}ms, opacity .75s ease-out ${delayMs}ms, filter .75s ease-out ${delayMs}ms`,
   });
 
-  let i = 0;
-  // Stable per-index ref callbacks — created once and reused across
-  // renders (rather than a fresh closure per render), so React never
-  // sees the ref prop "change" and re-attach mid-animation.
-  const refCallbacks = useRef<Array<(el: HTMLDivElement | null) => void>>(
-    FLOAT_ITEMS.map((_, idx) => (el: HTMLDivElement | null) => { itemRefs.current[idx] = el; })
-  );
-  const nextRef = () => refCallbacks.current[i++];
-
   return (
     <section className="c365-scene" data-scene="1" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', background: '#0D0D0D' }}>
-      {/* soft brand-red glow, same treatment as the reference design */}
-      <div style={{ position: 'absolute', left: '50%', top: '58%', width: '120vw', height: '70vh', transform: 'translate(-50%,-50%)', background: `radial-gradient(ellipse at center, ${RED}29, rgba(13,13,13,0) 62%)`, pointerEvents: 'none' }} />
+      {/* Background clip + brand grade + left-dark blend. Sits under the content
+          wrapper (zIndex 0 vs 1); nothing inside it takes pointer events. */}
+      <div className="c365-hero-media" aria-hidden="true">
+        <video ref={videoRef} className="c365-hero-video" autoPlay muted loop playsInline preload="auto">
+          <source src={CLIP} type="video/mp4" />
+        </video>
+        <div className="c365-hero-grade" />
+        <div className="c365-hero-blend" />
+      </div>
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: 'clamp(18px,2.6vw,34px)', paddingTop: 'clamp(96px,14vh,148px)', boxSizing: 'border-box' }}>
 
@@ -265,54 +119,15 @@ export function HeroSection() {
               <strong style={{ color: '#fff', fontWeight: 700 }}>สร้างอาชีพที่ยั่งยืน</strong>
             </p>
           </div>
-
-          {/* scattered photo bubbles + tags — pointer-parallax + entrance driven by useFloatMotion */}
-          <div ref={scatterRef} className="c365-hero-scatter" style={{ position: 'relative', flex: 1, minWidth: 280, aspectRatio: '2.5/1', maxHeight: '62vh' }}>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[0].left, top: FLOAT_ITEMS[0].top, width: FLOAT_ITEMS[0].width, aspectRatio: '1/1', opacity: 0, borderRadius: '50%', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#1D4ED8', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
-              <img src={PHOTOS.host} alt="Live host at desk setup" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[1].left, top: FLOAT_ITEMS[1].top, width: FLOAT_ITEMS[1].width, aspectRatio: '1/1.05', opacity: 0, borderRadius: 'clamp(10px,2vw,28px)', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#6D28D9', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
-              <img src={PHOTOS.beauty} alt="Beauty host live on phone" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[2].left, top: FLOAT_ITEMS[2].top, width: FLOAT_ITEMS[2].width, aspectRatio: '1/1', opacity: 0, borderRadius: '50%', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#D4A017', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
-              <img src={PHOTOS.food} alt="Food host live cooking" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[3].left, top: FLOAT_ITEMS[3].top, width: FLOAT_ITEMS[3].width, aspectRatio: '1/1.05', opacity: 0, borderRadius: 'clamp(10px,2vw,28px)', border: 'clamp(3px,.45vw,6px) solid #F8F8F6', background: '#1E9E52', overflow: 'hidden', boxShadow: '0 26px 60px rgba(0,0,0,.45)' }}>
-              <img src={PHOTOS.fashion} alt="Fashion host with ring light" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            {/* NOTE: Thai copy on these 4 tags was read off the reference screenshot —
-                small text, please double-check spelling before shipping. */}
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[4].left, top: FLOAT_ITEMS[4].top, width: FLOAT_ITEMS[4].width, opacity: 0, display: 'flex', flexDirection: 'column', gap: 4 }} className="c365-hero-tag">
-              <span style={{ display: 'block', background: '#D4A017', color: '#0D0D0D', fontWeight: 700, fontSize: 'clamp(9px,.9vw,12px)', textAlign: 'center', padding: '8px 6px', borderRadius: 8, boxShadow: '0 10px 22px rgba(0,0,0,.35)' }}>มาตรฐาน</span>
-              <span style={{ display: 'block', background: '#1D4ED8', color: '#F8F8F6', fontWeight: 700, fontSize: 'clamp(9px,.9vw,12px)', textAlign: 'center', padding: '8px 6px', borderRadius: 8, boxShadow: '0 10px 22px rgba(0,0,0,.35)' }}>ระดับ</span>
-              <span style={{ display: 'block', background: '#1D4ED8', color: '#F8F8F6', fontWeight: 700, fontSize: 'clamp(9px,.9vw,12px)', textAlign: 'center', padding: '8px 6px', borderRadius: 8, boxShadow: '0 10px 22px rgba(0,0,0,.35)' }}>สากล</span>
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[5].left, top: FLOAT_ITEMS[5].top, width: FLOAT_ITEMS[5].width, opacity: 0, background: 'rgba(248,248,246,.08)', border: '1px dashed rgba(248,248,246,.35)', color: 'rgba(248,248,246,.65)', fontWeight: 600, fontSize: 'clamp(9px,.9vw,12px)', textAlign: 'center', padding: '10px 8px', borderRadius: 10 }} className="c365-hero-tag">
-              ไม่ใช่ทุกคนที่ไลฟ์เก่ง แต่ทุกคนพัฒนาได้
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[6].left, top: FLOAT_ITEMS[6].top, width: FLOAT_ITEMS[6].width, opacity: 0, background: '#F8F8F6', color: '#0D0D0D', fontWeight: 700, fontSize: 'clamp(9px,.85vw,11.5px)', textAlign: 'center', padding: '9px 6px', borderRadius: 6, boxShadow: '0 12px 24px rgba(0,0,0,.35)' }} className="c365-hero-tag">
-              การสื่อสาร ทักษะพลัง
-            </div>
-
-            <div ref={nextRef()} style={{ position: 'absolute', left: FLOAT_ITEMS[7].left, top: FLOAT_ITEMS[7].top, width: FLOAT_ITEMS[7].width, opacity: 0, display: 'flex', flexDirection: 'column', gap: 4 }} className="c365-hero-tag">
-              <span style={{ display: 'block', background: '#6D28D9', color: '#F8F8F6', fontWeight: 700, fontSize: 'clamp(9px,.85vw,11.5px)', textAlign: 'center', padding: '7px 6px', borderRadius: 8, boxShadow: '0 10px 20px rgba(0,0,0,.35)' }}>HOST</span>
-              <span style={{ display: 'block', background: '#1E9E52', color: '#F8F8F6', fontWeight: 700, fontSize: 'clamp(9px,.85vw,11.5px)', textAlign: 'center', padding: '7px 6px', borderRadius: 8, boxShadow: '0 10px 20px rgba(0,0,0,.35)' }}>แบรนด์อยากจ้าง</span>
-            </div>
-
-          </div>
         </div>
       </div>
 
-      {/* Small screens: let the scatter wrap under the CTA column instead of
-          overlapping it — .c365-hero-scatter/.c365-hero-tag are unique to
-          this component, so this rule cannot touch any other section.
+      {/* .c365-hero-* classes are unique to this component, so these rules cannot
+          touch any other section.
+          Media: clip is zoomed/shifted onto the live-app monitor (right side);
+          .c365-hero-grade pulls it toward the Creatr365 palette (#0D0D0D base,
+          #CC0033 red); .c365-hero-blend keeps the left darker than the right so the
+          left column reads exactly as before.
           .c365-h-nodefault turns off the sitewide h1/h2.../::after hover-
           underline (src/index.css) specifically for this hero wordmark:
           that rule sizes the underline to the widest of the heading's
@@ -326,10 +141,40 @@ export function HeroSection() {
       <style>{`
         .c365-h-nodefault::after { content: none !important; }
         .c365-h-nodefault:hover { color: inherit !important; }
+
+        .c365-hero-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #0D0D0D; }
+        .c365-hero-video {
+          position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+          object-fit: cover; object-position: 50% 50%;
+          transform-origin: 51% 62%;
+          transform: translate(20%, 1%) scale(1.1);
+          filter: saturate(.78) contrast(1.12) brightness(.9);
+        }
+        .c365-hero-grade {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse at 70% 60%, rgba(204,0,51,.22), rgba(204,0,51,0) 60%), #CC0033;
+          background-blend-mode: normal;
+          mix-blend-mode: soft-light; opacity: .38;
+        }
+        .c365-hero-blend {
+          position: absolute; inset: 0;
+          background:
+            linear-gradient(90deg, #0D0D0D 0%, rgba(13,13,13,.97) 30%, rgba(13,13,13,.8) 42%, rgba(13,13,13,.4) 58%, rgba(13,13,13,0) 78%),
+            linear-gradient(180deg, rgba(13,13,13,.6) 0%, rgba(13,13,13,0) 22%, rgba(13,13,13,0) 76%, rgba(13,13,13,.75) 100%);
+        }
+        @media (max-width: 1100px) {
+          .c365-hero-blend {
+            background:
+              linear-gradient(90deg, #0D0D0D 0%, rgba(13,13,13,.97) 40%, rgba(13,13,13,.85) 52%, rgba(13,13,13,.45) 66%, rgba(13,13,13,0) 84%),
+              linear-gradient(180deg, rgba(13,13,13,.6) 0%, rgba(13,13,13,0) 22%, rgba(13,13,13,0) 76%, rgba(13,13,13,.75) 100%);
+          }
+        }
         @media (max-width: 820px) {
-          .c365-hero-scatter { position: static !important; aspect-ratio: auto !important; max-height: none !important; display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 12px !important; padding-block: 10px !important; }
-          .c365-hero-scatter > div { position: static !important; left: auto !important; top: auto !important; width: auto !important; flex: 1 1 40% !important; max-width: 42% !important; }
-          .c365-hero-tag { display: none !important; }
+          .c365-hero-video { transform-origin: 51% 62%; transform: translate(-2%, 6%) scale(1.35); object-position: 50% 62%; }
+          .c365-hero-blend {
+            background:
+              linear-gradient(180deg, rgba(13,13,13,.96) 0%, rgba(13,13,13,.92) 52%, rgba(13,13,13,.6) 78%, rgba(13,13,13,.85) 100%);
+          }
         }
       `}</style>
     </section>
