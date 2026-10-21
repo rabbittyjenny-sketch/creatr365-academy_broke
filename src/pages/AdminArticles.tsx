@@ -10,6 +10,7 @@ import { LiveNoteStatsPanel } from '@/components/admin/LiveNoteStatsPanel';
 import { LiveNoteLinkMenu } from '@/components/admin/LiveNoteLinkMenu';
 import { EventFormFields } from '@/components/admin/EventFormFields';
 import { validateEventForm } from '@/lib/events';
+import { ArticleBody, isDocumentHtml } from '@/components/ArticleBody';
 import { EventRegistrantsPanel } from '@/components/admin/EventRegistrantsPanel';
 
 interface Article {
@@ -367,7 +368,7 @@ const ContentEditor: React.FC<{
               <h1 className="text-2xl font-bold text-white mt-3 mb-2">{form.title || '(ชื่อเนื้อหา)'}</h1>
               <p className="text-white/50 text-sm mb-6">{form.summary}</p>
               {form.body && (
-                <div className="text-white/70 text-sm leading-relaxed article-body" dangerouslySetInnerHTML={{ __html: form.body }} />
+                <ArticleBody html={form.body} className="text-white/70 text-sm leading-relaxed" />
               )}
             </div>
           ) : (
@@ -473,7 +474,15 @@ const ContentEditor: React.FC<{
                   value={form.body || ''}
                   onChange={e => set('body', e.target.value)}
                 />
-                <p className="text-white/20 text-xs mt-1">รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img</p>
+                <p className="text-white/20 text-xs mt-1">
+                  รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img · วางไฟล์ HTML ทั้งหน้าได้ (มี &lt;style&gt; / &lt;html&gt;)
+                  ระบบแสดงตามไฟล์เหมือนเปิดเอง ไม่ใช้ CSS ของเว็บ
+                </p>
+                {isDocumentHtml(form.body) && /\{\{\s*[\w.]+\s*\}\}|<sc-(if|for)/i.test(form.body || '') && (
+                  <p className="text-[#FF6B7F] text-xs mt-1" role="alert">
+                    นี่คือไฟล์แม่แบบที่ยังไม่มีเนื้อหา (มี {'{{ }}'} / &lt;sc-if&gt;) — ใช้ไฟล์ HTML ที่แสดงบทความครบแล้ว
+                  </p>
+                )}
               </div>
               {!isClip && <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">External URL (ถ้าลิ้งค์ไปภายนอก)</label>
