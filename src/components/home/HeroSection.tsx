@@ -13,6 +13,13 @@ const LOGO = '/images/w-logo-side.png'; // real "Creatr365." logo asset — conf
 const CLIP = '/videos/golive-clip.mp4'; // public/videos/golive-clip.mp4 — hero background clip
 const GROUP_SHIFT = 'clamp(22px,2.2vw,32px)'; // badge + buttons + English tagline sit this much lower than before (≈1–2 text lines)
 const THAI_GAP = 'clamp(28px,3.4vw,44px)'; // the Thai line's original margin-top
+// Clip timeline (golive-clip.mp4 is 6.59 s): the Go Live button is pressed at ~4.8 s and the
+// screen flips to the live view by ~5.0 s. From ZOOM_OUT_START the camera eases out to the
+// wider scene, reaching it at ZOOM_OUT_END; the last frame is then held for HOLD_MS before
+// the clip restarts (set HOLD_MS to 0 for an immediate restart).
+const ZOOM_OUT_START = 4.9;
+const ZOOM_OUT_END = 6.4;
+const HOLD_MS = 1400;
 
 /* ════════════════════════════════════════════════════════
    HERO SECTION
@@ -20,11 +27,51 @@ const THAI_GAP = 'clamp(28px,3.4vw,44px)'; // the Thai line's original margin-to
 export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Background clip: respect "reduce motion" — keep it on screen, paused on frame 1.
+  // Background clip. Two jobs:
+  //  1. "reduce motion" → keep it on screen, paused on frame 1 (no zoom).
+  //  2. Otherwise drive the post-click zoom-out from the clip's own clock: every frame we write
+  //     one number, --c365-zo (0 = opening framing, 1 = wide framing), and the CSS below turns it
+  //     into the transform. Tying it to currentTime (not a separate CSS timer) keeps it in step
+  //     with the clip even if the video buffers, and the clip's loop restarts it from 0 by itself.
   useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      videoRef.current?.pause();
+      v.pause();
+      return;
     }
+    let raf = 0;
+    let hold = 0;
+    const setZoom = (n: number) => v.style.setProperty('--c365-zo', String(n));
+    const sync = () => {
+      const x = Math.min(1, Math.max(0, (v.currentTime - ZOOM_OUT_START) / (ZOOM_OUT_END - ZOOM_OUT_START)));
+      setZoom(x * x * (3 - 2 * x)); // smoothstep: eases in and out
+    };
+    const tick = () => { sync(); raf = requestAnimationFrame(tick); };
+    const onPlay = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); };
+    const onPause = () => cancelAnimationFrame(raf);
+    const onEnded = () => {
+      cancelAnimationFrame(raf);
+      setZoom(1);
+      hold = window.setTimeout(() => {
+        // reset the framing only once the first frame is on screen, so the jump hides in the cut
+        v.addEventListener('seeked', () => { setZoom(0); void v.play(); }, { once: true });
+        v.currentTime = 0;
+      }, HOLD_MS);
+    };
+    v.addEventListener('play', onPlay);
+    v.addEventListener('pause', onPause);
+    v.addEventListener('ended', onEnded);
+    v.addEventListener('seeked', sync);
+    if (!v.paused) onPlay();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(hold);
+      v.removeEventListener('play', onPlay);
+      v.removeEventListener('pause', onPause);
+      v.removeEventListener('ended', onEnded);
+      v.removeEventListener('seeked', sync);
+    };
   }, []);
 
   // Left-column entrance (headline lines + CTA block): fade/rise in,
@@ -52,7 +99,7 @@ export function HeroSection() {
           wrapper (zIndex 0 vs 1); nothing inside it takes pointer events.
           No colour tint on top of the clip any more — it plays in its own colours. */}
       <div className="c365-hero-media" aria-hidden="true">
-        <video ref={videoRef} className="c365-hero-video" autoPlay muted loop playsInline preload="auto">
+        <video ref={videoRef} className="c365-hero-video" autoPlay muted playsInline preload="auto">
           <source src={CLIP} type="video/mp4" />
         </video>
         <div className="c365-hero-blend" />
@@ -169,7 +216,16 @@ export function HeroSection() {
           position: absolute; inset: 0; width: 100%; height: 100%; display: block;
           object-fit: cover; object-position: 50% 50%;
           transform-origin: 51% 62%;
-          transform: translate(20%, 1%) scale(1.1);
+          /* opening framing (--*0) → wide framing after the click (--*1), blended by --c365-zo */
+          --c365-zo: 0;
+          --tx0: 20%; --ty0: 1%; --s0: 1.1;
+          --tx1: 6%; --ty1: 2%; --s1: .94;
+          transform:
+            translate(calc(var(--tx0) + (var(--tx1) - var(--tx0)) * var(--c365-zo)), calc(var(--ty0) + (var(--ty1) - var(--ty0)) * var(--c365-zo)))
+            scale(calc(var(--s0) + (var(--s1) - var(--s0)) * var(--c365-zo)));
+          /* soft top/bottom edge, so the wider framing never shows a hard clip edge */
+          -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
         }
         .c365-hero-blend {
           position: absolute; inset: 0;
@@ -185,7 +241,7 @@ export function HeroSection() {
           }
         }
         @media (max-width: 820px) {
-          .c365-hero-video { transform-origin: 51% 62%; transform: translate(-2%, 6%) scale(1.35); object-position: 50% 62%; }
+          .c365-hero-video { transform-origin: 51% 62%; --tx0: -2%; --ty0: 6%; --s0: 1.35; --tx1: 0%; --ty1: 4%; --s1: 1.08; object-position: 50% 62%; }
           .c365-hero-blend {
             background:
               linear-gradient(180deg, rgba(13,13,13,.96) 0%, rgba(13,13,13,.92) 52%, rgba(13,13,13,.6) 78%, rgba(13,13,13,.85) 100%);
