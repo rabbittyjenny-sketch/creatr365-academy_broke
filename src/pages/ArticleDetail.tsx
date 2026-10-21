@@ -5,6 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
 import { Footer } from '@/components/Footer';
+import { ArticleBody, isDesignedHtml } from '@/components/ArticleBody';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
@@ -17,14 +18,6 @@ const KIND_LABEL: Record<string, string> = {
   news: 'NEWS', tool: 'TOOL', community: 'COMMUNITY', quiz: 'DIAGNOSTIC',
   blog: 'BLOG', update: 'UPDATE',
 };
-
-// Simple HTML renderer with safe inline styles
-const ArticleBody: React.FC<{ html: string }> = ({ html }) => (
-  <div
-    className="article-body text-white/70 leading-relaxed"
-    dangerouslySetInnerHTML={{ __html: html }}
-  />
-);
 
 const ArticleDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -68,6 +61,30 @@ const ArticleDetail: React.FC = () => {
         <p className="text-white/40 text-sm mb-4">ไม่พบบทความนี้</p>
         <Link to="/articles" className="text-[#C0A060] text-sm hover:opacity-80">← กลับไปหน้าบทความ</Link>
       </div>
+    </>
+  );
+
+  // HTML with its own design (cover, title, chapters) gets the full width and
+  // replaces this page's own cover/title/summary block — see ArticleBody.
+  if (isDesignedHtml(article.body)) return (
+    <>
+      <SEOHead
+        title={`${article.title} — CREATR365`}
+        description={article.meta_description || article.summary}
+      />
+      <CourseNavbar />
+      <main className="section-accent bg-[#080808] min-h-screen pt-16" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
+        <ArticleBody html={article.body!} />
+        <div className="max-w-2xl mx-auto px-6 py-10 flex justify-between items-center">
+          <Link to="/articles" className="text-[#C0A060] text-sm hover:opacity-80 transition-opacity flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> บทความทั้งหมด
+          </Link>
+          <Link to="/courses" className="text-white/30 text-sm hover:text-white/60 transition-colors">
+            ดูหลักสูตร →
+          </Link>
+        </div>
+      </main>
+      <Footer />
     </>
   );
 

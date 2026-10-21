@@ -47,6 +47,7 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const isSyntheticEmail = (email: string) => /^line_.+@line\.creatr365\.com$/i.test(email);
+const PROFILE_ROW_MISSING = 'ไม่พบข้อมูลโปรไฟล์ของบัญชีนี้ ระบบยังไม่ได้บันทึก — กรุณาติดต่อแอดมิน';
 
 const Profile: React.FC = () => {
   useDarkPage();
@@ -137,8 +138,10 @@ const Profile: React.FC = () => {
       });
       if (upErr) { setError('อัปโหลดรูปไม่สำเร็จ: ' + upErr.message); return; }
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      const { error: saveErr } = await supabase.from('profiles').update({ avatar_url: data.publicUrl }).eq('user_id', userId);
+      const { data: saved, error: saveErr } = await supabase.from('profiles')
+        .update({ avatar_url: data.publicUrl }).eq('user_id', userId).select('user_id');
       if (saveErr) { setError('บันทึกรูปไม่สำเร็จ: ' + saveErr.message); return; }
+      if (!saved?.length) { setError(PROFILE_ROW_MISSING); return; }
       setAvatarUrl(data.publicUrl);
     } finally {
       setUploadingAvatar(false);
@@ -198,7 +201,8 @@ const Profile: React.FC = () => {
         update.last_name_en = lastNameEn.trim();
         update.names_confirmed_at = new Date().toISOString();
       }
-      const { error: profErr } = await supabase.from('profiles').update(update).eq('user_id', userId);
+      const { data: saved, error: profErr } = await supabase.from('profiles')
+        .update(update).eq('user_id', userId).select('user_id');
       if (profErr) {
         if (profErr.message.includes('CERT_NAME_LOCKED')) {
           setNamesLocked(true);
@@ -209,6 +213,13 @@ const Profile: React.FC = () => {
         }
         throw profErr;
       }
+      // update() on a missing row is "0 rows, no error" — without this check
+      // the page reported success while nothing was stored (5 accounts created
+      // before the profiles trigger existed had no row at all).
+      if (!saved?.length) throw new Error(PROFILE_ROW_MISSING);
+      // Names were just confirmed: a second save in this session must leave
+      // them out, or the lock trigger rejects it as CERT_NAME_LOCKED.
+      if (!namesLocked) setNamesLocked(true);
 
       if (emailChanged) {
         const { error: emailErr } = await supabase.auth.updateUser({ email: trimmedEmail });

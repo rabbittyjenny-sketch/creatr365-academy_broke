@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
 import { resolveContentType, sanitizeFileName } from '@/lib/uploadFile';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users, BarChart3, Link2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users, BarChart3, Link2, FileText } from 'lucide-react';
+import { ArticleBody, isDesignedHtml } from '@/components/ArticleBody';
 import { parseYouTubeId, youTubeThumb } from '@/lib/youtube';
 import { LiveNoteStatsPanel } from '@/components/admin/LiveNoteStatsPanel';
 import { LiveNoteLinkMenu } from '@/components/admin/LiveNoteLinkMenu';
@@ -136,6 +137,17 @@ const EMPTY_EVENT: EditorForm = {
 
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_PDF_BYTES = 20 * 1024 * 1024;
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
+// Inline-styled so it looks the same in plain articles and inside a designed
+// (Shadow DOM) body, where the site CSS doesn't reach.
+const pdfButtonHtml = (url: string, name: string) =>
+  `<p style="max-width:860px;margin:28px auto;padding:0 20px"><a href="${escapeHtml(url)}" target="_blank" rel="noopener" ` +
+  `style="display:inline-block;padding:12px 20px;background:#0D0D0D;color:#F8F8F6;border:1px solid #0D0D0D;text-decoration:none;font-weight:600">` +
+  `ดาวน์โหลด PDF: ${escapeHtml(name)}</a></p>`;
 
 type FilterKey = 'all' | 'articles' | 'live_notes' | 'events';
 
@@ -182,6 +194,9 @@ const ContentEditor: React.FC<{
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Cursor in the body textarea, kept on blur — clicking "แนบไฟล์ PDF" moves
+  // focus away before the upload finishes.
+  const bodyCursor = useRef<number | null>(null);
   const [error, setError] = useState('');
   const [tagInput, setTagInput] = useState((initial?.tags || []).join(', '));
 
@@ -233,6 +248,32 @@ const ContentEditor: React.FC<{
       if (uploadError) { setError('อัปโหลดไม่สำเร็จ: ' + uploadError.message); return; }
       const { data: { publicUrl } } = supabase.storage.from('course-media').getPublicUrl(path);
       set(field, publicUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // PDF → same public course-media bucket as covers; a download button is
+  // inserted into the body at the cursor (or appended).
+  const uploadPdf = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) { setError('รองรับเฉพาะไฟล์ PDF'); return; }
+    if (file.size > MAX_PDF_BYTES) { setError('ไฟล์ PDF ใหญ่เกิน 20MB'); return; }
+    setUploading(true);
+    try {
+      const path = `articles/pdf/${Date.now()}-${sanitizeFileName(file.name)}`;
+      const { error: uploadError } = await supabase.storage
+        .from('course-media')
+        .upload(path, file, { upsert: false, contentType: 'application/pdf' });
+      if (uploadError) { setError('อัปโหลด PDF ไม่สำเร็จ: ' + uploadError.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from('course-media').getPublicUrl(path);
+      const snippet = pdfButtonHtml(publicUrl, file.name.replace(/\.pdf$/i, ''));
+      const body = form.body || '';
+      const at = Math.min(bodyCursor.current ?? body.length, body.length);
+      set('body', body.slice(0, at) + (at > 0 ? '\n' : '') + snippet + '\n' + body.slice(at));
     } finally {
       setUploading(false);
     }
@@ -367,7 +408,9 @@ const ContentEditor: React.FC<{
               <h1 className="text-2xl font-bold text-white mt-3 mb-2">{form.title || '(ชื่อเนื้อหา)'}</h1>
               <p className="text-white/50 text-sm mb-6">{form.summary}</p>
               {form.body && (
-                <div className="text-white/70 text-sm leading-relaxed article-body" dangerouslySetInnerHTML={{ __html: form.body }} />
+                isDesignedHtml(form.body)
+                  ? <div className="-mx-6 border-y border-white/10"><ArticleBody html={form.body} /></div>
+                  : <ArticleBody html={form.body} className="text-white/70 text-sm leading-relaxed" />
               )}
             </div>
           ) : (
@@ -467,13 +510,29 @@ const ContentEditor: React.FC<{
                   {isClip ? 'รายละเอียดใต้คลิป (HTML, ไม่บังคับ)' : 'เนื้อหาเต็ม (HTML) — ใส่เนื้อหาเต็มที่นี่'}
                 </label>
                 <textarea
+                  onBlur={e => { bodyCursor.current = e.currentTarget.selectionStart; }}
                   className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-[#D4A843]/50 placeholder-white/15 resize-y"
                   rows={12}
                   placeholder={`<h2>หัวข้อ</h2>\n<p>เนื้อหา...</p>\n<ul>\n  <li>รายการ 1</li>\n</ul>`}
                   value={form.body || ''}
                   onChange={e => set('body', e.target.value)}
                 />
-                <p className="text-white/20 text-xs mt-1">รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img</p>
+                <p className="text-white/20 text-xs mt-1">
+                  รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img · วาง HTML ที่ออกแบบมาแล้วทั้งชุดได้
+                  (เช่นไฟล์ที่ export จากเครื่องมือออกแบบบทความ — ต้องเป็นแบบที่เติมเนื้อหาแล้ว ไม่มี {'{{ }}'}) ระบบจะแสดงเต็มหน้าตามดีไซน์
+                </p>
+                {isDesignedHtml(form.body) && /\{\{\s*[\w.]+\s*\}\}|<sc-(if|for)/i.test(form.body || '') && (
+                  <p className="text-[#FF6B7F] text-xs mt-1" role="alert">
+                    นี่คือไฟล์แม่แบบที่ยังไม่มีเนื้อหา (มี {'{{ }}'} / &lt;sc-if&gt;) — หน้าเว็บจะแสดงเป็นช่องว่าง ให้ใช้ไฟล์ที่ export แบบเติมเนื้อหาแล้ว
+                  </p>
+                )}
+                {!isClip && (
+                  <label className="mt-2 inline-flex items-center gap-2 bg-[#1a1a1a] border border-dashed border-white/15 px-4 py-2 text-white/50 text-xs cursor-pointer hover:text-white hover:border-white/30 transition-colors">
+                    <FileText className="w-3.5 h-3.5" />
+                    {uploading ? 'กำลังอัปโหลด...' : 'แนบไฟล์ PDF (สูงสุด 20MB) — ใส่ปุ่มดาวน์โหลดตรงตำแหน่งเคอร์เซอร์'}
+                    <input type="file" accept="application/pdf,.pdf" onChange={uploadPdf} disabled={uploading} className="hidden" />
+                  </label>
+                )}
               </div>
               {!isClip && <div>
                 <label className="text-xs text-white/40 font-medium block mb-1">External URL (ถ้าลิ้งค์ไปภายนอก)</label>
