@@ -11,6 +11,7 @@ import { LiveNoteLinkMenu } from '@/components/admin/LiveNoteLinkMenu';
 import { EventFormFields } from '@/components/admin/EventFormFields';
 import { validateEventForm } from '@/lib/events';
 import { ArticleBody, isDocumentHtml } from '@/components/ArticleBody';
+import { looksLikeArticleScript, normalizeArticleScript, parseStructuredArticle, validateStructuredArticle } from '@/lib/articleTemplate';
 import { EventRegistrantsPanel } from '@/components/admin/EventRegistrantsPanel';
 
 interface Article {
@@ -60,7 +61,7 @@ const TYPE_GUIDE: Record<ContentKind, {
     target: 'แสดงในหน้า Community > หมวดบทความ และเปิดอ่านเป็นหน้า /articles/:slug',
     url: '/articles/[slug]',
     media: 'แนะนำรูปปก 16:9 ขนาดอย่างน้อย 1600x900 ชื่อไฟล์: article-[slug]-cover.jpg',
-    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, เนื้อหา HTML',
+    required: 'ชื่อเรื่อง, Slug, สรุปย่อ, เนื้อหา (ไฟล์เนื้อหาบทความ .js/JSON จาก Claude หรือ HTML)',
   },
   video: {
     target: 'แสดงในหน้า Community > หมวดคลิปกิจกรรม (คลิปบรรยากาศ กิจกรรม ข่าว) เล่นในเว็บ ไม่ต้องล็อกอิน',
@@ -200,6 +201,38 @@ const ContentEditor: React.FC<{
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
 
+  // What the content box holds. A pasted article file (`window.C365_ARTICLE = {…}`)
+  // is converted to stored JSON automatically; a structured article is checked
+  // and its problems listed before saving. Plain HTML is left untouched.
+  const [bodyCheck, setBodyCheck] = useState<{ state: 'idle' | 'converting' | 'ok' | 'error'; message: string; warnings: string[] }>(
+    { state: 'idle', message: '', warnings: [] });
+  const bodyText = form.body || '';
+  useEffect(() => {
+    if (isEvent) return;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const structured = parseStructuredArticle(bodyText);
+      if (structured) {
+        if (!cancelled) setBodyCheck({
+          state: 'ok',
+          message: `บทความแบบโครงสร้าง · ${structured.blocks.filter(b => b?.type === 'chapter').length} บท · ${structured.blocks.length} บล็อก — แสดงด้วยแม่แบบของเว็บ`,
+          warnings: validateStructuredArticle(structured),
+        });
+        return;
+      }
+      if (looksLikeArticleScript(bodyText)) {
+        if (!cancelled) setBodyCheck({ state: 'converting', message: 'กำลังแปลงไฟล์บทความ…', warnings: [] });
+        const r = await normalizeArticleScript(bodyText);
+        if (cancelled) return;
+        if (r.ok) set('body', r.json); // re-checked as structured on the next pass
+        else setBodyCheck({ state: 'error', message: r.error, warnings: [] });
+        return;
+      }
+      if (!cancelled) setBodyCheck({ state: 'idle', message: '', warnings: [] });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [bodyText, isEvent]);
+
   const pickType = (k: ContentKind) => {
     if (isEditingExisting) return; // switching table for an existing row isn't a simple update
     setForm(k === 'event' ? { ...EMPTY_EVENT } : { ...EMPTY_ARTICLE, kind: k, _kind: k });
@@ -252,7 +285,8 @@ const ContentEditor: React.FC<{
   const videoId = parseYouTubeId(form.video_url);
   const canSave = isEvent
     ? !!form.title && !!form.date && !!form.target_date
-    : !!form.title && !!form.slug && !!form.summary && (!isClip || !!videoId);
+    : !!form.title && !!form.slug && !!form.summary && (!isClip || !!videoId)
+      && bodyCheck.state !== 'converting' && bodyCheck.state !== 'error';
 
   return (
     <div className="admin-modal-surface fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
@@ -475,9 +509,21 @@ const ContentEditor: React.FC<{
                   onChange={e => set('body', e.target.value)}
                 />
                 <p className="text-white/20 text-xs mt-1">
-                  รองรับ HTML tags: h1-h4, p, ul/ol/li, a, strong, em, blockquote, img · วางไฟล์ HTML ทั้งหน้าได้ (มี &lt;style&gt; / &lt;html&gt;)
-                  ระบบแสดงตามไฟล์เหมือนเปิดเอง ไม่ใช้ CSS ของเว็บ
+                  <span className="text-white/40 font-semibold">แนะนำ:</span> วางไฟล์เนื้อหาบทความ (เช่น articles/ชื่อบทความ.js จาก Claude ที่ขึ้นต้น window.C365_ARTICLE = …) ทั้งไฟล์
+                  ระบบแปลงและแสดงด้วยแม่แบบหน้าตาของเว็บให้เอง · หรือวาง HTML ทั้งหน้าที่มี &lt;style&gt; / &lt;html&gt; ได้ (แสดงตามไฟล์ ไม่ใช้ CSS ของเว็บ)
+                  · HTML ชิ้นสั้นรองรับ h1-h4, p, ul/ol/li, a, strong, em, blockquote, img
                 </p>
+                {bodyCheck.state !== 'idle' && (
+                  <div className={`mt-2 text-xs ${bodyCheck.state === 'error' ? 'text-[#FF6B7F]' : bodyCheck.state === 'ok' ? 'text-[#34A853]' : 'text-white/50'}`}
+                    role={bodyCheck.state === 'error' ? 'alert' : 'status'}>
+                    <p>{bodyCheck.state === 'ok' ? '✓ ' : ''}{bodyCheck.message}</p>
+                    {bodyCheck.warnings.length > 0 && (
+                      <ul className="mt-1 list-disc pl-5 text-[#D4A843]">
+                        {bodyCheck.warnings.map(w => <li key={w}>{w}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 {isDocumentHtml(form.body) && /\{\{\s*[\w.]+\s*\}\}|<sc-(if|for)/i.test(form.body || '') && (
                   <p className="text-[#FF6B7F] text-xs mt-1" role="alert">
                     นี่คือไฟล์แม่แบบที่ยังไม่มีเนื้อหา (มี {'{{ }}'} / &lt;sc-if&gt;) — ใช้ไฟล์ HTML ที่แสดงบทความครบแล้ว

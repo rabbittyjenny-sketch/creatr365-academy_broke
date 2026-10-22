@@ -1783,6 +1783,13 @@ flowchart TD
     SUPA --> ARTICLES[/articles]
 ```
 
+## 42. ลงบทความแบบโครงสร้าง (เนื้อหา + แม่แบบกลาง)
+
+`articles.body` รับได้ 3 แบบ: HTML ชิ้นส่วน, ไฟล์ HTML เต็ม, และ **JSON `{ meta, blocks }`** (แบบใหม่ — แนะนำ) ซึ่ง `src/lib/articleTemplate.ts` แปลงเป็นหน้า HTML เต็มด้วยแม่แบบเดียว แล้ว `ArticleBody` แสดงในกรอบ sandbox เดิม (ไม่รัน script)
+Admin: วางไฟล์ `articles/*.js` จาก Claude Design ในช่อง "เนื้อหาเต็ม (HTML)" ระบบแปลงเป็น JSON ให้เอง (ในกรอบแยก `sandbox="allow-scripts"` ไม่มี same-origin)
+ห้าม: เก็บ HTML เต็มต่อบทความ (ผูกเนื้อหากับดีไซน์) · ใส่ `slot` แทนรูป (ต้องเป็น https เต็ม)
+คู่มือใช้งานและสถานะ: `docs/ARTICLE_PUBLISHING.md` · ตัวอย่าง: `docs/articles/rules-before-live.json`
+
 ## Student entry distinction
 
 ### From Dashboard

@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { parseStructuredArticle, renderArticleHtml } from '@/lib/articleTemplate';
 
 /**
  * Renders an article's `body` (the one "เนื้อหาเต็ม (HTML)" field in
  * Admin → เนื้อหา). Used by /articles/:slug and the Admin preview.
  *
- * Two kinds of body come through that field:
+ * Three kinds of body come through that field:
  * - Plain HTML fragments (h2/p/ul/img…) → the site's dark `.article-body`
  *   styling, exactly as before.
  * - A whole HTML file with its own design (<html>/<head>/<style>, or the
@@ -12,6 +13,10 @@ import React, { useEffect, useMemo, useRef } from 'react';
  *   in its own frame. The site's CSS (heading hover underline, inline-block
  *   headings, 500 font weight, white heading colour…) cannot reach it, so it
  *   looks the same as opening the file in a browser.
+ * - Structured article content (JSON `{ meta, blocks }`, see
+ *   lib/articleTemplate.ts) → turned into a whole HTML document by the one
+ *   shared article template, then shown the same way as the previous kind.
+ *   This is the format for new articles: only the content is stored.
  *
  * The frame is sandboxed without allow-scripts: scripts in the file don't
  * run (the page height and #anchor links are handled from out here), and
@@ -19,10 +24,13 @@ import React, { useEffect, useMemo, useRef } from 'react';
  */
 
 export function isDocumentHtml(html?: string | null): boolean {
-  return !!html && /<!doctype|<html[\s>]|<head[\s>]|<body[\s>]|<style[\s>]|id=["']dc-root["']/i.test(html);
+  return !!html && (parseStructuredArticle(html) !== null
+    || /<!doctype|<html[\s>]|<head[\s>]|<body[\s>]|<style[\s>]|id=["']dc-root["']/i.test(html));
 }
 
-function toSrcDoc(html: string): string {
+function toSrcDoc(source: string): string {
+  const structured = parseStructuredArticle(source);
+  const html = structured ? renderArticleHtml(structured) : source;
   const base = '<base target="_blank">';
   if (/<head[\s>]/i.test(html)) return html.replace(/<head[^>]*>/i, m => m + base);
   if (/<html[\s>]/i.test(html)) return html.replace(/<html[^>]*>/i, m => `${m}<head><meta charset="utf-8">${base}</head>`);
