@@ -10,16 +10,19 @@ import { ArrowRight } from 'lucide-react';
 const RED = '#CC0033';
 const BADGE = '/images/logoCreatr365/white_concept_side.png'; // "Be a creatr. Not a consumer." — white concept lockup, in the repo's brand-logo folder
 const LOGO = '/images/w-logo-side.png'; // real "Creatr365." logo asset — confirmed by direct viewing, and named explicitly by the user
-const CLIP = '/videos/golive-clip.mp4'; // public/videos/golive-clip.mp4 — hero background clip
+const CLIP = '/videos/golive-clip%20(2).mp4'; // public/videos/golive-clip (2).mp4 — hero background clip (space is URL-encoded)
 const GROUP_SHIFT = 'clamp(22px,2.2vw,32px)'; // badge + buttons + English tagline sit this much lower than before (≈1–2 text lines)
 const THAI_GAP = 'clamp(28px,3.4vw,44px)'; // the Thai line's original margin-top
-// Clip timeline (golive-clip.mp4 is 6.59 s): the Go Live button is pressed at ~4.8 s and the
-// screen flips to the live view by ~5.0 s. From ZOOM_OUT_START the camera eases out to the
-// wider scene, reaching it at ZOOM_OUT_END; the last frame is then held for HOLD_MS before
-// the clip restarts (set HOLD_MS to 0 for an immediate restart).
-const ZOOM_OUT_START = 4.9;
-const ZOOM_OUT_END = 6.4;
-const HOLD_MS = 1400;
+// Clip timeline (golive-clip (2).mp4 is 10.0 s): the cursor reaches the Go Live button at ~2.8 s,
+// presses it at ~3.7 s and the screen is live by ~3.9 s. The shot opens as a tight crop on that
+// button and holds there through the press; from ZOOM_OUT_START the camera eases out to the wider
+// desk scene, reaching it at ZOOM_OUT_END. The clip loops by itself and dips to the page black
+// over its first FADE_IN s and last FADE_OUT s, so the restart is a soft cross-dip, never a cut.
+const ZOOM_OUT_START = 4.4;
+const ZOOM_OUT_END = 7.6;
+const FADE_IN = 0.7; // s
+const FADE_OUT = 1.1; // s
+const CLIP_LEN = 10; // s — fallback until the browser reports v.duration
 
 /* ════════════════════════════════════════════════════════
    HERO SECTION
@@ -29,10 +32,11 @@ export function HeroSection() {
 
   // Background clip. Two jobs:
   //  1. "reduce motion" → keep it on screen, paused on frame 1 (no zoom).
-  //  2. Otherwise drive the post-click zoom-out from the clip's own clock: every frame we write
-  //     one number, --c365-zo (0 = opening framing, 1 = wide framing), and the CSS below turns it
-  //     into the transform. Tying it to currentTime (not a separate CSS timer) keeps it in step
-  //     with the clip even if the video buffers, and the clip's loop restarts it from 0 by itself.
+  //  2. Otherwise drive the post-click zoom-out and the loop's fade from the clip's own clock: every
+  //     frame we write two numbers, --c365-zo (0 = tight crop on the Go Live button, 1 = wide
+  //     framing) and --c365-op (0–1 opacity), and the CSS below turns them into the transform and
+  //     the fade. Tying them to currentTime (not a separate CSS timer) keeps them in step with the
+  //     clip even if the video buffers, and the native `loop` restarts both from 0 by itself.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -41,35 +45,25 @@ export function HeroSection() {
       return;
     }
     let raf = 0;
-    let hold = 0;
-    const setZoom = (n: number) => v.style.setProperty('--c365-zo', String(n));
+    const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+    const smooth = (n: number) => n * n * (3 - 2 * n); // smoothstep: eases in and out
     const sync = () => {
-      const x = Math.min(1, Math.max(0, (v.currentTime - ZOOM_OUT_START) / (ZOOM_OUT_END - ZOOM_OUT_START)));
-      setZoom(x * x * (3 - 2 * x)); // smoothstep: eases in and out
+      const t = v.currentTime;
+      const len = v.duration || CLIP_LEN;
+      v.style.setProperty('--c365-zo', String(smooth(clamp01((t - ZOOM_OUT_START) / (ZOOM_OUT_END - ZOOM_OUT_START)))));
+      v.style.setProperty('--c365-op', String(smooth(clamp01(t / FADE_IN)) * smooth(clamp01((len - t) / FADE_OUT))));
     };
     const tick = () => { sync(); raf = requestAnimationFrame(tick); };
     const onPlay = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); };
     const onPause = () => cancelAnimationFrame(raf);
-    const onEnded = () => {
-      cancelAnimationFrame(raf);
-      setZoom(1);
-      hold = window.setTimeout(() => {
-        // reset the framing only once the first frame is on screen, so the jump hides in the cut
-        v.addEventListener('seeked', () => { setZoom(0); void v.play(); }, { once: true });
-        v.currentTime = 0;
-      }, HOLD_MS);
-    };
     v.addEventListener('play', onPlay);
     v.addEventListener('pause', onPause);
-    v.addEventListener('ended', onEnded);
     v.addEventListener('seeked', sync);
     if (!v.paused) onPlay();
     return () => {
       cancelAnimationFrame(raf);
-      window.clearTimeout(hold);
       v.removeEventListener('play', onPlay);
       v.removeEventListener('pause', onPause);
-      v.removeEventListener('ended', onEnded);
       v.removeEventListener('seeked', sync);
     };
   }, []);
@@ -99,7 +93,7 @@ export function HeroSection() {
           wrapper (zIndex 0 vs 1); nothing inside it takes pointer events.
           No colour tint on top of the clip any more — it plays in its own colours. */}
       <div className="c365-hero-media" aria-hidden="true">
-        <video ref={videoRef} className="c365-hero-video" autoPlay muted playsInline preload="auto">
+        <video ref={videoRef} className="c365-hero-video" autoPlay loop muted playsInline preload="auto">
           <source src={CLIP} type="video/mp4" />
         </video>
         <div className="c365-hero-blend" />
@@ -215,33 +209,43 @@ export function HeroSection() {
         .c365-hero-video {
           position: absolute; inset: 0; width: 100%; height: 100%; display: block;
           object-fit: cover; object-position: 50% 50%;
-          transform-origin: 51% 62%;
-          /* opening framing (--*0) → wide framing after the click (--*1), blended by --c365-zo */
-          --c365-zo: 0;
-          --tx0: 20%; --ty0: 1%; --s0: 1.1;
-          --tx1: 6%; --ty1: 2%; --s1: .94;
+          transform-origin: 76% 65%; /* the Go Live button */
+          /* tight crop on the Go Live button (--*0) → wide desk scene after the click (--*1), blended by --c365-zo */
+          --c365-zo: 0; --c365-op: 1;
+          --tx0: -8%; --ty0: -12.5%; --s0: 1.4;
+          --tx1: 5%; --ty1: 0%; --s1: 1.04;
           transform:
             translate(calc(var(--tx0) + (var(--tx1) - var(--tx0)) * var(--c365-zo)), calc(var(--ty0) + (var(--ty1) - var(--ty0)) * var(--c365-zo)))
             scale(calc(var(--s0) + (var(--s1) - var(--s0)) * var(--c365-zo)));
-          /* soft top/bottom edge, so the wider framing never shows a hard clip edge */
-          -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+          opacity: var(--c365-op); /* dips to the media's #0D0D0D at both ends of the loop */
+          /* gentle grade: a touch more contrast, a touch less saturation, so the clip sits in the page's black-and-red palette */
+          filter: contrast(1.08) saturate(.9) brightness(1.02);
+        }
+        /* Brand grade on top of the clip: a soft #CC0033 bloom behind the monitor, blended into the clip's own highlights */
+        .c365-hero-media::after {
+          content: ''; position: absolute; inset: 0; mix-blend-mode: soft-light;
+          background: radial-gradient(60% 75% at 70% 58%, rgba(204,0,51,.42) 0%, rgba(204,0,51,0) 72%);
         }
         .c365-hero-blend {
           position: absolute; inset: 0;
           background:
-            linear-gradient(90deg, #0D0D0D 0%, rgba(13,13,13,.97) 30%, rgba(13,13,13,.8) 42%, rgba(13,13,13,.4) 58%, rgba(13,13,13,0) 78%),
-            linear-gradient(180deg, rgba(13,13,13,.6) 0%, rgba(13,13,13,0) 22%, rgba(13,13,13,0) 76%, rgba(13,13,13,.75) 100%);
+            /* eased (smootherstep) fade from the text column into the clip: no visible edge or banding */
+            linear-gradient(90deg, rgba(13,13,13,.97) 16%, rgba(13,13,13,.959) 23%, rgba(13,13,13,.896) 30%, rgba(13,13,13,.766) 37%, rgba(13,13,13,.585) 44%, rgba(13,13,13,.385) 52%, rgba(13,13,13,.204) 59%, rgba(13,13,13,.074) 66%, rgba(13,13,13,.011) 73%, rgba(13,13,13,0) 80%),
+            /* vignette that frames the monitor */
+            radial-gradient(ellipse 85% 95% at 68% 56%, rgba(13,13,13,0) 50%, rgba(13,13,13,.38) 100%),
+            /* top melts under the navbar, bottom melts into the next section's black */
+            linear-gradient(180deg, rgba(13,13,13,.7) 0%, rgba(13,13,13,.28) 10%, rgba(13,13,13,0) 24%, rgba(13,13,13,0) 68%, rgba(13,13,13,.55) 88%, #0D0D0D 100%);
         }
         @media (max-width: 1100px) {
           .c365-hero-blend {
             background:
-              linear-gradient(90deg, #0D0D0D 0%, rgba(13,13,13,.97) 40%, rgba(13,13,13,.85) 52%, rgba(13,13,13,.45) 66%, rgba(13,13,13,0) 84%),
-              linear-gradient(180deg, rgba(13,13,13,.6) 0%, rgba(13,13,13,0) 22%, rgba(13,13,13,0) 76%, rgba(13,13,13,.75) 100%);
+              linear-gradient(90deg, rgba(13,13,13,.97) 22%, rgba(13,13,13,.959) 29%, rgba(13,13,13,.896) 37%, rgba(13,13,13,.766) 44%, rgba(13,13,13,.585) 51%, rgba(13,13,13,.385) 59%, rgba(13,13,13,.204) 66%, rgba(13,13,13,.074) 73%, rgba(13,13,13,.011) 81%, rgba(13,13,13,0) 88%),
+              radial-gradient(ellipse 85% 95% at 68% 56%, rgba(13,13,13,0) 50%, rgba(13,13,13,.38) 100%),
+              linear-gradient(180deg, rgba(13,13,13,.7) 0%, rgba(13,13,13,.28) 10%, rgba(13,13,13,0) 24%, rgba(13,13,13,0) 68%, rgba(13,13,13,.55) 88%, #0D0D0D 100%);
           }
         }
         @media (max-width: 820px) {
-          .c365-hero-video { transform-origin: 51% 62%; --tx0: -2%; --ty0: 6%; --s0: 1.35; --tx1: 0%; --ty1: 4%; --s1: 1.08; object-position: 50% 62%; }
+          .c365-hero-video { transform-origin: 75% 65%; object-position: 75% 65%; --tx0: 0%; --ty0: 0%; --s0: 1.5; --tx1: 0%; --ty1: 0%; --s1: 1.1; }
           .c365-hero-blend {
             background:
               linear-gradient(180deg, rgba(13,13,13,.96) 0%, rgba(13,13,13,.92) 52%, rgba(13,13,13,.6) 78%, rgba(13,13,13,.85) 100%);
