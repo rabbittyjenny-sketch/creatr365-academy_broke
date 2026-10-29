@@ -1111,7 +1111,7 @@ EXPLORE (nav)
    +--> Courses tile        --> /courses          (ของเดิม ไม่เปลี่ยน ไม่ได้ย้าย)
    +--> Toolbox tile        --> /toolbox           (ใหม่)
    +--> AI Lab tile         --> /ai-lab            (ใหม่ — มีเครื่องมือแรกแล้ว: Host Compass ลิงก์ไปเว็บภายนอก)
-                                              (อัปเดต 29 ต.ค. 2569: Host Compass เปิดในเว็บที่ /ai-lab/host-compass และเพิ่ม Abbreviation Search Tool ที่ /ai-lab/abbreviation-search — ทั้งคู่ฝังด้วย iframe; ตัวหลังชี้ไป https://kamtem.vercel.app/ ซึ่งต้องปิด Vercel Deployment Protection ของโปรเจกต์ kamtem ไม่งั้นผู้เยี่ยมชมทั่วไปเห็นหน้า login ของ Vercel)
+                                              (อัปเดต 29 ต.ค. 2569: Host Compass เปิดในเว็บที่ /ai-lab/host-compass และเพิ่ม KUM-TEM (คำเต็ม / Abbreviation Search Tool) ที่ /ai-lab/abbreviation-search — ทั้งคู่ฝังด้วย iframe · KUM-TEM คือแอปแยก (repo Cretr365-abbreviation-search-tool, https://kamtem.vercel.app/) ที่มีสองโหมดโดยออกแบบ: เปิดแยกบนคอม = กรอบมือถือบนโต๊ะลายจุด, อยู่ใน iframe หรือ ?embed=1 = ตัดกรอบแล้วเต็มกล่องที่ให้ (ตามโค้ด window.self !== window.top ใน src/App.tsx ของมัน) จึงฝังเต็มความกว้างไม่ได้ เพราะจะยืด · หน้าเราทำตาม README ของมัน: iframe ?embed=1 กว้างสูงสุด 420px สูง 760px จัดกลาง + ลิงก์ “เปิดแบบเต็มหน้า” ไปหน้าเปิดแยก · ต้องปิด Vercel Deployment Protection ของโปรเจกต์ kamtem ไม่งั้นผู้เยี่ยมชมทั่วไปเห็นหน้า login ของ Vercel)
    +--> Creator Tools tile  --> /creator-tools     (Coming soon, ใหม่)
 ```
 
