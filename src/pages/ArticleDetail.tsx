@@ -6,12 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
 import { Footer } from '@/components/Footer';
 import { ArticleBody, isDocumentHtml } from '@/components/ArticleBody';
+import { PodcastButton } from '@/components/podcast/PodcastButton';
 
 interface Article {
   id: string; slug: string; title: string; summary: string; body: string | null;
   cover_image_url: string | null; kind: string; author: string | null;
   tags: string[] | null; meta_description: string | null; target_url: string;
   created_at: string; updated_at: string;
+  audio_url: string | null; audio_duration_sec: number | null;
+  audio_title: string | null; audio_image_url: string | null;
 }
 
 const KIND_LABEL: Record<string, string> = {
@@ -74,6 +77,9 @@ const ArticleDetail: React.FC = () => {
       />
       <CourseNavbar />
       <main className="section-accent bg-[#080808] min-h-screen pt-16" style={{ '--hover-accent': '#C0A060', '--section-accent': '#C0A060' } as React.CSSProperties}>
+        {article.audio_url && (
+          <div className="max-w-2xl mx-auto px-6 py-4"><PodcastButton article={article} /></div>
+        )}
         <ArticleBody html={article.body!} scrollOffset={80} />
         <div className="max-w-2xl mx-auto px-6 py-10 flex justify-between items-center">
           <Link to="/articles" className="text-[#C0A060] text-sm hover:opacity-80 transition-opacity flex items-center gap-2">
@@ -137,6 +143,7 @@ const ArticleDetail: React.FC = () => {
           <p className="text-white/50 text-base leading-relaxed mb-10 pb-8 border-b border-white/8">
             {article.summary}
           </p>
+          {article.audio_url && <div className="-mt-4 mb-10"><PodcastButton article={article} /></div>}
 
           {/* Body content */}
           {article.body ? (
