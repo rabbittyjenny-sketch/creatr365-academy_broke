@@ -9,6 +9,7 @@ import Explore from "./pages/Explore";
 import Toolbox from "./pages/Toolbox";
 import AiLab from "./pages/AiLab";
 import HostCompass from "./pages/HostCompass";
+import AbbreviationSearch from "./pages/AbbreviationSearch";
 import CreatorTools from "./pages/CreatorTools";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
@@ -53,6 +54,7 @@ const App = () => (
         <Route path="/toolbox" element={<Toolbox />} />
         <Route path="/ai-lab" element={<AiLab />} />
         <Route path="/ai-lab/host-compass" element={<HostCompass />} />
+        <Route path="/ai-lab/abbreviation-search" element={<AbbreviationSearch />} />
         <Route path="/creator-tools" element={<CreatorTools />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/course/:id" element={<CourseDetail />} />

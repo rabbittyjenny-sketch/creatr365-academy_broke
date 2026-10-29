@@ -5,7 +5,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { Footer } from '@/components/Footer';
 import { useDarkPage } from '@/hooks/useDarkPage';
 import { PageBanner } from '@/components/PageBanner';
-import { Sparkles, ArrowUpRight } from 'lucide-react';
+import { Sparkles, ArrowUpRight, Search } from 'lucide-react';
 
 /**
  * /ai-lab — home of Creatr365's AI tools. Only tools that actually exist are
@@ -16,7 +16,9 @@ import { Sparkles, ArrowUpRight } from 'lucide-react';
  *
  * Host Compass opens inside this site at /ai-lab/host-compass
  * (src/pages/HostCompass.tsx — an iframe onto the static build in
- * public/host-compass-app/).
+ * public/host-compass-app/). The Abbreviation Search Tool opens at
+ * /ai-lab/abbreviation-search (src/pages/AbbreviationSearch.tsx — an iframe
+ * onto the tool's own hosted app).
  */
 const AiLab: React.FC = () => {
   useDarkPage();
@@ -80,6 +82,24 @@ const AiLab: React.FC = () => {
               <div className="font-bold text-lg">Host Compass</div>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
                 นำตัวเลขสรุปหลังการไลฟ์มาใช้ เพื่อเป็นแนวทางและการพัฒนาการไลฟ์ในครั้งต่อไป
+              </p>
+            </div>
+            <ArrowUpRight className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
+          </Link>
+
+          {/* Abbreviation Search Tool — also opens inside the site. */}
+          <Link
+            to="/ai-lab/abbreviation-search"
+            className="sharp-card section-accent group mt-6 flex flex-col sm:flex-row sm:items-center gap-5 p-4 sm:p-5 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
+            style={{ '--hover-accent': '#6AAA7A', '--section-accent': '#6AAA7A' } as React.CSSProperties}
+          >
+            <div className="w-full sm:w-52 shrink-0 aspect-square sm:aspect-auto sm:h-32 grid place-items-center bg-background border border-border">
+              <Search className="w-12 h-12 text-[#6AAA7A]" aria-hidden="true" />
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-lg">Abbreviation Search Tool</div>
+              <p className="text-sm text-muted-foreground mt-1 max-w-md">
+                เครื่องมือค้นหาคำย่อของ Creatr365
               </p>
             </div>
             <ArrowUpRight className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
