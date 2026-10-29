@@ -1111,6 +1111,7 @@ EXPLORE (nav)
    +--> Courses tile        --> /courses          (ของเดิม ไม่เปลี่ยน ไม่ได้ย้าย)
    +--> Toolbox tile        --> /toolbox           (ใหม่)
    +--> AI Lab tile         --> /ai-lab            (ใหม่ — มีเครื่องมือแรกแล้ว: Host Compass ลิงก์ไปเว็บภายนอก)
+                                              (อัปเดต 29 ต.ค. 2569: Host Compass เปิดในเว็บที่ /ai-lab/host-compass และเพิ่ม Abbreviation Search Tool ที่ /ai-lab/abbreviation-search — ทั้งคู่ฝังด้วย iframe; ตัวหลังชี้ไป https://kamtem.vercel.app/ ซึ่งต้องปิด Vercel Deployment Protection ของโปรเจกต์ kamtem ไม่งั้นผู้เยี่ยมชมทั่วไปเห็นหน้า login ของ Vercel)
    +--> Creator Tools tile  --> /creator-tools     (Coming soon, ใหม่)
 ```
 
