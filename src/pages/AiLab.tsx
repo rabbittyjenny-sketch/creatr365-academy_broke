@@ -17,8 +17,8 @@ import { Sparkles, ArrowUpRight, Search } from 'lucide-react';
  * Host Compass opens inside this site at /ai-lab/host-compass
  * (src/pages/HostCompass.tsx — an iframe onto the static build in
  * public/host-compass-app/). The Abbreviation Search Tool opens at
- * /ai-lab/abbreviation-search (src/pages/AbbreviationSearch.tsx — an iframe
- * onto the tool's own hosted app).
+ * /ai-lab/abbreviation-search (src/pages/AbbreviationSearch.tsx — KUM-TEM in an
+ * iframe laid out the way the tool's own README prescribes).
  */
 const AiLab: React.FC = () => {
   useDarkPage();
@@ -87,7 +87,7 @@ const AiLab: React.FC = () => {
             <ArrowUpRight className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />
           </Link>
 
-          {/* Abbreviation Search Tool — also opens inside the site. */}
+          {/* KUM-TEM (Abbreviation Search Tool) — also opens inside the site. */}
           <Link
             to="/ai-lab/abbreviation-search"
             className="sharp-card section-accent group mt-6 flex flex-col sm:flex-row sm:items-center gap-5 p-4 sm:p-5 bg-card border border-border border-t-4 border-t-[#6AAA7A]"
@@ -97,9 +97,10 @@ const AiLab: React.FC = () => {
               <Search className="w-12 h-12 text-[#6AAA7A]" aria-hidden="true" />
             </div>
             <div className="flex-1">
-              <div className="font-bold text-lg">Abbreviation Search Tool</div>
+              <div className="font-bold text-lg">KUM-TEM (คำเต็ม)</div>
+              <p className="text-[11px] font-bold tracking-widest text-[#6AAA7A] mt-0.5">ABBREVIATION SEARCH TOOL</p>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
-                เครื่องมือค้นหาคำย่อของ Creatr365
+                ยืดตัวย่อให้เป็นคำเต็ม รวมคำเต็มที่ชาว Creatr365 ใช้กัน พร้อมคำอ่านและปุ่มฟังเสียงเฉพาะคำ
               </p>
             </div>
             <ArrowUpRight className="w-5 h-5 text-muted-foreground shrink-0 group-hover:text-[#6AAA7A] transition-colors" aria-hidden="true" />

@@ -7,20 +7,25 @@ import { useDarkPage } from '@/hooks/useDarkPage';
 import { ExternalLink } from 'lucide-react';
 
 /**
- * /ai-lab/abbreviation-search — the Creatr365 Abbreviation Search Tool shown
- * inside the site, same pattern as Host Compass (HostCompass.tsx). The tool is
- * its own app hosted at ABBREVIATION_TOOL_URL and is displayed here in an
- * iframe, so it keeps its own styles and data and nothing here touches the
- * site's CSS. The small "open in a new tab" link is the fallback if the
- * visitor's browser or the tool's host refuses to frame it.
+ * /ai-lab/abbreviation-search — KUM-TEM (คำเต็ม), the Creatr365 abbreviation
+ * search tool, shown inside the site.
+ *
+ * The tool is its own app (repo Cretr365-abbreviation-search-tool, hosted at
+ * TOOL_URL). It has two display modes by design: opened on its own on a
+ * computer it draws a phone frame on a dotted desk; inside an iframe (or with
+ * ?embed=1) it drops the frame and fills whatever box it is given. Its README
+ * ("ฝังในเว็บอื่น") prescribes the embed: ?embed=1, max-width 420px, height
+ * 760px, centered — followed here. The "open full page" link opens the tool
+ * on its own, i.e. the desk-and-phone look.
  */
-export const ABBREVIATION_TOOL_URL = 'https://kamtem.vercel.app/';
+export const TOOL_URL = 'https://kamtem.vercel.app/';
+const EMBED_URL = `${TOOL_URL}?embed=1`;
 
 const AbbreviationSearch: React.FC = () => {
   useDarkPage();
   return (
     <>
-      <SEOHead title="Abbreviation Search Tool - AI Lab - Creatr365" description="Creatr365 Abbreviation Search Tool — เครื่องมือค้นหาคำย่อ" />
+      <SEOHead title="KUM-TEM (คำเต็ม) - AI Lab - Creatr365" description="KUM-TEM (คำเต็ม) — ยืดตัวย่อให้เป็นคำเต็ม พร้อมคำอ่านและปุ่มฟังเสียงเฉพาะคำ" />
       <CourseNavbar />
 
       <main className="pt-16 bg-background">
@@ -33,24 +38,25 @@ const AbbreviationSearch: React.FC = () => {
             <span aria-hidden="true">/</span>
             <Link to="/ai-lab" className="hover:text-foreground transition-colors">AI Lab</Link>
             <span aria-hidden="true">/</span>
-            <span className="text-foreground" aria-current="page">Abbreviation Search</span>
+            <span className="text-foreground" aria-current="page">KUM-TEM</span>
           </nav>
           <a
-            href={ABBREVIATION_TOOL_URL}
+            href={TOOL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-muted-foreground uppercase hover:text-foreground transition-colors"
           >
-            เปิดในแท็บใหม่ <ExternalLink className="w-3 h-3" aria-hidden="true" />
+            เปิดแบบเต็มหน้า <ExternalLink className="w-3 h-3" aria-hidden="true" />
           </a>
         </div>
 
         <iframe
-          title="Creatr365 Abbreviation Search Tool"
-          src={ABBREVIATION_TOOL_URL}
+          title="KUM-TEM คำเต็ม"
+          src={EMBED_URL}
           allow="clipboard-write"
-          className="block w-full border-0 h-[calc(100dvh-6.5rem)] min-h-[640px]"
+          className="block mx-auto w-full max-w-[420px] border-0 h-[min(760px,calc(100dvh-7rem))] min-h-[560px]"
         />
+        <div className="h-8" aria-hidden="true" />
       </main>
 
       <Footer />
