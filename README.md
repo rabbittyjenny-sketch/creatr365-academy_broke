@@ -1743,6 +1743,34 @@ Edge functions: `toolbox-checkout` (ใหม่: `create` / `verify`) · `strip
 * ⏳ `Production verification pending`: กดใช้งานจริงในเบราว์เซอร์และแอป LINE, YouTube IFrame API บนมือถือ, Stripe ชำระจริง/บัตรทดสอบ, webhook toolbox, การพากลับหลังยืนยันอีเมล (ขึ้นกับ Redirect URL allow-list ของ Supabase)
 * ⏳ ลิงก์ "LINE OA (ล็อกอินอัตโนมัติ)" ใช้ได้เมื่อ Endpoint URL ของ LIFF = root ของเว็บ — `UNKNOWN / VERIFY`
 
+# 42. Podcast ประกอบบทความ (29 ต.ค. 2569) — โค้ดเขียนเสร็จ ยังไม่ push / migration ยังไม่ apply
+
+**สิ่งที่ผู้ใช้เห็น:** บทความที่แอดมินใส่ไฟล์เสียง → มีปุ่มเดียว "ฟังเป็น Podcast" ใน `/articles/:slug` → กดแล้วเปิด **เครื่องเล่นลอยมุมขวาล่าง ไม่ล็อกหน้า (ไม่ใช่ modal — อ่านบทความ/เลื่อนหน้าไปด้วยได้ ไม่ปิดเมื่อกด Esc หรือคลิกนอกกรอบ ปิดได้ด้วยปุ่ม ✕ เท่านั้น)** เป็นเครื่องเล่นเทป (ภาพวาดเอง ปุ่มโปร่งแสงวางทับปุ่มในภาพ: ย้อน/เล่น/พัก/หยุด/ข้าม 15 วิ/ความเร็ว + สไลเดอร์ตำแหน่งและเสียง; รีลหมุนตอนเล่น) · บทความที่ไม่มีไฟล์เสียง **ไม่แสดงปุ่ม** · ไม่แตะเนื้อหาบทความ/HTML เดิม
+
+```text
+Admin › เนื้อหา › (ประเภทบทความ ไม่ใช่คลิป) › กล่อง "Podcast"
+   อัปโหลด MP3/M4A/WAV ≤50MB → bucket `course-media` โฟลเดอร์ `podcasts/` (public, admin เขียนได้ — policy เดิมของรูปปก ไม่มี bucket/policy ใหม่)
+   → articles.audio_url + audio_duration_sec (อ่านความยาวจากไฟล์ในเบราว์เซอร์)
+   + ชื่อพอตแคสต์ (audio_title, ไม่บังคับ) + รูปสติกเกอร์เล็ก (audio_image_url, ไม่บังคับ) → แสดงบนป้ายเทป
+   ชื่อที่แสดง = audio_title ถ้ามี ไม่งั้นชื่อบทความ — **ไม่ใช้ชื่อไฟล์เด็ดขาด**
+/articles/:slug  อ่าน articles (policy เดิม is_active) → PodcastButton → CassettePlayerDialog
+   ฟัง → rpc log_podcast_play (เริ่มเล่น / ทุก 10 วิที่ฟัง / พัก / จบ / ปิด) → podcast_plays
+Admin › เนื้อหา  แถวบทความที่มีเสียงโชว์ "ฟัง N" (tooltip: ฟังจบกี่ครั้ง) อ่านจาก podcast_plays (เห็นเฉพาะแอดมิน)
+```
+
+| ส่วน | ไฟล์ |
+|---|---|
+| migration (คอลัมน์ `articles.audio_url`/`audio_duration_sec`, ตาราง `podcast_plays`, RPC `log_podcast_play`) | `supabase/migrations/20261029100000_article_podcast.sql` (+ `audio_title`, `audio_image_url`) |
+| ป๊อปอัปเครื่องเล่นเทป + การเก็บสถิติ | `src/components/podcast/CassettePlayerDialog.tsx` |
+| ปุ่ม "ฟังเป็น Podcast" (จุดเสียบเดียวในหน้าบทความ) | `src/components/podcast/PodcastButton.tsx` → ใช้ใน `ArticleDetail.tsx` 2 จุด (layout ปกติ / layout HTML เต็มหน้า) |
+| Admin: อัปโหลด/ลบเสียง + ตัวเลขฟัง | `AdminArticles.tsx` |
+
+**เหตุที่แยก `podcast_plays` ไม่ใช้ `content_views`:** `content_views.user_id` เป็น NOT NULL และ RPC ของ Live Notes บังคับ login — บทความเปิดอ่านได้โดยไม่ต้อง login จึงต้องนับผู้ฟังที่ยังไม่ login ด้วย (`user_id` = NULL) · ผู้ที่ login แล้วได้ snapshot เพศ/อายุ/อาชีพ/จังหวัดจาก `profiles` เหมือน Live Notes · เขียนผ่าน RPC (SECURITY DEFINER) เท่านั้น ไม่มี insert/update policy · อ่านได้เฉพาะแอดมิน
+
+**ข้อควรรู้:** ไฟล์เสียงอยู่ใน bucket public (เหมือนรูปปก) — ใครมี URL ก็ฟังได้ ตรงกับบทความที่เปิดสาธารณะ · "เอาเสียงออก" ใน Admin ล้างช่องเท่านั้น ไฟล์เก่ายังค้างใน storage · ขนาดสูงสุดจริงขึ้นกับ limit ของ Supabase Storage (ฝั่ง Admin กั้นไว้ที่ 50MB) · ผู้ฟังที่ไม่ login สร้างแถวสถิติได้เอง (ตั้งใจ) จึงเป็นตัวเลขประมาณ ไม่ใช่ตัวเลขยืนยันตัวตน
+
+**ทดสอบแล้ว:** `tsc` + eslint สะอาด · migration dry-run (`BEGIN…ROLLBACK`) บน production: เรียก RPC ในบทบาท `anon` ผ่าน, ค่าความคืบหน้าไม่ถอยหลัง · เบราว์เซอร์จริง (Chromium, mock Supabase + ไฟล์ mp3): ไม่มีเสียง = ไม่มีปุ่ม, กดปุ่ม = ป๊อปอัปเล่นเอง, พัก/เล่น/หยุด/ข้าม±15 วิ/ความเร็ว/สไลเดอร์/เสียง ทำงาน, เครื่องเล่นลอยไม่ล็อกหน้า (เลื่อนหน้า/คลิปนอกกรอบ/Esc ไม่ปิด, ปิดด้วย ✕ แล้วเสียงหยุดและส่ง log สุดท้าย), ชื่อ+สติกเกอร์ขึ้นบนป้ายเทป, ไม่ใส่ชื่อ = ใช้ชื่อบทความ, มือถือ 375px ไม่ล้น · **ยังไม่ได้ทดสอบ:** หน้า Admin ในเบราว์เซอร์ (ต้อง login แอดมิน), อัปโหลดไฟล์จริงขึ้น storage, การเล่นบน LINE in-app / iOS Safari
+
 ---
 
 flow = """# CREATR365 SYSTEM FLOW

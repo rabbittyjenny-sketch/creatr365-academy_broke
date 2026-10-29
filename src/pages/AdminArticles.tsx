@@ -4,7 +4,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { fullSignOut } from '@/lib/fullSignOut';
 import { resolveContentType, sanitizeFileName } from '@/lib/uploadFile';
-import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users, BarChart3, Link2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, Save, X, ExternalLink, Upload, Users, BarChart3, Link2, Headphones } from 'lucide-react';
 import { parseYouTubeId, youTubeThumb } from '@/lib/youtube';
 import { LiveNoteStatsPanel } from '@/components/admin/LiveNoteStatsPanel';
 import { LiveNoteLinkMenu } from '@/components/admin/LiveNoteLinkMenu';
@@ -20,6 +20,8 @@ interface Article {
   tags: string[] | null; meta_description: string | null; target_url: string;
   is_active: boolean; sort_order: number; created_at: string;
   video_url: string | null; related_course_id: string | null; duration_label: string | null;
+  audio_url: string | null; audio_duration_sec: number | null;
+  audio_title: string | null; audio_image_url: string | null;
 }
 
 interface CourseOption { id: string; title: string; is_active: boolean }
@@ -125,6 +127,7 @@ const EMPTY_ARTICLE: EditorForm = {
   _kind: 'blog', title: '', slug: '', summary: '', body: '', cover_image_url: '',
   author: 'CREATR365 Team', tags: [], meta_description: '', target_url: '',
   is_active: true, sort_order: 0, video_url: '', related_course_id: null, duration_label: '',
+  audio_url: '', audio_duration_sec: null, audio_title: '', audio_image_url: '',
 };
 const EMPTY_LIVE_NOTE: EditorForm = { ...EMPTY_ARTICLE, _kind: 'live_note', kind: 'live_note' };
 const EMPTY_EVENT: EditorForm = {
@@ -138,6 +141,8 @@ const EMPTY_EVENT: EditorForm = {
 
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const AUDIO_TYPES: Record<string, string> = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav' };
+const MAX_AUDIO_BYTES = 50 * 1024 * 1024;
 
 type FilterKey = 'all' | 'articles' | 'live_notes' | 'events';
 
@@ -249,8 +254,8 @@ const ContentEditor: React.FC<{
   // this project — uploads there failed with "bucket not found".
   const uploadImage = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    folder: 'articles' | 'events',
-    field: 'cover_image_url' | 'background_image_url',
+    folder: 'articles' | 'events' | 'podcasts',
+    field: 'cover_image_url' | 'background_image_url' | 'audio_image_url',
   ) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -267,6 +272,40 @@ const ContentEditor: React.FC<{
       if (uploadError) { setError('อัปโหลดไม่สำเร็จ: ' + uploadError.message); return; }
       const { data: { publicUrl } } = supabase.storage.from('course-media').getPublicUrl(path);
       set(field, publicUrl);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Podcast audio goes to the same public course-media bucket as covers
+  // (folder podcasts/). The browser reads the length from the file itself.
+  const uploadAudio = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const type = AUDIO_TYPES[ext];
+    if (!type) { setError('รองรับเฉพาะไฟล์เสียง MP3, M4A หรือ WAV'); return; }
+    if (file.size > MAX_AUDIO_BYTES) { setError('ไฟล์เสียงใหญ่เกิน 50MB'); return; }
+    setUploading(true);
+    try {
+      const path = `podcasts/${Date.now()}-${sanitizeFileName(file.name)}`;
+      const { error: uploadError } = await supabase.storage
+        .from('course-media')
+        .upload(path, file, { upsert: false, contentType: type });
+      if (uploadError) { setError('อัปโหลดไม่สำเร็จ: ' + uploadError.message); return; }
+      const { data: { publicUrl } } = supabase.storage.from('course-media').getPublicUrl(path);
+      const seconds = await new Promise<number | null>(resolve => {
+        const probe = new Audio();
+        const url = URL.createObjectURL(file);
+        const done = (v: number | null) => { URL.revokeObjectURL(url); resolve(v); };
+        probe.preload = 'metadata';
+        probe.onloadedmetadata = () => done(isFinite(probe.duration) ? Math.round(probe.duration) : null);
+        probe.onerror = () => done(null);
+        probe.src = url;
+      });
+      setForm(f => ({ ...f, audio_url: publicUrl, audio_duration_sec: seconds }));
     } finally {
       setUploading(false);
     }
@@ -563,6 +602,67 @@ const ContentEditor: React.FC<{
                   />
                 </div>
               </div>
+              {!isClip && (
+                <div className="border border-white/10 p-4 space-y-3">
+                  <label className="text-xs text-white/40 font-medium flex items-center gap-1.5">
+                    <Headphones className="w-3.5 h-3.5" /> Podcast (เสียงประกอบบทความ — ไม่บังคับ)
+                  </label>
+                  {form.audio_url ? (
+                    <div className="space-y-2">
+                      <audio controls preload="metadata" src={form.audio_url} className="w-full" />
+                      <div className="flex items-center justify-between gap-3 text-xs text-white/40">
+                        <span>{form.audio_duration_sec ? `ความยาว ${Math.floor(form.audio_duration_sec / 60)}:${String(form.audio_duration_sec % 60).padStart(2, '0')} นาที` : 'ยังอ่านความยาวไม่ได้'}</span>
+                        <button type="button" onClick={() => setForm(f => ({ ...f, audio_url: '', audio_duration_sec: null }))}
+                          className="text-[#FF6B7F] hover:opacity-80">เอาเสียงออก (ปุ่ม Podcast จะหายจากหน้าบทความ)</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-white/30">ยังไม่มีเสียง — หน้าบทความจะไม่แสดงปุ่ม "ฟังเป็น Podcast"</p>
+                  )}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <label className="inline-flex items-center justify-center gap-2 bg-[#1a1a1a] border border-dashed border-white/15 px-4 py-3 text-white/40 text-sm cursor-pointer hover:text-white hover:border-white/30 transition-colors sm:w-56">
+                      <Upload className="w-4 h-4" />
+                      {uploading ? 'กำลังอัปโหลด...' : form.audio_url ? 'เปลี่ยนไฟล์เสียง' : 'อัปโหลดไฟล์เสียง (MP3/M4A/WAV, ≤50MB)'}
+                      <input type="file" accept=".mp3,.m4a,.wav,audio/*" onChange={uploadAudio} disabled={uploading} className="hidden" />
+                    </label>
+                    <input
+                      className="flex-1 bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
+                      placeholder="หรือวาง URL ไฟล์เสียงจากภายนอก..."
+                      value={form.audio_url || ''}
+                      onChange={e => setForm(f => ({ ...f, audio_url: e.target.value.trim(), audio_duration_sec: null }))}
+                    />
+                  </div>
+                  {form.audio_url && (
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+                      <div>
+                        <label htmlFor="podcast-title" className="text-xs text-white/40 font-medium block mb-1">ชื่อพอตแคสต์ (ไม่บังคับ — ถ้าเว้นว่างจะใช้ชื่อบทความ)</label>
+                        <input
+                          id="podcast-title"
+                          className="w-full bg-[#1a1a1a] border border-white/10 px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#D4A843]/50 placeholder-white/20"
+                          placeholder={form.title || 'ชื่อที่จะแสดงบนเทป'}
+                          maxLength={80}
+                          value={form.audio_title || ''}
+                          onChange={e => set('audio_title', e.target.value)}
+                        />
+                        <p className="text-[11px] text-white/25 mt-1">แสดงบนป้ายเทปของเครื่องเล่น (ตัวเล็ก ควรสั้น) — ไม่ใช้ชื่อไฟล์</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {form.audio_image_url && (
+                          <img src={form.audio_image_url} alt="" className="w-10 h-10 object-cover border border-white/10" />
+                        )}
+                        <label className="inline-flex items-center gap-2 bg-[#1a1a1a] border border-dashed border-white/15 px-3 py-2.5 text-white/40 text-xs cursor-pointer hover:text-white hover:border-white/30 transition-colors">
+                          <Upload className="w-3.5 h-3.5" />
+                          {form.audio_image_url ? 'เปลี่ยนรูปสติกเกอร์' : 'รูปสติกเกอร์ (เล็ก)'}
+                          <input type="file" accept="image/*" onChange={e => uploadImage(e, 'podcasts', 'audio_image_url')} disabled={uploading} className="hidden" />
+                        </label>
+                        {form.audio_image_url && (
+                          <button type="button" onClick={() => set('audio_image_url', '')} className="text-[11px] text-[#FF6B7F] hover:opacity-80">เอาออก</button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
                   <label className="text-xs text-white/40 font-medium block mb-1">Tags (คั่นด้วย ,)</label>
@@ -632,6 +732,7 @@ const AdminArticles: React.FC = () => {
   const [courses, setCourses] = useState<CourseOption[]>([]);
   // article_id → unique viewers (Live Notes)
   const [viewers, setViewers] = useState<Record<string, number>>({});
+  const [podcastStats, setPodcastStats] = useState<Record<string, { plays: number; completed: number }>>({});
   const [statsOf, setStatsOf] = useState<Article | null>(null);
 
   const flash = (text: string, ok = true) => {
@@ -640,12 +741,13 @@ const AdminArticles: React.FC = () => {
   };
 
   const load = useCallback(async () => {
-    const [{ data: articleData }, { data: eventData }, { data: regData }, { data: courseData }, { data: viewData }] = await Promise.all([
+    const [{ data: articleData }, { data: eventData }, { data: regData }, { data: courseData }, { data: viewData }, { data: playData }] = await Promise.all([
       supabase.from('articles').select('*').order('sort_order'),
       supabase.from('events').select('*').order('target_date', { ascending: false }),
       supabase.from('event_registrations').select('event_id, status').in('status', ['requested', 'confirmed']),
       supabase.from('courses').select('id,title,is_active').order('sort_order'),
       supabase.from('content_views').select('article_id,user_id'),
+      supabase.from('podcast_plays').select('article_id,completed'),
     ]);
     setCourses((courseData as unknown as CourseOption[]) || []);
     const uniq: Record<string, Set<string>> = {};
@@ -653,6 +755,12 @@ const AdminArticles: React.FC = () => {
       (uniq[v.article_id] ??= new Set()).add(v.user_id);
     }
     setViewers(Object.fromEntries(Object.entries(uniq).map(([k, set]) => [k, set.size])));
+    const pl: Record<string, { plays: number; completed: number }> = {};
+    for (const p of (playData as unknown as { article_id: string; completed: boolean }[]) || []) {
+      const c = (pl[p.article_id] ??= { plays: 0, completed: 0 });
+      c.plays++; if (p.completed) c.completed++;
+    }
+    setPodcastStats(pl);
     const rc: Record<string, { requested: number; confirmed: number }> = {};
     for (const r of regData || []) {
       const c = (rc[r.event_id] ??= { requested: 0, confirmed: 0 });
@@ -742,6 +850,10 @@ const AdminArticles: React.FC = () => {
         video_url: isClipKind(form._kind) ? (form.video_url || null) : null,
         related_course_id: form._kind === 'live_note' ? (form.related_course_id || null) : null,
         duration_label: form._kind === 'live_note' ? ((form.duration_label || '').trim() || null) : null,
+        audio_url: isClipKind(form._kind) ? null : ((form.audio_url || '').trim() || null),
+        audio_duration_sec: isClipKind(form._kind) || !form.audio_url ? null : (form.audio_duration_sec ?? null),
+        audio_title: isClipKind(form._kind) || !form.audio_url ? null : ((form.audio_title || '').trim() || null),
+        audio_image_url: isClipKind(form._kind) || !form.audio_url ? null : ((form.audio_image_url || '').trim() || null),
       };
       if (isClipKind(form._kind) && !parseYouTubeId(payload.video_url)) return 'ใส่ YouTube URL ให้ถูกต้อง';
       const { error } = form.id
@@ -873,6 +985,14 @@ const AdminArticles: React.FC = () => {
                               <span className="hidden sm:inline">ลิงก์</span>
                             </LiveNoteLinkMenu>
                           </>
+                        )}
+                        {row._kind === 'article' && row.audio_url && (
+                          <span className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold border border-white/10 text-white/60"
+                            title={`ฟังเป็น Podcast ${podcastStats[row.id]?.plays ?? 0} ครั้ง · ฟังจบ ${podcastStats[row.id]?.completed ?? 0} ครั้ง`}>
+                            <Headphones className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span className="hidden sm:inline">ฟัง</span>
+                            <span className="font-mono">{podcastStats[row.id]?.plays ?? 0}</span>
+                          </span>
                         )}
                         {row._kind === 'article' && row.kind !== 'live_note' && row.body && (
                           <a href={`/articles/${row.slug}`} target="_blank" rel="noopener noreferrer" aria-label="เปิดดูหน้าเว็บ"

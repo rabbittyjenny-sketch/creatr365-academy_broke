@@ -16,6 +16,10 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          audio_duration_sec: number | null
+          audio_image_url: string | null
+          audio_title: string | null
+          audio_url: string | null
           author: string | null
           body: string | null
           cover_image_url: string | null
@@ -36,6 +40,10 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          audio_duration_sec?: number | null
+          audio_image_url?: string | null
+          audio_title?: string | null
+          audio_url?: string | null
           author?: string | null
           body?: string | null
           cover_image_url?: string | null
@@ -56,6 +64,10 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          audio_duration_sec?: number | null
+          audio_image_url?: string | null
+          audio_title?: string | null
+          audio_url?: string | null
           author?: string | null
           body?: string | null
           cover_image_url?: string | null
@@ -1069,6 +1081,62 @@ export type Database = {
         }
         Relationships: []
       }
+      podcast_plays: {
+        Row: {
+          age_range: string | null
+          article_id: string
+          completed: boolean
+          gender: string | null
+          id: string
+          last_seen_at: string
+          listened_seconds: number
+          max_progress_pct: number
+          occupation: string | null
+          play_session: string
+          province: string | null
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          age_range?: string | null
+          article_id: string
+          completed?: boolean
+          gender?: string | null
+          id?: string
+          last_seen_at?: string
+          listened_seconds?: number
+          max_progress_pct?: number
+          occupation?: string | null
+          play_session: string
+          province?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          age_range?: string | null
+          article_id?: string
+          completed?: boolean
+          gender?: string | null
+          id?: string
+          last_seen_at?: string
+          listened_seconds?: number
+          max_progress_pct?: number
+          occupation?: string | null
+          play_session?: string
+          province?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_plays_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           names_confirmed_at: string | null
@@ -1822,6 +1890,15 @@ export type Database = {
           _progress_pct?: number
           _source?: string
           _view_session: string
+        }
+        Returns: undefined
+      }
+      log_podcast_play: {
+        Args: {
+          _article_id: string
+          _listened_seconds?: number
+          _play_session: string
+          _progress_pct?: number
         }
         Returns: undefined
       }
