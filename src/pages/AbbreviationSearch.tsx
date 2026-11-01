@@ -13,10 +13,12 @@ import { ExternalLink } from 'lucide-react';
  * The tool is its own app (repo Cretr365-abbreviation-search-tool, hosted at
  * TOOL_URL). It has two display modes by design: opened on its own on a
  * computer it draws a phone frame on a dotted desk; inside an iframe (or with
- * ?embed=1) it drops the frame and fills whatever box it is given. Its README
- * ("ฝังในเว็บอื่น") prescribes the embed: ?embed=1, max-width 420px, height
- * 760px, centered — followed here. The "open full page" link opens the tool
- * on its own, i.e. the desk-and-phone look.
+ * ?embed=1) it drops the phone frame and fills the box it is given; since its
+ * "wide iframe" update (Cretr365-abbreviation-search-tool #3) a wide box keeps
+ * the dotted desk and doodles around a centred column. So the iframe is full
+ * width and as tall as the screen below the top bars (navbar 4rem + this
+ * breadcrumb row 2.5rem = 6.5rem), which avoids scrolling twice. The "open
+ * full page" link opens the tool on its own.
  */
 export const TOOL_URL = 'https://kamtem.vercel.app/';
 const EMBED_URL = `${TOOL_URL}?embed=1`;
@@ -54,7 +56,7 @@ const AbbreviationSearch: React.FC = () => {
           title="KUM-TEM คำเต็ม"
           src={EMBED_URL}
           allow="clipboard-write"
-          className="block mx-auto w-full max-w-[420px] border-0 h-[min(760px,calc(100dvh-7rem))] min-h-[560px]"
+          className="block w-full border-0 h-[calc(100dvh-6.5rem)]"
         />
         <div className="h-8" aria-hidden="true" />
       </main>
