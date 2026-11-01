@@ -34,9 +34,11 @@ const AbbreviationSearch: React.FC = () => {
         <div className="flex items-center justify-between gap-3 h-10 px-4">
           <nav
             aria-label="Breadcrumb"
-            className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-muted-foreground uppercase"
+            className="flex items-center gap-2 min-w-0 whitespace-nowrap overflow-hidden text-[11px] font-bold tracking-widest text-muted-foreground uppercase"
           >
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/explore" className="hover:text-foreground transition-colors">Explore</Link>
             <span aria-hidden="true">/</span>
             <Link to="/ai-lab" className="hover:text-foreground transition-colors">AI Lab</Link>
             <span aria-hidden="true">/</span>
@@ -46,9 +48,10 @@ const AbbreviationSearch: React.FC = () => {
             href={TOOL_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-muted-foreground uppercase hover:text-foreground transition-colors"
+            aria-label="เปิดแบบเต็มหน้า"
+            className="flex shrink-0 items-center gap-1.5 text-[11px] font-bold tracking-widest text-muted-foreground uppercase hover:text-foreground transition-colors"
           >
-            เปิดแบบเต็มหน้า <ExternalLink className="w-3 h-3" aria-hidden="true" />
+            <span className="hidden sm:inline">เปิดแบบเต็มหน้า</span> <ExternalLink className="w-3 h-3" aria-hidden="true" />
           </a>
         </div>
 
