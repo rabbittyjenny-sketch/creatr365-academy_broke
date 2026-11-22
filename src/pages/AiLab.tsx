@@ -14,10 +14,9 @@ import { Sparkles, ArrowUpRight, Search } from 'lucide-react';
  * category tiles. Green (#6AAA7A) matches this tile's slot in Explore.tsx's
  * System B wayfinding rotation.
  *
- * Host Compass opens inside this site at /ai-lab/host-compass
- * (src/pages/HostCompass.tsx — an iframe onto the static build in
- * public/host-compass-app/). The Abbreviation Search Tool opens at
- * /ai-lab/abbreviation-search (src/pages/AbbreviationSearch.tsx — KUM-TEM in an
+ * Host Compass starts at /ai-lab/host-compass (src/pages/HostCompass.tsx), which
+ * signs the visitor in with their Creatr365 account and opens the Host Compass app.
+ * The Abbreviation Search Tool opens at /ai-lab/abbreviation-search (src/pages/AbbreviationSearch.tsx — KUM-TEM in an
  * iframe laid out the way the tool's own README prescribes).
  */
 const AiLab: React.FC = () => {
